@@ -5,6 +5,9 @@ venv/
 # Python cache
 __pycache__/
 *.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
 
 # Environment variables
 .env
@@ -20,11 +23,19 @@ Thumbs.db
 
 # Logs
 *.log
+logs/
 
-# Security test samples and artifacts
+# Security test samples and artifacts (never commit these)
 tests/samples/
 tests/results/
+samples/
+malware/
+quarantine/
+results/
+scan_results/
+*.eicar
 
 # Temporary scan files
 tmp/
 temp/
+uploads/
