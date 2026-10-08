@@ -17,6 +17,7 @@ def test_health():
     r = client.get("/health")
     assert r.status_code == 200
     assert r.json()["status"] == "ok"
+    assert r.json()["scanners_registered"] == 0  # must not imply scanners exist
 
 
 def test_scan_accepts_upload_and_is_not_safe():

@@ -37,9 +37,12 @@ app.add_middleware(
 
 @app.get("/health")
 async def health():
+    # Reports that the API process is up. It says nothing about scanner health;
+    # scanners_registered makes it explicit how many scanners exist (currently 0).
     return {
         "status": "ok",
         "service": "filesmagic-security-engine",
+        "scanners_registered": len(SCANNERS),
     }
 
 

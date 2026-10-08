@@ -1,0 +1,16 @@
+# Render Blueprint for the FilesMagic Security Engine API.
+# SECURITY_ENGINE_CORS_ORIGINS is deliberately not declared here: set it in the Render
+# dashboard to the exact Vercel origin once that URL is known (see README, "Deployment").
+# Until then the engine falls back to localhost-only origins, so no browser origin on the
+# internet is allowed.
+#
+# No `plan` is set on purpose: choose the instance type when creating the service.
+# If omitted, Render defaults new web services to 0.5c-512mb (a paid instance type).
+services:
+  - type: web
+    name: filesmagic-security-engine
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeployTrigger: "off"

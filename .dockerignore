@@ -1,0 +1,7 @@
+# Allow-list: the image only needs the engine code and its runtime requirements.
+# Everything else (frontend, tests, .venv, samples, results, .env files) stays out.
+*
+!app/
+!requirements.txt
+**/__pycache__
+**/*.py[cod]
