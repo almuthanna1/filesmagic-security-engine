@@ -63,6 +63,23 @@ def test_scan_combines_scanner_results(monkeypatch):
     assert post() == Verdict.MALICIOUS
 
 
+def test_cors_allows_only_listed_origins():
+    allowed = client.get("/health", headers={"Origin": "http://localhost:3000"})
+    assert allowed.headers["access-control-allow-origin"] == "http://localhost:3000"
+
+    blocked = client.get("/health", headers={"Origin": "https://evil.example"})
+    assert "access-control-allow-origin" not in blocked.headers
+
+
+def test_parse_cors_origins():
+    assert main.parse_cors_origins(" https://lab.example/ , http://localhost:3000,") == [
+        "https://lab.example",
+        "http://localhost:3000",
+    ]
+    with pytest.raises(ValueError):
+        main.parse_cors_origins("https://lab.example,*")
+
+
 @pytest.mark.parametrize(
     "severities, run, failed, expected",
     [

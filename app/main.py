@@ -1,6 +1,8 @@
 import logging
+import os
 
 from fastapi import FastAPI, File, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.decision import decide
 from app.models import Finding, ScanResult, Verdict
@@ -8,10 +10,28 @@ from app.scanners import SCANNERS
 
 logger = logging.getLogger(__name__)
 
+# Origins of the Security Lab frontend allowed to call the API from a browser.
+DEFAULT_CORS_ORIGINS = "http://localhost:3000,http://127.0.0.1:3000"
+
+
+def parse_cors_origins(value: str) -> list[str]:
+    """Parse a comma-separated origin allow-list. Wildcards are rejected on purpose."""
+    origins = [o.strip().rstrip("/") for o in value.split(",") if o.strip()]
+    if "*" in origins:
+        raise ValueError("SECURITY_ENGINE_CORS_ORIGINS must list explicit origins, not '*'.")
+    return origins
+
+
 app = FastAPI(
     title="FilesMagic Security Engine",
     description="Pre-conversion file security analysis service for FilesMagic.",
     version="0.1.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=parse_cors_origins(os.environ.get("SECURITY_ENGINE_CORS_ORIGINS", DEFAULT_CORS_ORIGINS)),
+    allow_methods=["GET", "POST"],
 )
 
 

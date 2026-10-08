@@ -1,0 +1,157 @@
+.result {
+  margin-top: 28px;
+}
+
+.heading {
+  font-size: 1.15rem;
+  margin-bottom: 12px;
+}
+
+.heading:focus {
+  outline: none;
+}
+
+.verdict {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
+  padding: 18px 20px;
+  border-radius: 10px;
+  border: 1px solid;
+  border-left-width: 8px;
+}
+
+.verdictLabel {
+  width: 100%;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.85;
+}
+
+.verdictValue {
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.verdictCode {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.safe {
+  color: var(--safe-fg);
+  background: var(--safe-bg);
+  border-color: var(--safe-border);
+}
+
+.suspicious {
+  color: var(--warn-fg);
+  background: var(--warn-bg);
+  border-color: var(--warn-border);
+}
+
+.malicious {
+  color: var(--danger-fg);
+  background: var(--danger-bg);
+  border-color: var(--danger-border);
+}
+
+.unable {
+  color: var(--neutral-fg);
+  background: var(--neutral-bg);
+  border-color: var(--neutral-border);
+}
+
+.meta {
+  display: grid;
+  gap: 12px;
+  margin: 18px 0 24px;
+}
+
+.meta dt {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.subheading {
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.empty {
+  color: var(--text-muted);
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.table th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  background: var(--surface-muted);
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.severity {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 1px solid;
+}
+
+.sevINFO {
+  color: var(--neutral-fg);
+  background: var(--neutral-bg);
+  border-color: var(--neutral-border);
+}
+
+.sevLOW,
+.sevMEDIUM {
+  color: var(--warn-fg);
+  background: var(--warn-bg);
+  border-color: var(--warn-border);
+}
+
+.sevHIGH,
+.sevCRITICAL {
+  color: var(--danger-fg);
+  background: var(--danger-bg);
+  border-color: var(--danger-border);
+}

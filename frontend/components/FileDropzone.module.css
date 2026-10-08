@@ -1,0 +1,82 @@
+.zone {
+  position: relative;
+  border: 2px dashed var(--border-strong);
+  border-radius: 10px;
+  padding: 28px 20px;
+  text-align: center;
+  background: var(--surface-muted);
+}
+
+.dragging {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.hint {
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.label {
+  display: inline-block;
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.label:hover {
+  border-color: var(--accent);
+}
+
+.input:focus-visible + .label {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.input:disabled + .label {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.selected {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 32px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.selected dt {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.selected dd {
+  font-weight: 600;
+}
+
+.filename {
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.muted {
+  color: var(--text-muted);
+  font-weight: 400 !important;
+}
