@@ -17,8 +17,8 @@ def test_health():
     r = client.get("/health")
     assert r.status_code == 200
     assert r.json()["status"] == "ok"
-    assert r.json()["scanners_registered"] == len(main.SCANNERS) == 1  # YARA-X
-    assert r.json()["scanners_ready"] == 1
+    assert r.json()["scanners_registered"] == len(main.SCANNERS) == 2  # YARA-X, Office
+    assert r.json()["scanners_ready"] == 2
 
 
 def test_health_counts_registered_scanners(monkeypatch):

@@ -80,22 +80,32 @@ def scan_file(file: UploadFile = File(...)) -> ScanResult:
         raise HTTPException(status_code=413, detail=UPLOAD_TOO_LARGE)
 
     findings: list[Finding] = []
-    failed = 0
+    failed = not_applicable = 0
     for scanner in SCANNERS:
         try:
-            findings.extend(scanner.scan(filename, data))
+            result = scanner.scan(filename, data)
         except Exception:
             logger.exception("Scanner %s failed on %r", scanner.name, filename)
             failed += 1
+            continue
+        if result is None:  # e.g. the Office scanner on a PDF
+            not_applicable += 1
+        else:
+            findings.extend(result)
 
-    verdict = decide(findings, scanners_run=len(SCANNERS), scanners_failed=failed)
+    # Not-applicable scanners neither count as analysis nor as failure.
+    applicable = len(SCANNERS) - not_applicable
+    verdict = decide(findings, scanners_run=applicable, scanners_failed=failed)
 
     if not SCANNERS:
         message = "No security scanners are configured yet. This file has NOT been security-scanned."
+    elif applicable == 0:
+        message = "None of the configured scanners supports this file type. This file has NOT been security-scanned."
     elif failed and verdict == Verdict.UNABLE_TO_SCAN:
-        message = f"{failed} of {len(SCANNERS)} scanners failed, so the file could not be fully analysed."
+        message = f"{failed} of {applicable} applicable scanners failed, so the file could not be fully analysed."
     else:
-        message = f"Analysed by {len(SCANNERS) - failed} of {len(SCANNERS)} scanners."
+        message = f"Analysed by {applicable - failed} of {len(SCANNERS)} scanners"
+        message += f" ({not_applicable} not applicable to this file type)." if not_applicable else "."
         if verdict == Verdict.SAFE:
             message += " No known indicators were found; this is not a guarantee that the file is harmless."
 

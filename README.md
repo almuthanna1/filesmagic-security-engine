@@ -7,7 +7,8 @@ early. Honors capstone project.
 
 ## Current status
 
-**Phase 3: YARA-X is the first implemented scanner. Office and PDF analysers are next.**
+**Phase 3B: YARA-X and Office document analysis are implemented. PDF analysis is next.**
+Not production-ready: detection quality has not been evaluated yet.
 The deployed backend is still the Phase 2B baseline (no scanners) until redeployed.
 
 What exists:
@@ -19,6 +20,7 @@ What exists:
 - Security Lab web interface (`frontend/`) for uploading test files to `POST /scan`
 - Deployment configuration: `Dockerfile` and `render.yaml` (API on Render), `frontend/` on Vercel
 - YARA-X scanner (`app/scanners/yarax.py`) with a small curated rule set (`app/rules/`)
+- Office scanner (`app/scanners/office.py`): structural analysis of OLE and OOXML documents
 - 10 MB upload limit on `POST /scan`
 - pytest suite
 
@@ -30,8 +32,8 @@ combines them into one verdict.
 
 | Layer | Tool | Status |
 |-------|------|--------|
-| 1 | YARA-X: curated rules for risky structures in supported file types | **Implemented** |
-| 2 | Office analysis: oletools, OOXML structure (macros, auto-exec, embedded objects, external relationships, ActiveX, DDE, encryption) | Planned |
+| 1 | YARA-X: curated rules for risky byte patterns in supported file types | **Implemented** |
+| 2 | Office analysis: oletools + OOXML ZIP/XML structure (macros, auto-exec, embedded objects, external relationships, ActiveX, DDE, encryption, package abuse) | **Implemented** |
 | 3 | PDF analysis: pypdf + structural checks (JavaScript, open/launch actions, embedded files, URIs, forms, encryption) | Planned |
 | 4 | General structural protections (type/signature validation, archive safety, size/resource limits) | Partly (upload limit) |
 
@@ -40,8 +42,13 @@ combines them into one verdict.
 (a Render instance of at most ~$25/month), so ClamAV is not part of the production
 engine. It may be used separately in the isolated test VM as a reference baseline.
 
-**What this is not:** YARA-X with a small rule set is **not** an antivirus and does
-not provide complete malware coverage. `SAFE` means "every configured scanner ran and
+The layers complement each other: YARA-X matches raw byte patterns in any file,
+including formats no structural analyser understands yet (RTF, SVG, executables);
+the Office scanner parses the document structure and sees what raw bytes hide
+(compressed XML parts, relationship targets, macro behaviour).
+
+**What this is not:** these layers are **not** an antivirus and do not provide
+complete malware coverage. `SAFE` means "every configured scanner ran and
 found no known indicator", not "proven harmless". Detection effectiveness (precision,
 recall, F1, false positives) and cost (latency, CPU, memory) will be measured
 empirically against independently labelled benign and malicious datasets.
@@ -51,11 +58,13 @@ Each scanner implements the `Scanner` protocol:
 ```python
 class Scanner(Protocol):
     name: str
-    def scan(self, filename: str, data: bytes) -> list[Finding]: ...
+    def scan(self, filename: str, data: bytes) -> list[Finding] | None: ...
 ```
 
-It returns a list of findings (empty means nothing was found) or raises an exception
-if it could not analyse the file. Scanners are registered in `SCANNERS` in
+It returns a list of findings (empty means nothing was found), returns `None` if the
+file is not a format it handles (e.g. the Office scanner given a PDF), or raises an
+exception if it could not analyse the file. Not-applicable scanners count neither
+as analysis nor as failure; a file that **no** scanner handles is `UNABLE_TO_SCAN`. Scanners are registered in `SCANNERS` in
 `app/scanners/__init__.py`. `POST /scan` runs every registered scanner and passes
 the combined findings to `decide()`.
 
@@ -86,10 +95,59 @@ Initial rules (`app/rules/filesmagic.yar`):
 | `Native_Executable` | MEDIUM | Windows PE or Linux ELF executable |
 
 Rules match raw bytes only: content in compressed PDF streams or compressed OOXML
-parts, and obfuscated PDF names (`/J#61vaScript`), are invisible to them. The
-planned PDF and Office analysers parse those structures. To add a rule, put it in
+parts, and obfuscated PDF names (`/J#61vaScript`), are invisible to them. The Office
+scanner (and the planned PDF analyser) parse those structures. The two macro rules
+overlap with the Office scanner on purpose: they still fire on macro projects in
+packages the structural scanner does not recognise. To add a rule, put it in
 `app/rules/` with the three metadata fields and add a trigger and a benign case to
 `tests/test_yarax.py`.
+
+### Office scanner
+
+Identifies the format from content, never the file extension:
+
+- **OLE2 compound file** with Office streams (`.doc`, `.xls`, `.ppt`, and encrypted
+  OOXML, which is stored as OLE). Other OLE files (MSI, Outlook `.msg`) are not applicable.
+- **OOXML package**: a ZIP containing `[Content_Types].xml` (`.docx/.docm`,
+  `.xlsx/.xlsm`, `.pptx/.pptm`, templates). Other ZIPs are not applicable.
+
+| Check | How | Severity |
+|-------|-----|----------|
+| VBA/XLM macro project present | olevba | LOW |
+| VBA project storage that cannot be parsed | olevba | LOW |
+| Macro auto-execution entry point (`AutoOpen`, `Document_Open`, …) | olevba | MEDIUM |
+| Macro can run commands, download files, inject code; VBA stomping | olevba | MEDIUM |
+| Other suspicious macro keywords / encoded strings | olevba | LOW |
+| Auto-execution **and** command execution/download | olevba | HIGH |
+| Excel 4.0 (XLM) macro sheets | OOXML parts | MEDIUM |
+| External relationship loaded on open (`attachedTemplate`, `oleObject`, `frame`, `subDocument`) | `.rels` XML | MEDIUM |
+| External target with a handler scheme (`mhtml:`, `ms-*:`, `search-ms:`, trailing `!`) | `.rels` XML | HIGH |
+| External target on a network/file path (credential leak) | `.rels` XML | MEDIUM |
+| Other external resources (e.g. linked images); ordinary hyperlinks ignored | `.rels` XML | INFO |
+| Embedded OLE object | olefile | LOW |
+| OLE Package object / with executable or script file name | oleobj | MEDIUM / HIGH |
+| Equation Editor 3.0 object (CVE-2017-11882) | olefile CLSID | HIGH |
+| ActiveX controls | OOXML parts | MEDIUM |
+| Word `DDE` / `DDEAUTO` field (also split across runs) | field XML | MEDIUM / HIGH |
+| Excel DDE link / to `cmd`, `powershell`, … | external-link XML | MEDIUM / HIGH |
+| Password-protected / encrypted document | msoffcrypto-tool, OLE streams | MEDIUM |
+| ZIP path traversal / absolute member names | ZIP headers | HIGH |
+| Decompression bomb (>256 MB declared) or >5000 entries | ZIP headers | HIGH |
+| Duplicate or ZIP-encrypted members | ZIP headers | MEDIUM |
+
+A macro, link or embedded object alone is not treated as malicious; only strong
+combinations or known exploit techniques are `HIGH`.
+
+Safety: everything is parsed in memory (no temp files, no extraction to disk);
+macros and objects are never executed; XML is parsed with defusedxml (DTDs and
+entities rejected) and streamed; ZIP limits are checked from the headers before any
+member is decompressed, and no single part over 32 MB is read. Any parser error makes
+the Office result a failure (`UNABLE_TO_SCAN` unless other evidence exists).
+
+Limitations: DDE in legacy `.doc`/`.xls` binary formats, QUOTE-obfuscated or nested
+DDE fields, ActiveX in legacy OLE files, macros inside embedded documents (embedded
+packages are not scanned recursively) and RTF documents (YARA-X only) are not
+covered. The macro analysis relies on olevba's keyword heuristics.
 
 ## Verdicts
 
@@ -98,7 +156,7 @@ planned PDF and Office analysers parse those structures. To add a rule, put it i
 | `SAFE` | Every configured scanner analysed the file and found nothing above `INFO` |
 | `SUSPICIOUS` | At least one `LOW` or `MEDIUM` finding, and no `HIGH`/`CRITICAL` finding |
 | `MALICIOUS` | At least one `HIGH` or `CRITICAL` finding |
-| `UNABLE_TO_SCAN` | No scanners are configured, or a scanner failed, and no finding of `LOW` or higher was produced |
+| `UNABLE_TO_SCAN` | No scanner handles the file, or a scanner failed, and no finding of `LOW` or higher was produced |
 
 Evidence takes priority over failures: if one scanner crashes and another reports a
 `HIGH` finding, the verdict is still `MALICIOUS`.
@@ -223,7 +281,7 @@ Vercel ─ Security Lab (Next.js, frontend/)
 Render ─ Security Engine API (FastAPI, Docker)
         │
         ▼
-YARA-X (in-process); later Office and PDF analysers
+YARA-X + Office analysis (in-process); later PDF analysis
 ```
 
 ### Backend on Render
@@ -236,15 +294,16 @@ YARA-X (in-process); later Office and PDF analysers
   choose one when creating the service (Render's default if none is chosen is the
   paid `0.5c-512mb`).
 
-`GET /health` returns `{"status": "ok", ..., "scanners_registered": 1, "scanners_ready": 1}`.
+`GET /health` returns `{"status": "ok", ..., "scanners_registered": 2, "scanners_ready": 2}`.
 `status` means the API process is up; `scanners_ready` counts scanners that loaded
 (e.g. YARA-X rules compiled). If it is lower than `scanners_registered`, scans are
 `UNABLE_TO_SCAN`.
 
-Measured locally (Windows, Python 3.14, not yet on Render): the API process with
-YARA-X loaded uses about 55 MiB; scanning a 10 MB file adds about 10 MiB and takes
-milliseconds. This suggests the free 512 MB instance is enough, but it must be
-benchmarked on Render.
+Measured locally (Windows, Python 3.14, not on Render): the API process with
+YARA-X and the Office scanner loaded uses about 62 MiB. Typical Office scans take
+milliseconds; a document with 28 MB of uncompressed XML took about 0.25 s, with
+memory kept flat by streaming the XML. This suggests the free 512 MB instance is
+enough, but it must be benchmarked on Render.
 
 ### Frontend on Vercel
 
@@ -279,7 +338,7 @@ origins; they are only allowed if listed explicitly.
 
 ```bash
 curl https://<service>.onrender.com/health
-# {"status":"ok","service":"filesmagic-security-engine","scanners_registered":1,"scanners_ready":1}
+# {"status":"ok","service":"filesmagic-security-engine","scanners_registered":2,"scanners_ready":2}
 ```
 
 Then upload a **benign** file (e.g. a small `.txt`) through the deployed Security Lab:
