@@ -1,0 +1,3 @@
+sample_id,sha256,path,file_type,ground_truth,ground_truth_basis,source,source_ref,acquired_date,split,active_content,encrypted,tags,notes
+EXAMPLE-B-0001,<64 hex chars>,benign/pdf/EXAMPLE-B-0001.pdf,pdf,BENIGN,"Published by a US federal agency; hash not flagged by any engine on lookup",govdocs1,thread0/000123.pdf,2026-10-15,dev,no,no,report;text-only,Example row - replace
+EXAMPLE-M-0001,<64 hex chars>,malicious/pdf/EXAMPLE-M-0001.pdf,pdf,MALICIOUS,"MalwareBazaar signature=ExampleFamily; >=5 independent vendor detections",malwarebazaar,<sha256 of sample>,2026-10-20,holdout,yes,no,javascript;openaction,Example row - replace

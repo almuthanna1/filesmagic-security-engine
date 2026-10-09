@@ -49,6 +49,18 @@ quarantine/
 results/
 scan_results/
 *.eicar
+# Sample archives and executables (evaluation samples stay inside the VM, outside the repo)
+*.zip
+*.7z
+*.rar
+*.tar
+*.tar.gz
+*.tgz
+*.exe
+*.dll
+*.scr
+*.msi
+*.com
 
 # Temporary scan files
 tmp/
