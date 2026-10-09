@@ -1,4 +1,4 @@
-"""Contract every scanner (ClamAV, YARA-X, oletools, PDF inspection) implements."""
+"""Contract every scanner (YARA-X, Office analysis, PDF analysis) implements."""
 
 from typing import Protocol
 

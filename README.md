@@ -7,7 +7,8 @@ early. Honors capstone project.
 
 ## Current status
 
-**Phase 2B: deployment baseline (Render + Vercel). No security scanners are implemented yet.**
+**Phase 3: YARA-X is the first implemented scanner. Office and PDF analysers are next.**
+The deployed backend is still the Phase 2B baseline (no scanners) until redeployed.
 
 What exists:
 
@@ -17,19 +18,33 @@ What exists:
 - Deterministic decision engine (`app/decision/`) that combines findings into a verdict
 - Security Lab web interface (`frontend/`) for uploading test files to `POST /scan`
 - Deployment configuration: `Dockerfile` and `render.yaml` (API on Render), `frontend/` on Vercel
+- YARA-X scanner (`app/scanners/yarax.py`) with a small curated rule set (`app/rules/`)
+- 10 MB upload limit on `POST /scan`
 - pytest suite
 
-Because no scanners are registered, `POST /scan` currently returns
-`UNABLE_TO_SCAN` for every file. It **never** reports `SAFE` without real analysis.
+## Security architecture
 
-## Planned scanner architecture
+FilesMagic uses a **lightweight, multilayer, file-aware** engine instead of a
+full antivirus. Each layer reports explainable findings; the decision engine
+combines them into one verdict.
 
-| Layer | Tool | Purpose |
-|-------|------|---------|
-| 1 | ClamAV | Known and generic malware signatures |
-| 2 | YARA-X | Rule-based detection (rules will live in `rules/`) |
-| 3 | oletools / olevba | Microsoft Office VBA and macro analysis |
-| 4 | pypdf + custom checks | Dangerous PDF features (JavaScript, auto-actions, embedded files) |
+| Layer | Tool | Status |
+|-------|------|--------|
+| 1 | YARA-X: curated rules for risky structures in supported file types | **Implemented** |
+| 2 | Office analysis: oletools, OOXML structure (macros, auto-exec, embedded objects, external relationships, ActiveX, DDE, encryption) | Planned |
+| 3 | PDF analysis: pypdf + structural checks (JavaScript, open/launch actions, embedded files, URIs, forms, encryption) | Planned |
+| 4 | General structural protections (type/signature validation, archive safety, size/resource limits) | Partly (upload limit) |
+
+**Why not ClamAV:** ClamAV needs about 1.2 GiB of RAM just to load its signatures
+(its documentation recommends 3-4 GiB). That does not fit the production budget
+(a Render instance of at most ~$25/month), so ClamAV is not part of the production
+engine. It may be used separately in the isolated test VM as a reference baseline.
+
+**What this is not:** YARA-X with a small rule set is **not** an antivirus and does
+not provide complete malware coverage. `SAFE` means "every configured scanner ran and
+found no known indicator", not "proven harmless". Detection effectiveness (precision,
+recall, F1, false positives) and cost (latency, CPU, memory) will be measured
+empirically against independently labelled benign and malicious datasets.
 
 Each scanner implements the `Scanner` protocol:
 
@@ -43,6 +58,38 @@ It returns a list of findings (empty means nothing was found) or raises an excep
 if it could not analyse the file. Scanners are registered in `SCANNERS` in
 `app/scanners/__init__.py`. `POST /scan` runs every registered scanner and passes
 the combined findings to `decide()`.
+
+### YARA-X scanner
+
+- Rules: every `app/rules/*.yar` file, compiled once at startup with the `yara-x`
+  Python package (Rust engine, prebuilt wheels, no system packages needed).
+- Each rule **must** declare `description`, `category` (kebab-case) and `severity`
+  (`INFO`/`LOW`/`MEDIUM`/`HIGH`/`CRITICAL`); the compiler rejects rules without them.
+  A match becomes a `Finding` with `scanner = "yara-x"` and `rule_id` = rule name.
+- Bytes are scanned in memory; files are never executed. Each scan has a 10 s
+  timeout and tracks at most 1000 matches per pattern (bounds memory).
+- If rules cannot be loaded (package missing, syntax error, missing metadata), the
+  scanner stays registered but **not ready**, and scans are `UNABLE_TO_SCAN`.
+
+Initial rules (`app/rules/filesmagic.yar`):
+
+| Rule | Severity | Detects |
+|------|----------|---------|
+| `PDF_Launch_Action` | HIGH | PDF `/Launch` action (can start programs) |
+| `PDF_JavaScript_With_Automatic_Action` | MEDIUM | PDF JavaScript plus `/OpenAction` or `/AA` |
+| `PDF_Embedded_File` | LOW | PDF file attachment |
+| `OLE_Office_VBA_Macros` | MEDIUM | Legacy Office file with a VBA project |
+| `OOXML_VBA_Macros` | MEDIUM | `.docm`/`.xlsm`-style file containing `vbaProject.bin` |
+| `RTF_Auto_Updating_Embedded_Object` | HIGH | RTF `\objupdate` embedded object (exploit trigger technique) |
+| `RTF_DDE_Auto_Field` | MEDIUM | RTF `DDEAUTO` field |
+| `SVG_Script_Content` | MEDIUM | SVG with `<script>`, event handlers or `javascript:` |
+| `Native_Executable` | MEDIUM | Windows PE or Linux ELF executable |
+
+Rules match raw bytes only: content in compressed PDF streams or compressed OOXML
+parts, and obfuscated PDF names (`/J#61vaScript`), are invisible to them. The
+planned PDF and Office analysers parse those structures. To add a rule, put it in
+`app/rules/` with the three metadata fields and add a trigger and a benign case to
+`tests/test_yarax.py`.
 
 ## Verdicts
 
@@ -67,7 +114,7 @@ python -m venv .venv
 # Linux/macOS
 source .venv/bin/activate
 
-pip install -r requirements-dev.txt   # runtime + test tooling
+pip install -r requirements-dev.txt   # runtime (incl. yara-x) + test tooling
 ```
 
 `requirements.txt` holds runtime dependencies only (that is what the Docker image
@@ -104,9 +151,8 @@ $env:SECURITY_ENGINE_CORS_ORIGINS="https://lab.example.com"; uvicorn app.main:ap
 findings exactly as the engine returned them. It is a Next.js + TypeScript app.
 
 It will eventually be deployed so the isolated Ubuntu VM can open it in a browser and
-upload controlled test files. Deployed scanner infrastructure (a container host for
-ClamAV and the other scanners) comes in a later phase. Until then, every scan shows
-`UNABLE_TO_SCAN`, because no scanner is integrated yet.
+upload controlled test files. Scans show whatever the engine returns, currently the
+YARA-X verdict.
 
 **Prerequisites:** Node.js 20.9+ (developed on Node 24) and npm.
 
@@ -151,12 +197,17 @@ pytest          # backend, from the repo root
 
 ## Safety and isolation
 
-Malicious files and security test samples (including EICAR-style test files) belong
+Malicious files and security test samples belong
 **only** in the isolated Ubuntu VirtualBox testing environment. They must **never**
 be committed to this repository, copied to a development machine, or opened outside
 the isolated VM. `.gitignore` excludes the common sample and result directories
 (`samples/`, `tests/samples/`, `quarantine/`, and others) as a safety net, but that
-does not replace keeping samples out of this repository entirely.
+does not replace keeping samples out of this repository entirely. The tests use only
+tiny synthetic byte strings that contain a rule's structural markers (e.g. `%PDF-`
+and `/Launch`); they are not malware.
+
+`POST /scan` rejects files over **10 MB** with HTTP 413: early from the declared
+`Content-Length`, and exactly while reading the file (at most 10 MB + 1 byte is read).
 
 ## Deployment
 
@@ -172,7 +223,7 @@ Vercel ─ Security Lab (Next.js, frontend/)
 Render ─ Security Engine API (FastAPI, Docker)
         │
         ▼
-Future scanner layers: ClamAV, YARA-X, oletools, PDF analysis
+YARA-X (in-process); later Office and PDF analysers
 ```
 
 ### Backend on Render
@@ -185,8 +236,15 @@ Future scanner layers: ClamAV, YARA-X, oletools, PDF analysis
   choose one when creating the service (Render's default if none is chosen is the
   paid `0.5c-512mb`).
 
-`GET /health` returns `{"status": "ok", ..., "scanners_registered": 0}`. It reports
-that the API process is running, not that any scanner is installed.
+`GET /health` returns `{"status": "ok", ..., "scanners_registered": 1, "scanners_ready": 1}`.
+`status` means the API process is up; `scanners_ready` counts scanners that loaded
+(e.g. YARA-X rules compiled). If it is lower than `scanners_registered`, scans are
+`UNABLE_TO_SCAN`.
+
+Measured locally (Windows, Python 3.14, not yet on Render): the API process with
+YARA-X loaded uses about 55 MiB; scanning a 10 MB file adds about 10 MiB and takes
+milliseconds. This suggests the free 512 MB instance is enough, but it must be
+benchmarked on Render.
 
 ### Frontend on Vercel
 
@@ -221,20 +279,19 @@ origins; they are only allowed if listed explicitly.
 
 ```bash
 curl https://<service>.onrender.com/health
-# {"status":"ok","service":"filesmagic-security-engine","scanners_registered":0}
+# {"status":"ok","service":"filesmagic-security-engine","scanners_registered":1,"scanners_ready":1}
 ```
 
 Then upload a **benign** file (e.g. a small `.txt`) through the deployed Security Lab:
 
 - the backend receives it (visible in Render logs),
-- the verdict is `UNABLE_TO_SCAN`,
-- findings are empty,
-- the message states the file has NOT been security-scanned.
+- the verdict is `SAFE` with no findings, and the message says this is not a guarantee,
+- a file over 10 MB is rejected with "File is too large".
 
 On the free instance type the service sleeps when idle; the first request after a pause can
 take up to a minute, and the Security Lab may report the API as unreachable until it
 wakes. Retry after `/health` responds.
 
 **Only benign files may be uploaded to the deployed service until the
-pre-malware-testing safeguards (upload size limits, access control, scanner
-isolation) are in place.**
+pre-malware-testing safeguards (access control, rate limiting, scanner isolation)
+are in place.**

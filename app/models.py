@@ -23,7 +23,7 @@ class Severity(str, Enum):
 
 
 class Finding(BaseModel):
-    scanner: str = Field(description="Scanner that produced the finding, e.g. 'clamav'.")
+    scanner: str = Field(description="Scanner that produced the finding, e.g. 'yara-x'.")
     category: str = Field(description="Kind of finding, e.g. 'malware', 'macro', 'pdf-javascript'.")
     severity: Severity
     description: str

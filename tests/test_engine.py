@@ -17,10 +17,18 @@ def test_health():
     r = client.get("/health")
     assert r.status_code == 200
     assert r.json()["status"] == "ok"
-    assert r.json()["scanners_registered"] == 0  # must not imply scanners exist
+    assert r.json()["scanners_registered"] == len(main.SCANNERS) == 1  # YARA-X
+    assert r.json()["scanners_ready"] == 1
 
 
-def test_scan_accepts_upload_and_is_not_safe():
+def test_health_counts_registered_scanners(monkeypatch):
+    monkeypatch.setattr(main, "SCANNERS", [])
+    body = client.get("/health").json()
+    assert body["scanners_registered"] == body["scanners_ready"] == 0
+
+
+def test_scan_without_scanners_is_not_safe(monkeypatch):
+    monkeypatch.setattr(main, "SCANNERS", [])
     r = client.post("/scan", files={"file": ("hello.txt", b"hello world", "text/plain")})
     assert r.status_code == 200
     body = r.json()
@@ -62,6 +70,33 @@ def test_scan_combines_scanner_results(monkeypatch):
     assert post() == Verdict.UNABLE_TO_SCAN
     monkeypatch.setattr(main, "SCANNERS", [Broken(), Flags()])
     assert post() == Verdict.MALICIOUS
+
+
+def test_oversized_upload_rejected_by_exact_check(monkeypatch):
+    # Small enough to pass the Content-Length pre-check, caught when the file is read.
+    monkeypatch.setattr(main, "MAX_UPLOAD_BYTES", 100)
+    r = client.post("/scan", files={"file": ("big.bin", b"x" * 101)})
+    assert r.status_code == 413
+    assert "too large" in r.json()["detail"]
+
+
+def test_oversized_upload_rejected_before_body_is_read(monkeypatch):
+    monkeypatch.setattr(main, "MAX_UPLOAD_BYTES", 100)
+    monkeypatch.setattr(main, "SCANNERS", [])  # never reached
+    r = client.post(
+        "/scan",
+        files={"file": ("big.bin", b"x" * (100 + main.MULTIPART_OVERHEAD_BYTES + 1))},
+        headers={"Origin": "http://localhost:3000"},
+    )
+    assert r.status_code == 413
+    assert "too large" in r.json()["detail"]
+    assert r.headers["access-control-allow-origin"] == "http://localhost:3000"  # browser can read it
+
+
+def test_upload_at_limit_is_accepted(monkeypatch):
+    monkeypatch.setattr(main, "MAX_UPLOAD_BYTES", 100)
+    monkeypatch.setattr(main, "SCANNERS", [])
+    assert client.post("/scan", files={"file": ("ok.bin", b"x" * 100)}).status_code == 200
 
 
 def test_cors_allows_only_listed_origins():
