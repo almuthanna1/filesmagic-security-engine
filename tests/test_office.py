@@ -484,5 +484,5 @@ def test_api_evidence_wins_over_office_failure(monkeypatch):
     assert body["verdict"] == Verdict.MALICIOUS
 
 
-def test_default_registry_has_both_scanners():
-    assert [s.name for s in main.SCANNERS] == ["yara-x", "office"]
+def test_default_registry_includes_yara_and_office():
+    assert {"yara-x", "office"} <= {s.name for s in main.SCANNERS}

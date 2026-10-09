@@ -7,7 +7,7 @@ early. Honors capstone project.
 
 ## Current status
 
-**Phase 3B: YARA-X and Office document analysis are implemented. PDF analysis is next.**
+**Phase 3C: YARA-X, Office and PDF analysis are implemented. Next: review the stack and benchmark on Render.**
 Not production-ready: detection quality has not been evaluated yet.
 The deployed backend is still the Phase 2B baseline (no scanners) until redeployed.
 
@@ -21,6 +21,7 @@ What exists:
 - Deployment configuration: `Dockerfile` and `render.yaml` (API on Render), `frontend/` on Vercel
 - YARA-X scanner (`app/scanners/yarax.py`) with a small curated rule set (`app/rules/`)
 - Office scanner (`app/scanners/office.py`): structural analysis of OLE and OOXML documents
+- PDF scanner (`app/scanners/pdf.py`): structural analysis of PDF documents
 - 10 MB upload limit on `POST /scan`
 - pytest suite
 
@@ -34,7 +35,7 @@ combines them into one verdict.
 |-------|------|--------|
 | 1 | YARA-X: curated rules for risky byte patterns in supported file types | **Implemented** |
 | 2 | Office analysis: oletools + OOXML ZIP/XML structure (macros, auto-exec, embedded objects, external relationships, ActiveX, DDE, encryption, package abuse) | **Implemented** |
-| 3 | PDF analysis: pypdf + structural checks (JavaScript, open/launch actions, embedded files, URIs, forms, encryption) | Planned |
+| 3 | PDF analysis: pypdf + structural walk (JavaScript, automatic actions, launch actions, embedded files, URIs, forms, encryption) | **Implemented** |
 | 4 | General structural protections (type/signature validation, archive safety, size/resource limits) | Partly (upload limit) |
 
 **Why not ClamAV:** ClamAV needs about 1.2 GiB of RAM just to load its signatures
@@ -42,10 +43,15 @@ combines them into one verdict.
 (a Render instance of at most ~$25/month), so ClamAV is not part of the production
 engine. It may be used separately in the isolated test VM as a reference baseline.
 
-The layers complement each other: YARA-X matches raw byte patterns in any file,
-including formats no structural analyser understands yet (RTF, SVG, executables);
-the Office scanner parses the document structure and sees what raw bytes hide
-(compressed XML parts, relationship targets, macro behaviour).
+The layers complement each other:
+
+- **YARA-X**: rule/pattern matching on raw bytes of any file, including formats no
+  structural analyser understands (RTF, SVG, executables).
+- **Office scanner**: semantic/structural analysis of Office documents (compressed
+  XML parts, relationship targets, macro behaviour).
+- **PDF scanner**: semantic/structural analysis of PDFs (objects inside compressed
+  object streams, what triggers an action, attachment types).
+- **Decision engine**: combines all explainable findings into one verdict.
 
 **What this is not:** these layers are **not** an antivirus and do not provide
 complete malware coverage. `SAFE` means "every configured scanner ran and
@@ -96,9 +102,9 @@ Initial rules (`app/rules/filesmagic.yar`):
 
 Rules match raw bytes only: content in compressed PDF streams or compressed OOXML
 parts, and obfuscated PDF names (`/J#61vaScript`), are invisible to them. The Office
-scanner (and the planned PDF analyser) parse those structures. The two macro rules
-overlap with the Office scanner on purpose: they still fire on macro projects in
-packages the structural scanner does not recognise. To add a rule, put it in
+and PDF scanners parse those structures. The macro and PDF rules overlap with the
+structural scanners on purpose: they are an independent second signal and still fire
+when a structural parser does not recognise or cannot parse a file. To add a rule, put it in
 `app/rules/` with the three metadata fields and add a trigger and a benign case to
 `tests/test_yarax.py`.
 
@@ -148,6 +154,51 @@ Limitations: DDE in legacy `.doc`/`.xls` binary formats, QUOTE-obfuscated or nes
 DDE fields, ActiveX in legacy OLE files, macros inside embedded documents (embedded
 packages are not scanned recursively) and RTF documents (YARA-X only) are not
 covered. The macro analysis relies on olevba's keyword heuristics.
+
+### PDF scanner
+
+A file is a PDF if `%PDF-` appears in its first 1024 bytes (where readers accept the
+header), regardless of extension; anything else is not applicable. pypdf
+(`strict=False`, as real-world PDFs are often slightly broken) parses it, and the
+scanner walks the object graph from the document catalog, tracking whether each
+action is reached through an **automatic trigger**: `/OpenAction`, document-level
+JavaScript, or `/AA` page-open and document events. Form-field keystroke/format
+scripts count as user-triggered.
+
+| Check | Severity | Rationale |
+|-------|----------|-----------|
+| JavaScript present | MEDIUM | Often legitimate (forms), but active content |
+| JavaScript run automatically on open | MEDIUM | Stronger signal, but Acrobat forms do this too |
+| JavaScript using historic exploit APIs (`util.printf`, `Collab.getIcon`, …) or `exportDataObject` with `nLaunch` | HIGH | Known exploit / attachment-launch technique |
+| Automatic JavaScript **and** an attachment or launch action | HIGH | Classic drop-and-open combination |
+| `/Launch` action | HIGH | Starts programs or opens files |
+| Embedded file | LOW | Attachments can be legitimate |
+| Embedded executable/script/macro document (by name or MIME type) | HIGH | Payload carrier |
+| Link with handler scheme (`javascript:`, `data:`, `ms-*:`, `search-ms:`, …) | HIGH | Hands the target to another program |
+| Link to a network/file path | MEDIUM | Can leak credentials |
+| Link with another uncommon scheme | INFO | Explained, no verdict impact |
+| Ordinary `http(s)`/`mailto` links, `GoTo` open actions | not reported | Normal |
+| AcroForm | INFO | Normal interactive form |
+| XFA form | LOW | Can carry scripts not parsed here |
+| Password-protected (needs a user password) | MEDIUM | Contents cannot be inspected |
+| Encrypted with empty user password (permissions only) | INFO | Decrypted and fully inspected |
+| Structure repaired by the parser | INFO | Evidence of malformation |
+
+Safety: parsed in memory; JavaScript is only searched as text (at most 1 MB per
+script) and never executed; URIs are only classified, never opened; attachments are
+only inspected by name and MIME type, never extracted. pypdf runs with decompression
+capped at 20 MB per stream and its external `jbig2dec` decoder disabled. The walk is
+iterative, visits each object once per trigger context (so reference cycles end),
+skips bulky branches that cannot hold actions (fonts, resources, page content,
+appearance streams), and fails closed beyond 64 levels of nesting inside one object
+or 200,000 visited objects. Any parser error makes the PDF result a failure.
+
+Limitations: JavaScript is not deobfuscated or emulated, so detection of malicious
+scripts beyond the listed APIs relies on context (automatic triggers, attachments);
+XFA content, rich media/Flash, and `SubmitForm`/`ImportData`/`GoToR`/`GoToE` actions
+are not analysed; attachments (e.g. an embedded Office file) are not scanned
+recursively; a password-protected PDF can only be reported as uninspectable. Many
+legitimate Acrobat forms use JavaScript and will be `SUSPICIOUS`.
 
 ## Verdicts
 
@@ -281,7 +332,7 @@ Vercel ─ Security Lab (Next.js, frontend/)
 Render ─ Security Engine API (FastAPI, Docker)
         │
         ▼
-YARA-X + Office analysis (in-process); later PDF analysis
+YARA-X + Office + PDF analysis (in-process)
 ```
 
 ### Backend on Render
@@ -294,16 +345,18 @@ YARA-X + Office analysis (in-process); later PDF analysis
   choose one when creating the service (Render's default if none is chosen is the
   paid `0.5c-512mb`).
 
-`GET /health` returns `{"status": "ok", ..., "scanners_registered": 2, "scanners_ready": 2}`.
+`GET /health` returns `{"status": "ok", ..., "scanners_registered": 3, "scanners_ready": 3}`.
 `status` means the API process is up; `scanners_ready` counts scanners that loaded
 (e.g. YARA-X rules compiled). If it is lower than `scanners_registered`, scans are
 `UNABLE_TO_SCAN`.
 
-Measured locally (Windows, Python 3.14, not on Render): the API process with
-YARA-X and the Office scanner loaded uses about 62 MiB. Typical Office scans take
-milliseconds; a document with 28 MB of uncompressed XML took about 0.25 s, with
-memory kept flat by streaming the XML. This suggests the free 512 MB instance is
-enough, but it must be benchmarked on Render.
+Measured locally (Windows, Python 3.14, not on Render): the API process with all
+three scanners loaded uses about 71 MiB. Typical Office and PDF scans take
+milliseconds; a document with 28 MB of uncompressed XML took about 0.25 s, a PDF with
+3000 links about 0.3 s, and a PDF made of tens of thousands of tiny objects about
+0.36 s per 10,000 objects (so a pathological 10 MB PDF hits the object limit and
+fails closed after a few seconds). This suggests the free 512 MB instance is enough,
+but it must be benchmarked on Render.
 
 ### Frontend on Vercel
 
@@ -338,7 +391,7 @@ origins; they are only allowed if listed explicitly.
 
 ```bash
 curl https://<service>.onrender.com/health
-# {"status":"ok","service":"filesmagic-security-engine","scanners_registered":2,"scanners_ready":2}
+# {"status":"ok","service":"filesmagic-security-engine","scanners_registered":3,"scanners_ready":3}
 ```
 
 Then upload a **benign** file (e.g. a small `.txt`) through the deployed Security Lab:
