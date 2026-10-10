@@ -1,5 +1,10 @@
 import logging
 import os
+from xml.etree.ElementTree import ParseError as XMLParseError
+from zipfile import BadZipFile
+
+from defusedxml.common import DefusedXmlException
+from pypdf.errors import PdfReadError
 
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,6 +13,8 @@ from fastapi.responses import JSONResponse
 from app.decision import decide
 from app.models import Finding, ScanResult, Verdict
 from app.scanners import SCANNERS
+from app.scanners.office import OfficeScanError
+from app.scanners.pdf import PdfScanError
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +76,28 @@ async def health():
     }
 
 
+def expected_scan_failure_reason(error: Exception) -> str | None:
+    """Describe known malformed-input failures without hiding unexpected defects.
+
+    PDF/Office scanners wrap low-level failures in their own exception types.
+    A parser error or explicit scanner limit is an expected rejection. Other
+    wrapped errors could be programming bugs and still need a full traceback.
+    Never log attacker-supplied exception text from the document itself.
+    """
+    cause = error.__cause__
+    if isinstance(error, PdfScanError):
+        if cause is None:
+            return "PDF structure is invalid or exceeds analysis limits"
+        if isinstance(cause, PdfReadError):
+            return "PDF is malformed or truncated; its structure could not be read"
+    if isinstance(error, OfficeScanError):
+        if cause is None:
+            return "Office document structure is invalid or exceeds analysis limits"
+        if isinstance(cause, (BadZipFile, XMLParseError, DefusedXmlException)):
+            return "Office ZIP/XML structure is malformed or unreadable"
+    return None
+
+
 # Sync def so FastAPI runs it in a worker thread; scanners are blocking calls.
 @app.post("/scan", response_model=ScanResult)
 def scan_file(file: UploadFile = File(...)) -> ScanResult:
@@ -84,8 +113,18 @@ def scan_file(file: UploadFile = File(...)) -> ScanResult:
     for scanner in SCANNERS:
         try:
             result = scanner.scan(filename, data)
-        except Exception:
-            logger.exception("Scanner %s failed on %r", scanner.name, filename)
+        except Exception as error:
+            # Expected malformed documents are scan outcomes, not server crashes.
+            # Keep tracebacks for surprises, including bugs wrapped by scanners.
+            reason = expected_scan_failure_reason(error)
+            if reason is not None:
+                logger.warning(
+                    "Scanner %s could not analyse %r: %s (%s).",
+                    scanner.name, filename[:120], reason,
+                    type(error.__cause__ or error).__name__,
+                )
+            else:
+                logger.exception("Unexpected scanner failure in %s on %r", scanner.name, filename[:120])
             failed += 1
             continue
         if result is None:  # e.g. the Office scanner on a PDF
