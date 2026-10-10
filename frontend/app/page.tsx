@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import FileDropzone from "@/components/FileDropzone";
 import ScanResultView from "@/components/ScanResultView";
 import { ApiError, scanFile, type ScanResult } from "@/lib/api";
@@ -50,6 +51,7 @@ export default function SecurityLabPage() {
           Upload a file to run it through the FilesMagic Security Engine, the analysis layer that checks
           files before they reach the conversion pipeline.
         </p>
+        <p style={{ marginTop: 16 }}><Link href="/test-files" style={{ color: "var(--accent)", fontWeight: 700 }}>Browse downloadable test files →</Link></p>
       </header>
 
       <section className={styles.panel} aria-labelledby="upload-heading">
