@@ -17,6 +17,8 @@ export default function TestFilesPage() {
   useEffect(() => {
     try {
       const data = JSON.parse(window.localStorage.getItem(SAVE_KEY) || "{}");
+      // One-time read of browser-only storage after hydration (the server render has none).
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (data && typeof data === "object") setObserved(data as Observations);
     } catch { /* local storage can be blocked, so the list still works */ }
     setLoaded(true);

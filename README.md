@@ -23,6 +23,12 @@ What exists:
 - Office scanner (`app/scanners/office.py`): structural analysis of OLE and OOXML documents
 - PDF scanner (`app/scanners/pdf.py`): structural analysis of PDF documents
 - 10 MB upload limit on `POST /scan`
+- Scan authorization: short-lived, single-use, file-bound Ed25519 tokens issued by the Lab after admin login (`app/auth.py`)
+- Per-scan isolated worker process with resource limits (`app/worker.py`)
+- Malware Evaluation workflow in the Security Lab (`/evaluation`) with CSV/JSON export
+
+Readiness for real malicious samples: **BLOCKED**, see
+[docs/malware-research-readiness.md](docs/malware-research-readiness.md).
 - pytest suite
 
 ## Security architecture
@@ -236,7 +242,8 @@ uvicorn app.main:app --reload
 ```
 
 - Health check: `curl http://localhost:8000/health`
-- Scan a file: `curl -F "file=@example.pdf" http://localhost:8000/scan`
+- Scan a file: the request body is the raw file, with a scan token (see "Access control"):
+  `curl --data-binary @example.pdf -H "Authorization: Bearer <token>" -H "X-Filename: example.pdf" http://localhost:8000/scan`
 - Interactive docs: http://localhost:8000/docs
 
 ### CORS
@@ -252,6 +259,62 @@ SECURITY_ENGINE_CORS_ORIGINS="https://lab.example.com" uvicorn app.main:app
 # Windows PowerShell
 $env:SECURITY_ENGINE_CORS_ORIGINS="https://lab.example.com"; uvicorn app.main:app
 ```
+
+### Access control
+
+`POST /scan` requires `Authorization: Bearer <token>`. Tokens are minted by the Security
+Lab's server-side route `/api/scan-token`, only for a logged-in administrator, and are:
+
+- **Ed25519-signed**: the Lab (Vercel) holds the private key; the engine (Render) holds only
+  the public key, so nothing on the scanning host can mint tokens;
+- **short-lived** (120 s, at most 300 s accepted) and **single-use** (`jti` replay check);
+- **bound to one file**: its SHA-256 and size, checked after upload (HTTP 403 on mismatch).
+
+The browser hashes the file, gets a token, and uploads the file directly to Render; file
+contents never pass through Vercel. The token is checked before any body byte is read, and
+20 failed attempts per minute from one address make further requests from it HTTP 429. If
+`SECURITY_ENGINE_TOKEN_PUBLIC_KEY` is unset, every scan is refused (`/health` reports
+`auth_configured: false`).
+
+Generate the keys and the admin password hash (Node 20+):
+
+```bash
+node -e "const k=require('crypto').generateKeyPairSync('ed25519');console.log('LAB_SCAN_TOKEN_PRIVATE_KEY='+k.privateKey.export({format:'der',type:'pkcs8'}).toString('base64'));console.log('SECURITY_ENGINE_TOKEN_PUBLIC_KEY='+k.publicKey.export({format:'der',type:'spki'}).toString('base64'))"
+node -e "const c=require('crypto');console.log('LAB_SESSION_SECRET='+c.randomBytes(32).toString('base64url'))"
+node -e "const c=require('crypto'),s=c.randomBytes(16);console.log('LAB_ADMIN_PASSWORD_HASH=scrypt$'+s.toString('base64')+'$'+c.scryptSync(process.argv[1],s,32).toString('base64'))" "<your long password>"
+```
+
+### Scan isolation
+
+Each scan runs every scanner in a fresh `python -m app.worker` child process with an empty
+environment; the API never parses a document itself (it only hashes it and reads magic
+bytes). The parent enforces a wall-clock timeout (30 s), caps the worker's output at 1 MB,
+kills the child's whole process group afterwards, and turns any crash, timeout or invalid
+report into `UNABLE_TO_SCAN`. Before reading the document the child applies, where the
+platform allows, two kinds of control:
+
+- **Kernel-enforced (Linux):** rlimits (CPU 20 s, writable memory, no file writes, 32 open
+  files, no new processes/threads, no core dumps) and, if unprivileged namespaces are
+  allowed, a new user + network namespace with no network interfaces.
+- **In-process guard only:** a Python audit hook that refuses sockets, DNS, process
+  creation, `ctypes` library loading and opening files for writing. It catches Python code
+  paths in the parsers; it is **not** an operating-system security boundary, and native
+  code (or a memory-corruption exploit) is not subject to it.
+
+Each result reports which controls were actually applied (`isolation`). With
+`SECURITY_ENGINE_REQUIRE_ISOLATION=1` a worker refuses to analyse anything unless all of
+them are in place. The kernel controls are exercised by `tests/test_worker_linux.py`
+(Linux only; CI in `.github/workflows/security-engine-tests.yml`, where they may not skip).
+
+**Logging.** Log lines carry only controlled values: a per-request `request_id` (also returned
+in the scan result), scanner name, failure kind (`malformed_input`, `invalid_structure`,
+`unexpected`, `worker`), exception type, a SHA-256 prefix and the verdict. Expected failures on
+malformed files are concise warnings; `unexpected` failures (possible scanner bugs) are errors
+with a code-location trace (`file:line:function` frames). Filenames, file contents and
+exception messages are never logged, because they can be attacker-controlled.
+
+This is defence in depth, **not a sandbox**: the worker runs as the same user in the same
+container as the API. See [docs/malware-research-readiness.md](docs/malware-research-readiness.md).
 
 ## Security Lab (frontend)
 
@@ -276,6 +339,12 @@ cp .env.example .env.local   # Windows PowerShell: Copy-Item .env.example .env.l
 | Variable | Purpose | Local value |
 |----------|---------|-------------|
 | `NEXT_PUBLIC_SECURITY_ENGINE_URL` | Base URL of the Security Engine API. Inlined at build time, so rebuild after changing it. | `http://localhost:8000` |
+| `LAB_ADMIN_PASSWORD_HASH`, `LAB_SESSION_SECRET`, `LAB_SCAN_TOKEN_PRIVATE_KEY` | Server-only login and token signing (see "Access control"). | generated locally |
+
+Pages: `/` (simple scanner) and `/evaluation` (Malware Evaluation: record each sample's
+source dataset and independently verified classification next to the observed verdict,
+findings, scanner status, versions, duration and isolation; export as CSV or JSON). Records
+hold results only, never file contents, and stay in the browser's localStorage.
 
 Never commit `.env.local` or any real `.env` file.
 
@@ -316,7 +385,9 @@ tiny synthetic byte strings that contain a rule's structural markers (e.g. `%PDF
 and `/Launch`); they are not malware.
 
 `POST /scan` rejects files over **10 MB** with HTTP 413: early from the declared
-`Content-Length`, and exactly while reading the file (at most 10 MB + 1 byte is read).
+`Content-Length`, and exactly while streaming the body into memory (chunked uploads
+included; nothing is spooled to disk). An upload that takes over 60 s gets HTTP 408, and
+only `SECURITY_ENGINE_MAX_CONCURRENT_SCANS` scans run at once (HTTP 429 beyond).
 
 ## Deployment
 
@@ -332,7 +403,7 @@ Vercel ─ Security Lab (Next.js, frontend/)
 Render ─ Security Engine API (FastAPI, Docker)
         │
         ▼
-YARA-X + Office + PDF analysis (in-process)
+isolated worker process per scan: YARA-X + Office + PDF analysis
 ```
 
 ### Backend on Render
@@ -367,6 +438,12 @@ detects Next.js; no `vercel.json` is needed.
 
 | Variable | Where | Value |
 |----------|-------|-------|
+| `LAB_ADMIN_PASSWORD_HASH`, `LAB_SESSION_SECRET`, `LAB_SCAN_TOKEN_PRIVATE_KEY` | Vercel (Production, sensitive) | See "Access control". Never `NEXT_PUBLIC_`. |
+| `SECURITY_ENGINE_TOKEN_PUBLIC_KEY` | Render | Public half of the token key pair. Required: without it every scan is refused. |
+| `SECURITY_ENGINE_MAX_CONCURRENT_SCANS` | Render (optional) | Default `1` (sized for 512 MB). |
+| `SECURITY_ENGINE_WORKER_MEMORY_MB` | Render (optional) | Writable memory per worker, default `320`. |
+| `SECURITY_ENGINE_WORKER_TIMEOUT_SECONDS` | Render (optional) | Default `30`. |
+| `SECURITY_ENGINE_REQUIRE_ISOLATION` | Render (optional) | `1` = refuse to scan without every isolation control. Required for real malware. |
 | `NEXT_PUBLIC_SECURITY_ENGINE_URL` | Vercel (Production) | The Render service URL, e.g. `https://<service>.onrender.com`. Inlined at build time, so **redeploy** the frontend after changing it. Public by design: never put secrets in `NEXT_PUBLIC_` variables. |
 | `SECURITY_ENGINE_CORS_ORIGINS` | Render | The exact Vercel production origin, e.g. `https://<project>.vercel.app`: scheme + host, no path, no trailing slash. Comma-separate multiple origins. Never `*` (the API refuses to start). |
 
@@ -376,6 +453,13 @@ blocked until the variable is set. Vercel preview deployments have different
 origins; they are only allowed if listed explicitly.
 
 ### Deployment order
+
+**Upgrading an existing deployment** from the multipart/no-auth version: the old and new
+Lab and engine are incompatible in both directions, so they must be switched (and rolled
+back) together. Follow the coordinated plan in
+[docs/malware-research-readiness.md](docs/malware-research-readiness.md), section 9.
+
+First deployment from scratch (also generate and set the access-control variables above):
 
 1. Deploy the backend to Render (New → Blueprint, select this repository).
 2. Copy the Render HTTPS service URL.
@@ -404,6 +488,7 @@ On the free instance type the service sleeps when idle; the first request after 
 take up to a minute, and the Security Lab may report the API as unreachable until it
 wakes. Retry after `/health` responds.
 
-**Only benign files may be uploaded to the deployed service until the
-pre-malware-testing safeguards (access control, rate limiting, scanner isolation)
-are in place.**
+**Only benign files may be uploaded to the deployed service.** Access control, rate
+limiting and per-scan worker isolation are implemented, but real-malware testing remains
+**BLOCKED** on hosting prerequisites; see
+[docs/malware-research-readiness.md](docs/malware-research-readiness.md).

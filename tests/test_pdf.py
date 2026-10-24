@@ -17,6 +17,7 @@ from app.scanners.pdf import PdfScanError, PdfScanner
 from app.scanners.yarax import YaraXScanner
 from tests.office_fixtures import make_ooxml
 from tests.pdf_fixtures import attachment, encrypted_pdf, js_action, make_pdf, uri_link
+from tests.scan_client import post_scan
 
 RANK = {s: i for i, s in enumerate(Severity)}
 
@@ -304,7 +305,7 @@ client = TestClient(main.app)
 
 def post(monkeypatch, data, scanners=None):
     monkeypatch.setattr(main, "SCANNERS", scanners or [YaraXScanner(), OfficeScanner(), PdfScanner()])
-    r = client.post("/scan", files={"file": ("upload", data)})
+    r = post_scan(client, data)
     assert r.status_code == 200
     return r.json()
 

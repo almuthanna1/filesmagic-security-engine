@@ -1,4 +1,5 @@
 import type { Ref } from "react";
+import { formatBytes } from "@/components/FileDropzone";
 import type { ScanResult, Verdict } from "@/lib/api";
 import styles from "./ScanResultView.module.css";
 
@@ -33,12 +34,57 @@ export default function ScanResultView({
 
       <dl className={styles.meta}>
         <div>
+          <dt>Request ID</dt>
+          <dd className={styles.mono}>{result.request_id}</dd>
+        </div>
+        <div>
           <dt>Filename</dt>
           <dd className={styles.mono}>{result.filename || "(no filename)"}</dd>
         </div>
         <div>
           <dt>Message</dt>
           <dd>{result.message}</dd>
+        </div>
+        <div>
+          <dt>SHA-256</dt>
+          <dd className={styles.mono}>{result.sha256}</dd>
+        </div>
+        <div>
+          <dt>Size / format</dt>
+          <dd>
+            {formatBytes(result.size_bytes)} · {result.detected_format}
+          </dd>
+        </div>
+        <div>
+          <dt>Analysis</dt>
+          <dd>
+            {result.complete ? "All applicable scanners completed" : "Incomplete"} · {result.duration_ms} ms
+          </dd>
+        </div>
+        <div>
+          <dt>Scanners</dt>
+          <dd>
+            {result.scanners.map((s) => (
+              <span key={s.name} className={styles.statusLine}>
+                <span className={styles.mono}>{s.name}</span>: {s.status.replace("_", " ")}
+                {s.error && <> ({s.error_kind ? `${s.error_kind}: ` : ""}{s.error})</>}
+              </span>
+            ))}
+          </dd>
+        </div>
+        <div>
+          <dt>Isolation</dt>
+          <dd className={styles.mono}>
+            {Object.entries(result.isolation).map(([k, v]) => `${k}=${v ? "yes" : "NO"}`).join(" ") || "not reported"}
+          </dd>
+        </div>
+        <div>
+          <dt>Versions</dt>
+          <dd className={styles.mono}>
+            {Object.entries(result.versions)
+              .map(([k, v]) => `${k} ${k === "ruleset_sha256" ? v.slice(0, 12) : v}`)
+              .join(" · ")}
+          </dd>
         </div>
       </dl>
 

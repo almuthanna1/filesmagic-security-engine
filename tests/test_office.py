@@ -19,6 +19,7 @@ from app.scanners import office
 from app.scanners.office import OfficeScanError, OfficeScanner
 from app.scanners.yarax import YaraXScanner
 from tests.office_fixtures import make_ole, make_ooxml, ole10native, rels, word_body, word_document_stream
+from tests.scan_client import post_scan
 
 EQUATION_CLSID = "0002CE02-0000-0000-C000-000000000046"
 RANK = {s: i for i, s in enumerate(Severity)}  # Severity is a str enum; max() would sort by name
@@ -425,7 +426,7 @@ client = TestClient(main.app)
 
 def post(monkeypatch, data, scanners=None):
     monkeypatch.setattr(main, "SCANNERS", scanners or [YaraXScanner(), OfficeScanner()])
-    r = client.post("/scan", files={"file": ("upload", data)})
+    r = post_scan(client, data)
     assert r.status_code == 200
     return r.json()
 

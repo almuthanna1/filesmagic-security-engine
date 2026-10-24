@@ -1,32 +1,49 @@
+import asyncio
+import hashlib
 import logging
 import os
-from xml.etree.ElementTree import ParseError as XMLParseError
-from zipfile import BadZipFile
+import re
+import time
+import uuid
+from importlib import metadata
+from urllib.parse import unquote
 
-from defusedxml.common import DefusedXmlException
-from pypdf.errors import PdfReadError
-
-from fastapi import FastAPI, File, HTTPException, Request, UploadFile
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 
+from app import auth, worker
 from app.decision import decide
-from app.models import Finding, ScanResult, Verdict
+from app.models import ScannerStatus, ScanResult, Verdict, WorkerReport
 from app.scanners import SCANNERS
-from app.scanners.office import OfficeScanError
-from app.scanners.pdf import PdfScanError
+from app.scanners.yarax import RULES_DIR
 
 logger = logging.getLogger(__name__)
+# uvicorn only configures its own loggers; without this the per-scan audit lines are dropped.
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(name)s: %(message)s")
 
 # Origins of the Security Lab frontend allowed to call the API from a browser.
 DEFAULT_CORS_ORIGINS = "http://localhost:3000,http://127.0.0.1:3000"
 
 # Largest file /scan accepts. Bounds memory per request on a small instance; every
 # scanner receives the whole file, so this also bounds scanner work.
-MAX_UPLOAD_BYTES = 10 * 1024 * 1024
-# Room for multipart boundaries and part headers on top of the file itself.
-MULTIPART_OVERHEAD_BYTES = 64 * 1024
+MAX_UPLOAD_BYTES = worker.MAX_INPUT_BYTES
 UPLOAD_TOO_LARGE = f"File is too large. The maximum upload size is {MAX_UPLOAD_BYTES // (1024 * 1024)} MB."
+UPLOAD_TIMEOUT_SECONDS = 60
+# Scans running at once (each one is a worker process holding up to 10 MB of input).
+MAX_CONCURRENT_SCANS = int(os.environ.get("SECURITY_ENGINE_MAX_CONCURRENT_SCANS", "1"))
+
+# Default runner: one isolated worker process per scan. Tests swap in an in-process runner.
+run_scan = worker.run
+_active_scans = 0
+
+
+# Fixed explanations for expected scanner failures (logged; nothing attacker-supplied).
+FAILURE_REASONS = {
+    ("pdf", "malformed_input"): "PDF is malformed or truncated; its structure could not be read",
+    ("pdf", "invalid_structure"): "PDF structure is invalid or exceeds analysis limits",
+    ("office", "malformed_input"): "Office ZIP/XML structure is malformed or unreadable",
+    ("office", "invalid_structure"): "Office document structure is invalid or exceeds analysis limits",
+}
 
 
 def parse_cors_origins(value: str) -> list[str]:
@@ -37,29 +54,29 @@ def parse_cors_origins(value: str) -> list[str]:
     return origins
 
 
+def ruleset_hash() -> str:
+    h = hashlib.sha256()
+    for path in sorted(RULES_DIR.glob("*.yar")):
+        h.update(path.name.encode() + b"\0" + path.read_bytes())
+    return h.hexdigest()
+
+
 app = FastAPI(
     title="FilesMagic Security Engine",
     description="Pre-conversion file security analysis service for FilesMagic.",
-    version="0.1.0",
+    version="0.2.0",
 )
 
-
-# Registered before CORS so CORS stays the outer layer and the 413 still carries
-# CORS headers (otherwise the browser would report a network error instead).
-@app.middleware("http")
-async def reject_oversized_uploads(request: Request, call_next):
-    # Early rejection from the declared size, before the body is received. Clients
-    # that omit Content-Length are still caught by the exact check in scan_file.
-    length = request.headers.get("content-length", "")
-    if request.url.path == "/scan" and length.isdigit() and int(length) > MAX_UPLOAD_BYTES + MULTIPART_OVERHEAD_BYTES:
-        return JSONResponse({"detail": UPLOAD_TOO_LARGE}, status_code=413)
-    return await call_next(request)
-
+VERSIONS = {"engine": app.version, "ruleset_sha256": ruleset_hash()} | {
+    pkg: metadata.version(pkg) for pkg in ("yara-x", "oletools", "olefile", "pypdf")
+}
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=parse_cors_origins(os.environ.get("SECURITY_ENGINE_CORS_ORIGINS", DEFAULT_CORS_ORIGINS)),
     allow_methods=["GET", "POST"],
+    allow_headers=["Authorization", "Content-Type", "X-Filename"],
+    max_age=600,
 )
 
 
@@ -73,65 +90,100 @@ async def health():
         "service": "filesmagic-security-engine",
         "scanners_registered": len(SCANNERS),
         "scanners_ready": sum(1 for s in SCANNERS if getattr(s, "ready", True)),
+        "auth_configured": auth.PUBLIC_KEY is not None,
     }
 
 
-def expected_scan_failure_reason(error: Exception) -> str | None:
-    """Describe known malformed-input failures without hiding unexpected defects.
-
-    PDF/Office scanners wrap low-level failures in their own exception types.
-    A parser error or explicit scanner limit is an expected rejection. Other
-    wrapped errors could be programming bugs and still need a full traceback.
-    Never log attacker-supplied exception text from the document itself.
-    """
-    cause = error.__cause__
-    if isinstance(error, PdfScanError):
-        if cause is None:
-            return "PDF structure is invalid or exceeds analysis limits"
-        if isinstance(cause, PdfReadError):
-            return "PDF is malformed or truncated; its structure could not be read"
-    if isinstance(error, OfficeScanError):
-        if cause is None:
-            return "Office document structure is invalid or exceeds analysis limits"
-        if isinstance(cause, (BadZipFile, XMLParseError, DefusedXmlException)):
-            return "Office ZIP/XML structure is malformed or unreadable"
-    return None
+def client_address(request: Request) -> str:
+    # The proxy in front of Render appends the connecting address as the LAST
+    # X-Forwarded-For entry; earlier entries are client-supplied and spoofable.
+    forwarded = request.headers.get("x-forwarded-for", "")
+    return forwarded.rsplit(",", 1)[-1].strip() or (request.client.host if request.client else "unknown")
 
 
-# Sync def so FastAPI runs it in a worker thread; scanners are blocking calls.
+def detect_format(data: bytes) -> str:
+    """Coarse type from magic bytes only (no parsing happens in the API process)."""
+    if b"%PDF-" in data[:1024]:
+        return "pdf"
+    if data.startswith(b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"):
+        return "ole2"
+    if data.startswith(b"PK\x03\x04"):
+        return "zip"
+    if data.startswith(b"{\\rt"):
+        return "rtf"
+    return "unknown"
+
+
+def clean_filename(header: str) -> str:
+    return re.sub(r"[\x00-\x1f\x7f]", "?", unquote(header))[:255]
+
+
+async def read_body(request: Request, limit: int) -> bytes:
+    """Read the raw upload into memory, never past `limit` bytes and never to disk."""
+    data = bytearray()
+    try:
+        async with asyncio.timeout(UPLOAD_TIMEOUT_SECONDS):
+            async for chunk in request.stream():
+                data += chunk
+                if len(data) > limit:
+                    raise HTTPException(status_code=413, detail=UPLOAD_TOO_LARGE)
+    except TimeoutError:
+        raise HTTPException(status_code=408, detail="Upload took too long.") from None
+    return bytes(data)
+
+
+# The request body is the raw file (no multipart parsing); the original filename, which is
+# informational only, comes percent-encoded in X-Filename. Authorization is checked before a
+# single body byte is read.
 @app.post("/scan", response_model=ScanResult)
-def scan_file(file: UploadFile = File(...)) -> ScanResult:
-    filename = file.filename or ""
-    # Read at most one byte past the limit, so an oversized upload never fully
-    # enters memory. TODO: add authentication and rate limiting before real samples.
-    data = file.file.read(MAX_UPLOAD_BYTES + 1)
-    if len(data) > MAX_UPLOAD_BYTES:
+async def scan_file(request: Request) -> ScanResult:
+    global _active_scans
+    request_id = uuid.uuid4().hex[:16]
+    client = client_address(request)
+    if auth.too_many_failures(client):
+        raise HTTPException(status_code=429, detail="Too many unauthorized requests. Try again later.",
+                            headers={"Retry-After": "60"})
+    try:
+        claims = auth.verify(request.headers.get("authorization", ""))
+    except auth.AuthError as e:
+        auth.record_failure(client)
+        logger.warning("scan rejected request_id=%s: %s", request_id, e)
+        raise HTTPException(status_code=401, detail=str(e), headers={"WWW-Authenticate": "Bearer"}) from None
+
+    length = request.headers.get("content-length", "")
+    if length.isdigit() and int(length) > MAX_UPLOAD_BYTES:
         raise HTTPException(status_code=413, detail=UPLOAD_TOO_LARGE)
+    if _active_scans >= MAX_CONCURRENT_SCANS:
+        raise HTTPException(status_code=429, detail="The engine is busy with another scan. Try again shortly.",
+                            headers={"Retry-After": "5"})
 
-    findings: list[Finding] = []
-    failed = not_applicable = 0
-    for scanner in SCANNERS:
+    _active_scans += 1
+    try:
+        data = await read_body(request, MAX_UPLOAD_BYTES)
+        sha256 = hashlib.sha256(data).hexdigest()
+        if sha256 != claims["sha256"] or len(data) != claims["size"]:
+            raise HTTPException(status_code=403, detail="The uploaded file does not match the scan token.")
+        start = time.perf_counter()
         try:
-            result = scanner.scan(filename, data)
-        except Exception as error:
-            # Expected malformed documents are scan outcomes, not server crashes.
-            # Keep tracebacks for surprises, including bugs wrapped by scanners.
-            reason = expected_scan_failure_reason(error)
-            if reason is not None:
-                logger.warning(
-                    "Scanner %s could not analyse %r: %s (%s).",
-                    scanner.name, filename[:120], reason,
-                    type(error.__cause__ or error).__name__,
-                )
-            else:
-                logger.exception("Unexpected scanner failure in %s on %r", scanner.name, filename[:120])
-            failed += 1
-            continue
-        if result is None:  # e.g. the Office scanner on a PDF
-            not_applicable += 1
-        else:
-            findings.extend(result)
+            report = await run_scan(data)
+            if sorted(s.name for s in report.scanners) != sorted(s.name for s in SCANNERS):
+                raise worker.WorkerError("scan worker reported an unexpected set of scanners")
+        except worker.WorkerError as e:
+            logger.error("scan worker failure request_id=%s: %s", request_id, e)  # message is the engine's own
+            report = WorkerReport(
+                scanners=[ScannerStatus(name=s.name, status="failed", error=str(e), error_kind="worker")
+                          for s in SCANNERS],
+                findings=[],
+            )
+        duration_ms = round((time.perf_counter() - start) * 1000, 1)
+        detected_format = detect_format(data)
+    finally:
+        _active_scans -= 1
+        data = None  # the upload is not kept beyond the scan
 
+    findings = report.findings
+    failed = sum(s.status == "failed" for s in report.scanners)
+    not_applicable = sum(s.status == "not_applicable" for s in report.scanners)
     # Not-applicable scanners neither count as analysis nor as failure.
     applicable = len(SCANNERS) - not_applicable
     verdict = decide(findings, scanners_run=applicable, scanners_failed=failed)
@@ -148,4 +200,33 @@ def scan_file(file: UploadFile = File(...)) -> ScanResult:
         if verdict == Verdict.SAFE:
             message += " No known indicators were found; this is not a guarantee that the file is harmless."
 
-    return ScanResult(filename=filename, verdict=verdict, findings=findings, message=message)
+    # Logs carry only controlled values: never file contents, the filename, or scanner error
+    # text (which can quote attacker-controlled data). Scanner names were checked against
+    # SCANNERS, error kinds/types and traces were validated by the WorkerReport model.
+    for s in report.scanners:
+        if s.status != "failed" or s.error_kind == "worker":
+            continue
+        if s.error_kind == "unexpected":
+            logger.error("scanner failure request_id=%s scanner=%s kind=unexpected type=%s trace=%s",
+                         request_id, s.name, s.error_type, report.traces.get(s.name, "unavailable"))
+        else:
+            logger.warning("scanner failure request_id=%s scanner=%s kind=%s type=%s reason=%s",
+                           request_id, s.name, s.error_kind, s.error_type,
+                           FAILURE_REASONS.get((s.name, s.error_kind), "document could not be analysed"))
+    logger.info("scan request_id=%s sha256=%s size=%d verdict=%s failed=%d duration_ms=%.0f",
+                request_id, sha256[:16], claims["size"], verdict.value, failed, duration_ms)
+    return ScanResult(
+        request_id=request_id,
+        filename=clean_filename(request.headers.get("x-filename", "")),
+        verdict=verdict,
+        findings=findings,
+        message=message,
+        sha256=sha256,
+        size_bytes=claims["size"],
+        detected_format=detected_format,
+        scanners=report.scanners,
+        complete=applicable > 0 and failed == 0,
+        duration_ms=duration_ms,
+        versions=VERSIONS,
+        isolation=report.isolation,
+    )

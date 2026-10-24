@@ -5,6 +5,7 @@ from app import main
 from app.decision import decide
 from app.main import app
 from app.models import Finding, Severity, Verdict
+from tests.scan_client import auth_headers, post_scan
 
 client = TestClient(app)
 
@@ -29,7 +30,7 @@ def test_health_counts_registered_scanners(monkeypatch):
 
 def test_scan_without_scanners_is_not_safe(monkeypatch):
     monkeypatch.setattr(main, "SCANNERS", [])
-    r = client.post("/scan", files={"file": ("hello.txt", b"hello world", "text/plain")})
+    r = post_scan(client, b"hello world", "hello.txt")
     assert r.status_code == 200
     body = r.json()
     assert body["filename"] == "hello.txt"
@@ -38,8 +39,8 @@ def test_scan_without_scanners_is_not_safe(monkeypatch):
     assert body["findings"] == []
 
 
-def test_scan_requires_file():
-    assert client.post("/scan").status_code == 422
+def test_scan_requires_token():
+    assert client.post("/scan", content=b"x").status_code == 401
 
 
 def test_scan_combines_scanner_results(monkeypatch):
@@ -62,7 +63,7 @@ def test_scan_combines_scanner_results(monkeypatch):
             return [finding(Severity.HIGH)]
 
     def post():
-        return client.post("/scan", files={"file": ("a.bin", b"x")}).json()["verdict"]
+        return post_scan(client, b"x", "a.bin").json()["verdict"]
 
     monkeypatch.setattr(main, "SCANNERS", [Clean()])
     assert post() == Verdict.SAFE
@@ -73,9 +74,10 @@ def test_scan_combines_scanner_results(monkeypatch):
 
 
 def test_oversized_upload_rejected_by_exact_check(monkeypatch):
-    # Small enough to pass the Content-Length pre-check, caught when the file is read.
+    # No Content-Length (chunked upload): caught while the body is streamed.
     monkeypatch.setattr(main, "MAX_UPLOAD_BYTES", 100)
-    r = client.post("/scan", files={"file": ("big.bin", b"x" * 101)})
+    data = b"x" * 101
+    r = client.post("/scan", content=iter([data[:60], data[60:]]), headers=auth_headers(data))
     assert r.status_code == 413
     assert "too large" in r.json()["detail"]
 
@@ -83,11 +85,8 @@ def test_oversized_upload_rejected_by_exact_check(monkeypatch):
 def test_oversized_upload_rejected_before_body_is_read(monkeypatch):
     monkeypatch.setattr(main, "MAX_UPLOAD_BYTES", 100)
     monkeypatch.setattr(main, "SCANNERS", [])  # never reached
-    r = client.post(
-        "/scan",
-        files={"file": ("big.bin", b"x" * (100 + main.MULTIPART_OVERHEAD_BYTES + 1))},
-        headers={"Origin": "http://localhost:3000"},
-    )
+    data = b"x" * 101
+    r = client.post("/scan", content=data, headers=auth_headers(data) | {"Origin": "http://localhost:3000"})
     assert r.status_code == 413
     assert "too large" in r.json()["detail"]
     assert r.headers["access-control-allow-origin"] == "http://localhost:3000"  # browser can read it
@@ -96,7 +95,7 @@ def test_oversized_upload_rejected_before_body_is_read(monkeypatch):
 def test_upload_at_limit_is_accepted(monkeypatch):
     monkeypatch.setattr(main, "MAX_UPLOAD_BYTES", 100)
     monkeypatch.setattr(main, "SCANNERS", [])
-    assert client.post("/scan", files={"file": ("ok.bin", b"x" * 100)}).status_code == 200
+    assert post_scan(client, b"x" * 100).status_code == 200
 
 
 def test_cors_allows_only_listed_origins():

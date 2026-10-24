@@ -1,25 +1,99 @@
+# CI for the Security Engine and Security Lab. It uses only the repository's synthetic,
+# inert test fixtures (built in memory by the tests): no samples, no secrets, no artifacts,
+# no deployments. Vercel and Render deploy through their own integrations, not from here.
 name: Security engine tests
 
 on:
   push:
-    branches: [main, fix/scan-failure-logging]
   pull_request:
     branches: [main]
 
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  pytest:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+  backend-linux:
+    name: Backend (Linux, Python 3.11, non-root)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      # tests/test_worker_linux.py fails instead of skipping when a control cannot be tested.
+      FM_REQUIRE_LINUX_TESTS: "1"
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.11"
           cache: pip
-      - name: Install Python dependencies
-        run: pip install -r requirements-dev.txt
-      - name: Run security engine tests
-        run: python -m pytest -q
+      - name: Allow unprivileged user namespaces (this ephemeral runner only)
+        # Ubuntu 24.04 blocks them through AppArmor by default. Relaxing that one switch on the
+        # throwaway runner lets the worker's network-namespace control be tested. It is never
+        # done on Render; whether Render allows namespaces must be checked there separately.
+        run: |
+          if [ "$(sysctl -n kernel.apparmor_restrict_unprivileged_userns 2>/dev/null)" = "1" ]; then
+            sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+          fi
+          if unshare --user --net true; then
+            echo "unprivileged user+network namespaces: available"
+          else
+            echo "::warning::unprivileged user+network namespaces unavailable; the namespace tests will fail"
+          fi
+      - run: test "$(id -u)" != 0 # rlimit tests need a non-root user (root ignores RLIMIT_NPROC)
+      - run: pip install -r requirements-dev.txt
+      - run: python -m pytest -q -rs -p no:cacheprovider
+
+  production-image:
+    name: Production image (Docker, non-root, no network)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: docker build -t fm-engine .
+      - name: Worker scan inside the image
+        # Docker's default seccomp profile (like most hosted containers) normally blocks the
+        # namespace, so network_namespace is reported, not required, here. The kernel-level
+        # namespace test runs in backend-linux.
+        run: |
+          docker run --rm --network none fm-engine python -B -c '
+          import asyncio, os
+          from app import worker
+          assert os.geteuid() != 0, "image must not run as root"
+          report = asyncio.run(worker.run(b"%PDF-1.7\n/Launch"))
+          print(report.model_dump_json(indent=2))
+          assert report.isolation["process"] and report.isolation["rlimits"] and report.isolation["audit_hook"], report.isolation
+          assert "PDF_Launch_Action" in {f.rule_id for f in report.findings}
+          print("network_namespace inside the default Docker sandbox:", report.isolation["network_namespace"])
+          '
+
+  frontend:
+    name: Security Lab (typecheck, lint, build, audit)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm run lint
+      - run: npm run build
+      - run: npm audit --omit=dev --audit-level=high

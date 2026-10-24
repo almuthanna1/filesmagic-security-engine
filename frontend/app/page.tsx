@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import FileDropzone from "@/components/FileDropzone";
+import LabNav from "@/components/LabNav";
+import LoginForm from "@/components/LoginForm";
 import ScanResultView from "@/components/ScanResultView";
-import { ApiError, scanFile, type ScanResult } from "@/lib/api";
+import { ApiError, AuthRequiredError, scanFile, type ScanResult } from "@/lib/api";
 import styles from "./page.module.css";
 
 export default function SecurityLabPage() {
@@ -12,6 +13,7 @@ export default function SecurityLabPage() {
   const [scanning, setScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ScanResult | null>(null);
+  const [needsLogin, setNeedsLogin] = useState(false);
   const resultHeading = useRef<HTMLHeadingElement>(null);
 
   // Move focus to the result so keyboard and screen-reader users land on it.
@@ -36,7 +38,8 @@ export default function SecurityLabPage() {
     try {
       setResult(await scanFile(file));
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Unexpected error while scanning the file.");
+      if (e instanceof AuthRequiredError) setNeedsLogin(true);
+      else setError(e instanceof ApiError ? e.message : "Unexpected error while scanning the file.");
     } finally {
       setScanning(false);
     }
@@ -51,8 +54,10 @@ export default function SecurityLabPage() {
           Upload a file to run it through the FilesMagic Security Engine, the analysis layer that checks
           files before they reach the conversion pipeline.
         </p>
-        <p style={{ marginTop: 16 }}><Link href="/test-files" style={{ color: "var(--accent)", fontWeight: 700 }}>Browse downloadable test files →</Link></p>
+        <LabNav />
       </header>
+
+      {needsLogin && <LoginForm onLogin={() => setNeedsLogin(false)} />}
 
       <section className={styles.panel} aria-labelledby="upload-heading">
         <h2 id="upload-heading" className={styles.panelHeading}>

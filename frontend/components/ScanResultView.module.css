@@ -155,3 +155,7 @@
   background: var(--danger-bg);
   border-color: var(--danger-border);
 }
+
+.statusLine {
+  display: block;
+}

@@ -129,11 +129,18 @@ def load_manifest(manifest: Path, samples_root: Path) -> list[dict]:
 
 def scan_samples(rows: list[dict], client=None) -> list[dict]:
     """Scan every unique, non-EXCLUDED sample through the in-process API."""
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+    from app import auth
+
+    key = Ed25519PrivateKey.generate()
     if client is None:
         from fastapi.testclient import TestClient
 
         from app.main import app
 
+        # In-process only: the engine trusts a signing key that exists just for this run.
+        auth.PUBLIC_KEY = key.public_key()
         client = TestClient(app)
 
     results = []
@@ -151,7 +158,9 @@ def scan_samples(rows: list[dict], client=None) -> list[dict]:
         start = time.perf_counter()
         try:
             # The sample ID, not the original filename, is sent; scanners ignore names anyway.
-            response = client.post("/scan", files={"file": (row["sample_id"], data)})
+            token = auth.mint_token(key, row["sha256"], len(data))
+            response = client.post("/scan", content=data,
+                                   headers={"Authorization": f"Bearer {token}", "X-Filename": row["sample_id"]})
         except Exception as e:
             result.update(outcome="ERROR", message=f"{type(e).__name__}: {e}"[:300])
         else:

@@ -12,6 +12,7 @@ from app import main
 from app.models import Severity, Verdict
 from app.scanners import yarax
 from app.scanners.yarax import YaraXError, YaraXScanner
+from tests.scan_client import post_scan
 
 OLE_MAGIC = bytes.fromhex("D0CF11E0A1B11AE1")
 PE_STUB = b"MZ" + b"\0" * 58 + (64).to_bytes(4, "little") + b"PE\0\0"
@@ -174,7 +175,7 @@ client = TestClient(main.app)
 
 def verdict_for(monkeypatch, data, scanner=None):
     monkeypatch.setattr(main, "SCANNERS", [scanner or YaraXScanner()])
-    r = client.post("/scan", files={"file": ("f.bin", data)})
+    r = post_scan(client, data, "f.bin")
     assert r.status_code == 200
     return r.json()
 
