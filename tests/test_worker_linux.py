@@ -227,3 +227,56 @@ def test_network_verification_detects_the_host_network():
     out = json.loads(probe(NET_PROBE.format(enter=False)).stdout)
     assert not out["net_loopback_only"] and not out["net_ipv4_no_route"], out
     assert not all(out.values())
+
+
+# --------------------------------------------------------------------- strict mode fails closed on failed verification
+
+
+# The real worker module in a fresh interpreter; only verify_network_isolation is replaced, in
+# that process alone. The namespace itself is really entered on hosts that allow it.
+FAULTY_WORKER = """import os, sys
+import app.worker as w
+mode = sys.argv[1]
+# Really enter the namespace where the host allows it; elsewhere simulate entry so the
+# verification path (the subject of these tests) is still reached.
+real_enter = w._network_namespace
+w.POSIX = True
+w._network_namespace = lambda: (os.name == "posix" and real_enter()) or True
+def faulty():
+    if mode == "raise":
+        raise RuntimeError("injected verification fault")
+    checks = dict.fromkeys(w.NETWORK_CHECKS, True)
+    checks["net_ipv4_unreachable"] = False
+    return checks
+w.verify_network_isolation = faulty
+sys.exit(w.main(["--require-isolation"]))"""
+
+
+def faulty_worker(mode):
+    return [sys.executable, "-B", "-c", FAULTY_WORKER, mode]
+
+
+def test_strict_mode_refuses_to_scan_when_network_verification_fails(monkeypatch):
+    report = asyncio.run(worker.run(make_pdf(), cmd=faulty_worker("fail")))
+    assert report.findings == []
+    assert all(s.status == "failed" and "required isolation unavailable" in s.error for s in report.scanners)
+    assert report.isolation["network_verified"] is False and report.isolation["net_ipv4_unreachable"] is False
+    missing = report.scanners[0].error
+    assert "network_verified" in missing and "net_ipv4_unreachable" in missing
+    if REQUIRED:  # namespace really entered, so verification alone caused the refusal
+        assert report.isolation["network_namespace"] is True and "network_namespace" not in missing
+
+    # Through the API: never SAFE, reported as incomplete with the reason.
+    monkeypatch.setattr(main, "run_scan", functools.partial(worker.run, cmd=faulty_worker("fail")))
+    body = post_scan(client, make_pdf()).json()
+    assert body["verdict"] == Verdict.UNABLE_TO_SCAN and body["findings"] == [] and not body["complete"]
+    assert all("required isolation unavailable" in s["error"] and "network_verified" in s["error"] for s in body["scanners"])
+
+
+def test_strict_mode_fails_closed_when_verification_crashes(monkeypatch):
+    with pytest.raises(worker.WorkerError, match="exited abnormally"):
+        asyncio.run(worker.run(make_pdf(), cmd=faulty_worker("raise")))
+    monkeypatch.setattr(main, "run_scan", functools.partial(worker.run, cmd=faulty_worker("raise")))
+    body = post_scan(client, make_pdf()).json()
+    assert body["verdict"] == Verdict.UNABLE_TO_SCAN and body["findings"] == [] and not body["complete"]
+    assert all(s["status"] == "failed" and s["error_kind"] == "worker" for s in body["scanners"])

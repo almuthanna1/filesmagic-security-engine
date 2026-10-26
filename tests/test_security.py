@@ -414,12 +414,44 @@ def test_network_verification_fails_closed_on_unexpected_errors(monkeypatch):
     assert set(checks) == set(worker.NETWORK_CHECKS) and not any(checks.values())
 
 
-def test_worker_reports_network_unverified_without_namespace():
-    report = asyncio.run(worker.run(DATA))
-    if report.isolation["network_namespace"]:
-        pytest.skip("this host provides a network namespace; covered by test_worker_linux.py")
-    assert report.isolation["network_verified"] is False
-    assert not any(report.isolation[k] for k in worker.NETWORK_CHECKS)
+ALL_PASS = dict.fromkeys(worker.NETWORK_CHECKS, True)
+
+
+def test_network_isolation_without_namespace_reports_everything_missing():
+    def must_not_run():
+        raise AssertionError("verification must not run outside a namespace")
+
+    for enter in (lambda: False, lambda: (_ for _ in ()).throw(OSError("unshare denied"))):
+        result = worker.network_isolation(enter=enter, verify=must_not_run)
+        assert result == {"network_namespace": False, "network_verified": False, **dict.fromkeys(worker.NETWORK_CHECKS, False)}
+
+
+def test_network_isolation_with_verified_namespace():
+    result = worker.network_isolation(enter=lambda: True, verify=lambda: dict(ALL_PASS))
+    assert result["network_namespace"] and result["network_verified"]
+    assert all(result[k] for k in worker.NETWORK_CHECKS)
+
+
+@pytest.mark.parametrize("failed", worker.NETWORK_CHECKS)
+def test_network_isolation_one_failed_check_is_not_verified(failed):
+    checks = dict(ALL_PASS, **{failed: False})
+    result = worker.network_isolation(enter=lambda: True, verify=lambda: checks)
+    assert result["network_namespace"] is True and result["network_verified"] is False
+    assert result[failed] is False and sum(not result[k] for k in worker.NETWORK_CHECKS) == 1
+
+
+def test_network_isolation_only_literal_true_counts():
+    # Missing or non-boolean check values are failures, never passes.
+    result = worker.network_isolation(enter=lambda: True, verify=lambda: {"net_loopback_only": 1})
+    assert result["network_verified"] is False and not any(result[k] for k in worker.NETWORK_CHECKS)
+
+
+def test_real_worker_network_report_is_consistent():
+    # Holds on every host: verified exactly when all checks pass, and no check passes without a namespace.
+    iso = asyncio.run(worker.run(DATA)).isolation
+    assert iso["network_verified"] == all(iso[k] for k in worker.NETWORK_CHECKS)
+    if not iso["network_namespace"]:
+        assert not iso["network_verified"] and not any(iso[k] for k in worker.NETWORK_CHECKS)
 
 
 def test_scan_result_reports_configured_strict_mode(monkeypatch):

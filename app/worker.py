@@ -269,6 +269,24 @@ def verify_network_isolation() -> dict[str, bool]:
     return checks
 
 
+def network_isolation(enter=None, verify=None) -> dict[str, bool]:
+    """Enter a new network namespace and verify it. Returns network_namespace (entered),
+    network_verified (every NETWORK_CHECKS check passed inside it) and the checks themselves;
+    anything not established is False. enter/verify are injectable for tests only."""
+    enter = enter or (lambda: POSIX and _network_namespace())
+    verify = verify or verify_network_isolation
+    result = {"network_namespace": False, "network_verified": False, **dict.fromkeys(NETWORK_CHECKS, False)}
+    try:
+        result["network_namespace"] = bool(enter())
+    except (OSError, AttributeError):
+        return result
+    if result["network_namespace"]:
+        checks = verify()
+        result.update({k: checks.get(k) is True for k in NETWORK_CHECKS})
+        result["network_verified"] = all(result[k] for k in NETWORK_CHECKS)
+    return result
+
+
 def _rlimits() -> None:
     import resource
 
@@ -307,13 +325,7 @@ def main(argv: list[str]) -> int:
 
     isolation = dict.fromkeys(ISOLATION_CONTROLS, False)
     isolation["process"] = True
-    try:
-        isolation["network_namespace"] = POSIX and _network_namespace()
-    except (OSError, AttributeError):
-        pass
-    if isolation["network_namespace"]:  # before the audit hook, which forbids sockets
-        isolation.update(verify_network_isolation())
-        isolation["network_verified"] = all(isolation[k] for k in NETWORK_CHECKS)
+    isolation.update(network_isolation())  # before the audit hook, which forbids sockets
     for scanner in SCANNERS:  # warm-up: lets YARA-X start its timeout thread before RLIMIT_NPROC
         try:
             scanner.scan("", b"")
