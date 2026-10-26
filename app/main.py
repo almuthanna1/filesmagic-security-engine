@@ -218,6 +218,9 @@ async def scan_file(request: Request) -> ScanResult:
             logger.warning("scanner failure request_id=%s scanner=%s kind=%s type=%s reason=%s",
                            request_id, s.name, s.error_kind, s.error_type,
                            FAILURE_REASONS.get((s.name, s.error_kind), "document could not be analysed"))
+    if report.diagnostics:  # staging only; validated by the WorkerReport model, never in the response
+        logger.warning("network diagnostics request_id=%s %s", request_id,
+                       report.diagnostics.model_dump_json(exclude_none=True))
     logger.info("scan request_id=%s sha256=%s size=%d verdict=%s failed=%d duration_ms=%.0f",
                 request_id, sha256[:16], claims["size"], verdict.value, failed, duration_ms)
     return ScanResult(

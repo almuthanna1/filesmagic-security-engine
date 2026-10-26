@@ -280,3 +280,43 @@ def test_strict_mode_fails_closed_when_verification_crashes(monkeypatch):
     body = post_scan(client, make_pdf()).json()
     assert body["verdict"] == Verdict.UNABLE_TO_SCAN and body["findings"] == [] and not body["complete"]
     assert all(s["status"] == "failed" and s["error_kind"] == "worker" for s in body["scanners"])
+
+
+# --------------------------------------------------------------------- network diagnostics (Phase C7B)
+
+
+DIAG_PROBE = """import json
+from app.worker import _network_namespace, collect_diagnostics
+entered = {enter}
+if entered and not _network_namespace():
+    print(json.dumps("unavailable"))
+else:
+    print(collect_diagnostics().model_dump_json())"""
+
+
+def test_diagnostics_inside_the_namespace_show_only_loopback():
+    out = json.loads(probe(DIAG_PROBE.format(enter=True)).stdout)
+    if out == "unavailable":
+        (pytest.fail if REQUIRED else pytest.skip)("unprivileged user/network namespaces are not available on this host")
+    assert out["collection_error"] is None and out["enumeration_error"] is None and out["proc_error"] is None
+    assert [i["name"] for i in out["interfaces"]] == ["lo"], out
+    lo = out["interfaces"][0]
+    assert lo["loopback"] is True and lo["link_type"] == 772 and lo["error"] is None  # ARPHRD_LOOPBACK
+    assert out["usable_routes_v4"] == 0 and out["usable_routes_v6"] == 0
+
+
+def test_diagnostics_read_real_interface_state_in_the_host_namespace():
+    # The runner's own interfaces exercise the ioctl parsing on real data; nothing is sent.
+    out = json.loads(probe(DIAG_PROBE.format(enter=False)).stdout)
+    assert out["collection_error"] is None and out["usable_routes_v4"] >= 1, out
+    assert any(i["loopback"] and i["link_type"] == 772 for i in out["interfaces"]), out
+    assert any(i["up"] and i["ipv4_address"] and not i["loopback"] and i["usable_routes_v4"] >= 1
+               for i in out["interfaces"]), out
+
+
+def test_real_worker_returns_diagnostics_only_when_asked():
+    cmd = worker.command()
+    assert asyncio.run(worker.run(make_pdf(), cmd=cmd)).diagnostics is None
+    report = asyncio.run(worker.run(make_pdf(), cmd=cmd + ["--net-diagnostics"]))
+    assert report.diagnostics is not None and report.diagnostics.collection_error is None
+    assert ([i.name for i in report.diagnostics.interfaces] == ["lo"]) == report.isolation["net_loopback_only"]

@@ -448,6 +448,7 @@ detects Next.js; no `vercel.json` is needed.
 | `SECURITY_ENGINE_WORKER_MEMORY_MB` | Render (optional) | Writable memory per worker, default `320`. |
 | `SECURITY_ENGINE_WORKER_TIMEOUT_SECONDS` | Render (optional) | Default `30`. |
 | `SECURITY_ENGINE_REQUIRE_ISOLATION` | Render (optional) | `1` = refuse to scan without every isolation control. Required for real malware. |
+| `SECURITY_ENGINE_NET_DIAGNOSTICS` | Render staging only (optional) | `1` = the worker describes its network namespace (interface names, flags, address and route counts; no addresses) and the API logs it per request ID. Never returned in responses. Diagnostic only: it never changes an isolation result. Leave unset elsewhere. |
 | `NEXT_PUBLIC_SECURITY_ENGINE_URL` | Vercel (Production) | The Render service URL, e.g. `https://<service>.onrender.com`. Inlined at build time, so **redeploy** the frontend after changing it. Public by design: never put secrets in `NEXT_PUBLIC_` variables. |
 | `SECURITY_ENGINE_CORS_ORIGINS` | Render | The exact Vercel production origin, e.g. `https://<project>.vercel.app`: scheme + host, no path, no trailing slash. Comma-separate multiple origins. Never `*` (the API refuses to start). |
 

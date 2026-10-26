@@ -12,9 +12,10 @@ import time
 import pytest
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
 
 from app import auth, main, worker
-from app.models import Verdict
+from app.models import Verdict, WorkerReport
 from tests.office_fixtures import make_ooxml
 from tests.pdf_fixtures import make_pdf
 from tests.scan_client import KEY, auth_headers, post_scan
@@ -458,3 +459,122 @@ def test_scan_result_reports_configured_strict_mode(monkeypatch):
     assert post_scan(client, DATA).json()["isolation_required"] is False
     monkeypatch.setattr(worker, "REQUIRE_ISOLATION", True)
     assert post_scan(client, DATA).json()["isolation_required"] is True
+
+
+# --------------------------------------------------------------------- network diagnostics (Phase C7B, staging only)
+
+
+ROUTE_HEADER = "Iface\tDestination\tGateway\tFlags\tRefCnt\tUse\tMetric\tMask\tMTU\tWindow\tIRTT\n"
+DEFAULT_ROUTE = "{dev}\t00000000\t00000000\t0001\t0\t0\t0\t00000000\t0\t0\t0\n"
+LO = {"up": False, "running": False, "loopback": True, "link_type": 772, "ipv4_address": False}
+SIT = {"up": False, "running": False, "loopback": False, "link_type": 776, "ipv4_address": False}
+
+
+def fake_namespace(monkeypatch, interfaces, routes=""):
+    """A namespace described by {name: ioctl state}; nothing real is queried."""
+    if callable(interfaces):
+        monkeypatch.setattr(socket, "if_nameindex", interfaces)
+    else:
+        monkeypatch.setattr(socket, "if_nameindex", lambda: [(i + 1, n) for i, n in enumerate(interfaces)])
+        monkeypatch.setattr(worker, "_interface_state", lambda name: dict(interfaces[name]))
+    files = {"/proc/net/route": ROUTE_HEADER + routes, "/proc/net/ipv6_route": "", "/proc/net/if_inet6": ""}
+    monkeypatch.setattr(worker, "_read", lambda path, missing_ok=False: files[path])
+    monkeypatch.setattr(worker, "_route_lookup_fails", lambda family, address: not routes)
+
+
+def test_diagnostics_only_loopback(monkeypatch):
+    fake_namespace(monkeypatch, {"lo": LO})
+    diag = worker.collect_diagnostics()
+    assert diag.interface_count == 1 and [i.name for i in diag.interfaces] == ["lo"]
+    assert diag.interfaces[0].loopback and diag.usable_routes_v4 == 0 and diag.usable_routes_v6 == 0
+    assert worker.network_isolation(enter=lambda: True)["network_verified"] is True
+
+
+def test_diagnostics_extra_interface_is_reported_and_still_fails(monkeypatch):
+    fake_namespace(monkeypatch, {"lo": LO, "sit0": SIT})
+    diag = worker.collect_diagnostics()
+    sit0 = diag.interfaces[1]
+    assert (sit0.index, sit0.name, sit0.up, sit0.link_type, sit0.ipv4_address) == (2, "sit0", False, 776, False)
+    assert sit0.usable_routes_v4 == 0 and sit0.ipv6_addresses == 0
+    # The diagnostics describe the extra interface; they never excuse it.
+    result = worker.network_isolation(enter=lambda: True)
+    assert result["net_loopback_only"] is False and result["network_verified"] is False
+
+
+def test_diagnostics_attribute_usable_routes_to_their_interface(monkeypatch):
+    fake_namespace(monkeypatch, {"lo": LO, "eth0": dict(SIT, up=True, link_type=1, ipv4_address=True)},
+                   routes=DEFAULT_ROUTE.format(dev="eth0"))
+    diag = worker.collect_diagnostics()
+    assert diag.usable_routes_v4 == 1 and [i.usable_routes_v4 for i in diag.interfaces] == [0, 1]
+    assert not any(worker.verify_network_isolation()[k] for k in ("net_loopback_only", "net_ipv4_no_route"))
+
+
+def test_diagnostics_enumeration_failure(monkeypatch):
+    def broken():
+        raise OSError(errno.EPERM, "denied")
+
+    fake_namespace(monkeypatch, broken)
+    diag = worker.collect_diagnostics()
+    assert (diag.enumeration_error, diag.enumeration_errno, diag.interface_count, diag.interfaces) == \
+        ("PermissionError", "EPERM", 0, [])
+    assert not any(worker.verify_network_isolation().values())
+
+
+def test_diagnostics_sanitise_and_bound_malformed_interface_data(monkeypatch):
+    pairs = [("7", "bad\nname"), (-5, "x" * 40), (3, ""), (4, "a b/../c")] + [(10 + i, f"if{i}") for i in range(30)]
+    fake_namespace(monkeypatch, lambda: pairs)
+    monkeypatch.setattr(worker, "_interface_state", lambda name: {"error": "ENODEV"})
+    diag = worker.collect_diagnostics()
+    assert diag.collection_error is None and diag.interface_count == 34 and len(diag.interfaces) == 16
+    assert [(i.index, i.name) for i in diag.interfaces[:4]] == [(-1, "bad?name"), (-1, "x" * 15), (3, "?"),
+                                                              (4, "a?b?..?c")]
+
+
+def test_diagnostics_faults_never_break_a_scan():
+    def crash():
+        raise RuntimeError("injected")
+
+    assert worker.collect_diagnostics(crash).collection_error == "RuntimeError"
+    # Values that escape sanitisation are rejected as a whole, not passed on to the log.
+    junk = {"interfaces": [{"index": 1, "name": "lo\nFAKE LOG LINE"}]}
+    assert worker.collect_diagnostics(lambda: junk).collection_error == "ValidationError"
+
+
+def test_worker_report_rejects_injected_diagnostics():
+    report = {"scanners": [], "findings": [], "diagnostics": {"interfaces": [{"index": 1, "name": "a\nb"}]}}
+    with pytest.raises(ValidationError):
+        WorkerReport.model_validate(report)
+    with pytest.raises(ValidationError):
+        WorkerReport.model_validate({"scanners": [], "findings": [], "diagnostics": {"secret": "x"}})
+
+
+def test_diagnostics_are_off_unless_configured(monkeypatch):
+    assert "--net-diagnostics" not in worker.command()
+    monkeypatch.setattr(worker, "NET_DIAGNOSTICS", True)
+    assert worker.command()[-1] == "--net-diagnostics"
+
+
+# The real worker in a fresh interpreter, with an extra interface injected into its namespace view.
+EXTRA_INTERFACE_WORKER = """import os, socket, sys
+import app.worker as w
+real_enter = w._network_namespace
+w.POSIX = True
+w._network_namespace = lambda: (os.name == "posix" and real_enter()) or True
+real = socket.if_nameindex if hasattr(socket, "if_nameindex") else (lambda: [(1, "lo")])
+socket.if_nameindex = lambda: [p for p in real() if p[1] == "lo"] + [(99, "sit0")]
+w._interface_state = lambda name: {"up": False, "loopback": name == "lo"}
+sys.exit(w.main(["--require-isolation", "--net-diagnostics"]))"""
+
+
+def test_strict_mode_with_diagnostics_fails_closed_and_logs_only(monkeypatch, caplog):
+    cmd = [sys.executable, "-B", "-c", EXTRA_INTERFACE_WORKER]
+    monkeypatch.setattr(main, "run_scan", functools.partial(worker.run, cmd=cmd))
+    with caplog.at_level("WARNING", logger="app.main"):
+        r = post_scan(client, make_pdf())
+    body = r.json()
+    assert body["verdict"] == Verdict.UNABLE_TO_SCAN and body["findings"] == [] and not body["complete"]
+    assert body["isolation"]["net_loopback_only"] is False and body["isolation"]["network_verified"] is False
+    assert all("net_loopback_only" in s["error"] for s in body["scanners"])
+    assert "diagnostics" not in body and "sit0" not in r.text
+    lines = [m for m in caplog.messages if m.startswith("network diagnostics request_id=" + body["request_id"])]
+    assert len(lines) == 1 and '"name":"sit0"' in lines[0] and '"index":99' in lines[0]

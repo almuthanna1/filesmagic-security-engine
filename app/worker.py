@@ -18,6 +18,9 @@ before it reads a single byte of the document:
     and opening files for writing. This is an in-process guard against Python code paths,
     NOT an operating-system boundary: native code is not subject to it
 
+With SECURITY_ENGINE_NET_DIAGNOSTICS=1 (staging only) the worker also describes what its
+network namespace contains (`network_diagnostics`); the API logs that and never returns it.
+
 What actually got applied is reported per scan (`isolation`), and with
 SECURITY_ENGINE_REQUIRE_ISOLATION=1 the child refuses to analyse anything unless every
 control is in place. None of this is a complete sandbox: the child runs as the same
@@ -26,6 +29,7 @@ bypass the audit hook (see docs/malware-research-readiness.md).
 """
 
 import asyncio
+import errno
 import os
 import re
 import signal
@@ -39,7 +43,7 @@ from defusedxml.common import DefusedXmlException
 from pydantic import ValidationError
 from pypdf.errors import PdfReadError
 
-from app.models import ScannerStatus, WorkerReport
+from app.models import NetworkDiagnostics, ScannerStatus, WorkerReport
 from app.scanners.office import OfficeScanError
 from app.scanners.pdf import PdfScanError
 
@@ -54,6 +58,7 @@ CPU_SECONDS = 20
 # uses ~70 MiB, and MAX_CONCURRENT_SCANS workers can run at once.
 MEMORY_MB = int(os.environ.get("SECURITY_ENGINE_WORKER_MEMORY_MB", "320"))
 REQUIRE_ISOLATION = os.environ.get("SECURITY_ENGINE_REQUIRE_ISOLATION") == "1"
+NET_DIAGNOSTICS = os.environ.get("SECURITY_ENGINE_NET_DIAGNOSTICS") == "1"
 
 # Reported per scan. network_namespace: unshare() succeeded; network_verified: the checks in
 # NETWORK_CHECKS all passed inside it. With --require-isolation every value must be true.
@@ -64,6 +69,9 @@ ISOLATION_CONTROLS = ("process", "network_namespace", "network_verified", *NETWO
 TEST_NET_V4 = ("192.0.2.1", 9)
 TEST_NET_V6 = ("2001:db8::1", 9)
 RTF_UP, RTF_REJECT = 0x0001, 0x0200
+SIOCGIFFLAGS, SIOCGIFADDR, SIOCGIFHWADDR = 0x8913, 0x8915, 0x8927
+IFF_UP, IFF_LOOPBACK, IFF_RUNNING = 0x1, 0x8, 0x40
+MAX_DIAG_INTERFACES = 16
 
 
 class WorkerError(RuntimeError):
@@ -76,7 +84,7 @@ class WorkerError(RuntimeError):
 def command() -> list[str]:
     # -E/-s: ignore PYTHON* variables and user site-packages; -B: write no bytecode.
     cmd = [sys.executable, "-B", "-E", "-s", "-m", "app.worker"]
-    return cmd + ["--require-isolation"] if REQUIRE_ISOLATION else cmd
+    return cmd + ["--require-isolation"] * REQUIRE_ISOLATION + ["--net-diagnostics"] * NET_DIAGNOSTICS
 
 
 def child_env() -> dict[str, str]:
@@ -210,18 +218,22 @@ def _network_namespace() -> bool:
     return libc.unshare(clone_newuser | clone_newnet) == 0
 
 
-def usable_routes(text: str, flags_col: int, dev_col: int, header: bool) -> int:
-    """Count routes in /proc/net/route or /proc/net/ipv6_route text that could carry traffic
-    out: up, not a reject/unreachable entry, and not on the loopback device."""
-    count = 0
+def usable_route_devices(text: str, flags_col: int, dev_col: int, header: bool) -> list[str]:
+    """Devices of the routes in /proc/net/route or /proc/net/ipv6_route text that could carry
+    traffic out: up, not a reject/unreachable entry, and not on the loopback device."""
+    devices = []
     for line in text.splitlines()[1 if header else 0:]:
         fields = line.split()
         if len(fields) <= max(flags_col, dev_col):
             continue
         flags = int(fields[flags_col], 16)
         if flags & RTF_UP and not flags & RTF_REJECT and fields[dev_col] != "lo":
-            count += 1
-    return count
+            devices.append(fields[dev_col])
+    return devices
+
+
+def usable_routes(text: str, flags_col: int, dev_col: int, header: bool) -> int:
+    return len(usable_route_devices(text, flags_col, dev_col, header))
 
 
 def _read(path: str, missing_ok: bool = False) -> str:
@@ -267,6 +279,81 @@ def verify_network_isolation() -> dict[str, bool]:
     except (OSError, ValueError):
         pass  # anything unexpected leaves the remaining checks false: fail closed
     return checks
+
+
+def _errno_name(e: OSError) -> str:
+    return errno.errorcode.get(e.errno, "unknown") if isinstance(e.errno, int) else "none"
+
+
+def _interface_state(name: str) -> dict:
+    """Flags, link type and whether an IPv4 address is set, via SIOCGIF* ioctls on an AF_INET
+    socket: like /proc/net, these describe the calling process's network namespace (/sys does not)."""
+    import fcntl
+    import socket
+    import struct
+
+    req = struct.pack("16s24x", os.fsencode(name)[:15])
+    state = {}
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+        try:
+            flags = struct.unpack_from("H", fcntl.ioctl(s, SIOCGIFFLAGS, req), 16)[0]
+            state.update(up=bool(flags & IFF_UP), running=bool(flags & IFF_RUNNING),
+                         loopback=bool(flags & IFF_LOOPBACK))
+            state["link_type"] = struct.unpack_from("H", fcntl.ioctl(s, SIOCGIFHWADDR, req), 16)[0]  # ARPHRD_*
+            fcntl.ioctl(s, SIOCGIFADDR, req)
+            state["ipv4_address"] = True
+        except OSError as e:
+            if e.errno == errno.EADDRNOTAVAIL and "link_type" in state:
+                state["ipv4_address"] = False
+            else:
+                state["error"] = _errno_name(e)
+    return state
+
+
+def network_diagnostics() -> dict:
+    """Staging-only evidence for the network checks: what the worker's namespace contains.
+    Flags, counts and kernel error names only (no addresses); interface names sanitised; at
+    most MAX_DIAG_INTERFACES entries. Purely descriptive: never feeds the isolation result."""
+    import socket
+    from collections import Counter
+
+    diag = {}
+    try:
+        pairs = list(socket.if_nameindex())
+    except OSError as e:
+        diag.update(enumeration_error=type(e).__name__, enumeration_errno=_errno_name(e))
+        pairs = []
+    diag["interface_count"] = len(pairs)
+    routes, addr6 = {}, Counter()
+    try:
+        routes["v4"] = usable_route_devices(_read("/proc/net/route"), 3, 0, header=True)
+        routes["v6"] = usable_route_devices(_read("/proc/net/ipv6_route", missing_ok=True), 8, 9, header=False)
+        addr6.update(f[5] for f in map(str.split, _read("/proc/net/if_inet6", missing_ok=True).splitlines())
+                     if len(f) == 6)
+    except (OSError, ValueError) as e:
+        diag["proc_error"] = type(e).__name__
+    diag.update({f"usable_routes_{v}": len(routes[v]) for v in routes})
+    interfaces = []
+    for index, name in pairs[:MAX_DIAG_INTERFACES]:
+        entry = {"index": index if isinstance(index, int) and 0 <= index < 2**31 else -1,
+                 "name": re.sub(r"[^A-Za-z0-9_.:@-]", "?", str(name))[:15] or "?",
+                 "ipv6_addresses": addr6[name],
+                 **{f"usable_routes_{v}": routes[v].count(name) for v in routes}}
+        try:
+            entry.update(_interface_state(str(name)))
+        except (OSError, ValueError, TypeError) as e:
+            entry["error"] = type(e).__name__
+        interfaces.append(entry)
+    diag["interfaces"] = interfaces
+    return diag
+
+
+def collect_diagnostics(collect=None) -> NetworkDiagnostics:
+    """network_diagnostics() that can never break a scan: any fault becomes collection_error."""
+    try:
+        return NetworkDiagnostics.model_validate((collect or network_diagnostics)())
+    except Exception as e:
+        return NetworkDiagnostics(collection_error=type(e).__name__[:40])
 
 
 def network_isolation(enter=None, verify=None) -> dict[str, bool]:
@@ -326,6 +413,8 @@ def main(argv: list[str]) -> int:
     isolation = dict.fromkeys(ISOLATION_CONTROLS, False)
     isolation["process"] = True
     isolation.update(network_isolation())  # before the audit hook, which forbids sockets
+    # Inside the namespace only: outside it, this would describe the host's network.
+    diagnostics = collect_diagnostics() if "--net-diagnostics" in argv and isolation["network_namespace"] else None
     for scanner in SCANNERS:  # warm-up: lets YARA-X start its timeout thread before RLIMIT_NPROC
         try:
             scanner.scan("", b"")
@@ -349,6 +438,7 @@ def main(argv: list[str]) -> int:
         if len(data) > MAX_INPUT_BYTES:
             return 3
         report = analyse(SCANNERS, data, isolation)
+    report.diagnostics = diagnostics
     sys.stdout.buffer.write(report.model_dump_json().encode())
     sys.stdout.flush()
     return 0
