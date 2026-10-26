@@ -75,6 +75,7 @@ export default function ScanResultView({
         <div>
           <dt>Isolation</dt>
           <dd className={styles.mono}>
+            strict mode {result.isolation_required ? "required" : "not required"} ·{" "}
             {Object.entries(result.isolation).map(([k, v]) => `${k}=${v ? "yes" : "NO"}`).join(" ") || "not reported"}
           </dd>
         </div>

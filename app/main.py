@@ -6,6 +6,7 @@ import re
 import time
 import uuid
 from importlib import metadata
+from pathlib import Path
 from urllib.parse import unquote
 
 from fastapi import FastAPI, HTTPException, Request
@@ -54,10 +55,14 @@ def parse_cors_origins(value: str) -> list[str]:
     return origins
 
 
-def ruleset_hash() -> str:
+def ruleset_hash(rules_dir: Path = RULES_DIR) -> str:
+    """Version identifier of the rule set. Line endings are normalised (CRLF/CR -> LF) so a
+    Windows checkout and the Linux image report the same hash for identical rules; the rules
+    YARA-X compiles are not changed by this."""
     h = hashlib.sha256()
-    for path in sorted(RULES_DIR.glob("*.yar")):
-        h.update(path.name.encode() + b"\0" + path.read_bytes())
+    for path in sorted(rules_dir.glob("*.yar")):
+        text = path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+        h.update(path.name.encode() + b"\0" + text)
     return h.hexdigest()
 
 
@@ -228,5 +233,6 @@ async def scan_file(request: Request) -> ScanResult:
         complete=applicable > 0 and failed == 0,
         duration_ms=duration_ms,
         versions=VERSIONS,
+        isolation_required=worker.REQUIRE_ISOLATION,
         isolation=report.isolation,
     )

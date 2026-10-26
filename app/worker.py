@@ -8,7 +8,10 @@ before it reads a single byte of the document:
 
   - empty environment (no secrets, no config), cwd = application root, stderr discarded
   - Linux: new user + network namespace, so the process has no network interfaces
-    (needs unprivileged user namespaces; usually unavailable inside hosted containers)
+    (needs unprivileged user namespaces: available on the Render staging host, not inside
+    Docker's default seccomp profile). Inside it, the worker independently verifies through
+    OS interfaces that no outbound route exists (`verify_network_isolation`), without sending
+    any traffic
   - Linux: rlimits on CPU time, writable memory, file size (0: no file writes), open
     files, core dumps and process/thread creation
   - a Python audit hook that refuses sockets, process creation, native library loading
@@ -52,7 +55,15 @@ CPU_SECONDS = 20
 MEMORY_MB = int(os.environ.get("SECURITY_ENGINE_WORKER_MEMORY_MB", "320"))
 REQUIRE_ISOLATION = os.environ.get("SECURITY_ENGINE_REQUIRE_ISOLATION") == "1"
 
-ISOLATION_CONTROLS = ("process", "network_namespace", "rlimits", "audit_hook")
+# Reported per scan. network_namespace: unshare() succeeded; network_verified: the checks in
+# NETWORK_CHECKS all passed inside it. With --require-isolation every value must be true.
+NETWORK_CHECKS = ("net_loopback_only", "net_ipv4_no_route", "net_ipv6_no_route", "net_ipv4_unreachable",
+                  "net_ipv6_unreachable")
+ISOLATION_CONTROLS = ("process", "network_namespace", "network_verified", *NETWORK_CHECKS, "rlimits", "audit_hook")
+# Documentation-only addresses (RFC 5737, RFC 3849): never routed on the internet.
+TEST_NET_V4 = ("192.0.2.1", 9)
+TEST_NET_V6 = ("2001:db8::1", 9)
+RTF_UP, RTF_REJECT = 0x0001, 0x0200
 
 
 class WorkerError(RuntimeError):
@@ -199,6 +210,65 @@ def _network_namespace() -> bool:
     return libc.unshare(clone_newuser | clone_newnet) == 0
 
 
+def usable_routes(text: str, flags_col: int, dev_col: int, header: bool) -> int:
+    """Count routes in /proc/net/route or /proc/net/ipv6_route text that could carry traffic
+    out: up, not a reject/unreachable entry, and not on the loopback device."""
+    count = 0
+    for line in text.splitlines()[1 if header else 0:]:
+        fields = line.split()
+        if len(fields) <= max(flags_col, dev_col):
+            continue
+        flags = int(fields[flags_col], 16)
+        if flags & RTF_UP and not flags & RTF_REJECT and fields[dev_col] != "lo":
+            count += 1
+    return count
+
+
+def _read(path: str, missing_ok: bool = False) -> str:
+    try:
+        return Path(path).read_text()
+    except FileNotFoundError:
+        if missing_ok:  # IPv6 disabled in the kernel: there is no IPv6 routing table at all
+            return ""
+        raise  # a missing IPv4 table is unexpected: fail closed
+
+
+def _route_lookup_fails(family: int, address: tuple) -> bool:
+    """UDP connect() only selects a route and a source address; it never sends a datagram."""
+    import errno
+    import socket
+
+    try:
+        sock = socket.socket(family, socket.SOCK_DGRAM)
+    except OSError as e:
+        return family == socket.AF_INET6 and e.errno == errno.EAFNOSUPPORT  # IPv6 not available at all
+    with sock:
+        try:
+            sock.connect(address)
+        except OSError as e:
+            return e.errno in (errno.ENETUNREACH, errno.EHOSTUNREACH, errno.EADDRNOTAVAIL)
+    return False
+
+
+def verify_network_isolation() -> dict[str, bool]:
+    """Independent check, from inside the namespace, that there is no usable outbound route.
+    /proc/net/* and the interface list describe the calling process's network namespace. No
+    DNS lookups and no packets: only route lookups against documentation addresses."""
+    import socket
+
+    checks = dict.fromkeys(NETWORK_CHECKS, False)
+    try:
+        checks["net_loopback_only"] = {name for _, name in socket.if_nameindex()} <= {"lo"}
+        checks["net_ipv4_no_route"] = usable_routes(_read("/proc/net/route"), 3, 0, header=True) == 0
+        checks["net_ipv6_no_route"] = usable_routes(_read("/proc/net/ipv6_route", missing_ok=True), 8, 9,
+                                                    header=False) == 0
+        checks["net_ipv4_unreachable"] = _route_lookup_fails(socket.AF_INET, TEST_NET_V4)
+        checks["net_ipv6_unreachable"] = _route_lookup_fails(socket.AF_INET6, TEST_NET_V6)
+    except (OSError, ValueError):
+        pass  # anything unexpected leaves the remaining checks false: fail closed
+    return checks
+
+
 def _rlimits() -> None:
     import resource
 
@@ -241,6 +311,9 @@ def main(argv: list[str]) -> int:
         isolation["network_namespace"] = POSIX and _network_namespace()
     except (OSError, AttributeError):
         pass
+    if isolation["network_namespace"]:  # before the audit hook, which forbids sockets
+        isolation.update(verify_network_isolation())
+        isolation["network_verified"] = all(isolation[k] for k in NETWORK_CHECKS)
     for scanner in SCANNERS:  # warm-up: lets YARA-X start its timeout thread before RLIMIT_NPROC
         try:
             scanner.scan("", b"")

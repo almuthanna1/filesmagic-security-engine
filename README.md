@@ -295,7 +295,11 @@ platform allows, two kinds of control:
 
 - **Kernel-enforced (Linux):** rlimits (CPU 20 s, writable memory, no file writes, 32 open
   files, no new processes/threads, no core dumps) and, if unprivileged namespaces are
-  allowed, a new user + network namespace with no network interfaces.
+  allowed, a new user + network namespace with no network interfaces. Inside it the worker
+  independently verifies that no outbound route exists (only `lo`, no usable IPv4/IPv6
+  routes in `/proc/net`, route lookups to documentation addresses unreachable; no DNS and no
+  packets sent) and reports `network_verified`. Results also report `isolation_required`
+  (strict mode configured).
 - **In-process guard only:** a Python audit hook that refuses sockets, DNS, process
   creation, `ctypes` library loading and opening files for writing. It catches Python code
   paths in the parsers; it is **not** an operating-system security boundary, and native

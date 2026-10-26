@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { MAX_UPLOAD_BYTES, mintScanToken, NotConfiguredError, SESSION_COOKIE, validSession } from "@/lib/auth";
+import { MAX_UPLOAD_BYTES, mintScanToken, NotConfiguredError, SESSION_COOKIE, UPLOAD_TOO_LARGE, validSession } from "@/lib/auth";
 
 // Issues a token for one upload. Only the file's hash and size reach Vercel, never its contents:
 // the browser sends the file straight to the engine, which checks the token itself.
@@ -12,8 +12,11 @@ export async function POST(request: NextRequest) {
     const body = (await request.json().catch(() => null)) as { sha256?: unknown; size?: unknown } | null;
     const { sha256, size } = body ?? {};
     if (typeof sha256 !== "string" || !/^[0-9a-f]{64}$/.test(sha256) ||
-        typeof size !== "number" || !Number.isInteger(size) || size < 0 || size > MAX_UPLOAD_BYTES) {
+        typeof size !== "number" || !Number.isInteger(size) || size < 0) {
       return NextResponse.json({ detail: "Invalid file description." }, { status: 400, headers });
+    }
+    if (size > MAX_UPLOAD_BYTES) {
+      return NextResponse.json({ detail: UPLOAD_TOO_LARGE }, { status: 413, headers });
     }
     return NextResponse.json({ token: mintScanToken(sha256, size) }, { headers });
   } catch (e) {

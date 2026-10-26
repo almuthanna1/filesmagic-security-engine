@@ -72,8 +72,9 @@ def test_real_worker_scans_under_rlimits(data, expected):
     # Every scanner must still work with RLIMIT_NPROC=0, RLIMIT_DATA and no file writes in force.
     report = asyncio.run(worker.run(data))
     assert report.isolation["process"] and report.isolation["rlimits"] and report.isolation["audit_hook"]
-    if REQUIRED:  # CI enables namespaces, so the full worker must actually enter one
+    if REQUIRED:  # CI enables namespaces, so the full worker must actually enter one and verify it
         assert report.isolation["network_namespace"], "worker could not create its network namespace"
+        assert report.isolation["network_verified"], {k: report.isolation[k] for k in worker.NETWORK_CHECKS}
     assert all(s.status != "failed" for s in report.scanners), report.scanners
     assert sorted(f.rule_id for f in report.findings) == sorted(expected)
 
@@ -199,3 +200,30 @@ def test_timeout_leaves_no_worker_behind(tmp_path):
         asyncio.run(worker.run(b"x", cmd=fake("spawn-sleep", str(pid_file)), timeout=1))
     assert time.monotonic() - start < 5
     assert wait_dead(int(pid_file.read_text()))
+
+
+# --------------------------------------------------------------------- network isolation verification (Phase C5)
+
+
+NET_PROBE = """import json
+from app.worker import _network_namespace, verify_network_isolation
+entered = {enter}
+if entered and not _network_namespace():
+    print(json.dumps("unavailable"))
+else:
+    print(json.dumps(verify_network_isolation()))"""
+
+
+def test_network_verification_passes_inside_the_namespace():
+    out = json.loads(probe(NET_PROBE.format(enter=True)).stdout)
+    if out == "unavailable":
+        (pytest.fail if REQUIRED else pytest.skip)("unprivileged user/network namespaces are not available on this host")
+    assert all(out.values()), out
+
+
+def test_network_verification_detects_the_host_network():
+    # The runner's own namespace has real interfaces and routes, so the same checks must fail.
+    # Only route lookups against a documentation address are made: no packet is sent.
+    out = json.loads(probe(NET_PROBE.format(enter=False)).stdout)
+    assert not out["net_loopback_only"] and not out["net_ipv4_no_route"], out
+    assert not all(out.values())

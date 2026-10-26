@@ -38,6 +38,10 @@ export interface ScanResult {
   complete: boolean;
   duration_ms: number;
   versions: Record<string, string>;
+  // Configured: strict mode (the worker refuses to scan unless every isolation value is true).
+  isolation_required?: boolean;
+  // Reported by the worker: applied controls (e.g. network_namespace) and independently
+  // verified ones (network_verified and the net_* checks behind it).
   isolation: Record<string, boolean>;
 }
 
@@ -114,6 +118,8 @@ export async function logout(): Promise<void> {
 
 // Must match MAX_UPLOAD_BYTES in the engine (app/main.py) and lib/auth.ts.
 export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+// Same wording as the engine's HTTP 413 response.
+export const UPLOAD_TOO_LARGE = `File is too large. The maximum upload size is ${MAX_UPLOAD_BYTES / (1024 * 1024)} MB.`;
 
 async function scanToken(sha256: string, size: number): Promise<string> {
   const response = await fetch("/api/scan-token", {
@@ -140,7 +146,7 @@ export async function scanFile(file: File): Promise<ScanResult> {
     );
   }
   if (file.size > MAX_UPLOAD_BYTES) {
-    throw new ApiError(`File is too large. The maximum upload size is ${MAX_UPLOAD_BYTES / (1024 * 1024)} MB.`);
+    throw new ApiError(UPLOAD_TOO_LARGE);
   }
 
   const sha256 = await sha256Hex(file);

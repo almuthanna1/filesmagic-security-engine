@@ -42,6 +42,7 @@ interface EvaluationRecord {
   scanners: ScannerStatus[];
   errors: string[];
   versions: Record<string, string>;
+  isolation_required: boolean;
   isolation: Record<string, boolean>;
   message: string;
 }
@@ -73,6 +74,7 @@ function fromResult(r: ScanResult, filename: string, source: string, expected: E
     scanners: r.scanners,
     errors: r.scanners.filter((s) => s.error).map((s) => `${s.name} [${s.error_kind ?? "error"}]: ${s.error}`),
     versions: r.versions,
+    isolation_required: r.isolation_required ?? false,
     isolation: r.isolation,
     message: r.message,
   };
@@ -95,6 +97,7 @@ const CSV_COLUMNS: [string, (r: EvaluationRecord) => string | number | boolean |
   ["findings", (r) => r.findings.map((f) => `${f.scanner}:${f.rule_id ?? f.category}:${f.severity}`).join(";")],
   ["scanner_status", (r) => r.scanners.map((s) => `${s.name}=${s.status}`).join(";")],
   ["errors", (r) => r.errors.join(" | ")],
+  ["isolation_required", (r) => r.isolation_required ?? ""],
   ["isolation", (r) => Object.entries(r.isolation).map(([k, v]) => `${k}=${v}`).join(";")],
   ["engine_version", (r) => r.versions.engine ?? ""],
   ["ruleset_sha256", (r) => r.versions.ruleset_sha256 ?? ""],
@@ -206,6 +209,7 @@ export default function EvaluationPage() {
           scanners: [],
           errors: [reason],
           versions: {},
+          isolation_required: false,
           isolation: {},
           message: "",
         },

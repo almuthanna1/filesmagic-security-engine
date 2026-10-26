@@ -12,7 +12,7 @@ export const SESSION_COOKIE = "lab_session";
 const SESSION_SECONDS = 8 * 60 * 60;
 const TOKEN_SECONDS = 120;
 const AUDIENCE = "filesmagic-security-engine/scan"; // must match app/auth.py
-export { MAX_UPLOAD_BYTES } from "@/lib/api";
+export { MAX_UPLOAD_BYTES, UPLOAD_TOO_LARGE } from "@/lib/api";
 
 export class NotConfiguredError extends Error {}
 

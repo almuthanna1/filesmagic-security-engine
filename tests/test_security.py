@@ -1,8 +1,10 @@
 """Access control, worker isolation and resource limits. All inputs are inert fixtures."""
 
 import asyncio
+import errno
 import functools
 import hashlib
+import socket
 import subprocess
 import sys
 import time
@@ -329,3 +331,98 @@ def test_no_outbound_connections_during_scans(monkeypatch):
     monkeypatch.setattr(socket, "getaddrinfo", getaddrinfo)
     for data in (make_ooxml({}), make_pdf("/OpenAction << /S /URI /URI (https://filesmagic.example/x) >>"), DATA):
         assert post_scan(client, data).status_code == 200
+
+
+# --------------------------------------------------------------------- rule-set hash (Phase C5)
+
+
+def test_ruleset_hash_ignores_line_endings(tmp_path):
+    rules = b'rule a { condition: true }\nrule b { condition: false }\n'
+    hashes = []
+    for name, content in [("lf", rules), ("crlf", rules.replace(b"\n", b"\r\n")), ("cr", rules.replace(b"\n", b"\r"))]:
+        d = tmp_path / name
+        d.mkdir()
+        (d / "r.yar").write_bytes(content)
+        hashes.append(main.ruleset_hash(d))
+    assert len(set(hashes)) == 1
+    changed = tmp_path / "changed"
+    changed.mkdir()
+    (changed / "r.yar").write_bytes(rules.replace(b"true", b"false"))
+    assert main.ruleset_hash(changed) != hashes[0]
+
+
+# --------------------------------------------------------------------- network isolation verification (Phase C5)
+
+IPV4_ROUTES = """Iface\tDestination\tGateway \tFlags\tRefCnt\tUse\tMetric\tMask\t\tMTU\tWindow\tIRTT
+eth0\t00000000\t0100A8C0\t0003\t0\t0\t100\t00000000\t0\t0\t0
+eth0\t0000A8C0\t00000000\t0001\t0\t0\t100\t00FFFFFF\t0\t0\t0
+"""
+IPV6_ROUTES = """fe800000000000000000000000000000 40 00000000000000000000000000000000 00 00000000000000000000000000000000 00000100 00000001 00000000 00000001     eth0
+00000000000000000000000000000000 00 00000000000000000000000000000000 00 00000000000000000000000000000000 ffffffff 00000001 00000000 00200200       lo
+00000000000000000000000000000001 80 00000000000000000000000000000000 00 00000000000000000000000000000000 00000000 00000001 00000000 80200001       lo
+"""
+
+
+def test_usable_routes_counts_only_outbound_routes():
+    assert worker.usable_routes(IPV4_ROUTES, 3, 0, header=True) == 2
+    assert worker.usable_routes(IPV4_ROUTES.splitlines()[0], 3, 0, header=True) == 0  # header only
+    assert worker.usable_routes("", 3, 0, header=True) == 0
+    # IPv6: the eth0 route counts; the reject (unreachable) entry and the loopback route do not.
+    assert worker.usable_routes(IPV6_ROUTES, 8, 9, header=False) == 1
+    assert worker.usable_routes("\n".join(IPV6_ROUTES.splitlines()[1:]), 8, 9, header=False) == 0
+
+
+class FakeSocket:
+    def __init__(self, error=None):
+        self.error = error
+
+    def __call__(self, family, kind):
+        if isinstance(self.error, tuple) and self.error[0] == "create":
+            raise OSError(self.error[1], "fake")
+        return self
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def connect(self, address):
+        if isinstance(self.error, int):
+            raise OSError(self.error, "fake")
+
+
+@pytest.mark.parametrize("error, family, expected", [
+    (errno.ENETUNREACH, socket.AF_INET, True),
+    (errno.EHOSTUNREACH, socket.AF_INET, True),
+    (None, socket.AF_INET, False),  # a route exists
+    (errno.ECONNREFUSED, socket.AF_INET, False),  # anything else is not proof of isolation
+    (("create", errno.EAFNOSUPPORT), socket.AF_INET6, True),  # no IPv6 at all
+    (("create", errno.EAFNOSUPPORT), socket.AF_INET, False),
+])
+def test_route_lookup_check(monkeypatch, error, family, expected):
+    monkeypatch.setattr(socket, "socket", FakeSocket(error))
+    assert worker._route_lookup_fails(family, ("192.0.2.1", 9)) is expected
+
+
+def test_network_verification_fails_closed_on_unexpected_errors(monkeypatch):
+    def broken():
+        raise OSError("netlink unavailable")
+
+    monkeypatch.setattr(socket, "if_nameindex", broken)
+    checks = worker.verify_network_isolation()
+    assert set(checks) == set(worker.NETWORK_CHECKS) and not any(checks.values())
+
+
+def test_worker_reports_network_unverified_without_namespace():
+    report = asyncio.run(worker.run(DATA))
+    if report.isolation["network_namespace"]:
+        pytest.skip("this host provides a network namespace; covered by test_worker_linux.py")
+    assert report.isolation["network_verified"] is False
+    assert not any(report.isolation[k] for k in worker.NETWORK_CHECKS)
+
+
+def test_scan_result_reports_configured_strict_mode(monkeypatch):
+    assert post_scan(client, DATA).json()["isolation_required"] is False
+    monkeypatch.setattr(worker, "REQUIRE_ISOLATION", True)
+    assert post_scan(client, DATA).json()["isolation_required"] is True

@@ -46,7 +46,7 @@ class WorkerReport(BaseModel):
 
     scanners: list[ScannerStatus] = Field(max_length=20)
     findings: list[Finding] = Field(max_length=500)
-    isolation: dict[str, bool] = Field(default_factory=dict, max_length=10)
+    isolation: dict[str, bool] = Field(default_factory=dict, max_length=16)
     # Code locations only (file:line:function), for unexpected failures; logged, never returned.
     traces: dict[str, Annotated[str, Field(max_length=1000, pattern=r"^[A-Za-z0-9_.:<> -]*$")]] = Field(default_factory=dict, max_length=20)
 
@@ -64,4 +64,7 @@ class ScanResult(BaseModel):
     complete: bool = Field(default=False, description="Every applicable scanner completed its analysis.")
     duration_ms: float = 0
     versions: dict[str, str] = Field(default_factory=dict)
-    isolation: dict[str, bool] = Field(default_factory=dict, description="Containment controls applied to the worker.")
+    isolation_required: bool = Field(default=False, description="Configured: SECURITY_ENGINE_REQUIRE_ISOLATION=1, "
+                                     "so the worker refuses to scan unless every isolation value is true.")
+    isolation: dict[str, bool] = Field(default_factory=dict, description="Reported by the worker: controls applied "
+                                       "(e.g. network_namespace) and independently verified (network_verified, net_*).")
