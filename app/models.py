@@ -100,6 +100,10 @@ class ScanResult(BaseModel):
     duration_ms: float = 0
     versions: dict[str, str] = Field(default_factory=dict)
     isolation_required: bool = Field(default=False, description="Configured: SECURITY_ENGINE_REQUIRE_ISOLATION=1, "
-                                     "so the worker refuses to scan unless every isolation value is true.")
+                                     "so the worker refuses to scan unless every required isolation value is true.")
     isolation: dict[str, bool] = Field(default_factory=dict, description="Reported by the worker: controls applied "
-                                       "(e.g. network_namespace) and independently verified (network_verified, net_*).")
+                                       "(e.g. network_namespace) and independently verified (network_verified, net_*). "
+                                       "net_loopback_only / net_fallback_tunnel_inert describe the interfaces found; "
+                                       "exactly one is true when net_interfaces_safe is.")
+    isolation_missing: list[str] = Field(default_factory=list, description="Required isolation values that are not "
+                                         "true. Strict mode analyses a file only when this is empty.")

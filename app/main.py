@@ -238,4 +238,5 @@ async def scan_file(request: Request) -> ScanResult:
         versions=VERSIONS,
         isolation_required=worker.REQUIRE_ISOLATION,
         isolation=report.isolation,
+        isolation_missing=worker.missing_controls(report.isolation),
     )

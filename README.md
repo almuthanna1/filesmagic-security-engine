@@ -295,18 +295,22 @@ platform allows, two kinds of control:
 
 - **Kernel-enforced (Linux):** rlimits (CPU 20 s, writable memory, no file writes, 32 open
   files, no new processes/threads, no core dumps) and, if unprivileged namespaces are
-  allowed, a new user + network namespace with no network interfaces. Inside it the worker
-  independently verifies that no outbound route exists (only `lo`, no usable IPv4/IPv6
-  routes in `/proc/net`, route lookups to documentation addresses unreachable; no DNS and no
-  packets sent) and reports `network_verified`. Results also report `isolation_required`
-  (strict mode configured).
+  allowed, a new user + network namespace with no usable network interface. Inside it the
+  worker independently verifies that no outbound route exists (only `lo`, or `lo` plus the
+  kernel's inert `tunl0` fallback device, checked field by field; no usable IPv4/IPv6 routes
+  in `/proc/net`; route lookups to documentation addresses unreachable; no DNS and no packets
+  sent) and reports `network_verified`. It then drops every Linux capability for good
+  (`capabilities_dropped`: empty capability sets including the bounding and ambient sets,
+  `no_new_privs`, locked securebits, confirmed through `/proc/self/status`), so it can no
+  longer reconfigure its namespace. Results also report `isolation_required` (strict mode
+  configured) and `isolation_missing` (required values that are not true).
 - **In-process guard only:** a Python audit hook that refuses sockets, DNS, process
   creation, `ctypes` library loading and opening files for writing. It catches Python code
   paths in the parsers; it is **not** an operating-system security boundary, and native
   code (or a memory-corruption exploit) is not subject to it.
 
 Each result reports which controls were actually applied (`isolation`). With
-`SECURITY_ENGINE_REQUIRE_ISOLATION=1` a worker refuses to analyse anything unless all of
+`SECURITY_ENGINE_REQUIRE_ISOLATION=1` a worker refuses to analyse anything unless every required one of
 them are in place. The kernel controls are exercised by `tests/test_worker_linux.py`
 (Linux only; CI in `.github/workflows/security-engine-tests.yml`, where they may not skip).
 

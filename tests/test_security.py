@@ -275,7 +275,7 @@ def test_isolation_can_be_required(monkeypatch):
     # anything (e.g. on Windows, or a host without namespaces). Both outcomes are asserted.
     monkeypatch.setattr(worker, "REQUIRE_ISOLATION", True)
     report = asyncio.run(worker.run(make_pdf("/OpenAction << /S /Launch /F (calc.exe) >>")))
-    if all(report.isolation.values()):
+    if not worker.missing_controls(report.isolation):
         assert all(s.status != "failed" for s in report.scanners)
         assert {f.rule_id for f in report.findings} == {"PDF_Launch_Action", "PDF_LAUNCH_ACTION"}
     else:
@@ -415,7 +415,10 @@ def test_network_verification_fails_closed_on_unexpected_errors(monkeypatch):
     assert set(checks) == set(worker.NETWORK_CHECKS) and not any(checks.values())
 
 
-ALL_PASS = dict.fromkeys(worker.NETWORK_CHECKS, True)
+# The two valid interface states: only loopback, or loopback plus the inert fallback tunnel.
+LOOPBACK = dict.fromkeys(worker.NETWORK_CHECKS, True) | {"net_fallback_tunnel_inert": False}
+TUNNEL = dict.fromkeys(worker.NETWORK_CHECKS, True) | {"net_loopback_only": False}
+STATES = pytest.mark.parametrize("state", [LOOPBACK, TUNNEL], ids=["loopback-only", "fallback-tunnel"])
 
 
 def test_network_isolation_without_namespace_reports_everything_missing():
@@ -424,35 +427,54 @@ def test_network_isolation_without_namespace_reports_everything_missing():
 
     for enter in (lambda: False, lambda: (_ for _ in ()).throw(OSError("unshare denied"))):
         result = worker.network_isolation(enter=enter, verify=must_not_run)
-        assert result == {"network_namespace": False, "network_verified": False, **dict.fromkeys(worker.NETWORK_CHECKS, False)}
+        assert result == {"network_namespace": False, "network_verified": False, "net_interfaces_safe": False,
+                          **dict.fromkeys(worker.NETWORK_CHECKS, False)}
 
 
-def test_network_isolation_with_verified_namespace():
-    result = worker.network_isolation(enter=lambda: True, verify=lambda: dict(ALL_PASS))
-    assert result["network_namespace"] and result["network_verified"]
-    assert all(result[k] for k in worker.NETWORK_CHECKS)
+@STATES
+def test_network_isolation_with_verified_namespace(state):
+    result = worker.network_isolation(enter=lambda: True, verify=lambda: dict(state))
+    assert result["network_namespace"] and result["net_interfaces_safe"] and result["network_verified"]
+    assert {k: result[k] for k in worker.NETWORK_CHECKS} == state  # reported as found, never rewritten
 
 
-@pytest.mark.parametrize("failed", worker.NETWORK_CHECKS)
-def test_network_isolation_one_failed_check_is_not_verified(failed):
-    checks = dict(ALL_PASS, **{failed: False})
+@pytest.mark.parametrize("both", [True, False])
+def test_network_isolation_needs_exactly_one_interface_state(both):
+    # Neither state (e.g. an unknown interface) fails; both at once is contradictory and fails too.
+    checks = dict(LOOPBACK, net_loopback_only=both, net_fallback_tunnel_inert=both)
     result = worker.network_isolation(enter=lambda: True, verify=lambda: checks)
-    assert result["network_namespace"] is True and result["network_verified"] is False
-    assert result[failed] is False and sum(not result[k] for k in worker.NETWORK_CHECKS) == 1
+    assert result["net_interfaces_safe"] is False and result["network_verified"] is False
+    assert all(result[k] for k in worker.ROUTE_CHECKS)
+
+
+@STATES
+@pytest.mark.parametrize("failed", worker.ROUTE_CHECKS)
+def test_network_isolation_one_failed_route_check_is_not_verified(state, failed):
+    checks = dict(state, **{failed: False})
+    result = worker.network_isolation(enter=lambda: True, verify=lambda: checks)
+    assert result["network_namespace"] is True and result["net_interfaces_safe"] is True
+    assert result["network_verified"] is False
+    assert result[failed] is False and sum(not result[k] for k in worker.ROUTE_CHECKS) == 1
 
 
 def test_network_isolation_only_literal_true_counts():
     # Missing or non-boolean check values are failures, never passes.
     result = worker.network_isolation(enter=lambda: True, verify=lambda: {"net_loopback_only": 1})
-    assert result["network_verified"] is False and not any(result[k] for k in worker.NETWORK_CHECKS)
+    assert result["network_verified"] is False and result["net_interfaces_safe"] is False
+    assert not any(result[k] for k in worker.NETWORK_CHECKS)
 
 
 def test_real_worker_network_report_is_consistent():
-    # Holds on every host: verified exactly when all checks pass, and no check passes without a namespace.
+    # Holds on every host: verified exactly when the interfaces are safe and every route check
+    # passes, the interface state is never both, and no check passes without a namespace.
     iso = asyncio.run(worker.run(DATA)).isolation
-    assert iso["network_verified"] == all(iso[k] for k in worker.NETWORK_CHECKS)
-    if not iso["network_namespace"]:
-        assert not iso["network_verified"] and not any(iso[k] for k in worker.NETWORK_CHECKS)
+    assert set(iso) == set(worker.ISOLATION_CONTROLS)
+    assert iso["network_verified"] == (iso["net_interfaces_safe"] and all(iso[k] for k in worker.ROUTE_CHECKS))
+    if iso["network_namespace"]:
+        assert iso["net_interfaces_safe"] == (iso["net_loopback_only"] != iso["net_fallback_tunnel_inert"])
+    else:
+        assert not iso["network_verified"] and not iso["net_interfaces_safe"]
+        assert not any(iso[k] for k in worker.NETWORK_CHECKS)
 
 
 def test_scan_result_reports_configured_strict_mode(monkeypatch):
@@ -470,15 +492,27 @@ LO = {"up": False, "running": False, "loopback": True, "link_type": 772, "ipv4_a
 SIT = {"up": False, "running": False, "loopback": False, "link_type": 776, "ipv4_address": False}
 
 
-def fake_namespace(monkeypatch, interfaces, routes=""):
-    """A namespace described by {name: ioctl state}; nothing real is queried."""
+def fake_namespace(monkeypatch, interfaces, routes="", if_inet6="", names=None, dev=None):
+    """A namespace described by {name: ioctl state}; nothing real is queried. names overrides the
+    interface list and dev the /proc/net/dev names (None as a file: it cannot be read)."""
     if callable(interfaces):
         monkeypatch.setattr(socket, "if_nameindex", interfaces)
+        names = []
     else:
-        monkeypatch.setattr(socket, "if_nameindex", lambda: [(i + 1, n) for i, n in enumerate(interfaces)])
+        names = list(interfaces) if names is None else names
+        monkeypatch.setattr(socket, "if_nameindex", lambda: [(i + 1, n) for i, n in enumerate(names)])
         monkeypatch.setattr(worker, "_interface_state", lambda name: dict(interfaces[name]))
-    files = {"/proc/net/route": ROUTE_HEADER + routes, "/proc/net/ipv6_route": "", "/proc/net/if_inet6": ""}
-    monkeypatch.setattr(worker, "_read", lambda path, missing_ok=False: files[path])
+    dev_text = None if dev == "unreadable" else "Inter-|\n face |\n" + "".join(
+        f"  {n}: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n" for n in (names if dev is None else dev))
+    files = {"/proc/net/route": ROUTE_HEADER + routes, "/proc/net/ipv6_route": "", "/proc/net/if_inet6": if_inet6,
+             "/proc/net/dev": dev_text}
+
+    def read(path, missing_ok=False):
+        if files[path] is None:
+            raise FileNotFoundError(path)
+        return files[path]
+
+    monkeypatch.setattr(worker, "_read", read)
     monkeypatch.setattr(worker, "_route_lookup_fails", lambda family, address: not routes)
 
 
@@ -574,7 +608,139 @@ def test_strict_mode_with_diagnostics_fails_closed_and_logs_only(monkeypatch, ca
     body = r.json()
     assert body["verdict"] == Verdict.UNABLE_TO_SCAN and body["findings"] == [] and not body["complete"]
     assert body["isolation"]["net_loopback_only"] is False and body["isolation"]["network_verified"] is False
-    assert all("net_loopback_only" in s["error"] for s in body["scanners"])
+    assert all("net_interfaces_safe" in s["error"] for s in body["scanners"])
+    assert body["isolation"]["net_fallback_tunnel_inert"] is False and "net_interfaces_safe" in body["isolation_missing"]
     assert "diagnostics" not in body and "sit0" not in r.text
     lines = [m for m in caplog.messages if m.startswith("network diagnostics request_id=" + body["request_id"])]
     assert len(lines) == 1 and '"name":"sit0"' in lines[0] and '"index":99' in lines[0]
+
+
+# --------------------------------------------------------------------- interface policy (Phase C7C)
+
+
+TUNL0 = {"up": False, "running": False, "loopback": False, "link_type": 768, "ipv4_address": False}  # as on Render
+
+
+def isolation_of(monkeypatch, interfaces, **kw):
+    fake_namespace(monkeypatch, interfaces, **kw)
+    return worker.network_isolation(enter=lambda: True)
+
+
+def test_policy_accepts_loopback_only(monkeypatch):
+    result = isolation_of(monkeypatch, {"lo": LO})
+    assert result["net_loopback_only"] is True and result["net_fallback_tunnel_inert"] is False
+    assert result["net_interfaces_safe"] is True and result["network_verified"] is True
+
+
+def test_policy_accepts_loopback_plus_inert_fallback_tunnel(monkeypatch):
+    result = isolation_of(monkeypatch, {"lo": LO, "tunl0": TUNL0})
+    # Truthful: the namespace is not loopback-only; it is the verified inert-tunnel state.
+    assert result["net_loopback_only"] is False and result["net_fallback_tunnel_inert"] is True
+    assert result["net_interfaces_safe"] is True and result["network_verified"] is True
+
+
+@pytest.mark.parametrize("interfaces, kw", [
+    ({"lo": LO, "eth0": dict(TUNL0, link_type=1)}, {}),  # unknown interface
+    ({"lo": LO, "sit0": SIT}, {}),  # another fallback tunnel: no general exemption
+    ({"lo": LO, "tunl1": TUNL0}, {}),  # similar name
+    ({"lo": LO, "tunl0": TUNL0, "sit0": SIT}, {}),  # an additional interface
+    ({"tunl0": TUNL0}, {}),  # no loopback
+    ({"lo": LO, "tunl0": dict(TUNL0, link_type=776)}, {}),  # wrong tunnel type
+    ({"lo": LO, "tunl0": dict(TUNL0, link_type=None)}, {}),
+    ({"lo": LO, "tunl0": dict(TUNL0, up=True)}, {}),
+    ({"lo": LO, "tunl0": dict(TUNL0, running=True)}, {}),
+    ({"lo": LO, "tunl0": dict(TUNL0, loopback=True)}, {}),
+    ({"lo": LO, "tunl0": dict(TUNL0, ipv4_address=True)}, {}),
+    ({"lo": LO, "tunl0": {k: v for k, v in TUNL0.items() if k != "ipv4_address"}}, {}),  # unknown address state
+    ({"lo": LO, "tunl0": dict(TUNL0, up=0)}, {}),  # malformed: not a boolean
+    ({"lo": LO, "tunl0": dict(TUNL0, error="EPERM")}, {}),  # kernel query error
+    ({"lo": dict(LO, loopback=False), "tunl0": TUNL0}, {}),  # contradictory loopback metadata
+    ({"lo": dict(LO, link_type=768), "tunl0": TUNL0}, {}),
+    ({"lo": dict(LO, error="ENODEV"), "tunl0": TUNL0}, {}),
+    ({"lo": LO, "tunl0": TUNL0}, {"if_inet6": "fe800000000000000000000000000001 02 40 20 80 tunl0\n"}),
+    ({"lo": LO, "tunl0": TUNL0}, {"if_inet6": "not an if_inet6 line\n"}),
+    ({"lo": LO, "tunl0": TUNL0}, {"routes": DEFAULT_ROUTE.format(dev="tunl0")}),
+    ({"lo": LO, "tunl0": TUNL0}, {"names": ["lo", "tunl0", "tunl0"]}),
+    ({"lo": LO, "tunl0": TUNL0}, {"dev": ["lo", "tunl0", "eth0"]}),  # /proc/net/dev disagrees
+    ({"lo": LO, "tunl0": TUNL0}, {"dev": "unreadable"}),
+], ids=["unknown", "sit0", "tunl1", "extra", "no-lo", "type-776", "type-missing", "up", "running", "loopback-flag",
+        "ipv4", "ipv4-unknown", "non-bool", "query-error", "lo-not-loopback", "lo-wrong-type", "lo-error", "ipv6",
+        "ipv6-malformed", "route", "duplicate", "dev-mismatch", "dev-unreadable"])
+def test_policy_rejects(monkeypatch, interfaces, kw):
+    result = isolation_of(monkeypatch, interfaces, **kw)
+    assert result["net_fallback_tunnel_inert"] is False and result["net_loopback_only"] is False
+    assert result["net_interfaces_safe"] is False and result["network_verified"] is False
+
+
+def test_policy_interface_query_failure_is_rejected(monkeypatch):
+    fake_namespace(monkeypatch, {"lo": LO, "tunl0": TUNL0})
+
+    def broken(name):
+        raise OSError(errno.ENODEV, "gone")
+
+    monkeypatch.setattr(worker, "_interface_state", broken)
+    result = worker.network_isolation(enter=lambda: True)
+    assert result["net_fallback_tunnel_inert"] is False and result["network_verified"] is False
+    assert all(result[k] for k in worker.ROUTE_CHECKS)  # the failure stays confined to the check it hit
+
+
+# --------------------------------------------------------------------- capability state (Phase C7C)
+
+
+ZERO = "0000000000000000"
+STATUS = ("Name:\tpython3\nThreads:\t1\nNoNewPrivs:\t1\n"
+          + "".join(f"{k}:\t{ZERO}\n" for k in worker.CAP_SETS))
+
+
+def test_capability_state_accepts_only_the_fully_dropped_state():
+    assert worker.capability_state_ok(STATUS, worker.SECUREBITS) is True
+    assert worker.capability_state_ok(STATUS, 0xFF) is True  # extra bits are fine
+
+
+@pytest.mark.parametrize("status, securebits", [
+    *[(STATUS.replace(f"{k}:\t{ZERO}", f"{k}:\t0000000000001000"), worker.SECUREBITS) for k in worker.CAP_SETS],
+    (STATUS.replace("NoNewPrivs:\t1", "NoNewPrivs:\t0"), worker.SECUREBITS),
+    (STATUS.replace("Threads:\t1", "Threads:\t2"), worker.SECUREBITS),  # other threads keep their capabilities
+    (STATUS.replace("CapAmb", "Missing"), worker.SECUREBITS),
+    (STATUS.replace(f"CapEff:\t{ZERO}", "CapEff:\tzz"), worker.SECUREBITS),
+    (STATUS, worker.SECUREBITS & ~0x02),  # SECBIT_NOROOT not locked
+    (STATUS, worker.SECUREBITS & ~0x80),  # ambient raise not locked off
+    (STATUS, -1),  # prctl(PR_GET_SECUREBITS) failed
+    ("", worker.SECUREBITS),
+])
+def test_capability_state_rejects(status, securebits):
+    assert worker.capability_state_ok(status, securebits) is False
+
+
+# --------------------------------------------------------------------- strict predicate, one control at a time
+
+
+# The real worker main() with each control's outcome forced; argv[1] names the one that fails.
+FORCED_WORKER = """import sys
+import app.worker as w
+off = sys.argv[1]
+network = dict.fromkeys(("network_namespace", "network_verified", "net_interfaces_safe", *w.ROUTE_CHECKS), True)
+network.update(net_loopback_only=True, net_fallback_tunnel_inert=False)
+w.network_isolation = lambda: dict(network, **({off: False} if off in network else {}))
+w.POSIX = True
+w.drop_capabilities = lambda: off != "capabilities_dropped"
+def rlimits():
+    if off == "rlimits":
+        raise OSError("refused")
+w._rlimits = rlimits
+sys.exit(w.main(["--require-isolation"]))"""
+FORCEABLE = [k for k in worker.REQUIRED_CONTROLS if k not in ("process", "audit_hook")]
+
+
+@pytest.mark.parametrize("off", [None, *FORCEABLE])
+def test_strict_mode_never_scans_without_a_required_control(monkeypatch, off):
+    cmd = [sys.executable, "-B", "-c", FORCED_WORKER, str(off)]
+    monkeypatch.setattr(main, "run_scan", functools.partial(worker.run, cmd=cmd))
+    body = post_scan(client, make_pdf()).json()
+    if off is None:  # the harness itself scans normally when everything holds
+        assert body["verdict"] == Verdict.SAFE and body["complete"] and body["isolation_missing"] == []
+    else:
+        assert body["verdict"] == Verdict.UNABLE_TO_SCAN and body["findings"] == [] and not body["complete"]
+        assert body["isolation_missing"] == [off] and body["isolation"][off] is False
+        assert all(s["error"] == f"required isolation unavailable: {off}" for s in body["scanners"])
+

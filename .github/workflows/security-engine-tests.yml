@@ -48,6 +48,16 @@ jobs:
       - run: test "$(id -u)" != 0 # rlimit tests need a non-root user (root ignores RLIMIT_NPROC)
       - run: pip install -r requirements-dev.txt
       - run: python -m pytest -q -rs -p no:cacheprovider
+      - name: Linux isolation tests with the kernel's tunl0 fallback device (as on Render)
+        # With the ipip module loaded, the kernel adds an inert tunl0 to every new network
+        # namespace, which is what the Render staging host does (Phase C7B). This reruns the
+        # Linux suite against that state on the throwaway runner; never done on Render.
+        env:
+          FM_EXPECT_FALLBACK_TUNNEL: "1"
+        run: |
+          sudo modprobe ipip
+          unshare --user --net cat /proc/net/dev | grep -q 'tunl0:'  # the Render condition is reproduced
+          python -m pytest -q -rs -p no:cacheprovider tests/test_worker_linux.py
 
   production-image:
     name: Production image (Docker, non-root, no network)

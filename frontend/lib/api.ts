@@ -38,11 +38,13 @@ export interface ScanResult {
   complete: boolean;
   duration_ms: number;
   versions: Record<string, string>;
-  // Configured: strict mode (the worker refuses to scan unless every isolation value is true).
+  // Configured: strict mode (the worker refuses to scan unless every required isolation value is true).
   isolation_required?: boolean;
   // Reported by the worker: applied controls (e.g. network_namespace) and independently
   // verified ones (network_verified and the net_* checks behind it).
   isolation: Record<string, boolean>;
+  // Required isolation values that are not true; strict mode analyses only when this is empty.
+  isolation_missing?: string[];
 }
 
 // Inlined at build time. Set it in frontend/.env.local (see .env.example).

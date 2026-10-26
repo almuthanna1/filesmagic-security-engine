@@ -7,11 +7,14 @@ process group. The child side (`main`) applies what containment the platform all
 before it reads a single byte of the document:
 
   - empty environment (no secrets, no config), cwd = application root, stderr discarded
-  - Linux: new user + network namespace, so the process has no network interfaces
+  - Linux: new user + network namespace, so the process has no usable network interface
     (needs unprivileged user namespaces: available on the Render staging host, not inside
     Docker's default seccomp profile). Inside it, the worker independently verifies through
     OS interfaces that no outbound route exists (`verify_network_isolation`), without sending
-    any traffic
+    any traffic. The only interface accepted besides `lo` is the kernel's inert IP-in-IP
+    fallback device `tunl0` (`fallback_tunnel_inert`)
+  - Linux: then every capability is dropped for good (`drop_capabilities`), so the worker can
+    no longer reconfigure its namespace's interfaces or routes, and exec cannot add privileges
   - Linux: rlimits on CPU time, writable memory, file size (0: no file writes), open
     files, core dumps and process/thread creation
   - a Python audit hook that refuses sockets, process creation, native library loading
@@ -60,17 +63,35 @@ MEMORY_MB = int(os.environ.get("SECURITY_ENGINE_WORKER_MEMORY_MB", "320"))
 REQUIRE_ISOLATION = os.environ.get("SECURITY_ENGINE_REQUIRE_ISOLATION") == "1"
 NET_DIAGNOSTICS = os.environ.get("SECURITY_ENGINE_NET_DIAGNOSTICS") == "1"
 
-# Reported per scan. network_namespace: unshare() succeeded; network_verified: the checks in
-# NETWORK_CHECKS all passed inside it. With --require-isolation every value must be true.
-NETWORK_CHECKS = ("net_loopback_only", "net_ipv4_no_route", "net_ipv6_no_route", "net_ipv4_unreachable",
-                  "net_ipv6_unreachable")
-ISOLATION_CONTROLS = ("process", "network_namespace", "network_verified", *NETWORK_CHECKS, "rlimits", "audit_hook")
+# Reported per scan. network_namespace: unshare() succeeded. Inside it, INTERFACE_CHECKS say
+# literally which state was found: only loopback, or loopback plus the kernel's inert IP-in-IP
+# fallback device (Render, docs/malware-research-readiness.md s. 13). net_interfaces_safe: exactly
+# one of the two holds. network_verified: net_interfaces_safe and every ROUTE_CHECKS check.
+INTERFACE_CHECKS = ("net_loopback_only", "net_fallback_tunnel_inert")
+ROUTE_CHECKS = ("net_ipv4_no_route", "net_ipv6_no_route", "net_ipv4_unreachable", "net_ipv6_unreachable")
+NETWORK_CHECKS = (*INTERFACE_CHECKS, *ROUTE_CHECKS)
+ISOLATION_CONTROLS = ("process", "network_namespace", "network_verified", "net_interfaces_safe", *NETWORK_CHECKS,
+                      "capabilities_dropped", "rlimits", "audit_hook")
+# With --require-isolation every one of these must be true. INTERFACE_CHECKS are reported as found
+# (one of them is false by design) and are required through net_interfaces_safe.
+REQUIRED_CONTROLS = tuple(k for k in ISOLATION_CONTROLS if k not in INTERFACE_CHECKS)
 # Documentation-only addresses (RFC 5737, RFC 3849): never routed on the internet.
 TEST_NET_V4 = ("192.0.2.1", 9)
 TEST_NET_V6 = ("2001:db8::1", 9)
 RTF_UP, RTF_REJECT = 0x0001, 0x0200
 SIOCGIFFLAGS, SIOCGIFADDR, SIOCGIFHWADDR = 0x8913, 0x8915, 0x8927
 IFF_UP, IFF_LOOPBACK, IFF_RUNNING = 0x1, 0x8, 0x40
+ARPHRD_TUNNEL, ARPHRD_LOOPBACK = 768, 772
+# Created by the kernel in every new network namespace while the host has the ipip module loaded
+# (unless net.core.fb_tunnels_only_for_init_net is set); it cannot be deleted from inside.
+FALLBACK_TUNNEL = "tunl0"
+PR_CAPBSET_DROP, PR_GET_SECUREBITS, PR_SET_SECUREBITS = 24, 27, 28
+PR_SET_NO_NEW_PRIVS, PR_CAP_AMBIENT, PR_CAP_AMBIENT_CLEAR_ALL = 38, 47, 4
+# SECBIT_NOROOT, SECBIT_NO_SETUID_FIXUP and SECBIT_NO_CAP_AMBIENT_RAISE, each locked, and
+# SECBIT_KEEP_CAPS locked off: no capabilities from root, setuid() or the ambient set, ever.
+SECUREBITS = 0x01 | 0x02 | 0x04 | 0x08 | 0x20 | 0x40 | 0x80
+LINUX_CAPABILITY_VERSION_3 = 0x20080522
+CAP_SETS = ("CapInh", "CapPrm", "CapEff", "CapBnd", "CapAmb")
 MAX_DIAG_INTERFACES = 16
 
 
@@ -262,15 +283,44 @@ def _route_lookup_fails(family: int, address: tuple) -> bool:
     return False
 
 
+def missing_controls(isolation: dict) -> list[str]:
+    """Required controls that are not literally true. Strict mode scans only if this is empty."""
+    return [k for k in REQUIRED_CONTROLS if isolation.get(k) is not True]
+
+
+def fallback_tunnel_inert(names: list) -> bool:
+    """True only for exactly lo + tunl0, where tunl0 is the kernel's IP-in-IP fallback device and
+    unusable: link type ARPHRD_TUNNEL, down, not running, no IPv4 or IPv6 address and no usable
+    route, lo is a real loopback device, and /proc/net/dev lists the same two interfaces. Any
+    other interface, a missing, malformed or contradictory value, or a query error is False."""
+    if sorted(names) != ["lo", FALLBACK_TUNNEL]:
+        return False
+    dev = [line.split(":", 1)[0].strip() for line in _read("/proc/net/dev").splitlines()[2:]]
+    if sorted(dev) != ["lo", FALLBACK_TUNNEL]:
+        return False
+    addr6 = [line.split() for line in _read("/proc/net/if_inet6", missing_ok=True).splitlines() if line.strip()]
+    if any(len(f) != 6 for f in addr6):
+        return False
+    routes = (usable_route_devices(_read("/proc/net/route"), 3, 0, header=True)
+              + usable_route_devices(_read("/proc/net/ipv6_route", missing_ok=True), 8, 9, header=False))
+    lo, tun = _interface_state("lo"), _interface_state(FALLBACK_TUNNEL)
+    return ("error" not in lo and lo.get("loopback") is True and lo.get("link_type") == ARPHRD_LOOPBACK
+            and "error" not in tun and tun.get("link_type") == ARPHRD_TUNNEL
+            and all(tun.get(k) is False for k in ("up", "running", "loopback", "ipv4_address"))
+            and FALLBACK_TUNNEL not in (f[5] for f in addr6) and FALLBACK_TUNNEL not in routes)
+
+
 def verify_network_isolation() -> dict[str, bool]:
     """Independent check, from inside the namespace, that there is no usable outbound route.
-    /proc/net/* and the interface list describe the calling process's network namespace. No
-    DNS lookups and no packets: only route lookups against documentation addresses."""
+    /proc/net/*, the interface list and SIOCGIF* ioctls describe the calling process's network
+    namespace. No DNS lookups and no packets: only route lookups against documentation addresses."""
     import socket
 
     checks = dict.fromkeys(NETWORK_CHECKS, False)
+    names = None
     try:
-        checks["net_loopback_only"] = {name for _, name in socket.if_nameindex()} <= {"lo"}
+        names = [name for _, name in socket.if_nameindex()]
+        checks["net_loopback_only"] = set(names) <= {"lo"}
         checks["net_ipv4_no_route"] = usable_routes(_read("/proc/net/route"), 3, 0, header=True) == 0
         checks["net_ipv6_no_route"] = usable_routes(_read("/proc/net/ipv6_route", missing_ok=True), 8, 9,
                                                     header=False) == 0
@@ -278,6 +328,11 @@ def verify_network_isolation() -> dict[str, bool]:
         checks["net_ipv6_unreachable"] = _route_lookup_fails(socket.AF_INET6, TEST_NET_V6)
     except (OSError, ValueError):
         pass  # anything unexpected leaves the remaining checks false: fail closed
+    if names is not None:
+        try:
+            checks["net_fallback_tunnel_inert"] = fallback_tunnel_inert(names)
+        except (OSError, ValueError, TypeError):
+            pass
     return checks
 
 
@@ -358,11 +413,12 @@ def collect_diagnostics(collect=None) -> NetworkDiagnostics:
 
 def network_isolation(enter=None, verify=None) -> dict[str, bool]:
     """Enter a new network namespace and verify it. Returns network_namespace (entered),
-    network_verified (every NETWORK_CHECKS check passed inside it) and the checks themselves;
-    anything not established is False. enter/verify are injectable for tests only."""
+    net_interfaces_safe, network_verified and the checks themselves; anything not established
+    is False. enter/verify are injectable for tests only."""
     enter = enter or (lambda: POSIX and _network_namespace())
     verify = verify or verify_network_isolation
-    result = {"network_namespace": False, "network_verified": False, **dict.fromkeys(NETWORK_CHECKS, False)}
+    result = {"network_namespace": False, "network_verified": False, "net_interfaces_safe": False,
+              **dict.fromkeys(NETWORK_CHECKS, False)}
     try:
         result["network_namespace"] = bool(enter())
     except (OSError, AttributeError):
@@ -370,8 +426,45 @@ def network_isolation(enter=None, verify=None) -> dict[str, bool]:
     if result["network_namespace"]:
         checks = verify()
         result.update({k: checks.get(k) is True for k in NETWORK_CHECKS})
-        result["network_verified"] = all(result[k] for k in NETWORK_CHECKS)
+        # Exactly one interface state: both at once is contradictory, so it fails.
+        result["net_interfaces_safe"] = result["net_loopback_only"] != result["net_fallback_tunnel_inert"]
+        result["network_verified"] = result["net_interfaces_safe"] and all(result[k] for k in ROUTE_CHECKS)
     return result
+
+
+def capability_state_ok(status: str, securebits: int) -> bool:
+    """/proc/self/status of a single-threaded process holding no capability in any set, with
+    no_new_privs set, and the SECUREBITS locks in place. Missing or malformed values are False."""
+    try:
+        fields = {k: v.strip() for k, v in (line.split(":", 1) for line in status.splitlines() if ":" in line)}
+        return (all(int(fields[k], 16) == 0 for k in CAP_SETS) and fields["NoNewPrivs"] == "1"
+                and fields["Threads"] == "1" and securebits >= 0 and securebits & SECUREBITS == SECUREBITS)
+    except (KeyError, ValueError):
+        return False
+
+
+def drop_capabilities() -> bool:
+    """Give up every capability for good. In its user namespace the worker holds all of them,
+    including CAP_NET_ADMIN over its network namespace; afterwards it cannot change interfaces or
+    routes, regain a capability through capset(), the ambient or bounding set, setuid() or exec.
+    Securebits and the bounding set need CAP_SETPCAP, so they come before capset() empties the
+    rest. Capabilities are per thread: this must run while the worker is single-threaded, so
+    every later thread inherits the empty sets. True only if the kernel reports that state."""
+    import ctypes
+
+    libc = ctypes.CDLL(None, use_errno=True)
+
+    def prctl(option: int, arg: int = 0) -> int:
+        return libc.prctl(option, ctypes.c_ulong(arg), ctypes.c_ulong(0), ctypes.c_ulong(0), ctypes.c_ulong(0))
+
+    prctl(PR_SET_NO_NEW_PRIVS, 1)  # exec can never add privileges (setuid bits, file capabilities)
+    prctl(PR_SET_SECUREBITS, SECUREBITS)
+    for cap in range(64):  # numbers above the kernel's last capability fail harmlessly
+        prctl(PR_CAPBSET_DROP, cap)
+    prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_CLEAR_ALL)
+    header = (ctypes.c_uint32 * 2)(LINUX_CAPABILITY_VERSION_3, 0)
+    libc.capset(header, (ctypes.c_uint32 * 6)())  # effective, permitted, inheritable: all empty
+    return capability_state_ok(Path("/proc/self/status").read_text(), prctl(PR_GET_SECUREBITS))
 
 
 def _rlimits() -> None:
@@ -415,6 +508,10 @@ def main(argv: list[str]) -> int:
     isolation.update(network_isolation())  # before the audit hook, which forbids sockets
     # Inside the namespace only: outside it, this would describe the host's network.
     diagnostics = collect_diagnostics() if "--net-diagnostics" in argv and isolation["network_namespace"] else None
+    try:  # still single-threaded here, and before the audit hook, which forbids ctypes
+        isolation["capabilities_dropped"] = POSIX and drop_capabilities()
+    except (OSError, AttributeError, TypeError):  # no prctl/capset here: stays False
+        pass
     for scanner in SCANNERS:  # warm-up: lets YARA-X start its timeout thread before RLIMIT_NPROC
         try:
             scanner.scan("", b"")
@@ -428,8 +525,7 @@ def main(argv: list[str]) -> int:
     sys.addaudithook(_audit_hook)  # cannot be removed once installed
     isolation["audit_hook"] = True
 
-    if "--require-isolation" in argv and not all(isolation.values()):
-        missing = ", ".join(k for k, v in isolation.items() if not v)
+    if "--require-isolation" in argv and (missing := ", ".join(missing_controls(isolation))):
         statuses = [ScannerStatus(name=s.name, status="failed", error=f"required isolation unavailable: {missing}")
                     for s in SCANNERS]
         report = WorkerReport(scanners=statuses, findings=[], isolation=isolation)

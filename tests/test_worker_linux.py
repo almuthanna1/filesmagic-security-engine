@@ -30,6 +30,9 @@ from tests.pdf_fixtures import make_pdf
 from tests.scan_client import post_scan
 
 REQUIRED = os.environ.get("FM_REQUIRE_LINUX_TESTS") == "1"
+# Set in CI for a second run with the ipip module loaded, so that every new network namespace
+# gets the kernel's tunl0 fallback device, as on the Render staging host.
+TUNNEL_EXPECTED = os.environ.get("FM_EXPECT_FALLBACK_TUNNEL") == "1"
 pytestmark = pytest.mark.skipif(sys.platform != "linux" and not REQUIRED, reason="Linux-only operating-system controls")
 
 client = TestClient(main.app)
@@ -69,12 +72,16 @@ def wait_dead(pid: int, seconds: float = 5) -> bool:
      ["OFFICE_EXTERNAL_DANGEROUS_SCHEME"]),
 ])
 def test_real_worker_scans_under_rlimits(data, expected):
-    # Every scanner must still work with RLIMIT_NPROC=0, RLIMIT_DATA and no file writes in force.
-    report = asyncio.run(worker.run(data))
+    # Every scanner must still work with RLIMIT_NPROC=0, RLIMIT_DATA, no file writes and no
+    # capabilities in force. In CI the worker runs in strict mode with every control in place.
+    report = asyncio.run(worker.run(data, cmd=[*worker.command(), "--require-isolation"] if REQUIRED else None))
     assert report.isolation["process"] and report.isolation["rlimits"] and report.isolation["audit_hook"]
     if REQUIRED:  # CI enables namespaces, so the full worker must actually enter one and verify it
         assert report.isolation["network_namespace"], "worker could not create its network namespace"
         assert report.isolation["network_verified"], {k: report.isolation[k] for k in worker.NETWORK_CHECKS}
+        assert report.isolation["capabilities_dropped"], "worker could not drop its capabilities"
+        assert worker.missing_controls(report.isolation) == [], report.isolation
+        assert report.isolation["net_fallback_tunnel_inert"] is TUNNEL_EXPECTED, report.isolation
     assert all(s.status != "failed" for s in report.scanners), report.scanners
     assert sorted(f.rule_id for f in report.findings) == sorted(expected)
 
@@ -218,7 +225,10 @@ def test_network_verification_passes_inside_the_namespace():
     out = json.loads(probe(NET_PROBE.format(enter=True)).stdout)
     if out == "unavailable":
         (pytest.fail if REQUIRED else pytest.skip)("unprivileged user/network namespaces are not available on this host")
-    assert all(out.values()), out
+    assert all(out[k] for k in worker.ROUTE_CHECKS), out
+    assert out["net_loopback_only"] != out["net_fallback_tunnel_inert"], out  # exactly one safe interface state
+    if TUNNEL_EXPECTED:
+        assert out["net_fallback_tunnel_inert"] is True and out["net_loopback_only"] is False, out
 
 
 def test_network_verification_detects_the_host_network():
@@ -226,6 +236,7 @@ def test_network_verification_detects_the_host_network():
     # Only route lookups against a documentation address are made: no packet is sent.
     out = json.loads(probe(NET_PROBE.format(enter=False)).stdout)
     assert not out["net_loopback_only"] and not out["net_ipv4_no_route"], out
+    assert not out["net_fallback_tunnel_inert"], out
     assert not all(out.values())
 
 
@@ -248,7 +259,14 @@ def faulty():
     checks = dict.fromkeys(w.NETWORK_CHECKS, True)
     checks["net_ipv4_unreachable"] = False
     return checks
-w.verify_network_isolation = faulty
+def no_capabilities():
+    if mode == "caps-raise":
+        raise PermissionError("injected capability fault")
+    return False
+if mode in ("fail", "raise"):
+    w.verify_network_isolation = faulty
+else:
+    w.drop_capabilities = no_capabilities
 sys.exit(w.main(["--require-isolation"]))"""
 
 
@@ -294,15 +312,20 @@ else:
     print(collect_diagnostics().model_dump_json())"""
 
 
-def test_diagnostics_inside_the_namespace_show_only_loopback():
+def test_diagnostics_inside_the_namespace_show_only_expected_interfaces():
     out = json.loads(probe(DIAG_PROBE.format(enter=True)).stdout)
     if out == "unavailable":
         (pytest.fail if REQUIRED else pytest.skip)("unprivileged user/network namespaces are not available on this host")
     assert out["collection_error"] is None and out["enumeration_error"] is None and out["proc_error"] is None
-    assert [i["name"] for i in out["interfaces"]] == ["lo"], out
+    names = [i["name"] for i in out["interfaces"]]
+    assert names == ["lo", "tunl0"] if TUNNEL_EXPECTED else names == ["lo"], out
     lo = out["interfaces"][0]
     assert lo["loopback"] is True and lo["link_type"] == 772 and lo["error"] is None  # ARPHRD_LOOPBACK
     assert out["usable_routes_v4"] == 0 and out["usable_routes_v6"] == 0
+    if TUNNEL_EXPECTED:  # the kernel's own fallback device, in the state observed on Render
+        tun = out["interfaces"][1]
+        assert (tun["link_type"], tun["up"], tun["running"], tun["ipv4_address"], tun["ipv6_addresses"]) == \
+            (768, False, False, False, 0), out
 
 
 def test_diagnostics_read_real_interface_state_in_the_host_namespace():
@@ -320,3 +343,80 @@ def test_real_worker_returns_diagnostics_only_when_asked():
     report = asyncio.run(worker.run(make_pdf(), cmd=cmd + ["--net-diagnostics"]))
     assert report.diagnostics is not None and report.diagnostics.collection_error is None
     assert ([i.name for i in report.diagnostics.interfaces] == ["lo"]) == report.isolation["net_loopback_only"]
+
+
+# --------------------------------------------------------------------- strict mode without dropped capabilities
+
+
+@pytest.mark.parametrize("mode", ["caps-fail", "caps-raise"])
+def test_strict_mode_refuses_to_scan_without_dropped_capabilities(monkeypatch, mode):
+    report = asyncio.run(worker.run(make_pdf(), cmd=faulty_worker(mode)))
+    assert report.findings == [] and report.isolation["capabilities_dropped"] is False
+    assert all(s.status == "failed" and "capabilities_dropped" in s.error for s in report.scanners)
+    if REQUIRED:  # everything else is really in place, so the capabilities alone caused the refusal
+        assert worker.missing_controls(report.isolation) == ["capabilities_dropped"], report.isolation
+
+    monkeypatch.setattr(main, "run_scan", functools.partial(worker.run, cmd=faulty_worker(mode)))
+    body = post_scan(client, make_pdf()).json()
+    assert body["verdict"] == Verdict.UNABLE_TO_SCAN and body["findings"] == [] and not body["complete"]
+    assert "capabilities_dropped" in body["isolation_missing"]
+
+
+# --------------------------------------------------------------------- capabilities, checked in the kernel (Phase C7C)
+
+
+# Runs in its own throwaway user + network namespace, never the runner's: it brings that
+# namespace's lo up once (proving CAP_NET_ADMIN was really held), drops everything the way the
+# worker does, then tries every way back.
+CAP_PROBE = r"""import ctypes, errno, fcntl, json, socket, struct, subprocess, sys
+import app.worker as w
+if not w._network_namespace():
+    print(json.dumps("unavailable")); sys.exit()
+libc = ctypes.CDLL(None, use_errno=True)
+def err(ok):
+    return "ok" if ok else errno.errorcode.get(ctypes.get_errno(), "unknown")
+def set_lo_flags(flags):
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+        try:
+            fcntl.ioctl(s, 0x8914, struct.pack("16sh22x", b"lo", flags))  # SIOCSIFFLAGS
+            return "ok"
+        except OSError as e:
+            return errno.errorcode[e.errno]
+def status(text):
+    return {k: v.strip() for k, v in (l.split(":", 1) for l in text.splitlines() if l.startswith(("Cap", "NoNewPrivs")))}
+out = {"lo_up_before": set_lo_flags(w.IFF_UP)}
+out["dropped"] = w.drop_capabilities()
+out["status"] = status(open("/proc/self/status").read())
+out["securebits"] = libc.prctl(w.PR_GET_SECUREBITS, 0, 0, 0, 0)
+out["lo_down_after"] = set_lo_flags(0)
+net_admin = 1 << 12  # CAP_NET_ADMIN
+header = (ctypes.c_uint32 * 2)(w.LINUX_CAPABILITY_VERSION_3, 0)
+out["capset"] = err(libc.capset(header, (ctypes.c_uint32 * 6)(net_admin, net_admin, net_admin, 0, 0, 0)) == 0)
+out["ambient_raise"] = err(libc.prctl(w.PR_CAP_AMBIENT, 2, 12, 0, 0) == 0)  # PR_CAP_AMBIENT_RAISE
+out["bounding_has_net_admin"] = libc.prctl(23, 12, 0, 0, 0)  # PR_CAPBSET_READ
+out["securebits_unlock"] = err(libc.prctl(w.PR_SET_SECUREBITS, 0, 0, 0, 0) == 0)
+out["setuid_root"] = err(libc.setuid(0) == 0)
+child = subprocess.run([sys.executable, "-c", "print(open('/proc/self/status').read())"], capture_output=True, text=True)
+out["exec_status"] = status(child.stdout)
+# A nested user namespace grants capabilities only over namespaces it owns, not this one.
+out["nested_userns"] = err(libc.unshare(0x10000000) == 0)
+out["lo_down_nested"] = set_lo_flags(0)
+print(json.dumps(out))"""
+
+
+def test_capabilities_are_dropped_in_the_kernel_and_cannot_be_regained():
+    out = json.loads(probe(CAP_PROBE).stdout)
+    if out == "unavailable":
+        (pytest.fail if REQUIRED else pytest.skip)("unprivileged user/network namespaces are not available on this host")
+    assert out["lo_up_before"] == "ok", out  # CAP_NET_ADMIN was really held before the drop
+    assert out["dropped"] is True, out
+    assert {k: int(out["status"][k], 16) for k in worker.CAP_SETS} == dict.fromkeys(worker.CAP_SETS, 0), out
+    assert out["status"]["NoNewPrivs"] == "1" and out["securebits"] & worker.SECUREBITS == worker.SECUREBITS, out
+    assert out["lo_down_after"] == "EPERM", out  # the namespace can no longer be reconfigured
+    assert out["capset"] == "EPERM" and out["ambient_raise"] == "EPERM", out
+    assert out["bounding_has_net_admin"] == 0, out
+    assert out["securebits_unlock"] == "EPERM" and out["setuid_root"] == "EPERM", out
+    assert all(int(out["exec_status"][k], 16) == 0 for k in worker.CAP_SETS), out  # exec adds nothing
+    assert out["exec_status"]["NoNewPrivs"] == "1", out
+    assert out["lo_down_nested"] == "EPERM", out  # with or without a nested user namespace
+

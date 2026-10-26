@@ -76,6 +76,11 @@ export default function ScanResultView({
           <dt>Isolation</dt>
           <dd className={styles.mono}>
             strict mode {result.isolation_required ? "required" : "not required"} ·{" "}
+            {result.isolation_missing === undefined
+              ? ""
+              : result.isolation_missing.length
+                ? `missing: ${result.isolation_missing.join(", ")} · `
+                : "all required controls verified · "}
             {Object.entries(result.isolation).map(([k, v]) => `${k}=${v ? "yes" : "NO"}`).join(" ") || "not reported"}
           </dd>
         </div>
