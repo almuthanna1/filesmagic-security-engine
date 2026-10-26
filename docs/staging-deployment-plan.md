@@ -96,6 +96,12 @@ default sandbox, and Render runs Docker containers.
    environment "benign-only, strict isolation OFF (namespace unavailable)". This is never an
    acceptable configuration for genuine malware; strict mode is not bypassed for that purpose.
 
+**Outcome (Phases C3-C4):** the prediction above was wrong. On the Render Free staging
+instance the worker *can* create its network namespace: every scan reported `process`,
+`network_namespace`, `rlimits` and `audit_hook` as true, the strict-mode scan succeeded, and
+`SECURITY_ENGINE_REQUIRE_ISOLATION=1` stays enabled on staging. See
+`docs/phase-c4-test-results.md` and `docs/malware-research-readiness.md` Section 12.
+
 ### 2.5 Health monitoring
 
 - Render health check on `/health`; enable workspace notifications for failed deploys and
@@ -239,7 +245,7 @@ inert). `ENGINE` = `https://filesmagic-security-engine-staging.onrender.com`,
 | A6 | Benign DOCX | Scan on `/` and `/evaluation` (expected Benign) | SAFE, `complete: true`, duration shown, request ID shown, outcome "Correct / SAFE" |
 | A7 | Benign PDF | Same | SAFE |
 | A8 | Synthetic library | `LAB/test-files`: download all 16, scan each on `/evaluation` (dataset "synthetic-fixtures"; these are inert indicators, not malware) | 16/16 match the library's expected verdicts (as verified locally through the worker) |
-| A9 | Isolation reporting | Read the result's Isolation line | Record actual values; expected `network_namespace=NO` |
+| A9 | Isolation reporting | Read the result's Isolation line | Record actual values (planned expectation was `network_namespace=NO`; observed `yes`, see Phase C4 results) |
 | A10 | Strict mode | §2.4 steps 2-3 | `UNABLE_TO_SCAN`, "required isolation unavailable: network_namespace"; evidence exported |
 | A11 | Worker timeout | Set `SECURITY_ENGINE_WORKER_TIMEOUT_SECONDS=1`, redeploy, scan the DOCX; then restore `30` | `UNABLE_TO_SCAN`, scanners `error_kind: worker` "timed out after 1s"; `/health` still OK; one `scan worker failure` log line |
 | A12 | Malformed input | Scan fixture `16-corrupted-document.pdf` | `UNABLE_TO_SCAN`, pdf `error_kind: malformed_input`; WARNING log without filename |
@@ -307,7 +313,7 @@ Staging shares nothing with the live systems, so rollback never touches them.
 
 | Area | Status | Why |
 |------|--------|-----|
-| Network egress isolation | **BLOCKED** | No egress firewall on Render; the worker's network namespace is unavailable in Docker (CI) and expected unavailable on Render (A10 will confirm). Only a Python audit hook remains, which is not an OS boundary |
+| Network egress isolation | PARTIAL (updated after C4) | The worker's network namespace **is** applied on Render staging (runtime-reported; blocking verified in CI, not yet demonstrated on Render itself). The API process keeps network access and Render has no egress firewall. The Python audit hook remains an extra in-process guard, not an OS boundary |
 | Separation from production | PARTIAL | New workspace + region removes the private-network path; the same Render and GitHub accounts remain a shared administrative blast radius |
 | Runtime containment | **BLOCKED** | Worker shares the API's user and container; no separate UID, seccomp profile or VM-level sandbox on Render; rlimits only |
 | Render hosting authorization | **BLOCKED** | Render's Acceptable Use Policy prohibits transmitting malware; written permission required before any live sample is uploaded |
