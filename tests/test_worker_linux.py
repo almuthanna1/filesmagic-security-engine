@@ -415,7 +415,10 @@ def test_capabilities_are_dropped_in_the_kernel_and_cannot_be_regained():
     assert out["lo_down_after"] == "EPERM", out  # the namespace can no longer be reconfigured
     assert out["capset"] == "EPERM" and out["ambient_raise"] == "EPERM", out
     assert out["bounding_has_net_admin"] == 0, out
-    assert out["securebits_unlock"] == "EPERM" and out["setuid_root"] == "EPERM", out
+    assert out["securebits_unlock"] == "EPERM", out
+    # The worker's user namespace maps no IDs at all, so any setuid() is invalid before
+    # capabilities are even considered: no UID change is possible.
+    assert out["setuid_root"] == "EINVAL", out
     assert all(int(out["exec_status"][k], 16) == 0 for k in worker.CAP_SETS), out  # exec adds nothing
     assert out["exec_status"]["NoNewPrivs"] == "1", out
     assert out["lo_down_nested"] == "EPERM", out  # with or without a nested user namespace
