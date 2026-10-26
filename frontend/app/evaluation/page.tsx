@@ -2,6 +2,7 @@
 
 import { useId, useMemo, useState, useSyncExternalStore } from "react";
 import FileDropzone, { formatBytes } from "@/components/FileDropzone";
+import IsolationReport from "@/components/IsolationReport";
 import LabNav from "@/components/LabNav";
 import LoginForm from "@/components/LoginForm";
 import ScanResultView from "@/components/ScanResultView";
@@ -100,17 +101,22 @@ const CSV_COLUMNS: [string, (r: EvaluationRecord) => string | number | boolean |
   ["scanner_status", (r) => r.scanners.map((s) => `${s.name}=${s.status}`).join(";")],
   ["errors", (r) => r.errors.join(" | ")],
   ["isolation_required", (r) => r.isolation_required ?? ""],
-  ["isolation", (r) => Object.entries(r.isolation).map(([k, v]) => `${k}=${v}`).join(";")],
+  ["isolation", (r) => Object.entries(r.isolation ?? {}).map(([k, v]) => `${k}=${v}`).join(";")],
   ["isolation_missing", (r) => (r.isolation_missing ?? []).join(";")],
-  ["engine_version", (r) => r.versions.engine ?? ""],
-  ["ruleset_sha256", (r) => r.versions.ruleset_sha256 ?? ""],
-  ["scanner_versions", (r) => Object.entries(r.versions).filter(([k]) => !["engine", "ruleset_sha256"].includes(k)).map(([k, v]) => `${k}=${v}`).join(";")],
+  ["network_verified", (r) => r.isolation?.network_verified ?? ""],
+  ["net_interfaces_safe", (r) => r.isolation?.net_interfaces_safe ?? ""],
+  ["net_loopback_only", (r) => r.isolation?.net_loopback_only ?? ""],
+  ["net_fallback_tunnel_inert", (r) => r.isolation?.net_fallback_tunnel_inert ?? ""],
+  ["capabilities_dropped", (r) => r.isolation?.capabilities_dropped ?? ""],
+  ["engine_version", (r) => r.versions?.engine ?? ""],
+  ["ruleset_sha256", (r) => r.versions?.ruleset_sha256 ?? ""],
+  ["scanner_versions", (r) => Object.entries(r.versions ?? {}).filter(([k]) => !["engine", "ruleset_sha256"].includes(k)).map(([k, v]) => `${k}=${v}`).join(";")],
 ];
 
 function csvCell(value: string | number | boolean | null): string {
   let text = value === null ? "" : String(value);
   // Filenames and scanner text are attacker-influenced: stop spreadsheets evaluating them as formulas.
-  if (/^[=+\-@\t\r]/.test(text)) text = `'${text}`;
+  if (/^\s*[=+\-@]/.test(text) || /^[\t\r]/.test(text)) text = `'${text}`;
   return `"${text.replace(/"/g, '""')}"`;
 }
 
@@ -337,6 +343,13 @@ export default function EvaluationPage() {
                       <span className={table.mono} title={r.sha256}>{r.sha256.slice(0, 16)}…</span>
                       <br />
                       {formatBytes(r.size_bytes)} · {r.detected_format} · {r.source_dataset}
+                      <details>
+                        <summary>Request and isolation details</summary>
+                        <p className={table.mono}>Request ID: {r.request_id || "not available"}</p>
+                        <p className={table.mono}>Ruleset SHA-256: {r.versions?.ruleset_sha256 || "not available"}</p>
+                        <p className={table.mono}>Scanner statuses: {(r.scanners ?? []).map((s) => `${s.name}=${s.status}`).join("; ") || "not available"}</p>
+                        <IsolationReport isolation={r.isolation ?? {}} required={r.isolation_required} missing={r.isolation_missing} />
+                      </details>
                     </td>
                     <td>{r.expected}</td>
                     <td>{r.verdict ?? "—"}</td>

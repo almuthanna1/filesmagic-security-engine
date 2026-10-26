@@ -1,5 +1,6 @@
 import type { Ref } from "react";
 import { formatBytes } from "@/components/FileDropzone";
+import IsolationReport from "@/components/IsolationReport";
 import type { ScanResult, Verdict } from "@/lib/api";
 import styles from "./ScanResultView.module.css";
 
@@ -74,15 +75,7 @@ export default function ScanResultView({
         </div>
         <div>
           <dt>Isolation</dt>
-          <dd className={styles.mono}>
-            strict mode {result.isolation_required ? "required" : "not required"} ·{" "}
-            {result.isolation_missing === undefined
-              ? ""
-              : result.isolation_missing.length
-                ? `missing: ${result.isolation_missing.join(", ")} · `
-                : "all required controls verified · "}
-            {Object.entries(result.isolation).map(([k, v]) => `${k}=${v ? "yes" : "NO"}`).join(" ") || "not reported"}
-          </dd>
+          <dd><IsolationReport isolation={result.isolation} required={result.isolation_required} missing={result.isolation_missing} /></dd>
         </div>
         <div>
           <dt>Versions</dt>

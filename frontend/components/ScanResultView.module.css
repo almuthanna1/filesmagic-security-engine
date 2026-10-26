@@ -159,3 +159,8 @@
 .statusLine {
   display: block;
 }
+
+.isolationReport p { margin: 0 0 8px; }
+.isolationSummary { color: var(--text-muted); }
+.isolationFailure { color: var(--danger-fg); font-weight: 700; }
+.isolationList { margin: 0 0 8px; padding-left: 20px; font-family: var(--font-mono); overflow-wrap: anywhere; }
