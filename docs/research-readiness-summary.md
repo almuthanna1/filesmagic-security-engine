@@ -91,10 +91,15 @@ Details and evidence:
 - **Shared guest:** the worker shares the guest kernel and the researcher's guest account.
 - **Shared guest user:** the harness, its workers and the tests run under one guest account and
   one AppArmor profile.
-  - A native-code exploit in a parser could read everything that profile allows, including other
-    samples.
-  - It could also delete, rename or truncate files under the results folder and `/tmp`, where the
-    profile allows writing. It can't write new data, because `RLIMIT_FSIZE=0`.
+  - The worker establishes its isolation before it reads the document: namespace, capability drop,
+    resource limits, then the audit hook.
+  - A native-code exploit in a parser would still keep the permissions that remain after those
+    controls. It could read everything the profile allows, including other samples. It could also
+    delete, rename or truncate files, or create empty ones, in the results folder and `/tmp`,
+    where the profile allows writing.
+- **`RLIMIT_FSIZE=0` is only a resource limit.** It stops a process from growing any regular file
+  beyond 0 bytes. It does not stop deleting, renaming or truncating files, creating empty files,
+  or overwriting bytes within an existing file's size. It is not a filesystem security boundary.
 - **`CAP_SYS_ADMIN` before the drop:** between creating its namespaces and dropping its
   capabilities, the worker briefly holds `CAP_SYS_ADMIN` and `CAP_SETPCAP` inside those namespaces.
   This happens before it reads the document; AppArmor still denies mounting and every other
@@ -115,10 +120,11 @@ Details and evidence:
 | 4 | Dataset approval: sources, labelling rules, size, time split and metrics (Section 7) | **Pending** (design proposed only) |
 | 5 | Acceptance of each sample source's terms (e.g. MalwareBazaar) | **Pending** |
 | 6 | Host disk-encryption (BitLocker) verification, required by the handling procedure | **Pending** (not yet checked) |
-| 7 | Hosted (Render) analysis | **Out of scope.** Render's written authorization and stronger containment would be required first; not requested |
+| 7 | Approved procedure for bringing research samples into the offline VM and exporting metadata-only results (method, integrity checks, who performs it, how the VM stays offline) | **Pending**. Not finalized, and no mechanism implemented; the VM has no network, shared folders, USB or clipboard |
+| 8 | Hosted (Render) analysis | **Out of scope.** Render's written authorization and stronger containment would be required first; not requested |
 
 **Technical readiness is not approval.** The VM results above do not authorize handling genuine
-malware. Items 1-6 must all be resolved and recorded first.
+malware. Items 1-7 must all be resolved and recorded first.
 
 ## 7. Proposed independently labelled methodology (planned, not results)
 
@@ -145,7 +151,8 @@ malware. Items 1-6 must all be resolved and recorded first.
 
 ## 8. Why genuine-malware testing has not started
 
-Approvals 1-6 in Section 6 are not yet recorded, and the handling procedure is still a proposal.
+Requirements 1-7 in Section 6 are not yet recorded or finalized, and the handling procedure is
+still a proposal.
 The project's rule is that technical readiness never substitutes for authorization.
 
 ## 9. Decisions requested

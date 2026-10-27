@@ -7,10 +7,16 @@ supervisor-approved evaluation would use. It covers benign and inert synthetic f
 **No genuine malware was downloaded, imported, opened or scanned.**
 
 **Technical readiness is not authorization.** These results show that the environment works. They
-do not approve handling genuine malware. That still requires the supervisor's approval of the
-sample-handling procedure, any applicable NIU authorization, dataset approval and host
-disk-encryption verification ([research-readiness-summary.md](research-readiness-summary.md),
-Section 6).
+do not approve handling genuine malware. That still requires:
+
+- the supervisor's approval;
+- approval of the sample-handling procedure, which is still a proposal;
+- any applicable NIU authorization;
+- dataset approval;
+- host disk-encryption verification;
+- a finalized procedure for transferring samples into the VM and exporting results.
+
+See [research-readiness-summary.md](research-readiness-summary.md), Section 6.
 
 **Evidence types used below.**
 
@@ -193,16 +199,41 @@ and only until `drop_capabilities()`. There are no `mount`, `pivot_root` or `ptr
 
 1. **Shared identity.** The harness, its workers and the tests share one profile and one guest user
    (uid 1000).
-   - A native-code exploit in a parser, before the worker's own controls apply, could read every
-     path the profile allows, including all samples. It could also delete or rename files under
-     `~/fm-eval/results`; `RLIMIT_FSIZE=0` prevents writing new data, but not deletion.
-   - Proposed hardening, which needs an engine code change: run the worker under a separate
+   - **Order of controls** (`app/worker.py`, `main()`). The worker applies its controls before it
+     reads the document:
+     1. user and network namespace, verified;
+     2. capability drop;
+     3. scanner warm-up on empty input;
+     4. resource limits;
+     5. Python audit hook;
+     6. the strict-mode check.
+
+     Only then does it read the document from stdin and run the parsers. Parsing therefore never
+     happens before isolation is established.
+   - **What remains open to an exploit.** A native-code exploit in a parser would run with
+     whatever these controls leave in place: no network, no capabilities and limited resources,
+     but the same guest user and the same AppArmor profile as the harness.
+   - **What that allows.** It could read every path the profile allows, including all samples.
+     It could also delete, rename or truncate files, and create empty files, under
+     `~/fm-eval/results` and `/tmp`. The audit hook doesn't constrain native code.
+   - **Proposed hardening**, which needs an engine code change: run the worker under a separate
      child profile with no write permissions and no sample access beyond its own input, for
      example by starting it from a distinct interpreter path.
 2. **Filesystem write permissions.** The profile grants write access to `~/fm-eval/results/**`
-   and to `/tmp/**` (with locks) for the whole profile, workers included. Workers are further
-   limited by `RLIMIT_FSIZE=0` and the Python audit hook. Native code could still delete, rename
-   or truncate files in those locations.
+   and to `/tmp/**` (with locks) for the whole profile, workers included.
+   - **What `RLIMIT_FSIZE=0` does.** It is a resource limit: the kernel refuses any write that
+     would extend a regular file beyond 0 bytes. The write fails with `EFBIG`; CPython ignores
+     `SIGXFSZ`.
+   - **What it does not do.** It does not stop:
+     - deleting, renaming or truncating files;
+     - creating empty files or directories;
+     - overwriting bytes inside an existing file's current size;
+     - writing to pipes or sockets (the worker returns its report over a stdout pipe).
+
+     It is not a filesystem access-control boundary. Access is decided by the AppArmor profile and
+     ordinary Unix permissions.
+   - **The audit hook** blocks Python-level opens for writing, but not native code. The shared
+     writable directories therefore remain exposed to the operations above.
 3. **`CAP_SYS_ADMIN` before the drop.** Between `unshare()` and `drop_capabilities()`, the worker
    holds `CAP_SYS_ADMIN` and `CAP_SETPCAP` inside its own new namespaces. The profile denies every
    other capability and grants no `mount`, `pivot_root` or `ptrace` rules. The window is short and
@@ -232,7 +263,15 @@ and only until `drop_capabilities()`. There are no `mount`, `pivot_root` or `ptr
 | `~/fm-eval/results/` | `complain-run`, `enforce-run1` (aborted preflight), `enforce-run2`, `c92c-final`, `c92c-after-reboot`; each with `run_status.json` and, when scanning ran, `per_sample.csv/json` and `summary.json/md` |
 | `~/c92b/` | Phase C9.2B installation logs (`apt.log`, `pip.log`, `checks.txt`) |
 
-These files have not been exported from the VM; doing so needs an approved transfer method.
+These files have not been exported from the VM. The procedure for bringing research samples into
+the offline VM and exporting metadata-only results has **not been finalized**, and no transfer
+mechanism has been implemented. It is an outstanding requirement
+([research-readiness-summary.md](research-readiness-summary.md), Section 6, item 7). The VM stays
+without network, shared folders, USB and clipboard.
+
+The setup files used during Phases C9.2C and C9.2D were the operator's own scripts and the
+AppArmor profile. They contained no samples. They were typed into the guest and verified by
+SHA-256; that was not a sample-transfer procedure.
 
 ## 10. VM state and snapshots
 

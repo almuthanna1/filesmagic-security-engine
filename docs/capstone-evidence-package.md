@@ -428,8 +428,10 @@ minute.
 - **Offline research VM** (Phase C9.2; details in
   [offline-vm-validation-c9-2.md](offline-vm-validation-c9-2.md) §7).
   - The harness, its workers and the tests share one guest user and one AppArmor profile.
-  - That profile allows writing to the results folder and `/tmp`, so native code could delete or
-    rename files there; `RLIMIT_FSIZE=0` still blocks new data.
+  - That profile allows writing to the results folder and `/tmp`, so an exploit in a parser,
+    running after the worker's controls are applied, could delete, rename or truncate files there.
+  - `RLIMIT_FSIZE=0` only stops regular files from growing beyond 0 bytes; it is not a filesystem
+    security boundary.
   - Each worker briefly holds `CAP_SYS_ADMIN` and `CAP_SETPCAP` in its own namespaces before
     dropping them.
   - The VM is not an absolute security boundary.
@@ -481,6 +483,7 @@ minute.
 | Evaluation harness made strict-aware (record and require isolation; memory honestly labelled) | **Done** (Phase C9; Linux CI [40447531705](https://github.com/almuthanna1/filesmagic-security-engine/actions/runs/40447531705): 386 + 28 passed); worker memory is still not measured |
 | Harness preflight passes on the actual evaluation VM | **Done, offline, benign files only** (Phase C9.2C, enforcing AppArmor profile; [offline-vm-validation-c9-2.md](offline-vm-validation-c9-2.md)). In the VM, the worker and evaluation test files gave 61 passed and **4 failed** (two assume a networked host; two expect weaker restrictions than the profile enforces) |
 | Host disk-encryption (BitLocker) verification required by the handling procedure | **Pending**; not yet checked |
+| Approved procedure for bringing samples into the offline VM and exporting metadata-only results | **Pending**; not finalized, no mechanism implemented |
 
 Genuine-malware evaluation stays **blocked** until the applicable rows are resolved and
 recorded. The staging Lab and Render engine are for benign and inert synthetic files only. No
