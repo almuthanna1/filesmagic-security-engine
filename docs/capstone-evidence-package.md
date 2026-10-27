@@ -425,6 +425,14 @@ minute.
 
 - **Not a sandbox.** The worker shares the API's Unix user, container, filesystem view and
   kernel.
+- **Offline research VM** (Phase C9.2; details in
+  [offline-vm-validation-c9-2.md](offline-vm-validation-c9-2.md) §7).
+  - The harness, its workers and the tests share one guest user and one AppArmor profile.
+  - That profile allows writing to the results folder and `/tmp`, so native code could delete or
+    rename files there; `RLIMIT_FSIZE=0` still blocks new data.
+  - Each worker briefly holds `CAP_SYS_ADMIN` and `CAP_SETPCAP` in its own namespaces before
+    dropping them.
+  - The VM is not an absolute security boundary.
   - A kernel or native-parser exploit is out of scope for these controls.
   - The audit hook is not a kernel boundary.
 - **API egress.** The API process keeps normal outbound network access, and Render offers no
@@ -470,12 +478,14 @@ minute.
 | Render's written authorization for live-malware analysis on its platform | **Not requested**; required before any hosted upload ([Render Acceptable Use Policy](https://render.com/acceptable-use)) |
 | Selection of the independently labelled dataset (sources, label rules, size, time split) | **Not started**; design in [evaluation/README.md](../evaluation/README.md) |
 | Agreement on detection-performance metrics and reporting | **Proposed** (Section 19) |
-| Evaluation harness made strict-aware (record and require isolation; memory honestly labelled) | **Implemented locally** (Phase C9), pending Linux CI; worker memory is still not measured |
-| Harness preflight passes on the actual evaluation VM | **Not done**; requires the approved VM |
+| Evaluation harness made strict-aware (record and require isolation; memory honestly labelled) | **Done** (Phase C9; Linux CI [40447531705](https://github.com/almuthanna1/filesmagic-security-engine/actions/runs/40447531705): 386 + 28 passed); worker memory is still not measured |
+| Harness preflight passes on the actual evaluation VM | **Done, offline, benign files only** (Phase C9.2C, enforcing AppArmor profile; [offline-vm-validation-c9-2.md](offline-vm-validation-c9-2.md)). In the VM, the worker and evaluation test files gave 61 passed and **4 failed** (two assume a networked host; two expect weaker restrictions than the profile enforces) |
+| Host disk-encryption (BitLocker) verification required by the handling procedure | **Pending**; not yet checked |
 
 Genuine-malware evaluation stays **blocked** until the applicable rows are resolved and
 recorded. The staging Lab and Render engine are for benign and inert synthetic files only. No
-academic or institutional approval is implied anywhere in this package.
+academic or institutional approval is implied anywhere in this package. The offline VM's
+validated technical readiness (Phase C9.2C) is **not** approval to handle genuine malware.
 
 ## 19. Proposed future evaluation with independently labelled samples (planned, not results)
 
@@ -507,8 +517,11 @@ Following [evaluation/README.md](../evaluation/README.md) and the
   Malformed documents remain ordinary `UNABLE_TO_SCAN` results and do not stop a run. On
   Windows the preflight aborts, as it must; the real harness CLI was checked to exit with code 3
   both without strict mode and with it. The Linux strict path (real namespaces, including the
-  `tunl0` rerun) is covered by `test_evaluation_harness_runs_strictly_with_real_isolation`. It
-  counts as Linux evidence only once a CI run has passed it.
+  `tunl0` rerun) is covered by `test_evaluation_harness_runs_strictly_with_real_isolation`, which
+  passed in CI run 40447531705. In the actual offline VM, with an enforcing AppArmor profile, the
+  strict preflight and a four-file inert evaluation also passed (Phase C9.2C; see
+  [offline-vm-validation-c9-2.md](offline-vm-validation-c9-2.md) and the supervisor summary
+  [research-readiness-summary.md](research-readiness-summary.md)).
 - **Ground truth fixed before scanning.**
   - `MALICIOUS`: a curated repository with family attribution, **and** at least five
     independent vendor detections or a published analysis.
