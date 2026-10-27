@@ -402,10 +402,20 @@ submission.
   tunnel was verified ([IsolationReport](../frontend/components/IsolationReport.tsx)).
 - **Production.** The customer-facing FilesMagic site and conversion backend, the original
   Security Engine, and `main` (`e6fdbd4`) were not changed by this work.
-- **Integration status.** The hardened engine exists on the research branch and the staging
-  service only. Whether, or how, the customer-facing conversion pipeline calls any version of the
-  engine was not examined or verified for this package. Integrating the gate, with the rule in
-  Section 6, is future work, and nothing here claims it is in place.
+- **Integration status.** The hardened engine exists on the research branch, the staging service
+  and the offline research VM only. The FilesMagic Conversion Engine has no call to it. Its own
+  architecture notes (`FILESMAGIC_CURRENT_ARCHITECTURE.md` in the website repository) state that
+  it has no malware scanning.
+- **Historical note (superseded):** those notes also identified a possible pre-conversion hook
+  inside the Conversion Engine's route handler (`engine/app/routes/convert.py`, lines 128-130).
+  The intended design below does not use it, and requires no change to the Conversion Engine's
+  routes or conversion logic.
+- **Intended design (not implemented):**
+  - The Security Engine receives the file first and always returns a verdict and explanation.
+  - It calls the separate, unchanged Conversion Engine itself, with the same SHA-256-verified
+    bytes. It does so only for a complete, SAFE scan with every required control passed.
+  - See [security-first-architecture.md](security-first-architecture.md). **This invocation is not
+    implemented**, and nothing here claims the integration is in place.
 
 ## 15. System performance
 

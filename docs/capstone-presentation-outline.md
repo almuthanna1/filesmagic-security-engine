@@ -4,6 +4,25 @@
 [capstone-evidence-package.md](capstone-evidence-package.md). Say "demonstrated", "reported"
 or "planned" deliberately; the research is **not** finished.
 
+**Oct 30 meeting update.** The built deck has 12 main slides and 4 appendix screenshot slides,
+saved outside the repository with its build script and screenshots. Compared with this outline
+it adds three things:
+
+- **The intended security-first architecture**
+  ([security-first-architecture.md](security-first-architecture.md)). The Security Engine is the
+  entry point. It always returns a verdict and explanation, and calls the independent Conversion
+  Engine itself only for a complete, SAFE scan with every mandatory control passed. The
+  Conversion Engine stays unchanged, with no hook inside its routes. It is shown as **intended
+  design, not implemented**.
+- **What runs in VirtualBox today:** the standalone Security Engine in the offline VM. The
+  FilesMagic conversion app is not in the VM.
+- **The C10 experiment** ([c10-docx-external-template-experiment.md](c10-docx-external-template-experiment.md)):
+  - only the Office scanner flags the harmless synthetic external-template test file;
+  - YARA-X has no finding for this technique under the current rules: there is no matching rule,
+    and compression hides the text. This is not a general detection result;
+  - PDF analysis is not applicable;
+  - verdicts: control SAFE, indicator SUSPICIOUS, 5 of 5 strict runs.
+
 ## 1. Title and status
 
 - FilesMagic Security Engine: an isolated, explainable document security gate.
@@ -25,6 +44,11 @@ or "planned" deliberately; the research is **not** finished.
   hash-bound token → direct upload to Render → fresh worker → YARA-X / Office / PDF → verdict.
 - Each boundary holds only what it needs. Render has only the public key, and the file never
   passes through Vercel.
+- **Intended next architecture (not implemented):** the frontend uploads to the Security Engine,
+  which always returns a verdict and explanation. Only for SAFE + complete + all mandatory
+  controls passed does it call the independent Conversion Engine, with the same SHA-256-verified
+  bytes and trusted service authentication. Conversion results are reported separately, and no
+  conversion request may bypass the scan.
 
 ## 4. Detection and verdicts
 
