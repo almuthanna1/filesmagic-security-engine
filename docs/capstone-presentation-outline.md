@@ -79,8 +79,9 @@ or "planned" deliberately; the research is **not** finished.
 ## 9. Proposed evaluation
 
 - Offline isolated VM only. The harness calls the API in process, but every sample still runs
-  in a separate worker. The harness must first be made strict-aware: record isolation and
-  require strict mode.
+  in a separate worker. The harness now refuses to start without a passing strict-isolation
+  preflight, records isolation per sample, and stops if isolation is lost. (Implemented locally;
+  Linux CI and the VM preflight are still to come.)
 - Ground truth fixed before scanning: curated repository plus at
   least five vendor detections or a published analysis; benign from trusted publishers with
   clean hash lookups.

@@ -423,3 +423,44 @@ def test_capabilities_are_dropped_in_the_kernel_and_cannot_be_regained():
     assert out["exec_status"]["NoNewPrivs"] == "1", out
     assert out["lo_down_nested"] == "EPERM", out  # with or without a nested user namespace
 
+
+# --------------------------------------------------------------------- offline evaluation harness, strict (Phase C9)
+
+
+def test_evaluation_harness_runs_strictly_with_real_isolation(monkeypatch, tmp_path):
+    # The real worker, strict mode, inert files only (the /Launch PDF names no target).
+    import csv
+
+    from evaluation import evaluate
+    from tests.office_fixtures import make_ooxml as ooxml
+
+    monkeypatch.setattr(worker, "REQUIRE_ISOLATION", True)
+    monkeypatch.setattr(main, "run_scan", worker.run)
+    root, rows = tmp_path / "samples", []
+    for sid, rel, data, truth in [("B1", "b/1.pdf", make_pdf(), "BENIGN"), ("B2", "b/2.docx", ooxml({}), "BENIGN"),
+                                  ("S1", "s/1.pdf", make_pdf("/OpenAction << /S /Launch /F (placeholder.txt) >>"),
+                                   "SECURITY_TEST"),
+                                  ("B3", "b/3.pdf", b"%PDF-1.7\nbroken", "BENIGN")]:
+        (root / rel).parent.mkdir(parents=True, exist_ok=True)
+        (root / rel).write_bytes(data)
+        rows.append(dict(sample_id=sid, sha256=__import__("hashlib").sha256(data).hexdigest(), path=rel,
+                         file_type=rel.rsplit(".", 1)[1], ground_truth=truth, ground_truth_basis="inert synthetic test",
+                         source="synthetic", source_ref="", acquired_date="2026-10-26", split="dev",
+                         active_content="no", encrypted="no", tags="", notes=""))
+    with (tmp_path / "m.csv").open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=evaluate.REQUIRED_COLUMNS)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    evaluate.run(tmp_path / "m.csv", root, tmp_path / "out")
+    status = json.loads((tmp_path / "out" / "run_status.json").read_text(encoding="utf-8"))
+    assert status["status"] == "completed" and status["preflight"]["isolation_missing"] == [], status
+    records = {r["sample_id"]: r for r in json.loads((tmp_path / "out" / "per_sample.json").read_text(encoding="utf-8"))}
+    for r in records.values():
+        assert r["isolation_required"] is True and r["isolation_missing"] == "", r
+        assert worker.missing_controls(r["isolation"]) == [], r
+        assert r["isolation"]["net_fallback_tunnel_inert"] is TUNNEL_EXPECTED, r
+    assert records["B1"]["outcome"] == "SAFE" and records["B2"]["outcome"] == "SAFE"
+    assert records["S1"]["outcome"] == "MALICIOUS"  # the engine's verdict on an inert indicator, not a label
+    assert records["B3"]["outcome"] == "UNABLE_TO_SCAN" and records["B3"]["failure_reason"] == "parser_failure"
+

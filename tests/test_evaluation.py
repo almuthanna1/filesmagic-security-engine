@@ -3,19 +3,29 @@
 Everything here is synthetic and inert: plain text, the existing PDF/Office test
 fixtures, and a /Launch PDF that only names a placeholder. "MALICIOUS" below is a
 ground-truth *label* used to exercise the arithmetic, not a property of the bytes.
+
+Functional tests of the arithmetic run with require_isolation=False (conftest scans in
+process, without a worker); the strict-isolation tests at the end use the real worker.
 """
 
 import csv
+import functools
 import hashlib
 import json
+import os
+import sys
 from pathlib import Path
 
 import pytest
 
+from app import main, worker
 from evaluation import evaluate
-from evaluation.evaluate import ManifestError, load_manifest, run, view_metrics, wilson
+from evaluation.evaluate import EvaluationAborted, ManifestError, load_manifest, run, view_metrics, wilson
 from tests.office_fixtures import make_ooxml
 from tests.pdf_fixtures import make_pdf
+from tests.test_security import FORCED_WORKER
+
+LINUX_REQUIRED = os.environ.get("FM_REQUIRE_LINUX_TESTS") == "1"
 
 COLUMNS = evaluate.REQUIRED_COLUMNS
 
@@ -114,7 +124,7 @@ def test_undefined_metrics_are_none_not_zero():
 
 def test_run_produces_expected_outcomes_and_metrics(dataset, tmp_path):
     manifest, root = dataset
-    summary = run(manifest, root, tmp_path / "out")
+    summary = run(manifest, root, tmp_path / "out", require_isolation=False)
     per_sample = {r["sample_id"]: r for r in csv.DictReader((tmp_path / "out" / "per_sample.csv").open(encoding="utf-8"))}
 
     assert per_sample["B1"]["outcome"] == "SAFE"
@@ -139,18 +149,21 @@ def test_run_produces_expected_outcomes_and_metrics(dataset, tmp_path):
 
     saved = json.loads((tmp_path / "out" / "summary.json").read_text(encoding="utf-8"))
     assert saved["environment"]["manifest_sha256"] and saved["environment"]["packages"]["pypdf"]
-    assert "# FilesMagic evaluation summary" in (tmp_path / "out" / "summary.md").read_text(encoding="utf-8")
+    report = (tmp_path / "out" / "summary.md").read_text(encoding="utf-8")
+    assert "# FilesMagic evaluation summary" in report
+    assert "NOT A VALID RESEARCH RUN" in report  # functional run without strict isolation
+    assert json.loads((tmp_path / "out" / "run_status.json").read_text())["strict_isolation_required"] is False
 
 
 def test_split_filter(dataset, tmp_path):
     manifest, root = dataset
-    summary = run(manifest, root, tmp_path / "out", split="holdout")
+    summary = run(manifest, root, tmp_path / "out", split="holdout", require_isolation=False)
     assert summary["counts"]["scanned"] == 2  # B3, M1
 
 
 def test_outputs_never_contain_sample_bytes(dataset, tmp_path):
     manifest, root = dataset
-    run(manifest, root, tmp_path / "out")
+    run(manifest, root, tmp_path / "out", require_isolation=False)
     produced = b"".join(p.read_bytes() for p in (tmp_path / "out").iterdir())
     for sample in root.rglob("*"):
         if sample.is_file() and len(sample.read_bytes()) > 20:
@@ -164,7 +177,7 @@ def test_oversized_sample_is_rejected_not_scanned(tmp_path, monkeypatch):
     root = tmp_path / "samples"
     sha = write_sample(root, "big.txt", b"x" * 100)
     manifest = write_manifest(tmp_path / "m.csv", [row("B1", sha, "big.txt", "txt", "BENIGN")])
-    summary = run(manifest, root, tmp_path / "out")
+    summary = run(manifest, root, tmp_path / "out", require_isolation=False)
     assert summary["distribution"]["BENIGN"]["REJECTED"] == 1
     assert summary["views"]["block_fail_closed"]["FP"] == 1
 
@@ -175,9 +188,13 @@ def test_engine_exception_is_recorded_as_error(dataset, tmp_path):
             raise RuntimeError("boom")
 
     manifest, root = dataset
-    summary = run(manifest, root, tmp_path / "out", client=Broken())
+    summary = run(manifest, root, tmp_path / "out", client=Broken(), key=evaluate.make_client()[1],
+                  require_isolation=False)
     assert summary["distribution"]["BENIGN"]["ERROR"] == 4
-    assert summary["errors"] and "boom" in summary["errors"][0]["message"]
+    # Only the exception type is kept: exception text can quote sample content.
+    assert summary["errors"] and summary["errors"][0]["message"] == "RuntimeError"
+    assert summary["failure_reasons"]["BENIGN"] == {"harness_exception": 4}
+    assert b"boom" not in b"".join(p.read_bytes() for p in (tmp_path / "out").iterdir())
 
 
 # --------------------------------------------------------------------- manifest validation / safety
@@ -240,3 +257,176 @@ def test_template_has_required_columns():
 def test_harness_has_no_network_mode():
     source = (evaluate.REPO_ROOT / "evaluation" / "evaluate.py").read_text(encoding="utf-8")
     assert "onrender.com" not in source and "--url" not in source and "httpx.post" not in source
+
+
+# --------------------------------------------------------------------- failure classification
+
+
+def scanners(*entries):
+    return [{"name": n, "status": st, "error_kind": k} for n, st, k in entries]
+
+
+@pytest.mark.parametrize("status, body, reason", [
+    (200, {"complete": True, "scanners": scanners(("pdf", "completed", None))}, ""),
+    (200, {"complete": False, "scanners": scanners(("pdf", "not_applicable", None))}, "not_applicable"),
+    (200, {"complete": False, "scanners": scanners(("pdf", "failed", "malformed_input"))}, "parser_failure"),
+    (200, {"complete": False, "scanners": scanners(("pdf", "failed", "invalid_structure"),
+                                                   ("office", "failed", "malformed_input"))}, "parser_failure"),
+    (200, {"complete": False, "scanners": scanners(("pdf", "failed", "unexpected"))}, "scanner_error"),
+    (200, {"complete": False, "scanners": scanners(("pdf", "failed", "worker"))}, "worker_failure"),
+    # Strict refusal: scanners failed without a kind, and isolation_missing names the controls.
+    (200, {"complete": False, "isolation_required": True, "isolation_missing": ["network_verified"],
+           "scanners": scanners(("pdf", "failed", None))}, "isolation_unavailable"),
+    (413, None, "rejected_size"),
+    (500, None, "http_error"),
+])
+def test_failure_reason_classification(status, body, reason):
+    assert evaluate.failure_reason(status, body) == reason
+
+
+# --------------------------------------------------------------------- strict isolation (Phase C9)
+
+
+def use_worker(monkeypatch, off="None", cmd=None):
+    """Real API and real worker main(), strict mode, with the isolation outcome forced (FORCED_WORKER:
+    off names the one required control that fails; "None" = every control holds)."""
+    monkeypatch.setattr(worker, "REQUIRE_ISOLATION", True)
+    cmd = cmd or [sys.executable, "-B", "-c", FORCED_WORKER, off]
+    monkeypatch.setattr(main, "run_scan", functools.partial(worker.run, cmd=cmd))
+
+
+def outputs(out: Path):
+    per_sample = {r["sample_id"]: r for r in csv.DictReader((out / "per_sample.csv").open(encoding="utf-8"))}
+    records = {r["sample_id"]: r for r in json.loads((out / "per_sample.json").read_text(encoding="utf-8"))}
+    return per_sample, records, json.loads((out / "summary.json").read_text(encoding="utf-8"))
+
+
+def test_strict_run_records_isolation_and_keeps_malformed_documents(monkeypatch, dataset, tmp_path):
+    use_worker(monkeypatch)
+    manifest, root = dataset
+    summary = run(manifest, root, tmp_path / "out")
+    per_sample, records, saved = outputs(tmp_path / "out")
+
+    status = saved["run_status"]
+    assert status["status"] == "completed" and status["strict_isolation_required"] is True
+    pre = status["preflight"]
+    assert pre["verdict"] == "SAFE" and pre["complete"] is True and pre["isolation_missing"] == []
+    assert pre["isolation_required"] is True and pre["request_id"]
+
+    scanned = [r for r in records.values() if r["outcome"] not in ("SKIPPED",)]
+    for r in scanned:
+        assert r["isolation_required"] is True and r["isolation_missing"] == "", r
+        assert all(r["isolation"][k] is True for k in worker.REQUIRED_CONTROLS), r
+        assert r["request_id"] and r["ruleset_sha256"] == main.VERSIONS["ruleset_sha256"]
+    # A malformed document is a legitimate UNABLE_TO_SCAN, not an isolation failure; the run goes on.
+    assert per_sample["M4"]["outcome"] == "UNABLE_TO_SCAN" and per_sample["M4"]["failure_reason"] == "parser_failure"
+    assert "pdf=failed:malformed_input" in per_sample["M4"]["scanner_status"]
+    assert per_sample["M4"]["complete"] == "False" and per_sample["B1"]["complete"] == "True"
+    assert "capabilities_dropped=True" in per_sample["B1"]["isolation"]
+    # Metrics are exactly those of the functional run: strict mode changes evidence, not arithmetic.
+    block = summary["views"]["block"]
+    assert (block["TP"], block["FN"], block["FP"], block["TN"]) == (2, 1, 1, 3)
+    assert summary["isolation"]["samples_with_verified_isolation"] == len(scanned)
+    assert summary["failure_reasons"]["MALICIOUS"] == {"parser_failure": 1}
+    env = saved["environment"]
+    assert env["strict_isolation_configured"] is True and env["worker_memory_measured"] is False
+    assert "peak_rss_mib" not in env and "harness_peak_rss_mib" in env
+    assert env["ruleset_sha256"] == main.VERSIONS["ruleset_sha256"] and env["engine_version"]
+    assert "NOT A VALID RESEARCH RUN" not in (tmp_path / "out" / "summary.md").read_text(encoding="utf-8")
+    # Scanner error text (which can quote content) is never exported, only kinds and types.
+    produced = "".join(p.read_text(encoding="utf-8") for p in (tmp_path / "out").iterdir())
+    assert "analysis failed" not in produced and "Traceback" not in produced
+
+
+@pytest.mark.parametrize("off", ["network_namespace", "capabilities_dropped", "network_verified"])
+def test_preflight_aborts_before_the_dataset_is_read(monkeypatch, tmp_path, off):
+    use_worker(monkeypatch, off)
+
+    def must_not_read(*args):
+        raise AssertionError("the dataset must not be read after a failed preflight")
+
+    monkeypatch.setattr(evaluate, "load_manifest", must_not_read)
+    with pytest.raises(EvaluationAborted, match="preflight failed"):
+        run(tmp_path / "manifest.csv", tmp_path / "samples", tmp_path / "out")
+    status = json.loads((tmp_path / "out" / "run_status.json").read_text(encoding="utf-8"))
+    assert status["status"] == "aborted_preflight" and status["preflight"]["isolation_missing"] == [off]
+    assert status["preflight"]["failure_reason"] == "isolation_unavailable"
+    assert not (tmp_path / "out" / "per_sample.csv").exists()
+
+
+def test_preflight_aborts_when_strict_mode_is_not_configured(monkeypatch, tmp_path):
+    monkeypatch.setattr(worker, "REQUIRE_ISOLATION", False)
+
+    class NoScans:
+        def post(self, *args, **kwargs):
+            raise AssertionError("no scan may run without strict mode")
+
+    with pytest.raises(EvaluationAborted, match="SECURITY_ENGINE_REQUIRE_ISOLATION=1"):
+        run(tmp_path / "manifest.csv", tmp_path / "samples", tmp_path / "out", client=NoScans())
+    status = json.loads((tmp_path / "out" / "run_status.json").read_text(encoding="utf-8"))
+    assert status["status"] == "aborted_preflight" and status["preflight"] == {"strict_isolation_configured": False}
+    assert status["reason"] == "strict isolation is not configured: set SECURITY_ENGINE_REQUIRE_ISOLATION=1"
+
+
+def test_real_worker_strict_preflight_reflects_the_platform(monkeypatch):
+    # No forcing: the real worker decides. Windows has no namespaces and must fail; Linux CI,
+    # where namespaces are enabled, must pass. Elsewhere only consistency is checked.
+    monkeypatch.setattr(worker, "REQUIRE_ISOLATION", True)
+    monkeypatch.setattr(main, "run_scan", worker.run)
+    try:
+        evidence, passed = evaluate.strict_preflight(*evaluate.make_client()), True
+    except EvaluationAborted as e:
+        evidence, passed = e.args[1], False
+    if sys.platform == "win32":
+        assert not passed and {"network_namespace", "capabilities_dropped"} <= set(evidence["isolation_missing"])
+    if LINUX_REQUIRED:
+        assert passed, evidence
+    assert passed == (evidence["isolation_missing"] == []), evidence
+
+
+class SwitchWorker:
+    """Passes requests to the real client; from the given call on, scans use another worker."""
+
+    def __init__(self, monkeypatch, client, at_call, cmd):
+        self.monkeypatch, self.client, self.at_call, self.cmd, self.calls = monkeypatch, client, at_call, cmd, 0
+
+    def post(self, *args, **kwargs):
+        self.calls += 1
+        if self.calls == self.at_call:
+            self.monkeypatch.setattr(main, "run_scan", functools.partial(worker.run, cmd=self.cmd))
+        return self.client.post(*args, **kwargs)
+
+
+def test_isolation_lost_mid_run_stops_scanning_and_fails_the_run(monkeypatch, dataset, tmp_path):
+    use_worker(monkeypatch)
+    client, key = evaluate.make_client()
+    # Call 1 is the preflight, call 2 sample B1; from call 3 (B2) network verification fails.
+    lossy = SwitchWorker(monkeypatch, client, 3, [sys.executable, "-B", "-c", FORCED_WORKER, "network_verified"])
+    manifest, root = dataset
+    with pytest.raises(EvaluationAborted, match="isolation was lost"):
+        run(manifest, root, tmp_path / "out", client=lossy, key=key)
+    per_sample, _, saved = outputs(tmp_path / "out")
+    assert saved["run_status"]["status"] == "failed_isolation_lost"
+    assert per_sample["B1"]["outcome"] == "SAFE"
+    assert per_sample["B2"]["outcome"] == "UNABLE_TO_SCAN" and per_sample["B2"]["failure_reason"] == "isolation_unavailable"
+    assert per_sample["B2"]["isolation_missing"] == "network_verified"
+    assert {per_sample[s]["outcome"] for s in ("B3", "B4", "M1", "M2", "M3", "M4", "T1")} == {"NOT_RUN"}
+    assert lossy.calls == 3  # nothing was scanned after the loss
+    assert saved["counts"]["not_run"] == 7
+    assert "NOT A VALID RESEARCH RUN" in (tmp_path / "out" / "summary.md").read_text(encoding="utf-8")
+
+
+def test_worker_crashes_are_recorded_without_stopping_the_run(monkeypatch, dataset, tmp_path):
+    # A crashing or timed-out worker sends no isolation report; that is a per-sample failure
+    # (it can be document-caused), not a loss of isolation.
+    use_worker(monkeypatch)
+    client, key = evaluate.make_client()
+    crash = SwitchWorker(monkeypatch, client, 2, [sys.executable, "-B", "-m", "tests.fake_worker", "crash"])
+    manifest, root = dataset
+    summary = run(manifest, root, tmp_path / "out", client=crash, key=key)
+    per_sample, _, saved = outputs(tmp_path / "out")
+    assert saved["run_status"]["status"] == "completed"
+    assert all(per_sample[s]["failure_reason"] == "worker_failure" and per_sample[s]["outcome"] == "UNABLE_TO_SCAN"
+               for s in ("B1", "B2", "M1", "T1"))
+    assert summary["isolation"]["samples_without_isolation_report"] == summary["counts"]["scanned"]
+

@@ -20,16 +20,47 @@ The system under test is the engine's `/scan` code path, called **in process** i
 the evaluation VM (`evaluate.py` uses FastAPI's TestClient: same scanners, decision
 engine and 10 MB upload limit as production, no network). Only the HTTP layer is in
 process: since the hardening work, `/scan` parses every sample in a **separate worker
-process** (`app/worker.py`), so durations include worker start-up. The harness does not
-yet record or require strict isolation (`isolation_required`, `isolation`,
-`isolation_missing`), and its `peak_rss_mib` covers the harness process only; both must
-be addressed before a real run (docs/capstone-evidence-package.md, Section 19). The public Render service
+process** (`app/worker.py`), so durations include worker start-up. The public Render service
 is never used for malicious samples; it is for benign/synthetic validation only.
 
-Per sample the harness records: verdict (`SAFE`, `SUSPICIOUS`, `MALICIOUS`,
-`UNABLE_TO_SCAN`), or `REJECTED` (HTTP 413, over 10 MB) or `ERROR` (any other failure);
-the rule IDs, scanners and maximum severity of the findings; the API message; and
-the in-process scan duration.
+**Strict isolation is mandatory** (Phase C9). Before the manifest or any sample is read, the
+harness:
+
+1. checks that `SECURITY_ENGINE_REQUIRE_ISOLATION=1` is loaded;
+2. scans a harmless one-page PDF that it generates itself (never a dataset file);
+3. continues only if that scan is `SAFE` and complete, with `isolation_required=true`,
+   `isolation_missing=[]` and every control in `worker.REQUIRED_CONTROLS` literally true.
+
+Otherwise it aborts, writes only `run_status.json` (`aborted_preflight`, with the preflight
+evidence), and exits with code 3. It never falls back to non-strict scanning. On Windows, and on
+Linux without unprivileged user namespaces, the preflight therefore fails, as it should.
+
+During the run, isolation is applied before a worker reads its document, so missing isolation can
+never be caused by a sample. If any sample's result lacks verified isolation, scanning stops: the
+remaining samples become `NOT_RUN`, and the run is recorded as `failed_isolation_lost` (exit code
+3, with a "NOT A VALID RESEARCH RUN" banner). A malformed document is different: its
+`UNABLE_TO_SCAN` is an ordinary result and the run continues. So is a crashed or timed-out worker,
+which sends no isolation report.
+
+Per sample the harness records:
+
+- the verdict (`SAFE`, `SUSPICIOUS`, `MALICIOUS`, `UNABLE_TO_SCAN`), or `REJECTED` (HTTP 413, over
+  10 MB), `ERROR` (any other failure; only the exception type is kept), `SKIPPED` (duplicate or
+  `EXCLUDED`), or `NOT_RUN`;
+- the rule IDs, scanners and maximum severity of the findings;
+- the engine's message, which is composed from counts and never contains document text;
+- `complete`;
+- `failure_reason`: `isolation_unavailable`, `worker_failure`, `parser_failure`,
+  `scanner_error`, `not_applicable`, `rejected_size`, `http_error` or `harness_exception`;
+- `scanner_status` as `name=status:error_kind:error_type` (engine-validated identifiers only,
+  never scanner error text);
+- `isolation_required`, the full `isolation` report and `isolation_missing`;
+- the request ID, engine commit and rule-set SHA-256;
+- the wall-clock duration, including worker start-up.
+
+**Memory.** `harness_peak_rss_mib` is the harness process only (`RUSAGE_SELF`). Scan workers are
+separate processes and are **not** included, and `worker_memory_measured` is `false`. Worker
+memory is not measured by this harness; do not report this figure as worker memory.
 
 ## 2. Ground truth
 
@@ -204,6 +235,12 @@ Recommended, as an optional comparison on the same files, **never** in productio
 
 ## 10. VM safety procedure
 
+**Conditional.** Everything in this section that involves malicious samples may be carried out
+only after Dr. Haque's written approval, any applicable NIU authorization, and approval of
+[the sample-handling procedure](../docs/malware-sample-handling-procedure.md). As of
+2026-10-26 none of these has been granted. Until then the harness is used only with benign and
+inert synthetic files.
+
 The Ubuntu 24.04 VM (VirtualBox, snapshot "Clean Ubuntu 24.04 - Pre Security Engine")
 is the only place malicious samples ever exist.
 
@@ -221,10 +258,13 @@ is the only place malicious samples ever exist.
    the file manager; do not double-click. Disable GNOME Tracker indexing / thumbnails for
    `~/fm-eval` (or the whole session) so nothing previews samples automatically. The only
    programs that read samples are the harness, `sha256sum` and `clamscan`.
-5. **Run:** `python -m evaluation.evaluate --manifest ~/fm-eval/manifest.csv
-   --samples-root ~/fm-eval/samples --split dev --out evaluation/results/dev-001`.
-6. **Export (metadata only):** `per_sample.csv`, `summary.json`, `summary.md` and the
-   manifest contain hashes, labels and rule IDs — never sample bytes. Review them, then
+5. **Run:** `SECURITY_ENGINE_REQUIRE_ISOLATION=1 python -m evaluation.evaluate --manifest
+   ~/fm-eval/manifest.csv --samples-root ~/fm-eval/samples --split dev --out
+   evaluation/results/dev-001`. The VM must allow unprivileged user namespaces, or the preflight
+   aborts. Check `run_status.json` says `completed` before using any number.
+6. **Export (metadata only):** `run_status.json`, `per_sample.csv`, `per_sample.json`,
+   `summary.json`, `summary.md` and the manifest contain hashes, labels, rule IDs and isolation
+   evidence — never sample bytes or scanner error text. Review them, then
    transfer by reconnecting the network and committing them from the VM (or pasting the
    reviewed text) — **never** via shared folders, clipboard of files or USB, and never
    transfer sample files to the host.
@@ -238,9 +278,16 @@ is the only place malicious samples ever exist.
 ```bash
 pip install -r requirements-dev.txt          # engine + TestClient
 cp evaluation/manifest_template.csv ~/fm-eval/manifest.csv   # then fill it in
-python -m evaluation.evaluate --manifest ~/fm-eval/manifest.csv \
+SECURITY_ENGINE_REQUIRE_ISOLATION=1 python -m evaluation.evaluate --manifest ~/fm-eval/manifest.csv \
     --samples-root ~/fm-eval/samples --split dev --out evaluation/results/dev-001
 ```
+
+Exit codes:
+
+- `0`: completed with verified strict isolation;
+- `2`: invalid manifest (nothing scanned);
+- `3`: aborted by the preflight, or isolation lost during the run. See `run_status.json`; do not
+  report the metrics.
 
 Manifest columns: `sample_id, sha256, path` (relative to the samples root),
 `file_type, ground_truth, ground_truth_basis, source, source_ref, acquired_date,
@@ -248,14 +295,16 @@ split` (`dev`/`holdout`), `active_content, encrypted` (`yes`/`no`/`unknown`), `t
 notes`. Outputs go to `evaluation/results/<run>/` (git-ignored); copy reviewed final
 summaries into `evaluation/reports/` for the capstone report.
 
-Each `summary.json` records the engine commit (and whether the tree was dirty), the
-manifest's SHA-256, Python/platform and scanner package versions, so every number can
-be traced to an exact engine and dataset.
+Each `summary.json` records the run status and preflight evidence, the engine commit (and
+whether the tree was dirty), the engine version and rule-set SHA-256, whether strict isolation was
+configured, the manifest's SHA-256, Python/platform and scanner package versions. It also counts
+incomplete results by `failure_reason` and samples with verified isolation, so every number can
+be traced to an exact engine, dataset and isolation state.
 
 ## 12. Evidence to keep for the report
 
-Manifest (hashes, labels, sources, split), per-run `summary.json`/`summary.md` and
-`per_sample.csv`, engine commit per run, the list of rule changes made on `dev`,
+Manifest (hashes, labels, sources, split), per-run `run_status.json`, `summary.json`/`summary.md`,
+`per_sample.csv` and `per_sample.json`, engine commit per run, the list of rule changes made on `dev`,
 ClamAV database version (if used), VM settings screenshots, and Phase 4 Render
 resource measurements.
 

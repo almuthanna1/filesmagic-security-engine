@@ -470,7 +470,8 @@ minute.
 | Render's written authorization for live-malware analysis on its platform | **Not requested**; required before any hosted upload ([Render Acceptable Use Policy](https://render.com/acceptable-use)) |
 | Selection of the independently labelled dataset (sources, label rules, size, time split) | **Not started**; design in [evaluation/README.md](../evaluation/README.md) |
 | Agreement on detection-performance metrics and reporting | **Proposed** (Section 19) |
-| Evaluation harness made strict-aware (record and require isolation, measure worker memory) and verified on the Linux VM | **Not started** (code change; Section 19) |
+| Evaluation harness made strict-aware (record and require isolation; memory honestly labelled) | **Implemented locally** (Phase C9), pending Linux CI; worker memory is still not measured |
+| Harness preflight passes on the actual evaluation VM | **Not done**; requires the approved VM |
 
 Genuine-malware evaluation stays **blocked** until the applicable rows are resolved and
 recorded. The staging Lab and Render engine are for benign and inert synthetic files only. No
@@ -488,23 +489,26 @@ Following [evaluation/README.md](../evaluation/README.md) and the
   code is the same as deployed, so every sample is still parsed in a **separate worker process**
   (`python -m app.worker`) with the worker's controls; only the HTTP layer is in process.
   Recorded durations therefore include worker start-up.
-- **Strict-isolation compatibility (checked in Phase C8 with two inert benign files, on Windows,
-  where namespaces are unavailable).**
-  - **Default:** both files `SAFE`.
-  - **With `SECURITY_ENGINE_REQUIRE_ISOLATION=1`:** both `UNABLE_TO_SCAN` ("3 of 3 applicable
-    scanners failed").
-  - **Harness tests:** `tests/test_evaluation.py`, 20 passed.
+- **Strict-isolation safeguards (Phase C9).** The C8 check found the harness was not
+  strict-aware. It now:
+  1. **Refuses to start unless strict isolation is proven.** It checks that strict mode is
+     configured, then runs a preflight scan of a harmless generated PDF that must be `SAFE` and
+     complete, with every required control true and `isolation_missing=[]`. This happens before
+     the dataset is read. Otherwise it aborts (`aborted_preflight`, exit code 3).
+  2. **Stops if isolation is ever missing during the run**, recording the run as
+     `failed_isolation_lost` with the remaining samples `NOT_RUN`.
+  3. **Records per sample** `complete`, a structured `failure_reason` (`isolation_unavailable`
+     versus `parser_failure`, `worker_failure` and others), `scanner_status` (kinds and types,
+     never error text), `isolation_required`, `isolation`, `isolation_missing`, the request ID,
+     engine commit and rule-set hash.
+  4. **Labels memory honestly.** The memory figure is now `harness_peak_rss_mib` with
+     `worker_memory_measured=false`; worker memory is not measured.
 
-  The harness runs under strict mode and fails closed, but it is **not strict-aware**:
-  - it neither sets nor checks strict mode;
-  - it records neither `isolation_required`, `isolation` nor `isolation_missing`, so a refused
-    scan is indistinguishable from a parser failure, and a non-strict run looks identical to a
-    strict one;
-  - `peak_rss_mib` measures the harness process only (`RUSAGE_SELF`), not the workers.
-
-  Before any evaluation run, the harness must record these fields and refuse to run unless strict
-  mode is configured. It must then be verified on the Linux VM, where namespaces are expected to
-  work, as in CI. That is a small code change, not yet made or approved.
+  Malformed documents remain ordinary `UNABLE_TO_SCAN` results and do not stop a run. On
+  Windows the preflight aborts, as it must; the real harness CLI was checked to exit with code 3
+  both without strict mode and with it. The Linux strict path (real namespaces, including the
+  `tunl0` rerun) is covered by `test_evaluation_harness_runs_strictly_with_real_isolation`. It
+  counts as Linux evidence only once a CI run has passed it.
 - **Ground truth fixed before scanning.**
   - `MALICIOUS`: a curated repository with family attribution, **and** at least five
     independent vendor detections or a published analysis.
