@@ -5,7 +5,7 @@ the engine against independently labelled benign and malicious documents. The go
 is to answer one question with evidence:
 
 > Can a lightweight, format-aware document scanner (YARA-X + Office + PDF structural
-> analysis) provide useful detection within a 512 MiB / 0.15 CPU cloud budget, and
+> analysis) provide useful detection within a 512 MB / 0.1 CPU cloud budget (Render Free), and
 > at what false-positive cost?
 
 It is not an antivirus certification. Results apply to the dataset described below

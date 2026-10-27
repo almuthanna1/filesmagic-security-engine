@@ -7,9 +7,12 @@ early. Honors capstone project.
 
 ## Current status
 
-**Phase 3C: YARA-X, Office and PDF analysis are implemented. Next: review the stack and benchmark on Render.**
-Not production-ready: detection quality has not been evaluated yet.
-The deployed backend is still the Phase 2B baseline (no scanners) until redeployed.
+**Research hardening (branch `security/malware-research-hardening`), validated on a separate
+benign-only staging deployment** (Render `0a91480`, Vercel Lab `279ad39`, as of 2026-10-26).
+Not production-ready: detection quality has not been evaluated against independently labelled
+samples, and genuine-malware work is blocked pending approvals. Current evidence and status:
+[docs/capstone-evidence-package.md](docs/capstone-evidence-package.md). The original
+production deployment and `main` are unchanged by this branch.
 
 What exists:
 
