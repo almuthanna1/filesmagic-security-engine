@@ -16,9 +16,14 @@ isolated evaluation VM, outside the repository checkout, and never leave it.
 
 ## 1. What is evaluated
 
-The system under test is the engine's `/scan` code path, run **in-process** inside
+The system under test is the engine's `/scan` code path, called **in process** inside
 the evaluation VM (`evaluate.py` uses FastAPI's TestClient: same scanners, decision
-engine and 10 MB upload limit as production, no network). The public Render service
+engine and 10 MB upload limit as production, no network). Only the HTTP layer is in
+process: since the hardening work, `/scan` parses every sample in a **separate worker
+process** (`app/worker.py`), so durations include worker start-up. The harness does not
+yet record or require strict isolation (`isolation_required`, `isolation`,
+`isolation_missing`), and its `peak_rss_mib` covers the harness process only; both must
+be addressed before a real run (docs/capstone-evidence-package.md, Section 19). The public Render service
 is never used for malicious samples; it is for benign/synthetic validation only.
 
 Per sample the harness records: verdict (`SAFE`, `SUSPICIOUS`, `MALICIOUS`,

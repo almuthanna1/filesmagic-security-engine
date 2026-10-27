@@ -8,8 +8,9 @@ or "planned" deliberately; the research is **not** finished.
 
 - FilesMagic Security Engine: an isolated, explainable document security gate.
 - NIU CSCI 499 Honors Capstone; Almuthanna Shihab; supervisor Dr. Haque.
-- Status line: implementation and benign/synthetic staging validation done. Labelled
-  real-world evaluation not yet conducted; it is waiting on approvals.
+- Status line: implementation and benign/synthetic staging validation done, on a separate
+  research staging deployment (not integrated into the customer-facing conversion pipeline).
+  Labelled real-world evaluation not yet conducted; it is waiting on approvals.
 
 ## 2. Problem and research questions
 
@@ -31,6 +32,9 @@ or "planned" deliberately; the research is **not** finished.
 - Ordered rules: HIGH/CRITICAL → MALICIOUS; LOW/MEDIUM → SUSPICIOUS; failure → UNABLE_TO_SCAN;
   else SAFE.
 - SAFE ≠ harmless; UNABLE_TO_SCAN ≠ SAFE.
+- Findings outrank failures, so a SUSPICIOUS or MALICIOUS verdict can come from an incomplete
+  analysis. Gate rule: only SAFE with `complete=true` (and no missing isolation control) may
+  pass. Incomplete analysis never authorizes conversion.
 
 ## 5. Containment and fail-closed design
 
@@ -46,7 +50,9 @@ or "planned" deliberately; the research is **not** finished.
 - Log-only diagnostics found the kernel's IP-in-IP fallback device: down, no address, no route.
 - Fix: accept exactly that device after field-by-field checks, and drop capabilities so it
   can't be changed later.
-- Verified with CI using the real kernel module, then on Render (`isolation_missing=[]`).
+- Exercised in Linux CI against the real kernel module (blocked egress, capabilities that
+  cannot be regained). On Render, observed as the worker's own kernel read-backs
+  (`isolation_missing=[]`), not probed independently.
 - Lesson: precise invariants, and evidence from the target environment.
 
 ## 7. Evidence (keep runs separate)
@@ -56,8 +62,10 @@ or "planned" deliberately; the research is **not** finished.
   green.
 - **Staging (Phase C4):** 19/19 acceptance checks; 16/16 synthetic fixtures matched their
   intended verdicts.
-- **Hosted (C7D/C7E):** harmless DOCX and PDF `SAFE`; inert Launch PDF `MALICIOUS`; no missing
-  controls; about 6-7 s per scan on Render Free, dominated by worker start-up.
+- **Hosted (C7D/C7E):** harmless DOCX and PDF `SAFE`. The inert synthetic Launch-indicator test
+  PDF got `MALICIOUS`, the engine's intended verdict for that indicator; it is not a malware
+  sample or ground truth. No missing controls; about 6-7 s per scan on Render Free, dominated by
+  worker start-up.
 - Caveat on the slide: the fixtures test the rules, and CI proves kernel behaviour. On Render,
   isolation is reported by the worker itself.
 
@@ -70,7 +78,10 @@ or "planned" deliberately; the research is **not** finished.
 
 ## 9. Proposed evaluation
 
-- Offline isolated VM only. Ground truth fixed before scanning: curated repository plus at
+- Offline isolated VM only. The harness calls the API in process, but every sample still runs
+  in a separate worker. The harness must first be made strict-aware: record isolation and
+  require strict mode.
+- Ground truth fixed before scanning: curated repository plus at
   least five vendor detections or a published analysis; benign from trusted publishers with
   clean hash lookups.
 - Frozen engine and rule-set hash; time-aware holdout; reporting per format and per family.

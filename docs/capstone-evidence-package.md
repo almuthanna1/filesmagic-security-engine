@@ -14,7 +14,9 @@ repository file). Section 2 separates what was **demonstrated** from **design as
 ## Abstract
 
 FilesMagic converts user-supplied documents. This project builds a file-aware security gate
-that inspects an upload before a conversion service would process it. A FastAPI engine combines
+designed to inspect an upload before a conversion service processes it. The hardened engine is
+deployed only as a **separate research staging service**. This package has no verified evidence
+that the customer-facing FilesMagic conversion pipeline calls it. A FastAPI engine combines
 YARA-X signatures with structural analysis of Microsoft Office and PDF files, and returns an
 explainable verdict (`SAFE`, `SUSPICIOUS`, `MALICIOUS` or `UNABLE_TO_SCAN`). The engine and an
 authenticated research interface (the Security Lab) run as a separate staging deployment.
@@ -30,8 +32,9 @@ How a scan works:
 
 On the hosted staging service the first strict-mode deployment refused every scan. The cause
 was a kernel-created tunnel interface (`tunl0`) that the original loopback-only check did not
-anticipate. The project diagnosed it, narrowed the policy to that one verified-inert device,
-and confirmed the correction in Linux CI and on Render.
+anticipate. The project diagnosed it and narrowed the policy to that one verified-inert device.
+It then exercised the corrected controls in Linux CI, including with a real `tunl0`. On Render,
+it observed them only as values the worker reports from its own kernel read-backs.
 
 Linux CI and benign staging tests show that these mechanisms work in their tested environments.
 The 16 inert synthetic fixtures exercise the intended rules and error paths. They do **not**
@@ -88,6 +91,7 @@ No current result answers these population-level questions.
 | 16 synthetic fixtures produce their intended verdicts | **Demonstrated** (functional behaviour only) | Phase C4 A8 |
 | Detection rate, false-positive rate or false-negative rate on real documents | **Not measured** | No labelled dataset scanned |
 | The engine is suitable for hosted live-malware analysis | **Not established**; blocked | Sections 16-18 |
+| The gate protects the customer-facing conversion pipeline | **Not claimed**; integration not verified | Section 14 |
 | Offline evaluation design (ground truth, metrics, VM procedure) | **Planned** | [evaluation/README.md](../evaluation/README.md), [sample-handling proposal](malware-sample-handling-procedure.md) |
 
 ## 3. Security architecture
@@ -181,9 +185,15 @@ Scanners identify formats from content, never from filenames.
 | Condition | Outcome |
 |---|---|
 | Worker timeout (30 s), crash, native fault, output over 1 MB, invalid report or unexpected scanner set | Every scanner `failed` with kind `worker`; verdict `UNABLE_TO_SCAN` |
-| Scanner raises on malformed or hostile input | That scanner `failed` (`malformed_input` / `invalid_structure` / `unexpected`); `UNABLE_TO_SCAN` unless another scanner found HIGH/CRITICAL (evidence wins) |
+| Scanner raises on malformed or hostile input | That scanner `failed` (`malformed_input` / `invalid_structure` / `unexpected`). The verdict is `MALICIOUS` if any other scanner found HIGH/CRITICAL, `SUSPICIOUS` if any found LOW/MEDIUM, otherwise `UNABLE_TO_SCAN`. In every case `complete=false` |
 | Strict mode and any required isolation control not literally `true` | Worker refuses to read the document; `UNABLE_TO_SCAN`; `isolation_missing` names the controls |
 | No applicable scanner | `UNABLE_TO_SCAN`, explicitly "NOT security-scanned" |
+
+**Gate rule for any integration.** Findings outrank failures, so a `SUSPICIOUS` or `MALICIOUS`
+verdict can come from an **incomplete** analysis in which another scanner failed. `SAFE` is
+returned only when no applicable scanner failed. Incomplete analysis must never automatically
+authorize conversion, whatever the verdict. Only `SAFE` with `complete=true` (and, in strict
+mode, `isolation_missing=[]`) should pass. Everything else blocks or is held for review.
 
 Logs carry only a request ID, a hash prefix, the size, scanner names, failure kinds and the
 verdict. They never carry filenames, file contents or exception text, which can be
@@ -243,7 +253,9 @@ The decision rules, applied in order ([decision](../app/decision/__init__.py)):
 3. No scanner ran, or any scanner failed → `UNABLE_TO_SCAN`.
 4. Otherwise → `SAFE`.
 
-Evidence outranks failure: a `MALICIOUS` finding stands even if another scanner crashed.
+Findings outrank failures: any LOW-to-CRITICAL finding yields `SUSPICIOUS` or `MALICIOUS` even
+if another scanner failed. Such results carry `complete=false` and are partial analyses
+(Section 6).
 
 Interpretation for a conversion gate:
 
@@ -251,7 +263,8 @@ Interpretation for a conversion gate:
 - `SUSPICIOUS` includes legitimate documents with active features, such as forms, attachments
   or external templates.
 - `MALICIOUS` is the engine's severity judgement about an indicator, not a confirmed label.
-- `UNABLE_TO_SCAN` must never be treated as `SAFE`.
+- `UNABLE_TO_SCAN` must never be treated as `SAFE`, and no verdict with `complete=false`
+  should authorize conversion.
 
 ## 10. The Render `tunl0` discovery and correction (Phases C7A-C7D)
 
@@ -332,8 +345,13 @@ The Lab's [test catalog](../frontend/lib/testCatalog.ts) defines 16 inert fixtur
 deterministically in the browser:
 
 - 6 benign controls: text, CSV, RTF, OOXML, SVG and PDF;
-- 6 suspicious-indicator fixtures (SVG event handlers, RTF DDE marker, OOXML external template,
-  PDF attachment, PDF auto-JavaScript with an empty script);
+- 6 suspicious-indicator fixtures:
+  - an SVG with an empty `<script>` element;
+  - an SVG with an empty `onload` event handler;
+  - an RTF DDE marker;
+  - an OOXML external template;
+  - a PDF with an embedded text attachment;
+  - a PDF with automatic JavaScript containing an empty script;
 - 3 high-severity-indicator fixtures (OOXML `ms-` external relationship, RTF auto-updating object
   marker, PDF `/Launch` action with no target);
 - 1 deliberately malformed PDF.
@@ -356,8 +374,8 @@ module that is also part of the 368. CI reruns of the same commit range are not 
 | [CI 40375905364](https://github.com/almuthanna1/filesmagic-security-engine/actions/runs/40375905364) | Backend `0a9148026d5d552d120ab76ba3d1d19d20f14049`; Ubuntu 24.04, Python 3.11, non-root; `FM_REQUIRE_LINUX_TESTS=1` (Linux tests may not skip) | Backend job: **368 passed**, 0 failed, 0 skipped. Second step with `ipip` loaded (real `tunl0` in every new namespace): `tests/test_worker_linux.py` **27 passed**, 0 skipped. Production-image and frontend jobs passed. |
 | [CI 40381320558](https://github.com/almuthanna1/filesmagic-security-engine/actions/runs/40381320558) | Frontend commit `279ad39428d3ac557003ae70b52791cb240f1b0d` | All three jobs passed; again **368 passed** and **27 passed** (same suites, new run, not 395 new tests). |
 | [Phase C4 record](phase-c4-test-results.md) | Engine and Lab at `90453e4`, benign/synthetic staging | **19/19** acceptance checks passed; **16/16** fixtures matched; an extra on-Render egress demonstration (N1) was **blocked** (no shell on Render Free; shown in CI instead). Historical, not retested in C7. |
-| C7D hosted scans (this phase series) | Render `0a91480`, `dep-dbfplih42hec738cakpg`; staging Lab then still the earlier frontend (`…a2xoc1lgx`) | Harmless DOCX `SAFE` (`d725d991ca8944c1`, 6,808 ms); harmless PDF `SAFE` (`9da181d003954729`, 6,453 ms); inert Launch-action PDF `MALICIOUS` with `PDF_Launch_Action` + `PDF_LAUNCH_ACTION` (`406c1cb8b72e4797`, 6,201 ms). All three: every isolation value as listed in Section 10, `isolation_required=true`, `isolation_missing=[]`; the server log showed `lo` + inert `tunl0` for each request. Unauthenticated scans returned 401, CORS admitted only the staging Lab, and the response carried no diagnostics. |
-| C7E hosted scans (recorded in Phase C7E) | Render `0a91480`; Vercel staging `279ad39`, `dpl_4RLCd1apcJmGAsCY4Pwq6Bqr7WQ8` | Harmless DOCX `SAFE` (`c0d5fa59d3194922`, 7,111.4 ms); harmless PDF `SAFE` (`e6bbdbfdf4594524`, 6,341.9 ms); inert Launch-action PDF `MALICIOUS` (`5edb0d4ba37d4b3c`, 6,432.9 ms); no missing required control. Admin login succeeded; unauthenticated token and scan requests returned 401; CSV/JSON exports kept findings and isolation metadata; an 11 MiB file showed the 10 MB limit message before upload. Checked against Render logs during C7E; not re-executed for this package. |
+| C7D hosted scans (this phase series) | Render `0a91480`, `dep-dbfplih42hec738cakpg`; staging Lab then still the earlier frontend (`…a2xoc1lgx`) | Harmless DOCX `SAFE` (`d725d991ca8944c1`, 6,808 ms); harmless PDF `SAFE` (`9da181d003954729`, 6,453 ms); inert synthetic Launch-indicator PDF `MALICIOUS` with `PDF_Launch_Action` + `PDF_LAUNCH_ACTION` (`406c1cb8b72e4797`, 6,201 ms). All three: every isolation value as listed in Section 10, `isolation_required=true`, `isolation_missing=[]`; the server log showed `lo` + inert `tunl0` for each request. Unauthenticated scans returned 401, CORS admitted only the staging Lab, and the response carried no diagnostics. |
+| C7E hosted scans (recorded in Phase C7E) | Render `0a91480`; Vercel staging `279ad39`, `dpl_4RLCd1apcJmGAsCY4Pwq6Bqr7WQ8` | Harmless DOCX `SAFE` (`c0d5fa59d3194922`, 7,111.4 ms); harmless PDF `SAFE` (`e6bbdbfdf4594524`, 6,341.9 ms); inert synthetic Launch-indicator PDF `MALICIOUS` (`5edb0d4ba37d4b3c`, 6,432.9 ms); no missing required control. Admin login succeeded; unauthenticated token and scan requests returned 401; CSV/JSON exports kept findings and isolation metadata; an 11 MiB file showed the 10 MB limit message before upload. Checked against Render logs during C7E; not re-executed for this package. |
 
 **Deployment identity (rechecked for this package, read-only):**
 
@@ -384,6 +402,10 @@ submission.
   tunnel was verified ([IsolationReport](../frontend/components/IsolationReport.tsx)).
 - **Production.** The customer-facing FilesMagic site and conversion backend, the original
   Security Engine, and `main` (`e6fdbd4`) were not changed by this work.
+- **Integration status.** The hardened engine exists on the research branch and the staging
+  service only. Whether, or how, the customer-facing conversion pipeline calls any version of the
+  engine was not examined or verified for this package. Integrating the gate, with the rule in
+  Section 6, is future work, and nothing here claims it is in place.
 
 ## 15. System performance
 
@@ -448,6 +470,7 @@ minute.
 | Render's written authorization for live-malware analysis on its platform | **Not requested**; required before any hosted upload ([Render Acceptable Use Policy](https://render.com/acceptable-use)) |
 | Selection of the independently labelled dataset (sources, label rules, size, time split) | **Not started**; design in [evaluation/README.md](../evaluation/README.md) |
 | Agreement on detection-performance metrics and reporting | **Proposed** (Section 19) |
+| Evaluation harness made strict-aware (record and require isolation, measure worker memory) and verified on the Linux VM | **Not started** (code change; Section 19) |
 
 Genuine-malware evaluation stays **blocked** until the applicable rows are resolved and
 recorded. The staging Lab and Render engine are for benign and inert synthetic files only. No
@@ -458,8 +481,30 @@ academic or institutional approval is implied anywhere in this package.
 Following [evaluation/README.md](../evaluation/README.md) and the
 [handling proposal](malware-sample-handling-procedure.md):
 
-- **Environment.** An isolated offline VM with its network adapter detached, the engine running
-  in process with strict isolation. Never the hosted staging service.
+- **Environment.** An isolated offline VM with its network adapter detached. Never the hosted
+  staging service.
+- **Harness architecture.** [`evaluation/evaluate.py`](../evaluation/evaluate.py) calls `/scan`
+  through FastAPI's in-process `TestClient`, with a signing key generated for that run. The API
+  code is the same as deployed, so every sample is still parsed in a **separate worker process**
+  (`python -m app.worker`) with the worker's controls; only the HTTP layer is in process.
+  Recorded durations therefore include worker start-up.
+- **Strict-isolation compatibility (checked in Phase C8 with two inert benign files, on Windows,
+  where namespaces are unavailable).**
+  - **Default:** both files `SAFE`.
+  - **With `SECURITY_ENGINE_REQUIRE_ISOLATION=1`:** both `UNABLE_TO_SCAN` ("3 of 3 applicable
+    scanners failed").
+  - **Harness tests:** `tests/test_evaluation.py`, 20 passed.
+
+  The harness runs under strict mode and fails closed, but it is **not strict-aware**:
+  - it neither sets nor checks strict mode;
+  - it records neither `isolation_required`, `isolation` nor `isolation_missing`, so a refused
+    scan is indistinguishable from a parser failure, and a non-strict run looks identical to a
+    strict one;
+  - `peak_rss_mib` measures the harness process only (`RUSAGE_SELF`), not the workers.
+
+  Before any evaluation run, the harness must record these fields and refuse to run unless strict
+  mode is configured. It must then be verified on the Linux VM, where namespaces are expected to
+  work, as in CI. That is a small code change, not yet made or approved.
 - **Ground truth fixed before scanning.**
   - `MALICIOUS`: a curated repository with family attribution, **and** at least five
     independent vendor detections or a published analysis.
@@ -483,13 +528,19 @@ Following [evaluation/README.md](../evaluation/README.md) and the
 
 ## 20. Conclusion and next steps
 
-The project delivers:
+The project delivers, on a separate research staging deployment:
 
 - an implemented, authenticated, multi-scanner document gate;
 - a per-scan worker that fails closed;
-- verified network isolation and capability dropping on the hosted staging service.
+- network isolation and capability dropping, with two kinds of evidence:
+  - **independently exercised in Linux CI**: blocked connections, unchanged interfaces, and
+    capabilities that cannot be regained, including with a real `tunl0`;
+  - **runtime-reported on Render** as the worker's own kernel read-backs
+    (`network_verified=true`, `capabilities_dropped=true`, `isolation_missing=[]`), not
+    independently probed there.
 
-Linux CI substantiates the kernel-level claims, and staging substantiates the functional claims.
+Staging substantiates the functional claims. The gate is not integrated into the
+customer-facing conversion pipeline.
 The `tunl0` episode showed why a security invariant must be checked precisely, and why evidence
 must come from the target environment and not only from CI.
 
