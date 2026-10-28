@@ -51,8 +51,6 @@ export interface ScanResult {
 const API_URL = process.env.NEXT_PUBLIC_SECURITY_ENGINE_URL;
 
 export class ApiError extends Error {}
-// The Lab session is missing or expired: show the login form.
-export class AuthRequiredError extends ApiError {}
 
 function isFinding(value: unknown): value is Finding {
   const f = value as Finding;
@@ -104,20 +102,6 @@ export async function sha256Hex(file: File): Promise<string> {
   return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-// Lab session (same-origin route handlers; the session cookie is HttpOnly).
-export async function login(password: string): Promise<void> {
-  const response = await fetch("/api/session", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ password }),
-  });
-  if (!response.ok) throw new ApiError(detailOf(await readJson(response)) || `Login failed (HTTP ${response.status}).`);
-}
-
-export async function logout(): Promise<void> {
-  await fetch("/api/session", { method: "DELETE" });
-}
-
 // Must match MAX_UPLOAD_BYTES in the engine (app/main.py) and lib/auth.ts.
 export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 // Same wording as the engine's HTTP 413 response.
@@ -130,7 +114,6 @@ async function scanToken(sha256: string, size: number): Promise<string> {
     body: JSON.stringify({ sha256, size }),
   });
   const data = await readJson(response);
-  if (response.status === 401) throw new AuthRequiredError(detailOf(data) || "Log in to scan files.");
   const token = (data as { token?: unknown } | undefined)?.token;
   if (!response.ok || typeof token !== "string") {
     throw new ApiError(detailOf(data) || `Could not authorize the scan (HTTP ${response.status}).`);
@@ -138,7 +121,7 @@ async function scanToken(sha256: string, size: number): Promise<string> {
   return token;
 }
 
-// 1. Hash the file in the browser. 2. Ask the Lab (server side, session required) for a
+// 1. Hash the file in the browser. 2. Ask the Lab (server-side, no login) for a
 // short-lived token bound to that hash and size. 3. Upload the raw file straight to the engine.
 // The file never passes through Vercel.
 export async function scanFile(file: File): Promise<ScanResult> {

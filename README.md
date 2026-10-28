@@ -26,7 +26,7 @@ What exists:
 - Office scanner (`app/scanners/office.py`): structural analysis of OLE and OOXML documents
 - PDF scanner (`app/scanners/pdf.py`): structural analysis of PDF documents
 - 10 MB upload limit on `POST /scan`
-- Scan authorization: short-lived, single-use, file-bound Ed25519 tokens issued by the Lab after admin login (`app/auth.py`)
+- Scan authorization: short-lived, single-use, file-bound Ed25519 tokens issued by the passwordless research Lab (`app/auth.py`); token issuance has only a best-effort in-memory throttle
 - Per-scan isolated worker process with resource limits (`app/worker.py`)
 - Malware Evaluation workflow in the Security Lab (`/evaluation`) with CSV/JSON export
 
@@ -266,7 +266,7 @@ $env:SECURITY_ENGINE_CORS_ORIGINS="https://lab.example.com"; uvicorn app.main:ap
 ### Access control
 
 `POST /scan` requires `Authorization: Bearer <token>`. Tokens are minted by the Security
-Lab's server-side route `/api/scan-token`, only for a logged-in administrator, and are:
+Lab's server-side route `/api/scan-token` without user login, and are:
 
 - **Ed25519-signed**: the Lab (Vercel) holds the private key; the engine (Render) holds only
   the public key, so nothing on the scanning host can mint tokens;
@@ -274,17 +274,23 @@ Lab's server-side route `/api/scan-token`, only for a logged-in administrator, a
 - **bound to one file**: its SHA-256 and size, checked after upload (HTTP 403 on mismatch).
 
 The browser hashes the file, gets a token, and uploads the file directly to Render; file
-contents never pass through Vercel. The token is checked before any body byte is read, and
+contents never pass through Vercel.
+
+**Passwordless staging risk:** anyone who can reach this Lab can request file-bound scan
+credentials; these tokens are not user authentication. The token route has only a
+best-effort per-IP, per-function-instance limit (12 issued per 15 minutes), which
+is not a shared distributed abuse control. The Render service still enforces its
+10 MiB upload cap, scan concurrency, token replay checks and isolation. Never
+submit genuine malware or confidential data to hosted staging; use the authorized
+offline VM for any approved malicious-document work. The token is checked before any body byte is read, and
 20 failed attempts per minute from one address make further requests from it HTTP 429. If
 `SECURITY_ENGINE_TOKEN_PUBLIC_KEY` is unset, every scan is refused (`/health` reports
 `auth_configured: false`).
 
-Generate the keys and the admin password hash (Node 20+):
+Generate the Ed25519 key pair (Node 20+):
 
 ```bash
 node -e "const k=require('crypto').generateKeyPairSync('ed25519');console.log('LAB_SCAN_TOKEN_PRIVATE_KEY='+k.privateKey.export({format:'der',type:'pkcs8'}).toString('base64'));console.log('SECURITY_ENGINE_TOKEN_PUBLIC_KEY='+k.publicKey.export({format:'der',type:'spki'}).toString('base64'))"
-node -e "const c=require('crypto');console.log('LAB_SESSION_SECRET='+c.randomBytes(32).toString('base64url'))"
-node -e "const c=require('crypto'),s=c.randomBytes(16);console.log('LAB_ADMIN_PASSWORD_HASH=scrypt$'+s.toString('base64')+'$'+c.scryptSync(process.argv[1],s,32).toString('base64'))" "<your long password>"
 ```
 
 ### Scan isolation
@@ -350,7 +356,7 @@ cp .env.example .env.local   # Windows PowerShell: Copy-Item .env.example .env.l
 | Variable | Purpose | Local value |
 |----------|---------|-------------|
 | `NEXT_PUBLIC_SECURITY_ENGINE_URL` | Base URL of the Security Engine API. Inlined at build time, so rebuild after changing it. | `http://localhost:8000` |
-| `LAB_ADMIN_PASSWORD_HASH`, `LAB_SESSION_SECRET`, `LAB_SCAN_TOKEN_PRIVATE_KEY` | Server-only login and token signing (see "Access control"). | generated locally |
+| `LAB_SCAN_TOKEN_PRIVATE_KEY` | Server-only token signing, no login (see "Access control"). | generated locally |
 
 Pages: `/` (simple scanner) and `/evaluation` (Malware Evaluation: record each sample's
 source dataset and independently verified classification next to the observed verdict,
@@ -449,7 +455,7 @@ detects Next.js; no `vercel.json` is needed.
 
 | Variable | Where | Value |
 |----------|-------|-------|
-| `LAB_ADMIN_PASSWORD_HASH`, `LAB_SESSION_SECRET`, `LAB_SCAN_TOKEN_PRIVATE_KEY` | Vercel (Production, sensitive) | See "Access control". Never `NEXT_PUBLIC_`. |
+| `LAB_SCAN_TOKEN_PRIVATE_KEY` | Vercel (Production, sensitive) | See "Access control". Never `NEXT_PUBLIC_`. |
 | `SECURITY_ENGINE_TOKEN_PUBLIC_KEY` | Render | Public half of the token key pair. Required: without it every scan is refused. |
 | `SECURITY_ENGINE_MAX_CONCURRENT_SCANS` | Render (optional) | Default `1` (sized for 512 MB). |
 | `SECURITY_ENGINE_WORKER_MEMORY_MB` | Render (optional) | Writable memory per worker, default `320`. |

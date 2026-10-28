@@ -4,11 +4,9 @@ import { useId, useMemo, useState, useSyncExternalStore } from "react";
 import FileDropzone, { formatBytes } from "@/components/FileDropzone";
 import IsolationReport from "@/components/IsolationReport";
 import LabNav from "@/components/LabNav";
-import LoginForm from "@/components/LoginForm";
 import ScanResultView from "@/components/ScanResultView";
 import {
   ApiError,
-  AuthRequiredError,
   scanFile,
   sha256Hex,
   type Finding,
@@ -167,7 +165,6 @@ export default function EvaluationPage() {
   const [expected, setExpected] = useState<Expected>("MALICIOUS");
   const [scanning, setScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [needsLogin, setNeedsLogin] = useState(false);
   const [latest, setLatest] = useState<ScanResult | null>(null);
   const raw = useSyncExternalStore(subscribe, snapshot, () => "[]");
   const records = useMemo(() => parseRecords(raw), [raw]);
@@ -192,10 +189,6 @@ export default function EvaluationPage() {
       setLatest(result);
       save([fromResult(result, file.name, source.trim(), expected), ...records]);
     } catch (e) {
-      if (e instanceof AuthRequiredError) {
-        setNeedsLogin(true);
-        return;
-      }
       const reason = e instanceof ApiError ? e.message : "Unexpected error while scanning the file.";
       setError(reason);
       // The attempt is still a research outcome: the engine could not produce a verdict.
@@ -253,10 +246,10 @@ export default function EvaluationPage() {
           Scan independently labelled samples one at a time and record the expected classification next to the
           engine&apos;s observed verdict. Only results are kept (in this browser); file contents are never stored.
         </p>
+        <p className={styles.intro}>Hosted research staging is for benign and inert test files only. Do not upload genuine malware; approved malicious-document studies must remain offline.</p>
         <LabNav />
       </header>
 
-      {needsLogin && <LoginForm onLogin={() => setNeedsLogin(false)} />}
 
       <section className={`${styles.panel} ${styles.gap}`} aria-labelledby="sample-heading">
         <h2 id="sample-heading" className={styles.panelHeading}>
