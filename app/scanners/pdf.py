@@ -20,9 +20,11 @@ import threading
 from collections import defaultdict
 
 from pypdf import PasswordType, PdfReader, apply_configuration
+from pypdf.errors import PdfReadError
 from pypdf.generic import ArrayObject, DictionaryObject, IndirectObject, StreamObject
 
 from app.models import Finding, Severity
+from app.scanners.base import ScanError
 
 NAME = "pdf"
 
@@ -66,8 +68,11 @@ EXPLOIT_JS = re.compile(
 )
 
 
-class PdfScanError(RuntimeError):
+class PdfScanError(ScanError):
     """The PDF could not be analysed reliably."""
+
+    # pypdf raises PdfReadError (and subclasses, e.g. PdfStreamError) on malformed input.
+    malformed_causes = (PdfReadError,)
 
 
 def clean(text, limit: int = 100) -> str:

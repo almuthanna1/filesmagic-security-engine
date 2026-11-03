@@ -39,16 +39,11 @@ import signal
 import sys
 import traceback
 from pathlib import Path
-from xml.etree.ElementTree import ParseError as XMLParseError
-from zipfile import BadZipFile
 
-from defusedxml.common import DefusedXmlException
 from pydantic import ValidationError
-from pypdf.errors import PdfReadError
 
 from app.models import NetworkDiagnostics, ScannerStatus, WorkerReport
-from app.scanners.office import OfficeScanError
-from app.scanners.pdf import PdfScanError
+from app.scanners.base import ScanError
 
 APP_ROOT = Path(__file__).resolve().parent.parent
 POSIX = os.name == "posix"
@@ -188,17 +183,19 @@ def safe_error(e: BaseException) -> str:
 def classify(error: Exception) -> str:
     """Separate expected rejections of malformed input from possible scanner bugs.
 
-    The PDF/Office scanners wrap low-level failures in their own exception types. A parser
-    error, or a scanner's own structure/limit check (no cause), is an expected outcome for
-    hostile files; anything else wrapped or raised could be a programming error.
+    A scanner signals an expected problem by raising a ScanError. Raised with no cause it is
+    the scanner's own structure/limit check (invalid_structure); wrapping one of that
+    scanner's declared malformed_causes it is a parser rejecting hostile input
+    (malformed_input). Each scanner declares its own malformed_causes (see ScanError), so a
+    new scanner is classified correctly without changing this function. Anything that is not a
+    ScanError, or a ScanError wrapping some other cause, could be a programming error.
     """
-    cause = error.__cause__
-    if isinstance(error, (PdfScanError, OfficeScanError)) and cause is None:
-        return "invalid_structure"
-    if isinstance(error, PdfScanError) and isinstance(cause, PdfReadError):
-        return "malformed_input"
-    if isinstance(error, OfficeScanError) and isinstance(cause, (BadZipFile, XMLParseError, DefusedXmlException)):
-        return "malformed_input"
+    if isinstance(error, ScanError):
+        cause = error.__cause__
+        if cause is None:
+            return "invalid_structure"
+        if isinstance(cause, error.malformed_causes):
+            return "malformed_input"
     return "unexpected"
 
 
