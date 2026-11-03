@@ -194,11 +194,15 @@ def office_parts(kind: str = "docx", main_type: str | None = None, overrides: di
 
 
 def zip_parts(files: dict, method: int = zipfile.ZIP_DEFLATED) -> bytes:
-    """The parts as a ZIP, [Content_Types].xml first, as Office writes it."""
+    """The parts as a ZIP, [Content_Types].xml first, as Office writes it. Deterministic: every
+    entry carries the ZIP epoch (1980-01-01) instead of the current time, so the same parts always
+    give the same bytes and research samples can be regenerated bit for bit."""
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", method) as zf:
         for name in sorted(files, key=lambda n: n != "[Content_Types].xml"):
-            zf.writestr(name, files[name])
+            info = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
+            info.external_attr = 0o600 << 16  # what writestr(name, ...) sets
+            zf.writestr(info, files[name], compress_type=method)
     return buf.getvalue()
 
 

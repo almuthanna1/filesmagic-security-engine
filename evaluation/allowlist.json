@@ -1,0 +1,108 @@
+{
+  "schema": 1,
+  "reviewed": "2026-11-03",
+  "reviewed_by": "Almuthanna Shihab with Claude Code; requires supervisor approval before the first acquisition",
+  "policy": [
+    "Exactly these URLs, over HTTPS, without redirects; nothing is crawled or discovered.",
+    "Every file is size-checked and SHA-256-verified before it is kept; archives are opened in memory and only the listed members are accepted.",
+    "Password-protected archives, unexpected member names, unsafe paths and oversized content are rejected.",
+    "Acquisition runs on an online host that is NOT the scanning VM; only verified files are transferred into the offline VM.",
+    "No downloaded file is opened by a document reader. Didier Stevens' scripts run only as the fixed commands in evaluation/prepare_samples.py and evaluation/benchmark.py."
+  ],
+  "resources": [
+    {
+      "id": "eicar-com-txt",
+      "source": "EICAR",
+      "page": "https://www.eicar.org/download-anti-malware-testfile/",
+      "url": "https://secure.eicar.org/eicar.com.txt",
+      "kind": "file",
+      "save_as": "eicar.com.txt",
+      "size": 68,
+      "sha256": "275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f",
+      "role": "security-test-file",
+      "active_content": "none: a 68-byte ASCII test string that anti-malware products detect by agreement; never executed here",
+      "license": "EICAR terms on the download page: download at your own risk"
+    },
+    {
+      "id": "eicar-com-zip",
+      "source": "EICAR",
+      "page": "https://www.eicar.org/download-anti-malware-testfile/",
+      "url": "https://secure.eicar.org/eicar_com.zip",
+      "kind": "zip",
+      "save_as": "eicar_com.zip",
+      "size": 184,
+      "sha256": null,
+      "sha256_note": "EICAR publishes no hash for the archive; it is verified by its size and by its single member, and its SHA-256 is recorded in provenance.json at acquisition",
+      "members": {
+        "eicar.com": {"size": 68, "sha256": "275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f"}
+      },
+      "role": "security-test-file",
+      "active_content": "none: the same test string inside a ZIP archive",
+      "license": "EICAR terms on the download page: download at your own risk"
+    },
+    {
+      "id": "ds-pdfid",
+      "source": "Didier Stevens Suite",
+      "page": "https://blog.didierstevens.com/programs/pdf-tools/",
+      "url": "https://raw.githubusercontent.com/DidierStevens/DidierStevensSuite/7d625d0b05c4638b981a2a2cc9a8481d7b73e56d/pdfid.py",
+      "kind": "file",
+      "save_as": "pdfid.py",
+      "size": 45194,
+      "sha256": "e958a01f1c2596470f27d3c308061b85d7059ff476a58d74f1957a71b4f1248f",
+      "git_blob": "4f8a2fd74a38b6d5df94b220f908f57c3164d279",
+      "role": "reference-tool",
+      "active_content": "none: Python source, PDFiD 0.2.10. Used only as a library (PDFiD, PDFiD2JSON) on local .pdf paths; its URL fetching, ZIP password, -S eval and -p plugin code paths are never reached",
+      "license": "public domain (source header: 'Source code put in public domain by Didier Stevens, no Copyright')"
+    },
+    {
+      "id": "ds-mpdf",
+      "source": "Didier Stevens Suite",
+      "page": "https://blog.didierstevens.com/programs/pdf-tools/",
+      "url": "https://raw.githubusercontent.com/DidierStevens/DidierStevensSuite/7d625d0b05c4638b981a2a2cc9a8481d7b73e56d/mPDF.py",
+      "kind": "file",
+      "save_as": "mPDF.py",
+      "size": 25658,
+      "sha256": "d241d76756c919bdbee35b5fb290cd0c724a4ad25d752c8f6873851e1ae2b6de",
+      "git_blob": "10221ab5d1588bcbfa2dbc4fbe8d5884af2e0a5b",
+      "role": "generator",
+      "active_content": "none: Python module that writes PDF syntax to the file it is given; standard library only",
+      "license": "public domain (source header: 'Source code put in public domain by Didier Stevens, no Copyright')"
+    },
+    {
+      "id": "ds-make-pdf-javascript",
+      "source": "Didier Stevens Suite",
+      "page": "https://blog.didierstevens.com/programs/pdf-tools/",
+      "url": "https://raw.githubusercontent.com/DidierStevens/DidierStevensSuite/7d625d0b05c4638b981a2a2cc9a8481d7b73e56d/make-pdf-javascript.py",
+      "kind": "file",
+      "save_as": "make-pdf-javascript.py",
+      "size": 4043,
+      "sha256": "6b5bc2d658f4a53b932d8e1e677b84115d9ebd6353040d03ea08e5fb66039651",
+      "git_blob": "f837a70479a1c39bfd533cd306bc81345e449b6f",
+      "role": "generator",
+      "active_content": "none: writes a PDF whose /OpenAction is the default script app.alert({cMsg: 'Hello from PDF JavaScript', ...}); the script is never run",
+      "license": "public domain (source header)"
+    },
+    {
+      "id": "ds-make-pdf-embedded",
+      "source": "Didier Stevens Suite",
+      "page": "https://blog.didierstevens.com/programs/pdf-tools/",
+      "url": "https://raw.githubusercontent.com/DidierStevens/DidierStevensSuite/7d625d0b05c4638b981a2a2cc9a8481d7b73e56d/make-pdf-embedded.py",
+      "kind": "file",
+      "save_as": "make-pdf-embedded.py",
+      "size": 5392,
+      "sha256": "5ae80ab1d48fb9e791c272900d2ef76991e55019a6fc74f35e4b833c52371189",
+      "git_blob": "afb2baee247a813f4b4a399007f8576c5f619755",
+      "role": "generator",
+      "active_content": "none as used: embeds an inert text file. Its -a (auto-open) and -b (launch button) options add exportDataObject launch JavaScript and are refused by prepare_samples.py",
+      "license": "public domain (source header: 'Source code put in public domain by Didier Stevens, no Copyright')"
+    }
+  ],
+  "excluded": [
+    {"what": "Didier Stevens' PDF-with-DOC macro dropper and every other sample document from the blog or its comments", "why": "a macro-carrying payload; this study uses no third-party sample documents, only generators run with fixed inert arguments"},
+    {"what": "https://secure.eicar.org/eicar.com", "why": "identical content to eicar.com.txt (a duplicate adds nothing)"},
+    {"what": "https://secure.eicar.org/eicar_com2.zip", "why": "an archive nested in an archive; adds no document-format coverage"},
+    {"what": "make-pdf-helloworld.py", "why": "Python 2 only; the same clean PDF is built by calling mPDF directly"},
+    {"what": "pdf-parser.py, pdftool.py, make-pdf-jbig2.py and the blog's ZIP bundles", "why": "not needed; the ZIP bundles' contents were not reviewed"},
+    {"what": "any password-protected archive (e.g. password 'infected')", "why": "policy: live-sample archives are out of scope and need separate supervisor approval"}
+  ]
+}
