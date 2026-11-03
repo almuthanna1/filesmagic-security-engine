@@ -39,6 +39,8 @@ class ScannerStatus(BaseModel):
         default=None, description="malformed_input/invalid_structure: expected for hostile or broken files; "
         "unexpected: a possible scanner bug; worker: the isolated worker crashed or timed out.")
     error_type: str | None = Field(default=None, pattern=r"^[A-Za-z_][A-Za-z0-9_]{0,79}$")
+    duration_ms: float | None = Field(default=None, ge=0, le=3_600_000, description="Time this scanner spent on the "
+                                      "document inside the worker; None if the worker never reported it.")
 
 
 _KERNEL_NAME = r"^[A-Za-z_][A-Za-z0-9_]{0,39}$"  # exception types and errno names, e.g. ENODEV

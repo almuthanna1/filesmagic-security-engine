@@ -37,6 +37,7 @@ import os
 import re
 import signal
 import sys
+import time
 import traceback
 from pathlib import Path
 
@@ -199,6 +200,10 @@ def classify(error: Exception) -> str:
     return "unexpected"
 
 
+def _ms(start: float) -> float:
+    return round((time.perf_counter() - start) * 1000, 3)
+
+
 def code_trace(error: Exception) -> str:
     """Where an unexpected failure happened: file:line:function frames, innermost last.
     Exception messages are left out on purpose; they can quote document content."""
@@ -210,20 +215,19 @@ def code_trace(error: Exception) -> str:
 def analyse(scanners, data: bytes, isolation: dict[str, bool] | None = None) -> WorkerReport:
     statuses, findings, traces = [], [], {}
     for scanner in scanners:
+        start = time.perf_counter()
         try:
             result = scanner.scan("", data)  # scanners identify formats from content, never names
         except Exception as e:
             kind = classify(e)
             statuses.append(ScannerStatus(name=scanner.name, status="failed", error=safe_error(e), error_kind=kind,
-                                          error_type=type(e.__cause__ or e).__name__))
+                                          error_type=type(e.__cause__ or e).__name__, duration_ms=_ms(start)))
             if kind == "unexpected":
                 traces[scanner.name] = re.sub(r"[^A-Za-z0-9_.:<> -]", "?", code_trace(e))
             continue
-        if result is None:
-            statuses.append(ScannerStatus(name=scanner.name, status="not_applicable"))
-        else:
-            statuses.append(ScannerStatus(name=scanner.name, status="completed"))
-            findings += result
+        status = "not_applicable" if result is None else "completed"
+        statuses.append(ScannerStatus(name=scanner.name, status=status, duration_ms=_ms(start)))
+        findings += result or []
     return WorkerReport(scanners=statuses, findings=findings, isolation=isolation or {}, traces=traces)
 
 
