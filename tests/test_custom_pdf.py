@@ -61,11 +61,11 @@ def test_every_name_can_be_read_from_a_dictionary():
 # ----------------------------------------------------------------------------- contract
 
 
-def test_only_pdf_is_applicable():
+def test_only_pdf_and_ooxml_are_applicable():
     assert scanner.name == "custom"
     assert scanner.scan("", b"") is None  # the worker's warm-up call
     assert scanner.scan("report.pdf", b"plain text") is None  # the filename is never trusted
-    assert scanner.scan("", make_ooxml({})) is None  # OOXML arrives with C4-C10
+    assert scanner.scan("", make_ooxml({})) == []  # OOXML: applicable since C4-C6, and clean
 
 
 def test_findings_are_attributed_to_the_custom_scanner():
@@ -215,8 +215,8 @@ def test_api_clean_pdf_is_safe_with_four_scanners():
     assert status(body)["status"] == "completed"
 
 
-def test_api_non_pdf_is_not_applicable_for_the_custom_scanner():
-    body = post_scan(client, make_ooxml({})).json()
+def test_api_unsupported_format_is_not_applicable_for_the_custom_scanner():
+    body = post_scan(client, b"plain text, neither PDF nor OOXML").json()
     assert status(body)["status"] == "not_applicable"
     assert body["verdict"] == Verdict.SAFE
 

@@ -44,6 +44,7 @@ FAILURE_REASONS = {
     ("pdf", "invalid_structure"): "PDF structure is invalid or exceeds analysis limits",
     ("office", "malformed_input"): "Office ZIP/XML structure is malformed or unreadable",
     ("office", "invalid_structure"): "Office document structure is invalid or exceeds analysis limits",
+    ("custom", "malformed_input"): "Office ZIP container or XML part is malformed; the custom detector could not read it",
     ("custom", "invalid_structure"): "Document syntax is invalid or exceeds the custom detector's analysis limits",
 }
 

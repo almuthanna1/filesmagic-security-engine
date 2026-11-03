@@ -4,6 +4,9 @@ All of them are inert: the only script is app.alert(1), stream contents are shor
 nothing exploits anything. They carry exactly the syntax the custom detector inspects.
 """
 
+import io
+import struct
+import zipfile
 import zlib
 
 from tests.pdf_fixtures import make_pdf
@@ -91,3 +94,156 @@ def unterminated_string_pdf() -> bytes:
 
 def unterminated_stream_pdf() -> bytes:
     return b"%PDF-1.7\n1 0 obj\n<< /Length 10 >>\nstream\nno end marker follows"
+
+
+# ============================================================================= OOXML (C4-C6)
+#
+# Minimal but structurally complete packages, as Office writes them: [Content_Types].xml with
+# Defaults and Overrides, package relationships to the main part, and a main part that
+# references one child part explicitly (r:id / r:embed) and one implicitly (styles or
+# presentation properties: a relationship no XML attribute names, which is normal).
+
+REL = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+VBA_REL = "http://schemas.microsoft.com/office/2006/relationships/vbaProject"
+PKG_RELS_NS = "http://schemas.openxmlformats.org/package/2006/relationships"
+PNG = b"\x89PNG\r\n\x1a\n" + b"\0" * 24  # signature only: inert
+VBA_PLACEHOLDER = b"inert placeholder bytes, not a VBA project"
+
+MAIN_TYPES = {
+    "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml",
+    "docm": "application/vnd.ms-word.document.macroEnabled.main+xml",
+    "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml",
+    "xlsm": "application/vnd.ms-excel.sheet.macroEnabled.main+xml",
+    "pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml",
+    "pptm": "application/vnd.ms-powerpoint.presentation.macroEnabled.main+xml",
+}
+DEFAULTS = {"rels": "application/vnd.openxmlformats-package.relationships+xml", "xml": "application/xml", "png": "image/png"}
+
+W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+S = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
+P = "http://schemas.openxmlformats.org/presentationml/2006/main"
+A = "http://schemas.openxmlformats.org/drawingml/2006/main"
+XML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+OFFICE = "application/vnd.openxmlformats-officedocument"
+
+FAMILIES = {
+    "doc": dict(
+        dir="word", main="document.xml",
+        xml=lambda rid: f'{XML}<w:document xmlns:w="{W}" xmlns:r="{REL}" xmlns:a="{A}"><w:body><w:p><w:r>'
+                        f'<w:drawing><a:blip r:embed="{rid}"/></w:drawing></w:r></w:p></w:body></w:document>',
+        child=("image", "media/image1.png", None, PNG),
+        implicit=("styles", "styles.xml", f"{OFFICE}.wordprocessingml.styles+xml", f'{XML}<w:styles xmlns:w="{W}"/>')),
+    "xls": dict(
+        dir="xl", main="workbook.xml",
+        xml=lambda rid: f'{XML}<workbook xmlns="{S}" xmlns:r="{REL}"><sheets>'
+                        f'<sheet name="Sheet1" sheetId="1" r:id="{rid}"/></sheets></workbook>',
+        child=("worksheet", "worksheets/sheet1.xml", f"{OFFICE}.spreadsheetml.worksheet+xml",
+               f'{XML}<worksheet xmlns="{S}"><sheetData/></worksheet>'),
+        implicit=("styles", "styles.xml", f"{OFFICE}.spreadsheetml.styles+xml", f'{XML}<styleSheet xmlns="{S}"/>')),
+    "ppt": dict(
+        dir="ppt", main="presentation.xml",
+        xml=lambda rid: f'{XML}<p:presentation xmlns:p="{P}" xmlns:r="{REL}"><p:sldIdLst>'
+                        f'<p:sldId id="256" r:id="{rid}"/></p:sldIdLst></p:presentation>',
+        child=("slide", "slides/slide1.xml", f"{OFFICE}.presentationml.slide+xml",
+               f'{XML}<p:sld xmlns:p="{P}"><p:cSld/></p:sld>'),
+        implicit=("presProps", "presProps.xml", f"{OFFICE}.presentationml.presProps+xml",
+                  f'{XML}<p:presentationPr xmlns:p="{P}"/>')),
+}
+
+
+def rels_xml(*relationships: tuple) -> str:
+    """relationships: (Id, Type, Target) or (Id, Type, Target, "External")."""
+    items = "".join(f'<Relationship Id="{r[0]}" Type="{r[1]}" Target="{r[2]}"'
+                    + (' TargetMode="External"' if len(r) > 3 else "") + "/>" for r in relationships)
+    return f'{XML}<Relationships xmlns="{PKG_RELS_NS}">{items}</Relationships>'
+
+
+def content_types(overrides: dict[str, str], defaults: dict[str, str] = DEFAULTS, extra: str = "") -> str:
+    body = "".join(f'<Default Extension="{e}" ContentType="{t}"/>' for e, t in defaults.items())
+    body += "".join(f'<Override PartName="/{p}" ContentType="{t}"/>' for p, t in overrides.items())
+    return f'{XML}<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">{body}{extra}</Types>'
+
+
+def office_parts(kind: str = "docx", main_type: str | None = None, overrides: dict | None = None,
+                 defaults: dict | None = None, main_rels: tuple = (), main_xml: str | None = None) -> dict:
+    """Every part of a valid package as {name: content}; tests change entries, then call zip_parts.
+    kind: docx docm xlsx xlsm pptx pptm. Macro-enabled kinds carry a (placeholder) VBA project,
+    as a normal macro-enabled file does."""
+    fam = FAMILIES[kind[:3]]
+    d, main = fam["dir"], f"{fam['dir']}/{fam['main']}"
+    child_rel, child_target, child_type, child_body = fam["child"]
+    impl_rel, impl_target, impl_type, impl_body = fam["implicit"]
+    declared = {main: main_type or MAIN_TYPES[kind], f"{d}/{impl_target}": impl_type}
+    if child_type:
+        declared[f"{d}/{child_target}"] = child_type
+    rels = [("rId1", f"{REL}/{child_rel}", child_target), ("rId2", f"{REL}/{impl_rel}", impl_target)]
+    files = {
+        "_rels/.rels": rels_xml(("rId1", f"{REL}/officeDocument", main)),
+        main: main_xml if main_xml is not None else fam["xml"]("rId1"),
+        f"{d}/{child_target}": child_body,
+        f"{d}/{impl_target}": impl_body,
+    }
+    all_defaults = dict(DEFAULTS)
+    if kind.endswith("m"):
+        files[f"{d}/vbaProject.bin"] = VBA_PLACEHOLDER
+        rels.append(("rId3", VBA_REL, "vbaProject.bin"))
+        all_defaults["bin"] = "application/vnd.ms-office.vbaProject"
+    files[f"{d}/_rels/{fam['main']}.rels"] = rels_xml(*rels, *main_rels)
+    files["[Content_Types].xml"] = content_types({**declared, **(overrides or {})}, {**all_defaults, **(defaults or {})})
+    return files
+
+
+def zip_parts(files: dict, method: int = zipfile.ZIP_DEFLATED) -> bytes:
+    """The parts as a ZIP, [Content_Types].xml first, as Office writes it."""
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", method) as zf:
+        for name in sorted(files, key=lambda n: n != "[Content_Types].xml"):
+            zf.writestr(name, files[name])
+    return buf.getvalue()
+
+
+def office_package(kind: str = "docx", parts: dict | None = None, **kw) -> bytes:
+    """office_parts(kind, **kw) with whole parts added or replaced (a value of None removes one)."""
+    files = office_parts(kind, **kw)
+    for name, content in (parts or {}).items():
+        if content is None:
+            files.pop(name, None)
+        else:
+            files[name] = content
+    return zip_parts(files)
+
+
+# ----------------------------------------------------------------------------- ZIP header surgery
+# Field offsets in the local file header (APPNOTE.TXT 4.3.7) and central directory record (4.3.12).
+
+LOCAL = {"method": (8, "H"), "csize": (18, "I"), "usize": (22, "I"), "name": (30, None)}
+CENTRAL = {"method": (10, "H"), "csize": (20, "I"), "usize": (24, "I"), "offset": (42, "I"), "name": (46, None)}
+
+
+def _central_record(data: bytes, name: str) -> int:
+    pos = data.find(b"PK\x01\x02")
+    while pos >= 0:
+        nlen = struct.unpack_from("<H", data, pos + 28)[0]
+        if data[pos + 46:pos + 46 + nlen] == name.encode():
+            return pos
+        pos = data.find(b"PK\x01\x02", pos + 4)
+    raise KeyError(name)
+
+
+def local_offset(data: bytes, name: str) -> int:
+    return struct.unpack_from("<I", data, _central_record(data, name) + 42)[0]
+
+
+def patch(data: bytes, name: str, local: dict | None = None, central: dict | None = None) -> bytes:
+    """Overwrite header fields of ZIP entry `name` in its local header and/or central record
+    (a replacement name must have the same length)."""
+    out = bytearray(data)
+    cpos = _central_record(data, name)
+    for base, table, fields in ((local_offset(data, name), LOCAL, local or {}), (cpos, CENTRAL, central or {})):
+        for field_name, value in fields.items():
+            offset, fmt = table[field_name]
+            if fmt:
+                struct.pack_into("<" + fmt, out, base + offset, value)
+            else:
+                out[base + offset:base + offset + len(value)] = value
+    return bytes(out)
