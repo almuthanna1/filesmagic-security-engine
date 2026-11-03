@@ -17,12 +17,15 @@ param(
 $ErrorActionPreference = "Stop"
 $repo = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 
-function Git { & git -C $repo -c core.autocrlf=false @args; if ($LASTEXITCODE -ne 0) { throw "git $args failed" } }
+# The executable, never a function or alias of the same name (a function called "Git" that runs
+# "& git" would call itself: PowerShell resolves names case-insensitively, functions first).
+$gitExe = (Get-Command git -CommandType Application | Select-Object -First 1).Source
+function Invoke-Git { & $gitExe -C $repo -c core.autocrlf=false @args; if ($LASTEXITCODE -ne 0) { throw "git $args failed" } }
 
-$commit = (Git rev-parse HEAD).Trim()
-if ((Git rev-parse "refs/heads/$Branch").Trim() -ne $commit) { throw "HEAD is not the tip of $Branch" }
-if (Git status --porcelain) { throw "the working tree has uncommitted changes; the ISO must hold exactly one commit" }
-if ((Git rev-parse "refs/remotes/origin/$Branch").Trim() -ne $commit) { throw "$commit is not pushed to origin/$Branch" }
+$commit = (Invoke-Git rev-parse HEAD).Trim()
+if ((Invoke-Git rev-parse "refs/heads/$Branch").Trim() -ne $commit) { throw "HEAD is not the tip of $Branch" }
+if (Invoke-Git status --porcelain) { throw "the working tree has uncommitted changes; the ISO must hold exactly one commit" }
+if ((Invoke-Git rev-parse "refs/remotes/origin/$Branch").Trim() -ne $commit) { throw "$commit is not pushed to origin/$Branch" }
 
 # Refuse EICAR and anything else that is not part of this transfer.
 foreach ($dir in @($Samples, $Acquired)) {
@@ -44,9 +47,9 @@ $stage = Join-Path $env:TEMP "fm-eval-iso-$short"
 if (Test-Path $stage) { Remove-Item -Recurse -Force $stage }
 New-Item -ItemType Directory $stage | Out-Null
 
-Git bundle create (Join-Path $stage "filesmagic.bundle") "refs/heads/$Branch" | Out-Null
-Git archive --format=tar --prefix=filesmagic-security-engine/ -o (Join-Path $stage "source-$short.tar") $commit
-Git archive --format=zip -o (Join-Path $stage "script.zip") $commit evaluation/vm/install_from_iso.sh
+Invoke-Git bundle create (Join-Path $stage "filesmagic.bundle") "refs/heads/$Branch" | Out-Null
+Invoke-Git archive --format=tar --prefix=filesmagic-security-engine/ -o (Join-Path $stage "source-$short.tar") $commit
+Invoke-Git archive --format=zip -o (Join-Path $stage "script.zip") $commit evaluation/vm/install_from_iso.sh
 Expand-Archive (Join-Path $stage "script.zip") $stage
 Move-Item (Join-Path $stage "evaluation\vm\install_from_iso.sh") (Join-Path $stage "install_from_iso.sh")
 Remove-Item -Recurse -Force (Join-Path $stage "evaluation"), (Join-Path $stage "script.zip")
