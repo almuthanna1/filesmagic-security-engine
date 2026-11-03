@@ -97,4 +97,8 @@ Write-Output "ISO      $iso"
 Write-Output "SHA-256  $isoHash"
 Write-Output "commit   $commit"
 Write-Output "files    $($lines.Count) (listed in SHA256SUMS on the medium)"
+# IMAPI keeps the staged files open until its COM objects are released.
+[void][Runtime.InteropServices.Marshal]::ReleaseComObject($result)
+[void][Runtime.InteropServices.Marshal]::ReleaseComObject($fsi)
+[GC]::Collect(); [GC]::WaitForPendingFinalizers()
 Remove-Item -Recurse -Force $stage
