@@ -310,8 +310,8 @@ def post(monkeypatch, data, scanners=None):
     return r.json()
 
 
-def test_default_registry_has_three_scanners():
-    assert [s.name for s in main.SCANNERS] == ["yara-x", "office", "pdf"]
+def test_default_registry_has_four_scanners():
+    assert [s.name for s in main.SCANNERS] == ["yara-x", "office", "pdf", "custom"]
 
 
 def test_api_benign_pdf_is_safe(monkeypatch):

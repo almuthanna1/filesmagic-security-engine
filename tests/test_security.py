@@ -175,7 +175,7 @@ def run_fake(mode, timeout=10.0):
 def test_real_worker_scans_benign_documents():
     for data in (make_ooxml({}), make_pdf(), DATA):
         report = asyncio.run(worker.run(data))
-        assert {s.name for s in report.scanners} == {"yara-x", "office", "pdf"}
+        assert {s.name for s in report.scanners} == {"yara-x", "office", "pdf", "custom"}
         assert all(s.status != "failed" for s in report.scanners)
         assert report.findings == []
         assert report.isolation["process"] and report.isolation["audit_hook"]
