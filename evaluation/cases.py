@@ -39,7 +39,7 @@ CLICK_LINK_JS = "<< /Type /Annot /Subtype /Link /Rect [0 0 50 50] /A " + js_acti
 EXPORT_JS = js_action("this.exportDataObject\\({cName: \"f\", nLaunch: 0}\\);")  # "f": the fixture's attachment key
 
 
-def _cases() -> list[dict]:
+def cases() -> list[dict]:
     att_extra, att_objs = attachment("notes.txt")
     rel = fx.REL
     case = lambda id, indicator, data: dict(id=id, ground_truth="BENIGN", indicator=indicator, data=data)  # noqa: E731
@@ -119,7 +119,7 @@ def main(argv=None) -> int:
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args(argv)
     cmd = worker.command()
-    results = [scan_case(c, args.trials, cmd) for c in _cases()]
+    results = [scan_case(c, args.trials, cmd) for c in cases()]
     env = environment(None) | {"platform": platform.platform(), "python": sys.version.split()[0],
                                "worker_command": cmd[3:], "trials": args.trials}
     args.out.mkdir(parents=True, exist_ok=True)
