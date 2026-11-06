@@ -15,9 +15,9 @@ recorded run in `docs/evidence/`), **proposed** (not built), **rejected** (measu
 | Module 1: PDF action-chain extraction `app/engine/pdf_chains.py` | implemented (`d8b3bec`) |
 | Module 2: chain findings + evidence correlation `app/engine/correlate.py`, `--engine=unified` | implemented (`51a5049`) |
 | Reference vs unified comparison on the 10 cases | measured (section 8) |
-| Correction 1: click-only scripts behind a page destination (explicit classification + regressions) | implemented (`7dc8fe8`), measured (section 13) |
-| Correction 2: refined bytes-only YARA-X rule for automatic triggers `app/engine/rules/pdf.yar` | implemented (`7dc8fe8`), measured (section 13) |
-| Linux-only isolation tests (28) | **not run**: no Linux environment on this machine (section 13.4) |
+| Correction 1: click-only scripts behind a page destination (explicit classification + regressions) | implemented (`7dc8fe8`), measured (section 12) |
+| Correction 2: refined bytes-only YARA-X rule for automatic triggers `app/engine/rules/pdf.yar` | implemented (`7dc8fe8`), measured (section 12) |
+| Linux-only isolation tests (28) | **not run**: no Linux environment on this machine (section 12.5) |
 | Format-aware worker start-up (latency) | proposed, needs a security decision (section 10) |
 | YARA-X compiled-rule reuse; YARA-X `fast_scan` | rejected by measurement (section 6) |
 | Office correlation (macro + relationship + C4-C6) | proposed, next |
@@ -248,12 +248,12 @@ verdict must travel with the file.
   both; that is why YARA-X matches are never removed and a repaired structure disables superseding.
 - All cases are synthetic and BENIGN by ground truth; they demonstrate indicator handling only.
 
-## 13. PDF corrections (Nov 6, commit `7dc8fe8`)
+## 12. PDF corrections (Nov 6, commit `7dc8fe8`)
 
 Evidence: [`docs/evidence/custom-engine-7dc8fe8/`](evidence/custom-engine-7dc8fe8/) (reference and
 unified, 20 trials each, same session, 11 cases: case `2c` was added as an over-correction guard).
 
-### 13.1 Investigation
+### 12.1 Investigation
 
 Which YARA-X strings produced `PDF_JavaScript_With_Automatic_Action` (printed from the match
 offsets, not assumed):
@@ -265,14 +265,14 @@ offsets, not assumed):
 So each issue had a structural part (the PDF scanner's inherited "automatic" flag, already
 replaced by the chain rules since `51a5049`) and a signature part.
 
-### 13.2 Correction 1: click-only scripts are classified as such
+### 12.2 Correction 1: click-only scripts are classified as such
 
 The chain model already excluded them (only `/Next` joins a chain). Added: an explicit INFO finding
 `ENGINE_PDF_USER_TRIGGERED_SCRIPT` that names each user-triggered script chain, and regression tests
 for a GoTo *action* to the page, an indirect destination array, an outline-item click, and the
 over-correction guard (case 2c: the destination page's own `/AA /O` stays automatic).
 
-### 13.3 Correction 2: refined signature `ENGINE_PDF_JavaScript_With_Automatic_Trigger`
+### 12.3 Correction 2: refined signature `ENGINE_PDF_JavaScript_With_Automatic_Trigger`
 
 Concept: a byte signature cannot parse nested dictionaries, so instead of recognising automatic
 triggers more cleverly, it **discounts only occurrences whose bytes prove they are not automatic**:
@@ -298,7 +298,7 @@ matched in up to 4,092 bytes (a 4,055-byte script); longer ones are not proven, 
 fires as the reference rule does (tested at 4,000 and 5,000 bytes). Form formatting scripts
 (`AFNumber_Keystroke(...)`) are under 100 bytes.
 
-### 13.4 Results at `7dc8fe8`
+### 12.4 Results at `7dc8fe8`
 
 | Case | Automatic script present? | Reference "automatic" claims | Unified "automatic" claims |
 |---|---|---|---|
@@ -318,7 +318,7 @@ fires as the reference rule does (tested at 4,000 and 5,000 bytes). Form formatt
   +9 ms (median of case medians 577.0 → 586.1 ms). Accounted for: importing `app.engine` (mostly
   compiling the second rule set) measured 7.1-8.4 ms in 5 runs.
 
-### 13.5 Linux-only isolation tests: not run
+### 12.5 Linux-only isolation tests: not run
 
 28 tests in `tests/test_worker_linux.py` (namespaces, capabilities, rlimits, audit hook,
 tunl0 fallback) skip on Windows. This machine has neither WSL nor Docker. The suitable
@@ -328,7 +328,7 @@ which turns those skips into failures), run on push. Not pushed: the branch is n
 therefore not validated for these commits.** The unified engine changes no isolation code; the
 worker gained only the `--engine=unified` scanner selection before containment is applied.
 
-## 12. Learning journal
+## 13. Learning journal
 
 - Nov 6: `pypdf`'s `dict[key]` silently resolves indirect references. The first chain test caught
   a `/Next` cycle running an action twice because the cycle guard tracks object IDs and the
