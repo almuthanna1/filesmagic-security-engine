@@ -17,12 +17,12 @@ recorded run in `docs/evidence/`), **proposed** (not built), **rejected** (measu
 | Reference vs unified comparison on the 10 cases | measured (section 8) |
 | Correction 1: click-only scripts behind a page destination (explicit classification + regressions) | implemented (`7dc8fe8`), measured (section 12) |
 | Correction 2: refined bytes-only YARA-X rule for automatic triggers `app/engine/rules/pdf.yar` | implemented (`7dc8fe8`), measured (section 12) |
-| Linux-only isolation tests (28) | passed in CI on GitHub's Ubuntu 24.04 runner at `2721a25` (section 15); not run on Render or the VM |
-| Office: VBA call-graph analysis `app/engine/vba_chains.py` | implemented (`7d9f69c`), unit-tested on inert source strings (section 14) |
+| Linux-only isolation tests (28) | passed in CI on GitHub's Ubuntu 24.04 runner at `2721a25` (section 14); not run on Render or the VM |
+| Office: VBA call-graph analysis `app/engine/vba_chains.py` | implemented (`7d9f69c`), unit-tested on inert source strings (section 13) |
 | Format-aware worker start-up (latency) | proposed, needs a security decision (section 10) |
 | YARA-X compiled-rule reuse; YARA-X `fast_scan` | rejected by measurement (section 6) |
-| VBA evidence refinement: demonstrated vs possible calls and capabilities | implemented (`0a427e6`), section 17 |
-| Office: OOXML activation graph `app/engine/ooxml_links.py` | implemented (`775b60e`, `be5f27d`), measured (section 18) |
+| VBA evidence refinement: demonstrated vs possible calls and capabilities | implemented (`0a427e6`), section 15 |
+| Office: OOXML activation graph `app/engine/ooxml_links.py` | implemented (`775b60e`, `be5f27d`), measured (section 16) |
 
 ## 2. Environment and reproduction
 
@@ -320,7 +320,7 @@ fires as the reference rule does (tested at 4,000 and 5,000 bytes). Form formatt
   +9 ms (median of case medians 577.0 → 586.1 ms). Accounted for: importing `app.engine` (mostly
   compiling the second rule set) measured 7.1-8.4 ms in 5 runs.
 
-### 12.5 Linux-only isolation tests: not run at the time (superseded by section 15)
+### 12.5 Linux-only isolation tests: not run at the time (superseded by section 14)
 
 28 tests in `tests/test_worker_linux.py` (namespaces, capabilities, rlimits, audit hook,
 tunl0 fallback) skip on Windows. This machine has neither WSL nor Docker. The suitable
@@ -330,9 +330,9 @@ which turns those skips into failures), run on push. Not pushed: the branch is n
 therefore not validated for these commits.** The unified engine changes no isolation code; the
 worker gained only the `--engine=unified` scanner selection before containment is applied.
 
-## 14. Office: VBA call-graph analysis (Nov 6, commit `7d9f69c`)
+## 13. Office: VBA call-graph analysis (Nov 6, commit `7d9f69c`)
 
-### 14.1 Threat and gap
+### 13.1 Threat and gap
 
 A macro attack needs code that runs without being asked (an automatic entry: `AutoOpen`,
 `Document_Open`, `Workbook_Open`, ActiveX event handlers) and code that does something dangerous
@@ -341,7 +341,7 @@ A macro attack needs code that runs without being asked (an automatic entry: `Au
 the macro counterpart of PDF case 5a. A benign workbook whose `Workbook_Open` only sets up the
 sheet and whose unrelated button handler starts a program is rated MALICIOUS.
 
-### 14.2 Algorithm (`app/engine/vba_chains.py`)
+### 13.2 Algorithm (`app/engine/vba_chains.py`)
 
 1. Lexing: line continuations collapsed (olevba `vba_collapse_long_lines`), comments (apostrophe,
    `Rem`) removed, string contents blanked. The literals of the code part are kept per line, so a
@@ -365,7 +365,7 @@ sheet and whose unrelated button handler starts a program is rated MALICIOUS.
      an OLE VBA project or could not be extracted;
    - **no-path**: none reached and none of the above.
 
-### 14.3 What correlation does with it, and why it never lowers the verdict
+### 13.3 What correlation does with it, and why it never lowers the verdict
 
 `OFFICE_MACRO_AUTOEXEC_EXECUTION` is **never removed**. Linked confirms it (the path is a HIGH engine
 finding); no-path and undetermined keep it, with an INFO finding saying why. Reason, from the
@@ -375,7 +375,7 @@ files on disk, and the isolated worker writes none. So "no-path" is true of the 
 unverified for what runs. A consequence for the reference too: its `VBA Stomping` check never
 runs in this engine.
 
-### 14.4 Reused vs original
+### 13.4 Reused vs original
 
 Reused (oletools 0.60.2, BSD-2): `VBA_Parser.extract_macros`, `VBA_Scanner`, `AUTOEXEC_KEYWORDS`,
 `AUTOEXEC_KEYWORDS_REGEX`, `vba_collapse_long_lines`. Reused (this repository): the Office
@@ -383,7 +383,7 @@ scanner's `STRONG_VBA_BEHAVIOUR`, `identify`, `read_member`, ZIP limits and `cle
 lexer, the procedure and call-graph model, resolution of named and `AddressOf` calls, the
 three-outcome search with its incompleteness rules, and the correlation policy.
 
-### 14.5 Tests and what they show
+### 13.5 Tests and what they show
 
 `tests/test_vba_chains.py`, 33 tests. All VBA is inert Python strings (the "dangerous" lines are
 `Shell "placeholder"`). No VBA project or macro-bearing document is built: a stand-in replaces only
@@ -409,7 +409,7 @@ every PDF and Office result is identical to `7dc8fe8` for both engines; `vba-cha
 project). Wall time in this run: +14 ms against the reference (574.2 to 588.5 ms), of which about
 8 ms is engine start-up (12.4); the rest is not isolated.
 
-## 15. Linux CI (Nov 6, run 42259767395, commit `2721a25`)
+## 14. Linux CI (Nov 6, run 42259767395, commit `2721a25`)
 
 Deployment safeguards checked before the push: `frontend/vercel.json` now disables Git deployments
 for this branch as well as `security/malware-research-hardening`. The connected Vercel project
@@ -432,7 +432,7 @@ Conclusion allowed: the worker's Linux isolation controls pass their tests on th
 Render or on the evaluation VM; and the production image gets no network namespace under Docker's
 default seccomp.
 
-## 17. VBA evidence refinement (Nov 6, commit `0a427e6`)
+## 15. VBA evidence refinement (Nov 6, commit `0a427e6`)
 
 Audit of the first version, reproduced before changing anything: five inert sources gave
 **linked** (a HIGH engine finding) without a demonstrated path to an execution:
@@ -469,9 +469,9 @@ Result: all five audited cases are now undetermined with the reason stated; the 
 (`Call RunTool` reaching `Shell "placeholder"`) is still linked. 22 new inert regression tests
 (55 VBA tests in total). The verdict policy is unchanged: the reference macro HIGH is never removed.
 
-## 18. OOXML activation graph (Nov 6, commits `775b60e`, `be5f27d`)
+## 16. OOXML activation graph (Nov 6, commits `775b60e`, `be5f27d`)
 
-### 18.1 Concepts
+### 16.1 Concepts
 
 - **Relationship** (ECMA-376 Part 2 / ISO/IEC 29500-2, 9.3): an entry in a `_rels/*.rels` part
   with an `Id`, a `Type` URI and a `Target`, an arrow from one source part to another part or, with
@@ -502,7 +502,7 @@ https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.vml.office.o
 engine relies on the schema value names (Link/Embed, Always/OnCall). Office's runtime behaviour is
 not observed: no Office application is run.
 
-### 18.2 Algorithm (`app/engine/ooxml_links.py`)
+### 16.2 Algorithm (`app/engine/ooxml_links.py`)
 
 1. Read the package with the custom C4-C6 OPC reader (`open_package`): content types, every
    relationship with its Id, type, target, external flag and resolved part key; essential parts
@@ -519,7 +519,7 @@ not observed: no Office application is run.
    malformed, Id declared twice, unmodelled element). With several referencing elements the most
    consequential one counts. Object parts no relationship leads to are listed separately.
 
-### 18.3 Findings and correlation
+### 16.3 Findings and correlation
 
 | Rule (scanner `ooxml-links`) | Severity |
 |---|---|
@@ -533,14 +533,14 @@ findings: it adds "confirmed", "kept although ... not demonstrated" or "kept: un
 model, or Office behaviour beyond the specification, could still use a relationship the graph
 calls not activated.
 
-### 18.4 Reused vs original
+### 16.4 Reused vs original
 
 Reused: the custom C4-C6 OPC reader (`ooxml_package`), its `REL_NAMESPACES` and `is_xml` (`ooxml`),
 defusedxml, the existing fixture builders (`office_parts`, `zip_parts`, `rels_xml`, `make_ole`).
 Original: the loaded-part search with chains, the reference collection, the element-semantics
 classification, the activation states and the correlation notes; fixture builder `linked_docx`.
 
-### 18.5 Results (commit `be5f27d`, 20 trials per engine, same session, all deterministic)
+### 16.5 Results (commit `be5f27d`, 20 trials per engine, same session, all deterministic)
 
 Evidence: [`docs/evidence/custom-engine-be5f27d/`](evidence/custom-engine-be5f27d/). The reference
 engine's findings on all pre-existing cases are identical to `7d9f69c`; on those cases the unified
@@ -565,7 +565,7 @@ unified 596.1 ms (median of case medians, +16 ms). Accounted for: importing `app
 12.4-13.2 ms (5 runs) and the four engine scanners 0.5-0.88 ms per document. No latency improvement
 is claimed.
 
-### 18.6 Limitations
+### 16.6 Limitations
 
 - Element semantics come from the specification, not from running Office; behaviour Office has
   beyond it (or bugs) is not modelled, which is why nothing is removed.
@@ -575,7 +575,7 @@ is claimed.
 - "Not activated" is evidence of absence only within the elements modelled; it is reported as INFO.
 - Synthetic, BENIGN-by-ground-truth cases; no measurement on real documents.
 
-## 19. Poster-ready findings so far (all on inert synthetic cases)
+## 17. Poster-ready findings so far (all on inert synthetic cases)
 
 1. Correlating evidence on the same execution path removes an unjustified MALICIOUS verdict
    (PDF case 5a) while keeping the justified one (5b), which differs only in whether the automatic
@@ -590,7 +590,7 @@ is claimed.
 5. Latency is dominated by worker start-up (about 570 ms of ~575 ms per scan on this laptop); the
    engine adds about 16 ms, almost all of it start-up.
 
-## 20. Learning journal
+## 18. Learning journal
 
 - Nov 6: `pypdf`'s `dict[key]` silently resolves indirect references. The first chain test caught
   a `/Next` cycle running an action twice because the cycle guard tracks object IDs and the
