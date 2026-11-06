@@ -6,9 +6,25 @@ followed by evidence correlation. Run only by `python -m app.worker --engine=uni
 docs/custom-engine-research-log.md.
 """
 
-from app.engine.correlate import PdfChainScanner, correlate
-from app.scanners import SCANNERS as REFERENCE_SCANNERS
+from pathlib import Path
 
-SCANNERS = [*REFERENCE_SCANNERS, PdfChainScanner()]
+from app.engine.correlate import SIGNATURES, PdfChainScanner, correlate
+from app.scanners import SCANNERS as REFERENCE_SCANNERS
+from app.scanners.yarax import YaraXScanner
+
+RULES_DIR = Path(__file__).resolve().parent / "rules"
+
+
+class EngineSignatures(YaraXScanner):
+    """The engine's own YARA-X rules (app/engine/rules), with the reference scanner's compiler
+    checks, timeout, match cap and fail-closed handling."""
+
+    name = SIGNATURES
+
+    def __init__(self, rules_dir: Path = RULES_DIR):
+        super().__init__(rules_dir)
+
+
+SCANNERS = [*REFERENCE_SCANNERS, EngineSignatures(), PdfChainScanner()]
 
 __all__ = ["SCANNERS", "correlate"]

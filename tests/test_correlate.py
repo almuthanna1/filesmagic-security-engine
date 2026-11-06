@@ -4,7 +4,7 @@ import pytest
 
 from app import engine, worker
 from app.models import Finding, ScannerStatus, Severity, WorkerReport
-from evaluation.cases import cases, verdicts
+from evaluation.cases import CLICK_LINK_JS, cases, verdicts
 from tests.pdf_fixtures import make_pdf
 
 CASE = {c["id"]: c["data"] for c in cases()}
@@ -20,8 +20,16 @@ def rules(report: WorkerReport) -> set[str]:
 
 @pytest.mark.parametrize("case, verdict, present, absent", [
     ("1-pdf-clean", "SAFE", set(), {"ENGINE_CORRELATION"}),
-    ("2b-pdf-open-at-page-click-js", "SUSPICIOUS", {"PDF_JAVASCRIPT", "ENGINE_CORRELATION"},
-     {"PDF_AUTO_JAVASCRIPT", "ENGINE_PDF_AUTO_CHAIN_SCRIPT"}),
+    ("2-pdf-form-keystroke-js", "SUSPICIOUS", {"PDF_JAVASCRIPT", "ENGINE_PDF_USER_TRIGGERED_SCRIPT"},
+     {"PDF_JavaScript_With_Automatic_Action", "ENGINE_PDF_JavaScript_With_Automatic_Trigger"}),
+    # Issue 1: the page destination made the click-only script "automatic" in the reference engine.
+    ("2b-pdf-open-at-page-click-js", "SUSPICIOUS", {"PDF_JAVASCRIPT", "ENGINE_PDF_USER_TRIGGERED_SCRIPT"},
+     {"PDF_AUTO_JAVASCRIPT", "ENGINE_PDF_AUTO_CHAIN_SCRIPT", "PDF_JavaScript_With_Automatic_Action",
+      "ENGINE_PDF_JavaScript_With_Automatic_Trigger"}),
+    # Over-correction guard: the page's own open trigger stays automatic.
+    ("2c-pdf-open-at-page-page-open-js", "SUSPICIOUS",
+     {"ENGINE_PDF_AUTO_CHAIN_SCRIPT", "ENGINE_PDF_JavaScript_With_Automatic_Trigger"},
+     {"PDF_JavaScript_With_Automatic_Action", "ENGINE_PDF_USER_TRIGGERED_SCRIPT"}),
     ("3-pdf-escaped-openaction-js", "SUSPICIOUS", {"ENGINE_PDF_AUTO_CHAIN_SCRIPT", "CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME"},
      {"PDF_AUTO_JAVASCRIPT"}),
     # The reference engine says MALICIOUS here: an automatic script plus an attachment it never uses.
@@ -38,8 +46,11 @@ def test_unified_verdicts_and_evidence(case, verdict, present, absent):
 
 
 def test_an_unconfirmed_byte_signature_is_kept_and_annotated():
-    report = unified(CASE["2-pdf-form-keystroke-js"])
-    assert "PDF_JavaScript_With_Automatic_Action" in rules(report)
+    # An indirect /OpenAction cannot be shown to be a destination from bytes, so the refined rule
+    # still fires; the chain view finds no automatic script, so the match is marked unconfirmed.
+    report = unified(make_pdf(catalog_extra="/OpenAction 6 0 R", page_extra="/Annots [5 0 R]",
+                              objects={5: CLICK_LINK_JS, 6: "[3 0 R /Fit]"}))
+    assert "ENGINE_PDF_JavaScript_With_Automatic_Trigger" in rules(report)
     note = next(f for f in report.findings if f.rule_id == "ENGINE_CORRELATION")
     assert note.severity == Severity.INFO and "not confirmed" in note.description
 
@@ -72,5 +83,5 @@ def test_the_worker_runs_the_unified_engine_only_when_asked():
     reference = asyncio.run(worker.run(data))
     candidate = asyncio.run(worker.run(data, worker.command() + ["--engine=unified"]))
     assert [s.name for s in reference.scanners] == ["yara-x", "office", "pdf", "custom"]
-    assert [s.name for s in candidate.scanners] == ["yara-x", "office", "pdf", "custom", "pdf-chains"]
+    assert [s.name for s in candidate.scanners] == ["yara-x", "office", "pdf", "custom", "yara-x-engine", "pdf-chains"]
     assert (verdicts(reference)["aggregate"], verdicts(candidate)["aggregate"]) == ("MALICIOUS", "SUSPICIOUS")

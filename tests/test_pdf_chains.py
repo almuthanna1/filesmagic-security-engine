@@ -84,3 +84,27 @@ def test_not_a_pdf_is_not_applicable():
 def test_unreadable_pdfs_fail_closed(data):
     with pytest.raises(ChainScanError):
         scan(data)
+
+
+# Issue 1 regressions: what a trigger reaches through anything but /Next is not part of its chain.
+def test_a_goto_action_to_a_page_does_not_make_that_pages_click_scripts_automatic():
+    link = "<< /Type /Annot /Subtype /Link /Rect [0 0 1 1] /A " + js_action() + " >>"
+    data = make_pdf(catalog_extra="/OpenAction << /S /GoTo /D [3 0 R /Fit] >>", page_extra="/Annots [5 0 R]",
+                    objects={5: link})
+    assert sorted(summary(data)) == [("catalog /OpenAction", True, ["GoTo"]), ("object 5 0 /A", False, ["JavaScript"])]
+
+
+def test_an_indirect_destination_array_is_not_an_action():
+    data = make_pdf(catalog_extra="/OpenAction 5 0 R", objects={5: "[3 0 R /Fit]"})
+    assert summary(data) == []
+
+
+def test_outline_item_scripts_are_click_triggered():
+    data = make_pdf(catalog_extra="/Outlines 5 0 R", objects={
+        5: "<< /Type /Outlines /First 6 0 R /Last 6 0 R /Count 1 >>",
+        6: "<< /Title (Intro) /Parent 5 0 R /A " + js_action() + " >>"})
+    assert summary(data) == [("object 6 0 /A", False, ["JavaScript"])]
+
+
+def test_the_open_trigger_of_the_destination_page_stays_automatic():
+    assert summary(CASE["2c-pdf-open-at-page-page-open-js"]) == [("object 3 0 /AA /O", True, ["JavaScript"])]

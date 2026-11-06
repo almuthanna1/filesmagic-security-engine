@@ -50,6 +50,8 @@ def cases() -> list[dict]:
                       objects={5: FORM_KEYSTROKE_JS})),
         case("2b-pdf-open-at-page-click-js", "/OpenAction page destination + click-only link JavaScript",
              make_pdf(catalog_extra="/OpenAction [3 0 R /Fit]", page_extra="/Annots [5 0 R]", objects={5: CLICK_LINK_JS})),
+        case("2c-pdf-open-at-page-page-open-js", "/OpenAction page destination + that page's own open trigger /AA /O",
+             make_pdf(catalog_extra="/OpenAction [3 0 R /Fit]", page_extra="/AA << /O 5 0 R >>", objects={5: js_action()})),
         case("3-pdf-escaped-openaction-js", "/OpenAction JavaScript written /J#61vaScript /J#53",
              fx.obfuscated_javascript_pdf()),
         case("4-pdf-objstm-escaped-js", "the same action inside a FlateDecode object stream",
