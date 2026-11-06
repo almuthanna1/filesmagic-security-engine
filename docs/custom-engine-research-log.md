@@ -15,6 +15,9 @@ recorded run in `docs/evidence/`), **proposed** (not built), **rejected** (measu
 | Module 1: PDF action-chain extraction `app/engine/pdf_chains.py` | implemented (`d8b3bec`) |
 | Module 2: chain findings + evidence correlation `app/engine/correlate.py`, `--engine=unified` | implemented (`51a5049`) |
 | Reference vs unified comparison on the 10 cases | measured (section 8) |
+| Correction 1: click-only scripts behind a page destination (explicit classification + regressions) | implemented (`7dc8fe8`), measured (section 13) |
+| Correction 2: refined bytes-only YARA-X rule for automatic triggers `app/engine/rules/pdf.yar` | implemented (`7dc8fe8`), measured (section 13) |
+| Linux-only isolation tests (28) | **not run**: no Linux environment on this machine (section 13.4) |
 | Format-aware worker start-up (latency) | proposed, needs a security decision (section 10) |
 | YARA-X compiled-rule reuse; YARA-X `fast_scan` | rejected by measurement (section 6) |
 | Office correlation (macro + relationship + C4-C6) | proposed, next |
@@ -245,11 +248,95 @@ verdict must travel with the file.
   both; that is why YARA-X matches are never removed and a repaired structure disables superseding.
 - All cases are synthetic and BENIGN by ground truth; they demonstrate indicator handling only.
 
+## 13. PDF corrections (Nov 6, commit `7dc8fe8`)
+
+Evidence: [`docs/evidence/custom-engine-7dc8fe8/`](evidence/custom-engine-7dc8fe8/) (reference and
+unified, 20 trials each, same session, 11 cases: case `2c` was added as an over-correction guard).
+
+### 13.1 Investigation
+
+Which YARA-X strings produced `PDF_JavaScript_With_Automatic_Action` (printed from the match
+offsets, not assumed):
+- case 2: `$auto2` matched `/AA << /K << /S /JavaScript ...`, a form-field keystroke trigger
+  (ISO 32000-1 Table 196: runs on user input);
+- case 2b: `$auto1` matched `/OpenAction [3 0 R /Fit]`, an inline destination (Table 28: the
+  value may be a destination, which shows a page and runs nothing).
+
+So each issue had a structural part (the PDF scanner's inherited "automatic" flag, already
+replaced by the chain rules since `51a5049`) and a signature part.
+
+### 13.2 Correction 1: click-only scripts are classified as such
+
+The chain model already excluded them (only `/Next` joins a chain). Added: an explicit INFO finding
+`ENGINE_PDF_USER_TRIGGERED_SCRIPT` that names each user-triggered script chain, and regression tests
+for a GoTo *action* to the page, an indirect destination array, an outline-item click, and the
+over-correction guard (case 2c: the destination page's own `/AA /O` stays automatic).
+
+### 13.3 Correction 2: refined signature `ENGINE_PDF_JavaScript_With_Automatic_Trigger`
+
+Concept: a byte signature cannot parse nested dictionaries, so instead of recognising automatic
+triggers more cleverly, it **discounts only occurrences whose bytes prove they are not automatic**:
+- `#open > #open_destination`: every `/OpenAction`, minus those directly followed by `[`;
+- `#aa > #aa_user_only`: every `/AA`, minus direct dictionaries whose every key is a user-interaction
+  trigger (`K F V C E X D U Fo Bl PC PI`, the complement of the PDF scanner's `AUTO_TRIGGERS`) with an
+  indirect reference or a non-nested dictionary as value;
+- at the scanner's match cap (1000 per pattern) nothing is discounted.
+
+Anything unprovable (indirect `/AA 9 0 R`, an indirect `/OpenAction`, a `>` inside a script, an
+unknown key, text in a string) still counts, as in the reference rule. Consequence, tested on every
+case and variant: **the refined rule fires only where the reference rule fires.** It runs as the
+engine's own YARA-X scanner (`EngineSignatures`, a subclass of the reference `YaraXScanner`: same
+metadata enforcement, timeout, match cap, fail-closed handling). `correlate()` replaces the
+reference match only when that scanner completed; no parser result is involved, so the signature
+evidence stays independent of pypdf.
+
+Reused: YARA-X (matching, regex engine, counts), `YaraXScanner`. Original: the rule and its
+counting method, and the correlation step.
+
+Measured limit: YARA-X ends a regex match at about 4 KiB. The proof holds for an `/AA` dictionary
+matched in up to 4,092 bytes (a 4,055-byte script); longer ones are not proven, and the rule then
+fires as the reference rule does (tested at 4,000 and 5,000 bytes). Form formatting scripts
+(`AFNumber_Keystroke(...)`) are under 100 bytes.
+
+### 13.4 Results at `7dc8fe8`
+
+| Case | Automatic script present? | Reference "automatic" claims | Unified "automatic" claims |
+|---|---|---|---|
+| 2 form keystroke | no | YARA-X (false) | none |
+| 2b page destination + click | no | PDF scanner + YARA-X (both false) | none |
+| 2c page destination + page `/AA /O` | yes | PDF scanner + YARA-X | chain rule + refined signature |
+| 3, 4 escaped / object stream | yes | PDF scanner (YARA-X misses) | chain rule (signature misses: escaped bytes) |
+| 5a, 5b | yes | all | chain rule + refined signature |
+
+- False "automatic" rule hits on these 11 cases: reference 3, unified 0; no true claim lost.
+- Signature alone: reference rule fires on {2, 2b, 2c, 5a, 5b}, refined on {2c, 5a, 5b}; automatic
+  script present in {2c, 3, 4, 5a, 5b}. Synthetic cases only; not a general precision figure.
+- Verdicts: unchanged except 5a (MALICIOUS → SUSPICIOUS, from `51a5049`). Cases 2 and 2b stay
+  SUSPICIOUS because the reference PDF scanner rates *any* JavaScript MEDIUM (`PDF_JAVASCRIPT`);
+  the engine does not change that policy.
+- Latency: `yara-x-engine` 0.30-0.36 ms p50 per document, `pdf-chains` ≤ 0.43 ms. Wall time per scan
+  +9 ms (median of case medians 577.0 → 586.1 ms). Accounted for: importing `app.engine` (mostly
+  compiling the second rule set) measured 7.1-8.4 ms in 5 runs.
+
+### 13.5 Linux-only isolation tests: not run
+
+28 tests in `tests/test_worker_linux.py` (namespaces, capabilities, rlimits, audit hook,
+tunl0 fallback) skip on Windows. This machine has neither WSL nor Docker. The suitable
+environment is the repository's CI job `backend-linux` (Ubuntu 24.04, `FM_REQUIRE_LINUX_TESTS=1`,
+which turns those skips into failures), run on push. Not pushed: the branch is not excluded in
+`frontend/vercel.json`, so a push would likely create a Vercel preview deployment. **Isolation is
+therefore not validated for these commits.** The unified engine changes no isolation code; the
+worker gained only the `--engine=unified` scanner selection before containment is applied.
+
 ## 12. Learning journal
 
 - Nov 6: `pypdf`'s `dict[key]` silently resolves indirect references. The first chain test caught
   a `/Next` cycle running an action twice because the cycle guard tracks object IDs and the
   resolved value no longer had one. Fix: `raw_get`. Lesson: cycle detection must operate on
   identities, so the access path must preserve them.
+- Nov 6: a signature can be made more precise without becoming weaker if it only *subtracts*
+  occurrences the bytes disprove. Counting (`#a > #b`) does that in YARA's condition language;
+  regex cannot balance nested `<< >>`, so the proof gives up on anything it cannot match.
+- Nov 6: YARA-X regex matches end at about 4 KiB (measured by bisection: 4,092 bytes).
 - Nov 6: profiling before optimising. The plan listed compiled-rule reuse and `fast_scan` as
   latency ideas; measurement showed YARA-X is < 2% of a scan. The real cost is process start-up.
