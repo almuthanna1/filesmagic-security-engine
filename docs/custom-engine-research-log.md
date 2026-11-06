@@ -21,7 +21,8 @@ recorded run in `docs/evidence/`), **proposed** (not built), **rejected** (measu
 | Office: VBA call-graph analysis `app/engine/vba_chains.py` | implemented (`7d9f69c`), unit-tested on inert source strings (section 14) |
 | Format-aware worker start-up (latency) | proposed, needs a security decision (section 10) |
 | YARA-X compiled-rule reuse; YARA-X `fast_scan` | rejected by measurement (section 6) |
-| Office: external relationships and embedded objects on the package graph | proposed, next |
+| VBA evidence refinement: demonstrated vs possible calls and capabilities | implemented (`0a427e6`), section 17 |
+| Office: OOXML activation graph `app/engine/ooxml_links.py` | implemented (`775b60e`, `be5f27d`), measured (section 18) |
 
 ## 2. Environment and reproduction
 
@@ -431,7 +432,165 @@ Conclusion allowed: the worker's Linux isolation controls pass their tests on th
 Render or on the evaluation VM; and the production image gets no network namespace under Docker's
 default seccomp.
 
-## 16. Learning journal
+## 17. VBA evidence refinement (Nov 6, commit `0a427e6`)
+
+Audit of the first version, reproduced before changing anything: five inert sources gave
+**linked** (a HIGH engine finding) without a demonstrated path to an execution:
+
+| Source | Why "linked" was wrong |
+|---|---|
+| `Dim RunTool As Long` / `RunTool = 1` | a local variable shadows the procedure name |
+| `ws.RunTool` | a method of some object, not shown to be our procedure |
+| `Application.Run procName` | olevba lists `Run` under "run an executable", but Application.Run starts a macro, here an unknown one |
+| `Declare ... Lib "shell32" Alias "SHGetFolderPathA"` | `shell32` is a library name; this function looks up a folder |
+| `style = vbHide` | a window-style constant is an argument |
+
+Reading olevba's keyword list (`SUSPICIOUS_KEYWORDS`, oletools 0.60.2) found the same class in
+`Create` (counted as WMI execution), `DoIt`, `WScript.Shell` (also used for special folders and the
+registry) and `Shell` itself, which `\bShell\b` also matches inside `WScript.Shell` and
+`Shell.Application`. olevba also scans comments.
+
+Change: edges and capabilities are each **demonstrated** or only **possible**.
+- Capabilities are analysed on code without comments. Demonstrated: at least one triggering
+  keyword is specific (`Shell` as the function, `ShellExecuteA`, `InvokeVerb`, ...), or an
+  ambiguous one is confirmed in the same procedure (`WScript.Shell` with `.Run`/`.Exec`; `Create`
+  with `Win32_Process`). Ambiguous-only keywords are possible capabilities.
+- A procedure name is a demonstrated call as a statement, `Call` or expression-call target,
+  `Module.Name` with a known module, `AddressOf Name`, or a literal in `Run`/`OnTime`/`OnKey`/
+  `OnAction`/`CallByName`. It is a possible call if the name is also declared as a variable,
+  constant, parameter or loop counter (in the procedure, or at module level in any module) or used
+  as `obj.Name`. A type name (`As`/`New`) or a named argument (`name:=`) is no call.
+- **linked** requires demonstrated edges ending in a demonstrated capability; a path needing a
+  possible edge or ending in a possible capability is **undetermined**, with the ambiguity named
+  (e.g. "possible path Module1.AutoOpen -> Module1.RunTool: 'RunTool' is also declared as a
+  variable, constant or parameter").
+
+Result: all five audited cases are now undetermined with the reason stated; the control
+(`Call RunTool` reaching `Shell "placeholder"`) is still linked. 22 new inert regression tests
+(55 VBA tests in total). The verdict policy is unchanged: the reference macro HIGH is never removed.
+
+## 18. OOXML activation graph (Nov 6, commits `775b60e`, `be5f27d`)
+
+### 18.1 Concepts
+
+- **Relationship** (ECMA-376 Part 2 / ISO/IEC 29500-2, 9.3): an entry in a `_rels/*.rels` part
+  with an `Id`, a `Type` URI and a `Target`, an arrow from one source part to another part or, with
+  `TargetMode="External"`, to a URL outside the file. It does nothing by itself.
+- **Use**: Office follows relationships from the package root to load parts. Inside a loaded
+  part, an element references a relationship by its Id in an attribute of the relationships
+  namespace (`r:id`, `r:embed`, `r:link`, ...) or, in VML, `o:relid`. That element says when the
+  target is used.
+- **External template**: `word/settings.xml` (reached from the main part through a `settings`
+  relationship) contains `<w:attachedTemplate r:id="rId1"/>`; `word/_rels/settings.xml.rels`
+  maps `rId1` to an external `attachedTemplate` target. ISO/IEC 29500-1 (attachedTemplate, parent
+  `settings` 17.15.1.78): the template "shall be attached ... if it is accessible". That is the
+  remote-template technique (MITRE ATT&CK T1221, Template Injection).
+- **Linked picture**: `a:blip r:link` (ISO/IEC 29500-1, DrawingML `blip`): "an image that does not
+  reside within this file"; `r:embed` is one that does.
+- **Embedded object**: an internal `oleObject`/`package`/`control` relationship to a part under
+  `embeddings/` or `activeX/`, shown by `o:OLEObject Type="Embed"` (Word VML), `p:oleObj`
+  (PowerPoint) or `oleObject` (Excel). Linked OLE objects (`Type="Link"`) point to external targets;
+  `UpdateMode`, Excel's `oleUpdate` and PowerPoint's `p:link updateAutomatic` say whether they refresh
+  automatically.
+
+Sources: Microsoft Learn Open XML SDK reference pages for `AttachedTemplate`, `Blip` and
+`OleObject` (they reproduce the ISO/IEC 29500:2008 text), fetched Nov 6, 2026:
+https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.attachedtemplate ,
+https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.blip ,
+https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.vml.office.oleobject . The
+`OleObject` page lists `Type` and `UpdateMode` but does not quote the meaning of their values; the
+engine relies on the schema value names (Link/Embed, Always/OnCall). Office's runtime behaviour is
+not observed: no Office application is run.
+
+### 18.2 Algorithm (`app/engine/ooxml_links.py`)
+
+1. Read the package with the custom C4-C6 OPC reader (`open_package`): content types, every
+   relationship with its Id, type, target, external flag and resolved part key; essential parts
+   that cannot be read fail closed (`CustomScanError`).
+2. `loaded_parts`: breadth-first search from the package root over internal relationships,
+   recording each part's parent edge, so evidence shows the chain
+   (`package -> word/document.xml (officedocument) -> word/settings.xml (settings) -> ...`).
+3. `references`: stream each loaded source part that has relationships of interest (defusedxml,
+   start/end events) and record every relationship-namespace attribute and `o:relid` with its
+   element; PowerPoint `p:link updateAutomatic` is attributed to its enclosing `p:oleObj`.
+4. `classify` each relationship of interest (external, or internal to OLE/package/ActiveX):
+   on-open, image-on-open, on-action, click (not reported), displayed, not-activated (source part
+   never loaded, or no element references the Id), undetermined (source part unreadable, binary or
+   malformed, Id declared twice, unmodelled element). With several referencing elements the most
+   consequential one counts. Object parts no relationship leads to are listed separately.
+
+### 18.3 Findings and correlation
+
+| Rule (scanner `ooxml-links`) | Severity |
+|---|---|
+| `ENGINE_OFFICE_EXTERNAL_LOADS_ON_OPEN` (template, frame, auto-updating OLE link) | MEDIUM |
+| `ENGINE_OFFICE_LINKED_PICTURE_LOADS_ON_OPEN` | LOW |
+| `ENGINE_OFFICE_EXTERNAL_ON_USER_ACTION`, `ENGINE_OFFICE_EMBEDDED_OBJECT_DISPLAYED`, `ENGINE_OFFICE_EXTERNAL_NOT_ACTIVATED`, `ENGINE_OFFICE_EMBEDDED_OBJECT_NOT_DISPLAYED`, `ENGINE_OFFICE_ACTIVATION_UNDETERMINED` | INFO |
+
+`correlate()` never removes `OFFICE_EXTERNAL_AUTOLOAD` or the Office scanner's embedded-object
+findings: it adds "confirmed", "kept although ... not demonstrated" or "kept: undetermined", and
+"shown in the document" / "no element shows the object". Reason: an element this analysis does not
+model, or Office behaviour beyond the specification, could still use a relationship the graph
+calls not activated.
+
+### 18.4 Reused vs original
+
+Reused: the custom C4-C6 OPC reader (`ooxml_package`), its `REL_NAMESPACES` and `is_xml` (`ooxml`),
+defusedxml, the existing fixture builders (`office_parts`, `zip_parts`, `rels_xml`, `make_ole`).
+Original: the loaded-part search with chains, the reference collection, the element-semantics
+classification, the activation states and the correlation notes; fixture builder `linked_docx`.
+
+### 18.5 Results (commit `be5f27d`, 20 trials per engine, same session, all deterministic)
+
+Evidence: [`docs/evidence/custom-engine-be5f27d/`](evidence/custom-engine-be5f27d/). The reference
+engine's findings on all pre-existing cases are identical to `7d9f69c`; on those cases the unified
+engine gained or lost no non-INFO finding (6a and 6b gained INFO qualifications only).
+
+| Case | Reference | Unified | What changed and why |
+|---|---|---|---|
+| 6a hyperlink relationship, no element | SAFE | SAFE | INFO: not activated (no `w:hyperlink` references it) |
+| 6b template relationship on `document.xml`, no element | SUSPICIOUS (`OFFICE_EXTERNAL_AUTOLOAD`) | SUSPICIOUS | INFO: not activated; the reference finding is kept and qualified "use not demonstrated" |
+| 6c template via `w:attachedTemplate` in settings | SUSPICIOUS | SUSPICIOUS | `ENGINE_OFFICE_EXTERNAL_LOADS_ON_OPEN` with the full chain; the reference finding is confirmed |
+| 6d linked picture `a:blip r:link` | **SAFE** (`OFFICE_EXTERNAL_RESOURCE`, INFO) | **SUSPICIOUS** | `ENGINE_OFFICE_LINKED_PICTURE_LOADS_ON_OPEN` (LOW): showing the document fetches content from outside |
+| 6e OLE container shown by `o:OLEObject Type=Embed` | SUSPICIOUS (`OFFICE_EMBEDDED_OLE`) | SUSPICIOUS | INFO: displayed, runs only when activated |
+| 6f same container, relationship only | SUSPICIOUS (`OFFICE_EMBEDDED_OLE`) | SUSPICIOUS | INFO: not displayed |
+
+Tests: `tests/test_ooxml_links.py`, 50 tests (element semantics for Word, Excel and PowerPoint,
+VML `o:relid`, chains, never-loaded source parts, binary or malformed source parts, duplicate Ids,
+fail-closed packages, and a property test over every case: the unified verdict is never lower than
+the reference except the PDF case 5a correction). Full suite: 714 passed, 28 skipped (Linux-only).
+
+Latency: `ooxml-links` 0.32-0.47 ms p50 per Office document. Wall time per scan: reference 579.8 ms,
+unified 596.1 ms (median of case medians, +16 ms). Accounted for: importing `app.engine` now takes
+12.4-13.2 ms (5 runs) and the four engine scanners 0.5-0.88 ms per document. No latency improvement
+is claimed.
+
+### 18.6 Limitations
+
+- Element semantics come from the specification, not from running Office; behaviour Office has
+  beyond it (or bugs) is not modelled, which is why nothing is removed.
+- Not modelled: field codes that fetch content without a relationship (`INCLUDEPICTURE`,
+  `INCLUDETEXT`, `LINK`; Word fields are the planned C7), Excel external workbook links
+  (`externalLink` parts), custom XML data bindings, embedded packages opened recursively.
+- "Not activated" is evidence of absence only within the elements modelled; it is reported as INFO.
+- Synthetic, BENIGN-by-ground-truth cases; no measurement on real documents.
+
+## 19. Poster-ready findings so far (all on inert synthetic cases)
+
+1. Correlating evidence on the same execution path removes an unjustified MALICIOUS verdict
+   (PDF case 5a) while keeping the justified one (5b), which differs only in whether the automatic
+   script names the attachment.
+2. A byte signature can be made more precise without becoming weaker by subtracting only the
+   occurrences its bytes disprove: false "automatic" claims 3 to 0 on 11 PDF cases, no true claim lost.
+3. Static macro analysis can show a call path but cannot safely clear one: VBA stomping cannot be
+   checked on in-memory files, so the engine qualifies the reference macro verdict and never lowers it.
+4. An OOXML relationship is used only when a loaded part references it; the activation graph
+   confirms a template injection chain (6c), separates it from an unreferenced relationship (6b), and
+   finds an automatically fetched external picture the reference rates INFO (6d).
+5. Latency is dominated by worker start-up (about 570 ms of ~575 ms per scan on this laptop); the
+   engine adds about 16 ms, almost all of it start-up.
+
+## 20. Learning journal
 
 - Nov 6: `pypdf`'s `dict[key]` silently resolves indirect references. The first chain test caught
   a `/Next` cycle running an action twice because the cycle guard tracks object IDs and the
@@ -443,5 +602,8 @@ default seccomp.
 - Nov 6: YARA-X regex matches end at about 4 KiB (measured by bisection: 4,092 bytes).
 - Nov 6: read the dependency, not its reputation: olevba's stomping check returns False for
   in-memory files, so a check the reference appears to make never runs in an isolated worker.
+- Nov 6: a keyword list is not a capability model: `Run`, `Create` and even `Shell` mean different
+  things on different objects, so evidence must say whether a capability is shown or only possible.
+- Nov 6: an OOXML relationship is a declaration, not a use; the use is an element in a loaded part.
 - Nov 6: profiling before optimising. The plan listed compiled-rule reuse and `fast_scan` as
   latency ideas; measurement showed YARA-X is < 2% of a scan. The real cost is process start-up.
