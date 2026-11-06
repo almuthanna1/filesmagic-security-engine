@@ -14,7 +14,7 @@ This is a development harness, not a research run: it does not enforce strict is
 clean tree (evaluation.benchmark does that). Its output records the platform, commit and
 whether isolation was complete, so numbers are compared only within one environment.
 
-    python -m evaluation.cases --trials 20 --out <dir>
+    python -m evaluation.cases --trials 20 --out <dir> [--engine unified]
 """
 
 import argparse
@@ -117,8 +117,10 @@ def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--trials", type=int, default=20)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--engine", choices=["reference", "unified"], default="reference",
+                        help="reference: the four scanners /scan runs; unified: the custom engine candidate")
     args = parser.parse_args(argv)
-    cmd = worker.command()
+    cmd = worker.command() + ["--engine=unified"] * (args.engine == "unified")
     results = [scan_case(c, args.trials, cmd) for c in cases()]
     env = environment(None) | {"platform": platform.platform(), "python": sys.version.split()[0],
                                "worker_command": cmd[3:], "trials": args.trials}

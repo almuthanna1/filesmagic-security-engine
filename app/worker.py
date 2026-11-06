@@ -502,7 +502,12 @@ def _audit_hook(event: str, args: tuple) -> None:
 
 def main(argv: list[str]) -> int:
     # Rules and parsers load first (trusted files), before any containment that would block them.
-    from app.scanners import SCANNERS
+    # --engine=unified: the custom engine candidate (evaluation only; the API never passes it).
+    unified = "--engine=unified" in argv
+    if unified:
+        from app.engine import SCANNERS, correlate
+    else:
+        from app.scanners import SCANNERS
 
     isolation = dict.fromkeys(ISOLATION_CONTROLS, False)
     isolation["process"] = True
@@ -535,6 +540,8 @@ def main(argv: list[str]) -> int:
         if len(data) > MAX_INPUT_BYTES:
             return 3
         report = analyse(SCANNERS, data, isolation)
+        if unified:
+            report = correlate(report)
     report.diagnostics = diagnostics
     sys.stdout.buffer.write(report.model_dump_json().encode())
     sys.stdout.flush()

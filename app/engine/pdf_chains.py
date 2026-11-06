@@ -57,6 +57,7 @@ class Action:
     kind: str  # /S without the slash, or "JavaScript" for a dictionary that only has /JS
     payload: tuple[tuple[str, str], ...] = ()  # (embedded file name or COMPUTED, how: launch/export/open)
     target: str = ""  # Launch target that is not embedded, shown as evidence
+    script: bool = False  # has /JS: JavaScript actions, and Rendition actions with a script (12.6.4.13)
 
 
 @dataclass
@@ -109,7 +110,7 @@ def _describe(action: DictionaryObject, where: str) -> Action:
             if "/N" in tree:
                 payload.append((text_of(tree["/N"], 1000), "open"))
             tree = _resolve(tree.get("/T"))
-    return Action(where, kind, tuple(payload), target)
+    return Action(where, kind, tuple(payload), target, "/JS" in action)
 
 
 def _actions(value, owner: str, budget: list[int]) -> list[Action]:
@@ -206,7 +207,8 @@ def extract(data: bytes) -> PdfChains:
             elif k == "/A":
                 chain(f"{owner} /A", False, v, owner)
             elif k == "/JavaScript" and not isinstance(v, str):  # the names dictionary's script tree
-                for name, action in _name_tree(v):
+                # Not a name tree (a bare action or array): automatic too, as the PDF scanner treats it.
+                for name, action in list(_name_tree(v)) or [("(not a name tree)", v)]:
                     chain(f"document-level script {clean(name, 40)!r}", True, action, owner)
             elif k == "/EmbeddedFiles" and not isinstance(v, str):
                 result.attachments.update(name for name, _ in _name_tree(v))
