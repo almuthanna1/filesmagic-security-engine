@@ -70,11 +70,86 @@ def test_dynamic_calls_on_the_reachable_part_make_the_path_undetermined(call, re
     assert overall == UNDETERMINED and reason in result.entries[0].reasons[0]
 
 
-def test_run_with_a_computed_name_is_itself_a_capability_for_olevba():
-    # olevba lists "Run" under "May run an executable file or a system command", which the Office
-    # scanner rates strong, so the procedure making the dynamic call is a capability node.
-    overall, entries, _ = outcome("Sub AutoOpen()\n    Application.Run procName\nEnd Sub\n")
-    assert overall == LINKED and entries[0][2] == ("Module1.AutoOpen",)
+def test_run_with_a_computed_name_is_unresolved_not_an_execution():
+    # olevba lists "Run" under "May run an executable file or a system command", but
+    # Application.Run starts a macro whose name is computed here: nothing is demonstrated.
+    overall, _, result = outcome("Sub AutoOpen()\n    Application.Run procName\nEnd Sub\n")
+    reasons = " | ".join(result.entries[0].reasons)
+    assert overall == UNDETERMINED
+    assert "only run: Run also starts macros" in reasons and "calls Run with a name that is not a known" in reasons
+
+
+# ----------------------------------------------------------------------------- demonstrated vs possible
+
+
+def reasons(*sources: str) -> str:
+    overall, _, result = outcome(*sources)
+    assert overall == UNDETERMINED, overall
+    return " | ".join(r for e in result.entries for r in e.reasons)
+
+
+@pytest.mark.parametrize("body, why", [
+    ("Dim RunTool As Long\n    RunTool = 1", "'RunTool' is also declared as a variable"),
+    ("Const RunTool = 3\n    MsgBox RunTool", "'RunTool' is also declared as a variable"),
+    ("For RunTool = 1 To 3\n    Next", "'RunTool' is also declared as a variable"),
+    ("ws.RunTool", "'RunTool' is a member of something that is not a module"),
+])
+def test_a_name_that_may_not_be_a_call_gives_only_a_possible_path(body, why):
+    assert why in reasons(f"Sub AutoOpen()\n    {body}\nEnd Sub\n" + TOOL)
+
+
+def test_a_parameter_shadows_the_procedure_name():
+    assert "also declared" in reasons("Sub AutoOpen()\n    Helper 1\nEnd Sub\n"
+                                      "Sub Helper(ByVal RunTool As Long)\n    MsgBox RunTool\nEnd Sub\n" + TOOL)
+
+
+def test_a_module_level_variable_in_another_module_shadows_the_procedure_name():
+    # Module1 declares a public variable RunTool; Module2 defines the procedure RunTool.
+    assert "also declared" in reasons("Public RunTool As Long\nSub AutoOpen()\n    RunTool = 2\nEnd Sub\n", TOOL)
+
+
+@pytest.mark.parametrize("body", [
+    "Dim t As RunTool",  # a type name
+    "Set t = New RunTool",
+    "Helper RunTool:=1",  # a named argument
+])
+def test_type_names_and_named_arguments_are_no_calls(body):
+    src = f"Sub AutoOpen()\n    {body}\nEnd Sub\nSub Helper()\nEnd Sub\n" + TOOL
+    assert outcome(src)[0] == NO_PATH
+
+
+@pytest.mark.parametrize("call", ["Call RunTool", "RunTool", "x = RunTool()", "Module1.RunTool", "If x Then RunTool"])
+def test_demonstrated_calls_still_link(call):
+    assert outcome(f"Sub AutoOpen()\n    {call}\nEnd Sub\n" + TOOL)[0] == LINKED
+
+
+@pytest.mark.parametrize("body, only", [
+    ("style = vbHide", "only vbhide: a window-style constant is an argument"),
+    ('Set o = CreateObject("WScript.Shell")\n    p = o.SpecialFolders("Desktop")', "only shell, wscript.shell"),
+    ("x = obj.Create(1)", "only create: Create is a common method name"),
+    ('Set a = CreateObject("Shell.Application")\n    MsgBox a.Namespace(0).Title', "only shell"),
+])
+def test_an_ambiguous_keyword_is_only_a_possible_capability(body, only):
+    assert only in reasons(f"Sub AutoOpen()\n    {body}\nEnd Sub\n")
+
+
+def test_a_shell32_declaration_alone_is_not_an_execution():
+    src = ('Private Declare PtrSafe Function GetFolder Lib "shell32" Alias "SHGetFolderPathA" (ByVal h As LongPtr) As Long\n'
+           "Sub AutoOpen()\n    GetFolder 0\nEnd Sub\n")
+    assert "only shell32" in reasons(src)
+
+
+@pytest.mark.parametrize("body", [
+    'Set o = CreateObject("WScript.Shell")\n    o.Run "placeholder"',
+    'Set w = GetObject("winmgmts:").Get("Win32_Process")\n    w.Create "placeholder"',
+])
+def test_an_ambiguous_keyword_confirmed_by_its_context_is_demonstrated(body):
+    assert outcome(f"Sub AutoOpen()\n    {body}\nEnd Sub\n")[0] == LINKED
+
+
+def test_keywords_in_comments_are_no_evidence():
+    src = "Sub AutoOpen()\n    ' never call Shell here\n    MsgBox \"x\"\nEnd Sub\n' AutoExec is documented elsewhere\n"
+    assert outcome(src)[:2] == (NO_PATH, [("Module1.AutoOpen", NO_PATH, ())])
 
 
 def test_a_dynamic_call_outside_the_reachable_part_does_not_matter():
@@ -101,7 +176,7 @@ def test_an_aliased_library_declaration_links_a_harmless_looking_call():
      'Sub Helper()\nEnd Sub\nEnd Sub\n', "End without a procedure"),
     ('Dim s As Object: Set s = CreateObject("WScript.Shell")\nSub AutoOpen()\n    MsgBox "x"\nEnd Sub\n',
      "dangerous keywords outside any procedure"),
-    ("Sub Main()\n    ' started from AutoOpen in another file\nEnd Sub\n" + TOOL, "automatic-entry keyword 'AutoOpen'"),
+    ("Sub Main()\n    Call AutoOpen\nEnd Sub\n" + TOOL, "automatic-entry keyword 'AutoOpen'"),
 ])
 def test_incomplete_call_graphs_are_undetermined(src, problem):
     overall, _, result = outcome(src)
