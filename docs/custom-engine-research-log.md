@@ -431,7 +431,7 @@ Conclusion allowed: the worker's Linux isolation controls pass their tests on th
 Render or on the evaluation VM; and the production image gets no network namespace under Docker's
 default seccomp.
 
-## 13. Learning journal
+## 16. Learning journal
 
 - Nov 6: `pypdf`'s `dict[key]` silently resolves indirect references. The first chain test caught
   a `/Next` cycle running an action twice because the cycle guard tracks object IDs and the
