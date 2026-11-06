@@ -25,10 +25,16 @@ its own precondition; if it does not hold, the reference finding stands (fail cl
     signature evidence stays independent of pypdf.
   - A signature claim of an automatic trigger that no automatic script chain confirms is kept and
     marked unconfirmed (a signature can see bytes a parser does not).
+  - OFFICE_MACRO_AUTOEXEC_EXECUTION (Office scanner: an automatic entry and a dangerous capability
+    anywhere in the same VBA project) is never removed. VbaChainScanner (app.engine.vba_chains)
+    adds whether an automatic procedure's calls reach the capability: ENGINE_VBA_AUTOEXEC_REACHES_
+    CAPABILITY (HIGH, with the call path) confirms it; ENGINE_VBA_NO_CALL_PATH and
+    ENGINE_VBA_CALL_PATH_UNDETERMINED (INFO) qualify it. "No call path" holds for the source only:
+    the P-code Office may run instead cannot be checked for VBA stomping in the isolated worker.
 Every decision is listed in one INFO finding, ENGINE_CORRELATION, so nothing changes silently.
 """
 
-from app.engine import pdf_chains
+from app.engine import pdf_chains, vba_chains
 from app.models import Finding, Severity, WorkerReport
 from app.scanners.custom.indicators import NOT_PROOF, clean, listing
 
@@ -39,6 +45,8 @@ STRUCTURAL = {("pdf", "PDF_AUTO_JAVASCRIPT"), ("pdf", "PDF_AUTO_JAVASCRIPT_WITH_
 REFERENCE_SIGNATURE = ("yara-x", "PDF_JavaScript_With_Automatic_Action")
 REFINED_SIGNATURE = (SIGNATURES, "ENGINE_PDF_JavaScript_With_Automatic_Trigger")
 SCRIPT_RULES = {"ENGINE_PDF_AUTO_CHAIN_SCRIPT", "ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT"}
+VBA = "vba-chains"
+REFERENCE_MACRO = ("office", "OFFICE_MACRO_AUTOEXEC_EXECUTION")
 
 RULES = {  # rule -> (severity, summary)
     "ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT": (
@@ -52,8 +60,8 @@ RULES = {  # rule -> (severity, summary)
 }
 
 
-def finding(rule: str, severity: Severity, description: str) -> Finding:
-    return Finding(scanner=NAME, category=CATEGORY, severity=severity, rule_id=rule,
+def finding(rule: str, severity: Severity, description: str, scanner: str = NAME, category: str = CATEGORY) -> Finding:
+    return Finding(scanner=scanner, category=category, severity=severity, rule_id=rule,
                    description=description + (NOT_PROOF if severity != Severity.INFO else ""))
 
 
@@ -102,6 +110,39 @@ class PdfChainScanner:
         return None if result is None else chain_findings(result)
 
 
+def vba_findings(result: vba_chains.VbaChains) -> list[Finding]:
+    def make(rule: str, severity: Severity, text: str) -> Finding:
+        return finding(rule, severity, text, scanner=VBA, category="office-macro-chain")
+
+    by = {o: [e for e in result.entries if e.outcome == o] for o in (vba_chains.LINKED, vba_chains.NO_PATH,
+                                                                     vba_chains.UNDETERMINED)}
+    found = []
+    if linked := by[vba_chains.LINKED]:
+        found.append(make("ENGINE_VBA_AUTOEXEC_REACHES_CAPABILITY", Severity.HIGH,
+                          "An automatically running macro procedure reaches a dangerous operation through its calls. "
+                          "Evidence: " + listing([" -> ".join(clean(p, 60) for p in e.path)
+                                                  + f" ({'; '.join(e.capabilities)})" for e in linked]) + "."))
+    reasons = [r for e in by[vba_chains.UNDETERMINED] for r in e.reasons] + result.problems
+    if reasons:
+        found.append(make("ENGINE_VBA_CALL_PATH_UNDETERMINED", Severity.INFO,
+                          "Whether automatically running macro code reaches a dangerous operation could not be "
+                          f"determined. Evidence: {listing([clean(r, 120) for r in dict.fromkeys(reasons)])}."))
+    if result.outcome == vba_chains.NO_PATH and by[vba_chains.NO_PATH]:
+        found.append(make("ENGINE_VBA_NO_CALL_PATH", Severity.INFO,
+                          "No call path leads from the automatically running macro procedures to a dangerous "
+                          "operation in the extracted source. The compiled P-code was not checked (VBA stomping). "
+                          f"Entries: {listing([clean(e.entry, 60) for e in by[vba_chains.NO_PATH]])}."))
+    return found
+
+
+class VbaChainScanner:
+    name = VBA
+
+    def scan(self, filename: str, data: bytes) -> list[Finding] | None:
+        result = vba_chains.scan(data)
+        return None if result is None else vba_findings(result)
+
+
 def correlate(report: WorkerReport) -> WorkerReport:
     status = {s.name: s.status for s in report.scanners}
     rules = {(f.scanner, f.rule_id) for f in report.findings}
@@ -118,6 +159,17 @@ def correlate(report: WorkerReport) -> WorkerReport:
     claim = next((r for r in (REFINED_SIGNATURE, REFERENCE_SIGNATURE) if r in rules and r not in drop), None)
     if chains_ok and claim and not any(s == NAME and r in SCRIPT_RULES for s, r in rules):
         notes.append(f"{claim[1]} ({claim[0]}) kept but not confirmed: no automatic action chain runs a script")
+    if status.get(VBA) == "completed" and REFERENCE_MACRO in rules:
+        # ponytail: never removed. Lowering it on "no call path" needs the P-code checked for VBA
+        # stomping, which olevba does only on files on disk; the worker cannot write any.
+        if (VBA, "ENGINE_VBA_AUTOEXEC_REACHES_CAPABILITY") in rules:
+            notes.append(f"{REFERENCE_MACRO[1]} (Office scanner) confirmed by a macro call path")
+        elif (VBA, "ENGINE_VBA_NO_CALL_PATH") in rules:
+            notes.append(f"{REFERENCE_MACRO[1]} (Office scanner) kept although the source shows no call path from "
+                         "the automatic procedures to the dangerous operation: the P-code that may run instead "
+                         "cannot be checked for VBA stomping here")
+        else:
+            notes.append(f"{REFERENCE_MACRO[1]} (Office scanner) kept: the macro call path could not be determined")
     if not notes:
         return report
     findings = [f for f in report.findings if (f.scanner, f.rule_id) not in drop]
