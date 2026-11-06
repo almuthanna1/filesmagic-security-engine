@@ -17,10 +17,11 @@ recorded run in `docs/evidence/`), **proposed** (not built), **rejected** (measu
 | Reference vs unified comparison on the 10 cases | measured (section 8) |
 | Correction 1: click-only scripts behind a page destination (explicit classification + regressions) | implemented (`7dc8fe8`), measured (section 12) |
 | Correction 2: refined bytes-only YARA-X rule for automatic triggers `app/engine/rules/pdf.yar` | implemented (`7dc8fe8`), measured (section 12) |
-| Linux-only isolation tests (28) | **not run**: no Linux environment on this machine (section 12.5) |
+| Linux-only isolation tests (28) | passed in CI on GitHub's Ubuntu 24.04 runner at `2721a25` (section 15); not run on Render or the VM |
+| Office: VBA call-graph analysis `app/engine/vba_chains.py` | implemented (`7d9f69c`), unit-tested on inert source strings (section 14) |
 | Format-aware worker start-up (latency) | proposed, needs a security decision (section 10) |
 | YARA-X compiled-rule reuse; YARA-X `fast_scan` | rejected by measurement (section 6) |
-| Office correlation (macro + relationship + C4-C6) | proposed, next |
+| Office: external relationships and embedded objects on the package graph | proposed, next |
 
 ## 2. Environment and reproduction
 
@@ -318,7 +319,7 @@ fires as the reference rule does (tested at 4,000 and 5,000 bytes). Form formatt
   +9 ms (median of case medians 577.0 → 586.1 ms). Accounted for: importing `app.engine` (mostly
   compiling the second rule set) measured 7.1-8.4 ms in 5 runs.
 
-### 12.5 Linux-only isolation tests: not run
+### 12.5 Linux-only isolation tests: not run at the time (superseded by section 15)
 
 28 tests in `tests/test_worker_linux.py` (namespaces, capabilities, rlimits, audit hook,
 tunl0 fallback) skip on Windows. This machine has neither WSL nor Docker. The suitable
@@ -327,6 +328,108 @@ which turns those skips into failures), run on push. Not pushed: the branch is n
 `frontend/vercel.json`, so a push would likely create a Vercel preview deployment. **Isolation is
 therefore not validated for these commits.** The unified engine changes no isolation code; the
 worker gained only the `--engine=unified` scanner selection before containment is applied.
+
+## 14. Office: VBA call-graph analysis (Nov 6, commit `7d9f69c`)
+
+### 14.1 Threat and gap
+
+A macro attack needs code that runs without being asked (an automatic entry: `AutoOpen`,
+`Document_Open`, `Workbook_Open`, ActiveX event handlers) and code that does something dangerous
+(run a program, download, WMI, inject code). The reference Office scanner raises
+`OFFICE_MACRO_AUTOEXEC_EXECUTION` (HIGH) when olevba finds both **anywhere in the same project**:
+the macro counterpart of PDF case 5a. A benign workbook whose `Workbook_Open` only sets up the
+sheet and whose unrelated button handler starts a program is rated MALICIOUS.
+
+### 14.2 Algorithm (`app/engine/vba_chains.py`)
+
+1. Lexing: line continuations collapsed (olevba `vba_collapse_long_lines`), comments (apostrophe,
+   `Rem`) removed, string contents blanked. The literals of the code part are kept per line, so a
+   comment can never resolve a call.
+2. Procedures: `Sub`/`Function`/`Property` blocks up to their `End`, and `Declare ... Lib` lines as
+   external functions. An aliased declaration (`OpenIt ... Alias "ShellExecuteA"`) is how a
+   harmless-looking call site hides a dangerous function.
+3. Capabilities: olevba's `VBA_Scanner` on each procedure's text, keeping the descriptions the Office
+   scanner's `STRONG_VBA_BEHAVIOUR` rates strong, i.e. the reference's own definition of dangerous.
+4. Edges: any identifier equal to a procedure name (deliberately loose: a path may be over-reported,
+   never hidden); `Run`/`OnTime`/`OnKey`/`OnAction`/`CallByName` with a literal naming a procedure
+   (`"Module1.Proc"`, `"'Book.xlsm'!Module1.Proc"`); `AddressOf Proc`.
+5. Entries: procedure names matching olevba's `AUTOEXEC_KEYWORDS` / `AUTOEXEC_KEYWORDS_REGEX`.
+6. Breadth-first search from each entry. Outcomes:
+   - **linked**: a procedure with a capability is reached; the path is reported;
+   - **undetermined**: none reached, but a reachable procedure makes a dynamic call (`OnKey`,
+     `CallByName`, ... with a name that is not a known procedure; `Evaluate`, `ExecuteExcel4Macro`;
+     self-modifying code via `VBProject`, `CodeModule`, `AddFromString`, ...), or the project has
+     a gap: unbalanced blocks, a dangerous keyword outside any procedure, a capability or automatic
+     keyword olevba reports that no procedure accounts for, XLM macros, or a container that is not
+     an OLE VBA project or could not be extracted;
+   - **no-path**: none reached and none of the above.
+
+### 14.3 What correlation does with it, and why it never lowers the verdict
+
+`OFFICE_MACRO_AUTOEXEC_EXECUTION` is **never removed**. Linked confirms it (the path is a HIGH engine
+finding); no-path and undetermined keep it, with an INFO finding saying why. Reason, from the
+installed olevba source (`VBA_Parser.detect_vba_stomping`): VBA stomping, where the source is
+replaced while the compiled P-code that Office may execute stays malicious, is checked only for
+files on disk, and the isolated worker writes none. So "no-path" is true of the source and
+unverified for what runs. A consequence for the reference too: its `VBA Stomping` check never
+runs in this engine.
+
+### 14.4 Reused vs original
+
+Reused (oletools 0.60.2, BSD-2): `VBA_Parser.extract_macros`, `VBA_Scanner`, `AUTOEXEC_KEYWORDS`,
+`AUTOEXEC_KEYWORDS_REGEX`, `vba_collapse_long_lines`. Reused (this repository): the Office
+scanner's `STRONG_VBA_BEHAVIOUR`, `identify`, `read_member`, ZIP limits and `clean`. Original: the
+lexer, the procedure and call-graph model, resolution of named and `AddressOf` calls, the
+three-outcome search with its incompleteness rules, and the correlation policy.
+
+### 14.5 Tests and what they show
+
+`tests/test_vba_chains.py`, 33 tests. All VBA is inert Python strings (the "dangerous" lines are
+`Shell "placeholder"`). No VBA project or macro-bearing document is built: a stand-in replaces only
+olevba's container parsing, and keyword analysis stays real olevba. Covered:
+- related (transitive, cross-module) and unrelated procedures, names in comments and strings, cycles;
+- indirect calls resolved by literal (`Run` with plain, module-qualified and workbook-qualified
+  names, `OnTime`, `AddressOf`); dynamic calls (`OnKey`, `CallByName`, `Evaluate`, `VBProject`);
+  dynamic calls outside the reachable part (ignored); an established path winning over a dynamic call;
+- an aliased `Declare`; incomplete graphs (missing `End`, stray `End`, module-level `CreateObject`,
+  an automatic keyword with no procedure); extraction failures; non-OLE VBA parts; broken ZIPs
+  (fail closed as malformed input);
+- the unified engine on all three outcomes: the reference HIGH stays, and the verdict equals the
+  reference's (MALICIOUS) every time.
+
+Finding from the tests: olevba lists `Run` itself under "May run an executable file or a system
+command", so `Application.Run procName` makes its own procedure a capability node and the outcome
+is linked, not undetermined (the cautious direction, and the reference's own definition).
+
+What this does **not** show: no measurement on real documents (none are built, by decision), no
+change in any verdict, nothing about P-code. On the case matrix (`docs/evidence/custom-engine-7d9f69c/`)
+every PDF and Office result is identical to `7dc8fe8` for both engines; `vba-chains` takes at most
+0.15 ms p50 and reports case 7 as undetermined (its `vbaProject.bin` placeholder is not an OLE
+project). Wall time in this run: +14 ms against the reference (574.2 to 588.5 ms), of which about
+8 ms is engine start-up (12.4); the rest is not isolated.
+
+## 15. Linux CI (Nov 6, run 42259767395, commit `2721a25`)
+
+Deployment safeguards checked before the push: `frontend/vercel.json` now disables Git deployments
+for this branch as well as `security/malware-research-hardening`. The connected Vercel project
+(`filesmagic-security-lab`) honours that file: the excluded branch's Nov 3 pushes have no Vercel
+status or deployment, while this branch's earlier push (`c22fe64`, before the exclusion) got a
+Preview. Render has `autoDeployTrigger: "off"`; the only workflow builds and tests and deploys
+nothing; there are no repository webhooks. Pushed content: code, tests and evidence JSON (versions,
+timings, rule IDs; no document bytes, no secrets). The EICAR/Didier files are not committed.
+
+| Job | Result |
+|---|---|
+| Backend (Linux, Python 3.11, non-root), `FM_REQUIRE_LINUX_TESTS=1` | success: **633 passed, 0 skipped**, including the 28 Linux isolation tests; unprivileged user+network namespaces available |
+| same job, rerun with the `tunl0` fallback device (Render condition) | success: 28 passed |
+| Production image (Docker, non-root, `--network none`) | success; under Docker's default seccomp `process`, `rlimits`, `audit_hook` are true and `network_namespace`, `network_verified`, `capabilities_dropped` false (reported, not required, by design) |
+| Security Lab (typecheck, lint, build, audit) | success |
+| Vercel | no status and no deployment for `2721a25` |
+
+Conclusion allowed: the worker's Linux isolation controls pass their tests on the GitHub Ubuntu
+24.04 runner, whose AppArmor user-namespace restriction the workflow relaxes. Not shown: isolation on
+Render or on the evaluation VM; and the production image gets no network namespace under Docker's
+default seccomp.
 
 ## 13. Learning journal
 
@@ -338,5 +441,7 @@ worker gained only the `--engine=unified` scanner selection before containment i
   occurrences the bytes disprove. Counting (`#a > #b`) does that in YARA's condition language;
   regex cannot balance nested `<< >>`, so the proof gives up on anything it cannot match.
 - Nov 6: YARA-X regex matches end at about 4 KiB (measured by bisection: 4,092 bytes).
+- Nov 6: read the dependency, not its reputation: olevba's stomping check returns False for
+  in-memory files, so a check the reference appears to make never runs in an isolated worker.
 - Nov 6: profiling before optimising. The plan listed compiled-rule reuse and `fast_scan` as
   latency ideas; measurement showed YARA-X is < 2% of a scan. The real cost is process start-up.

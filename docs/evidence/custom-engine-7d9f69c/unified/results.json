@@ -1,0 +1,1199 @@
+{
+  "environment": {
+    "timestamp_utc": "2026-11-06T17:28:40+00:00",
+    "engine_commit": "7d9f69cb426a4c8674dd75e9c9f104a64b1b4b52",
+    "working_tree_dirty": true,
+    "manifest_sha256": null,
+    "engine_version": "0.2.0",
+    "ruleset_sha256": "0be9918509e95e639f866291dc297c45c8e72812d602fb149fad3484435ae3b0",
+    "strict_isolation_configured": false,
+    "python": "3.14.3",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "packages": {
+      "yara-x": "1.21.0",
+      "oletools": "0.60.2",
+      "pypdf": "6.19.0",
+      "msoffcrypto-tool": "6.0.0",
+      "defusedxml": "0.7.1",
+      "fastapi": "0.142.4"
+    },
+    "harness_peak_rss_mib": null,
+    "worker_memory_measured": false,
+    "worker_command": [
+      "-s",
+      "-m",
+      "app.worker",
+      "--engine=unified"
+    ],
+    "trials": 20
+  },
+  "results": [
+    {
+      "id": "1-pdf-clean",
+      "ground_truth": "BENIGN",
+      "indicator": "none (negative control)",
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "n/a",
+        "pdf": "SAFE",
+        "custom": "SAFE",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "SAFE",
+        "vba-chains": "n/a",
+        "aggregate": "SAFE"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable"
+      },
+      "rules": [],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 591.41,
+          "median_ms": 589.47,
+          "p95_ms": 612.624,
+          "max_ms": 617.041,
+          "min_ms": 576.758
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.39,
+          "median_ms": 0.38,
+          "p95_ms": 0.484,
+          "max_ms": 0.622,
+          "min_ms": 0.305
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.01,
+          "median_ms": 0.0,
+          "p95_ms": 0.012,
+          "max_ms": 0.058,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.46,
+          "median_ms": 0.44,
+          "p95_ms": 0.52,
+          "max_ms": 0.621,
+          "min_ms": 0.412
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.09,
+          "median_ms": 0.08,
+          "p95_ms": 0.167,
+          "max_ms": 0.23,
+          "min_ms": 0.075
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.32,
+          "median_ms": 0.32,
+          "p95_ms": 0.415,
+          "max_ms": 0.438,
+          "min_ms": 0.266
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.24,
+          "median_ms": 0.22,
+          "p95_ms": 0.326,
+          "max_ms": 0.49,
+          "min_ms": 0.189
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.004,
+          "min_ms": 0.002
+        }
+      }
+    },
+    {
+      "id": "2-pdf-form-keystroke-js",
+      "ground_truth": "BENIGN",
+      "indicator": "form-field keystroke JavaScript (user-triggered /AA /K)",
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SAFE",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "SAFE",
+        "vba-chains": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable"
+      },
+      "rules": [
+        "pdf:PDF_JAVASCRIPT:MEDIUM"
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 587.49,
+          "median_ms": 588.28,
+          "p95_ms": 593.204,
+          "max_ms": 679.392,
+          "min_ms": 564.57
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.5,
+          "median_ms": 0.46,
+          "p95_ms": 0.642,
+          "max_ms": 0.839,
+          "min_ms": 0.371
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.005,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.63,
+          "median_ms": 0.6,
+          "p95_ms": 0.704,
+          "max_ms": 1.109,
+          "min_ms": 0.559
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.09,
+          "median_ms": 0.1,
+          "p95_ms": 0.101,
+          "max_ms": 0.104,
+          "min_ms": 0.088
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.35,
+          "median_ms": 0.32,
+          "p95_ms": 0.464,
+          "max_ms": 0.486,
+          "min_ms": 0.294
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.41,
+          "median_ms": 0.4,
+          "p95_ms": 0.498,
+          "max_ms": 0.503,
+          "min_ms": 0.344
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.002
+        }
+      }
+    },
+    {
+      "id": "2b-pdf-open-at-page-click-js",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction page destination + click-only link JavaScript",
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SAFE",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "SAFE",
+        "vba-chains": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable"
+      },
+      "rules": [
+        "pdf:PDF_JAVASCRIPT:MEDIUM"
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 593.23,
+          "median_ms": 589.78,
+          "p95_ms": 623.25,
+          "max_ms": 632.299,
+          "min_ms": 578.442
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.44,
+          "median_ms": 0.41,
+          "p95_ms": 0.576,
+          "max_ms": 0.746,
+          "min_ms": 0.369
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.005,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.63,
+          "median_ms": 0.59,
+          "p95_ms": 0.826,
+          "max_ms": 0.861,
+          "min_ms": 0.552
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.09,
+          "median_ms": 0.09,
+          "p95_ms": 0.102,
+          "max_ms": 0.107,
+          "min_ms": 0.084
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.34,
+          "median_ms": 0.31,
+          "p95_ms": 0.442,
+          "max_ms": 0.725,
+          "min_ms": 0.281
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.4,
+          "median_ms": 0.37,
+          "p95_ms": 0.492,
+          "max_ms": 0.57,
+          "min_ms": 0.332
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.002
+        }
+      }
+    },
+    {
+      "id": "2c-pdf-open-at-page-page-open-js",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction page destination + that page's own open trigger /AA /O",
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SAFE",
+        "yara-x-engine": "SUSPICIOUS",
+        "pdf-chains": "SUSPICIOUS",
+        "vba-chains": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable"
+      },
+      "rules": [
+        "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+        "pdf:PDF_JAVASCRIPT:MEDIUM",
+        "yara-x-engine:ENGINE_PDF_JavaScript_With_Automatic_Trigger:MEDIUM"
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 589.12,
+          "median_ms": 586.68,
+          "p95_ms": 602.295,
+          "max_ms": 605.929,
+          "min_ms": 573.991
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.42,
+          "median_ms": 0.39,
+          "p95_ms": 0.511,
+          "max_ms": 0.671,
+          "min_ms": 0.351
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.61,
+          "median_ms": 0.56,
+          "p95_ms": 0.797,
+          "max_ms": 0.843,
+          "min_ms": 0.516
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.09,
+          "median_ms": 0.09,
+          "p95_ms": 0.101,
+          "max_ms": 0.103,
+          "min_ms": 0.084
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.33,
+          "median_ms": 0.32,
+          "p95_ms": 0.392,
+          "max_ms": 0.463,
+          "min_ms": 0.29
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.37,
+          "median_ms": 0.35,
+          "p95_ms": 0.444,
+          "max_ms": 0.625,
+          "min_ms": 0.322
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.004,
+          "min_ms": 0.002
+        }
+      }
+    },
+    {
+      "id": "3-pdf-escaped-openaction-js",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction JavaScript written /J#61vaScript /J#53",
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SUSPICIOUS",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "SUSPICIOUS",
+        "vba-chains": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable"
+      },
+      "rules": [
+        "custom:CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME:MEDIUM",
+        "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+        "pdf:PDF_JAVASCRIPT:MEDIUM"
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 585.1,
+          "median_ms": 583.41,
+          "p95_ms": 597.816,
+          "max_ms": 599.641,
+          "min_ms": 575.096
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.38,
+          "median_ms": 0.36,
+          "p95_ms": 0.535,
+          "max_ms": 0.584,
+          "min_ms": 0.291
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.005,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.6,
+          "median_ms": 0.59,
+          "p95_ms": 0.744,
+          "max_ms": 0.849,
+          "min_ms": 0.508
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.2,
+          "median_ms": 0.18,
+          "p95_ms": 0.223,
+          "max_ms": 0.402,
+          "min_ms": 0.171
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.32,
+          "median_ms": 0.32,
+          "p95_ms": 0.374,
+          "max_ms": 0.397,
+          "min_ms": 0.275
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.29,
+          "median_ms": 0.27,
+          "p95_ms": 0.404,
+          "max_ms": 0.412,
+          "min_ms": 0.256
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.002
+        }
+      }
+    },
+    {
+      "id": "4-pdf-objstm-escaped-js",
+      "ground_truth": "BENIGN",
+      "indicator": "the same action inside a FlateDecode object stream",
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SUSPICIOUS",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "SUSPICIOUS",
+        "vba-chains": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable"
+      },
+      "rules": [
+        "custom:CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME:MEDIUM",
+        "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+        "pdf:PDF_JAVASCRIPT:MEDIUM"
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 588.37,
+          "median_ms": 590.41,
+          "p95_ms": 600.242,
+          "max_ms": 603.473,
+          "min_ms": 574.518
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.37,
+          "median_ms": 0.35,
+          "p95_ms": 0.581,
+          "max_ms": 0.614,
+          "min_ms": 0.288
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.005,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.75,
+          "median_ms": 0.71,
+          "p95_ms": 0.938,
+          "max_ms": 1.191,
+          "min_ms": 0.666
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.24,
+          "median_ms": 0.22,
+          "p95_ms": 0.314,
+          "max_ms": 0.32,
+          "min_ms": 0.206
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.36,
+          "median_ms": 0.32,
+          "p95_ms": 0.455,
+          "max_ms": 0.749,
+          "min_ms": 0.286
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.44,
+          "median_ms": 0.41,
+          "p95_ms": 0.631,
+          "max_ms": 0.715,
+          "min_ms": 0.349
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.004,
+          "min_ms": 0.002
+        }
+      }
+    },
+    {
+      "id": "5a-pdf-auto-js-unrelated-attachment",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction JavaScript + a text attachment it never references",
+      "verdicts": {
+        "yara-x": "SUSPICIOUS",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SAFE",
+        "yara-x-engine": "SUSPICIOUS",
+        "pdf-chains": "SUSPICIOUS",
+        "vba-chains": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable"
+      },
+      "rules": [
+        "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+        "pdf:PDF_EMBEDDED_FILE:LOW",
+        "pdf:PDF_JAVASCRIPT:MEDIUM",
+        "yara-x-engine:ENGINE_PDF_JavaScript_With_Automatic_Trigger:MEDIUM",
+        "yara-x:PDF_Embedded_File:LOW"
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 588.44,
+          "median_ms": 588.52,
+          "p95_ms": 599.737,
+          "max_ms": 602.342,
+          "min_ms": 577.144
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.43,
+          "median_ms": 0.43,
+          "p95_ms": 0.487,
+          "max_ms": 0.49,
+          "min_ms": 0.354
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.73,
+          "median_ms": 0.7,
+          "p95_ms": 0.871,
+          "max_ms": 0.935,
+          "min_ms": 0.659
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.13,
+          "median_ms": 0.13,
+          "p95_ms": 0.136,
+          "max_ms": 0.156,
+          "min_ms": 0.123
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.35,
+          "median_ms": 0.33,
+          "p95_ms": 0.461,
+          "max_ms": 0.474,
+          "min_ms": 0.298
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.48,
+          "median_ms": 0.42,
+          "p95_ms": 0.822,
+          "max_ms": 0.931,
+          "min_ms": 0.378
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.004,
+          "min_ms": 0.002
+        }
+      }
+    },
+    {
+      "id": "5b-pdf-auto-js-exports-attachment",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction JavaScript that exports the attachment (nLaunch 0)",
+      "verdicts": {
+        "yara-x": "SUSPICIOUS",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SAFE",
+        "yara-x-engine": "SUSPICIOUS",
+        "pdf-chains": "MALICIOUS",
+        "vba-chains": "n/a",
+        "aggregate": "MALICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable"
+      },
+      "rules": [
+        "pdf-chains:ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT:HIGH",
+        "pdf:PDF_EMBEDDED_FILE:LOW",
+        "pdf:PDF_JAVASCRIPT:MEDIUM",
+        "yara-x-engine:ENGINE_PDF_JavaScript_With_Automatic_Trigger:MEDIUM",
+        "yara-x:PDF_Embedded_File:LOW"
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 594.12,
+          "median_ms": 588.57,
+          "p95_ms": 610.332,
+          "max_ms": 644.169,
+          "min_ms": 582.42
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.45,
+          "median_ms": 0.45,
+          "p95_ms": 0.561,
+          "max_ms": 0.578,
+          "min_ms": 0.364
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.005,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.74,
+          "median_ms": 0.72,
+          "p95_ms": 0.93,
+          "max_ms": 0.984,
+          "min_ms": 0.668
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.14,
+          "median_ms": 0.13,
+          "p95_ms": 0.15,
+          "max_ms": 0.237,
+          "min_ms": 0.12
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.34,
+          "median_ms": 0.33,
+          "p95_ms": 0.401,
+          "max_ms": 0.448,
+          "min_ms": 0.287
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.49,
+          "median_ms": 0.45,
+          "p95_ms": 0.763,
+          "max_ms": 0.784,
+          "min_ms": 0.398
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.004,
+          "min_ms": 0.002
+        }
+      }
+    },
+    {
+      "id": "6a-docx-hyperlink",
+      "ground_truth": "BENIGN",
+      "indicator": "ordinary external hyperlink (negative control)",
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SAFE",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "n/a",
+        "vba-chains": "n/a",
+        "aggregate": "SAFE"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable"
+      },
+      "rules": [],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 588.41,
+          "median_ms": 588.25,
+          "p95_ms": 596.331,
+          "max_ms": 596.847,
+          "min_ms": 579.499
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.38,
+          "median_ms": 0.37,
+          "p95_ms": 0.561,
+          "max_ms": 0.634,
+          "min_ms": 0.293
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 1.84,
+          "median_ms": 1.79,
+          "p95_ms": 2.213,
+          "max_ms": 2.233,
+          "min_ms": 1.677
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.005,
+          "min_ms": 0.003
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.63,
+          "median_ms": 0.58,
+          "p95_ms": 0.843,
+          "max_ms": 0.944,
+          "min_ms": 0.539
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.34,
+          "median_ms": 0.33,
+          "p95_ms": 0.392,
+          "max_ms": 0.401,
+          "min_ms": 0.294
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.006,
+          "min_ms": 0.003
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.07,
+          "median_ms": 0.06,
+          "p95_ms": 0.079,
+          "max_ms": 0.211,
+          "min_ms": 0.058
+        }
+      }
+    },
+    {
+      "id": "6b-docx-external-template",
+      "ground_truth": "BENIGN",
+      "indicator": "external attachedTemplate https://template.example.invalid/normal.dotm (never fetched)",
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "n/a",
+        "vba-chains": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable"
+      },
+      "rules": [
+        "office:OFFICE_EXTERNAL_AUTOLOAD:MEDIUM"
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 590.04,
+          "median_ms": 587.7,
+          "p95_ms": 600.927,
+          "max_ms": 604.466,
+          "min_ms": 579.607
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.37,
+          "median_ms": 0.37,
+          "p95_ms": 0.454,
+          "max_ms": 0.576,
+          "min_ms": 0.282
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 1.99,
+          "median_ms": 1.95,
+          "p95_ms": 2.224,
+          "max_ms": 2.486,
+          "min_ms": 1.722
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.003
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.65,
+          "median_ms": 0.59,
+          "p95_ms": 0.92,
+          "max_ms": 1.357,
+          "min_ms": 0.547
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.38,
+          "median_ms": 0.36,
+          "p95_ms": 0.477,
+          "max_ms": 0.624,
+          "min_ms": 0.303
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.01,
+          "median_ms": 0.0,
+          "p95_ms": 0.007,
+          "max_ms": 0.039,
+          "min_ms": 0.003
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.07,
+          "median_ms": 0.07,
+          "p95_ms": 0.101,
+          "max_ms": 0.118,
+          "min_ms": 0.057
+        }
+      }
+    },
+    {
+      "id": "7-docx-macro-declaration-mismatch",
+      "ground_truth": "BENIGN",
+      "indicator": "macro-free DOCX declaration with a vbaProject.bin placeholder",
+      "verdicts": {
+        "yara-x": "SUSPICIOUS",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "SUSPICIOUS",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "n/a",
+        "vba-chains": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "completed"
+      },
+      "rules": [
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "office:OFFICE_VBA_UNPARSED:LOW",
+        "yara-x:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 590.61,
+          "median_ms": 590.38,
+          "p95_ms": 604.692,
+          "max_ms": 611.883,
+          "min_ms": 574.671
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.42,
+          "median_ms": 0.43,
+          "p95_ms": 0.475,
+          "max_ms": 0.636,
+          "min_ms": 0.36
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 1.83,
+          "median_ms": 1.81,
+          "p95_ms": 1.968,
+          "max_ms": 2.27,
+          "min_ms": 1.591
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.006,
+          "min_ms": 0.003
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.68,
+          "median_ms": 0.62,
+          "p95_ms": 1.025,
+          "max_ms": 1.083,
+          "min_ms": 0.571
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.36,
+          "median_ms": 0.35,
+          "p95_ms": 0.425,
+          "max_ms": 0.53,
+          "min_ms": 0.303
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.006,
+          "max_ms": 0.007,
+          "min_ms": 0.003
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.16,
+          "median_ms": 0.15,
+          "p95_ms": 0.216,
+          "max_ms": 0.221,
+          "min_ms": 0.132
+        }
+      }
+    }
+  ]
+}
