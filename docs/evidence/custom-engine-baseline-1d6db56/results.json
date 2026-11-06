@@ -1,0 +1,796 @@
+{
+  "environment": {
+    "timestamp_utc": "2026-11-06T16:26:54+00:00",
+    "engine_commit": "1d6db56d7c9c75cb7abd0e6fe15d588fb15356de",
+    "working_tree_dirty": true,
+    "manifest_sha256": null,
+    "engine_version": "0.2.0",
+    "ruleset_sha256": "0be9918509e95e639f866291dc297c45c8e72812d602fb149fad3484435ae3b0",
+    "strict_isolation_configured": false,
+    "python": "3.14.3",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "packages": {
+      "yara-x": "1.21.0",
+      "oletools": "0.60.2",
+      "pypdf": "6.19.0",
+      "msoffcrypto-tool": "6.0.0",
+      "defusedxml": "0.7.1",
+      "fastapi": "0.142.4"
+    },
+    "harness_peak_rss_mib": null,
+    "worker_memory_measured": false,
+    "worker_command": [
+      "-s",
+      "-m",
+      "app.worker"
+    ],
+    "trials": 20
+  },
+  "results": [
+    {
+      "id": "1-pdf-clean",
+      "ground_truth": "BENIGN",
+      "indicator": "none (negative control)",
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "n/a",
+        "pdf": "SAFE",
+        "custom": "SAFE",
+        "aggregate": "SAFE"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "rules": [],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 613.93,
+          "median_ms": 609.77,
+          "p95_ms": 658.336,
+          "max_ms": 760.254,
+          "min_ms": 551.337
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.42,
+          "median_ms": 0.39,
+          "p95_ms": 0.621,
+          "max_ms": 0.786,
+          "min_ms": 0.285
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.006,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.55,
+          "median_ms": 0.48,
+          "p95_ms": 0.844,
+          "max_ms": 1.499,
+          "min_ms": 0.404
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.11,
+          "median_ms": 0.09,
+          "p95_ms": 0.173,
+          "max_ms": 0.364,
+          "min_ms": 0.074
+        }
+      }
+    },
+    {
+      "id": "2-pdf-form-keystroke-js",
+      "ground_truth": "BENIGN",
+      "indicator": "form-field keystroke JavaScript (user-triggered /AA /K)",
+      "verdicts": {
+        "yara-x": "SUSPICIOUS",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "rules": [
+        "pdf:PDF_JAVASCRIPT:MEDIUM",
+        "yara-x:PDF_JavaScript_With_Automatic_Action:MEDIUM"
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 599.65,
+          "median_ms": 598.44,
+          "p95_ms": 656.673,
+          "max_ms": 670.334,
+          "min_ms": 518.669
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.46,
+          "median_ms": 0.45,
+          "p95_ms": 0.595,
+          "max_ms": 0.612,
+          "min_ms": 0.349
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.006,
+          "max_ms": 0.006,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.65,
+          "median_ms": 0.62,
+          "p95_ms": 0.811,
+          "max_ms": 0.922,
+          "min_ms": 0.537
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.14,
+          "median_ms": 0.1,
+          "p95_ms": 0.139,
+          "max_ms": 0.985,
+          "min_ms": 0.086
+        }
+      }
+    },
+    {
+      "id": "2b-pdf-open-at-page-click-js",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction page destination + click-only link JavaScript",
+      "verdicts": {
+        "yara-x": "SUSPICIOUS",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "rules": [
+        "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+        "pdf:PDF_JAVASCRIPT:MEDIUM",
+        "yara-x:PDF_JavaScript_With_Automatic_Action:MEDIUM"
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 558.09,
+          "median_ms": 550.78,
+          "p95_ms": 629.141,
+          "max_ms": 644.8,
+          "min_ms": 509.136
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.43,
+          "median_ms": 0.4,
+          "p95_ms": 0.486,
+          "max_ms": 0.846,
+          "min_ms": 0.36
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.59,
+          "median_ms": 0.57,
+          "p95_ms": 0.76,
+          "max_ms": 0.822,
+          "min_ms": 0.528
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.09,
+          "median_ms": 0.09,
+          "p95_ms": 0.103,
+          "max_ms": 0.127,
+          "min_ms": 0.082
+        }
+      }
+    },
+    {
+      "id": "3-pdf-escaped-openaction-js",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction JavaScript written /J#61vaScript /J#53",
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SUSPICIOUS",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "rules": [
+        "custom:CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME:MEDIUM",
+        "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+        "pdf:PDF_JAVASCRIPT:MEDIUM"
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 564.31,
+          "median_ms": 561.22,
+          "p95_ms": 624.804,
+          "max_ms": 665.299,
+          "min_ms": 509.368
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.35,
+          "median_ms": 0.33,
+          "p95_ms": 0.471,
+          "max_ms": 0.532,
+          "min_ms": 0.283
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.53,
+          "median_ms": 0.51,
+          "p95_ms": 0.65,
+          "max_ms": 0.703,
+          "min_ms": 0.485
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.18,
+          "median_ms": 0.18,
+          "p95_ms": 0.244,
+          "max_ms": 0.246,
+          "min_ms": 0.164
+        }
+      }
+    },
+    {
+      "id": "4-pdf-objstm-escaped-js",
+      "ground_truth": "BENIGN",
+      "indicator": "the same action inside a FlateDecode object stream",
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SUSPICIOUS",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "rules": [
+        "custom:CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME:MEDIUM",
+        "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+        "pdf:PDF_JAVASCRIPT:MEDIUM"
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 538.42,
+          "median_ms": 532.28,
+          "p95_ms": 578.68,
+          "max_ms": 625.476,
+          "min_ms": 507.388
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.35,
+          "median_ms": 0.32,
+          "p95_ms": 0.425,
+          "max_ms": 0.497,
+          "min_ms": 0.289
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.005,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.7,
+          "median_ms": 0.67,
+          "p95_ms": 0.875,
+          "max_ms": 0.953,
+          "min_ms": 0.626
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.22,
+          "median_ms": 0.21,
+          "p95_ms": 0.267,
+          "max_ms": 0.363,
+          "min_ms": 0.195
+        }
+      }
+    },
+    {
+      "id": "5a-pdf-auto-js-unrelated-attachment",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction JavaScript + a text attachment it never references",
+      "verdicts": {
+        "yara-x": "SUSPICIOUS",
+        "office": "n/a",
+        "pdf": "MALICIOUS",
+        "custom": "SAFE",
+        "aggregate": "MALICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "rules": [
+        "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+        "pdf:PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD:HIGH",
+        "pdf:PDF_EMBEDDED_FILE:LOW",
+        "pdf:PDF_JAVASCRIPT:MEDIUM",
+        "yara-x:PDF_Embedded_File:LOW",
+        "yara-x:PDF_JavaScript_With_Automatic_Action:MEDIUM"
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 534.28,
+          "median_ms": 526.7,
+          "p95_ms": 580.215,
+          "max_ms": 582.336,
+          "min_ms": 513.567
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.43,
+          "median_ms": 0.4,
+          "p95_ms": 0.516,
+          "max_ms": 0.697,
+          "min_ms": 0.365
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.68,
+          "median_ms": 0.68,
+          "p95_ms": 0.74,
+          "max_ms": 0.766,
+          "min_ms": 0.628
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.13,
+          "median_ms": 0.12,
+          "p95_ms": 0.139,
+          "max_ms": 0.147,
+          "min_ms": 0.118
+        }
+      }
+    },
+    {
+      "id": "5b-pdf-auto-js-exports-attachment",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction JavaScript that exports the attachment (nLaunch 0)",
+      "verdicts": {
+        "yara-x": "SUSPICIOUS",
+        "office": "n/a",
+        "pdf": "MALICIOUS",
+        "custom": "SAFE",
+        "aggregate": "MALICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "rules": [
+        "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+        "pdf:PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD:HIGH",
+        "pdf:PDF_EMBEDDED_FILE:LOW",
+        "pdf:PDF_JAVASCRIPT:MEDIUM",
+        "yara-x:PDF_Embedded_File:LOW",
+        "yara-x:PDF_JavaScript_With_Automatic_Action:MEDIUM"
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 552.31,
+          "median_ms": 546.34,
+          "p95_ms": 603.405,
+          "max_ms": 605.416,
+          "min_ms": 514.632
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.44,
+          "median_ms": 0.41,
+          "p95_ms": 0.577,
+          "max_ms": 0.592,
+          "min_ms": 0.368
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.005,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.71,
+          "median_ms": 0.66,
+          "p95_ms": 0.807,
+          "max_ms": 1.206,
+          "min_ms": 0.633
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.14,
+          "median_ms": 0.13,
+          "p95_ms": 0.149,
+          "max_ms": 0.221,
+          "min_ms": 0.122
+        }
+      }
+    },
+    {
+      "id": "6a-docx-hyperlink",
+      "ground_truth": "BENIGN",
+      "indicator": "ordinary external hyperlink (negative control)",
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SAFE",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "aggregate": "SAFE"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "rules": [],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 532.32,
+          "median_ms": 523.71,
+          "p95_ms": 566.993,
+          "max_ms": 578.707,
+          "min_ms": 513.44
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.33,
+          "median_ms": 0.32,
+          "p95_ms": 0.379,
+          "max_ms": 0.385,
+          "min_ms": 0.284
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 1.73,
+          "median_ms": 1.72,
+          "p95_ms": 2.178,
+          "max_ms": 2.204,
+          "min_ms": 1.517
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.005,
+          "min_ms": 0.003
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.57,
+          "median_ms": 0.55,
+          "p95_ms": 0.716,
+          "max_ms": 0.717,
+          "min_ms": 0.526
+        }
+      }
+    },
+    {
+      "id": "6b-docx-external-template",
+      "ground_truth": "BENIGN",
+      "indicator": "external attachedTemplate https://template.example.invalid/normal.dotm (never fetched)",
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "rules": [
+        "office:OFFICE_EXTERNAL_AUTOLOAD:MEDIUM"
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 529.99,
+          "median_ms": 525.4,
+          "p95_ms": 561.295,
+          "max_ms": 566.584,
+          "min_ms": 514.92
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.32,
+          "median_ms": 0.31,
+          "p95_ms": 0.35,
+          "max_ms": 0.358,
+          "min_ms": 0.285
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 1.68,
+          "median_ms": 1.66,
+          "p95_ms": 1.759,
+          "max_ms": 1.998,
+          "min_ms": 1.574
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.003
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.57,
+          "median_ms": 0.56,
+          "p95_ms": 0.619,
+          "max_ms": 0.622,
+          "min_ms": 0.539
+        }
+      }
+    },
+    {
+      "id": "7-docx-macro-declaration-mismatch",
+      "ground_truth": "BENIGN",
+      "indicator": "macro-free DOCX declaration with a vbaProject.bin placeholder",
+      "verdicts": {
+        "yara-x": "SUSPICIOUS",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "SUSPICIOUS",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "rules": [
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "office:OFFICE_VBA_UNPARSED:LOW",
+        "yara-x:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 590.81,
+          "median_ms": 593.86,
+          "p95_ms": 664.29,
+          "max_ms": 668.486,
+          "min_ms": 510.007
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.42,
+          "median_ms": 0.41,
+          "p95_ms": 0.544,
+          "max_ms": 0.602,
+          "min_ms": 0.363
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 1.88,
+          "median_ms": 1.76,
+          "p95_ms": 2.318,
+          "max_ms": 3.609,
+          "min_ms": 1.571
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.006,
+          "min_ms": 0.003
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.68,
+          "median_ms": 0.63,
+          "p95_ms": 0.87,
+          "max_ms": 1.045,
+          "min_ms": 0.574
+        }
+      }
+    }
+  ]
+}
