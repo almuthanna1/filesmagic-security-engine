@@ -193,6 +193,31 @@ def office_parts(kind: str = "docx", main_type: str | None = None, overrides: di
     return files
 
 
+VML, VML_OFFICE = "urn:schemas-microsoft-com:vml", "urn:schemas-microsoft-com:office:office"
+OLE_OBJECT_TYPE = f"{OFFICE}.oleObject"
+
+
+def linked_docx(body: str = "", main_rels: tuple = (), settings: str | None = None, settings_rels: tuple = (),
+                parts: dict | None = None) -> bytes:
+    """A valid DOCX whose body also holds `body` (WordprocessingML with the r, a, v and o prefixes)
+    and whose main part has the extra relationships `main_rels`. With `settings`, a settings part
+    holding that XML (inside w:settings) is linked from the main part, as Word writes it, with
+    `settings_rels` as its relationships. `parts` adds parts (e.g. an embedded object)."""
+    ns = f'xmlns:w="{W}" xmlns:r="{REL}" xmlns:a="{A}" xmlns:v="{VML}" xmlns:o="{VML_OFFICE}"'
+    main_xml = (f'{XML}<w:document {ns}><w:body><w:p><w:r><w:drawing><a:blip r:embed="rId1"/></w:drawing></w:r>'
+                f'</w:p>{body}</w:body></w:document>')
+    overrides, extra = {}, dict(parts or {})
+    if settings is not None:
+        main_rels = (*main_rels, ("rId8", f"{REL}/settings", "settings.xml"))
+        overrides["word/settings.xml"] = f"{OFFICE}.wordprocessingml.settings+xml"
+        extra["word/settings.xml"] = f"{XML}<w:settings {ns}>{settings}</w:settings>"
+        extra["word/_rels/settings.xml.rels"] = rels_xml(*settings_rels)
+    files = office_parts("docx", main_rels=main_rels, main_xml=main_xml, overrides=overrides,
+                         defaults={"bin": OLE_OBJECT_TYPE})
+    files.update(extra)
+    return zip_parts(files)
+
+
 def zip_parts(files: dict, method: int = zipfile.ZIP_DEFLATED) -> bytes:
     """The parts as a ZIP, [Content_Types].xml first, as Office writes it. Deterministic: every
     entry carries the ZIP epoch (1980-01-01) instead of the current time, so the same parts always

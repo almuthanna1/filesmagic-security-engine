@@ -83,5 +83,5 @@ def test_the_worker_runs_the_unified_engine_only_when_asked():
     reference = asyncio.run(worker.run(data))
     candidate = asyncio.run(worker.run(data, worker.command() + ["--engine=unified"]))
     assert [s.name for s in reference.scanners] == ["yara-x", "office", "pdf", "custom"]
-    assert [s.name for s in candidate.scanners] == ["yara-x", "office", "pdf", "custom", "yara-x-engine", "pdf-chains", "vba-chains"]
+    assert [s.name for s in candidate.scanners] == ["yara-x", "office", "pdf", "custom", "yara-x-engine", "pdf-chains", "vba-chains", "ooxml-links"]
     assert (verdicts(reference)["aggregate"], verdicts(candidate)["aggregate"]) == ("MALICIOUS", "SUSPICIOUS")

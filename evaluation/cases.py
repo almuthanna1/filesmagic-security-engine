@@ -31,11 +31,14 @@ from app.models import Severity
 from evaluation.evaluate import environment, latency
 from evaluation.prepare_samples import TEMPLATE_URL
 from tests import custom_fixtures as fx
+from tests.office_fixtures import make_ole
 from tests.pdf_fixtures import attachment, js_action, make_pdf
 
 FORM_KEYSTROKE_JS = ("<< /Type /Annot /Subtype /Widget /FT /Tx /T (amount) /Rect [0 0 50 20] /AA << /K "
                      "<< /S /JavaScript /JS (AFNumber_Keystroke\\(2, 0, 0, 0, \"\", true\\);) >> >> >>")
 CLICK_LINK_JS = "<< /Type /Annot /Subtype /Link /Rect [0 0 50 50] /A " + js_action("app.alert\\(1\\);") + " >>"
+LINKED_PICTURE = "https://images.example.invalid/pixel.png"  # RFC 2606 .invalid: never resolves
+INERT_OLE = make_ole({"Contents": b"inert placeholder bytes"})  # an OLE container with no object in it
 EXPORT_JS = js_action("this.exportDataObject\\({cName: \"f\", nLaunch: 0}\\);")  # "f": the fixture's attachment key
 
 
@@ -64,6 +67,20 @@ def cases() -> list[dict]:
              fx.office_package("docx", main_rels=(("rId9", f"{rel}/hyperlink", "https://example.com/", "External"),))),
         case("6b-docx-external-template", f"external attachedTemplate {TEMPLATE_URL} (never fetched)",
              fx.office_package("docx", main_rels=(("rId9", f"{rel}/attachedTemplate", TEMPLATE_URL, "External"),))),
+        case("6c-docx-template-referenced-by-settings", "the same template, referenced by w:attachedTemplate in "
+             "the settings part, as Word writes it",
+             fx.linked_docx(settings='<w:attachedTemplate r:id="rId1"/>',
+                            settings_rels=(("rId1", f"{rel}/attachedTemplate", TEMPLATE_URL, "External"),))),
+        case("6d-docx-linked-picture", f"a picture shown from {LINKED_PICTURE} (a:blip r:link; never fetched)",
+             fx.linked_docx(body='<w:p><w:r><w:drawing><a:blip r:link="rId9"/></w:drawing></w:r></w:p>',
+                            main_rels=(("rId9", f"{rel}/image", LINKED_PICTURE, "External"),))),
+        case("6e-docx-embedded-object-displayed", "an inert OLE container shown by o:OLEObject Type=Embed",
+             fx.linked_docx(body='<w:p><w:r><w:object><o:OLEObject Type="Embed" r:id="rId10"/></w:object></w:r></w:p>',
+                            main_rels=(("rId10", f"{rel}/oleObject", "embeddings/oleObject1.bin"),),
+                            parts={"word/embeddings/oleObject1.bin": INERT_OLE})),
+        case("6f-docx-embedded-object-not-displayed", "the same object with its relationship but no element",
+             fx.linked_docx(main_rels=(("rId10", f"{rel}/oleObject", "embeddings/oleObject1.bin"),),
+                            parts={"word/embeddings/oleObject1.bin": INERT_OLE})),
         case("7-docx-macro-declaration-mismatch", "macro-free DOCX declaration with a vbaProject.bin placeholder",
              fx.zip_parts(fx.office_parts("docm", main_type=fx.MAIN_TYPES["docx"]))),
     ]

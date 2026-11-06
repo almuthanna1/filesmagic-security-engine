@@ -34,7 +34,7 @@ its own precondition; if it does not hold, the reference finding stands (fail cl
 Every decision is listed in one INFO finding, ENGINE_CORRELATION, so nothing changes silently.
 """
 
-from app.engine import pdf_chains, vba_chains
+from app.engine import ooxml_links, pdf_chains, vba_chains
 from app.models import Finding, Severity, WorkerReport
 from app.scanners.custom.indicators import NOT_PROOF, clean, listing
 
@@ -47,6 +47,22 @@ REFINED_SIGNATURE = (SIGNATURES, "ENGINE_PDF_JavaScript_With_Automatic_Trigger")
 SCRIPT_RULES = {"ENGINE_PDF_AUTO_CHAIN_SCRIPT", "ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT"}
 VBA = "vba-chains"
 REFERENCE_MACRO = ("office", "OFFICE_MACRO_AUTOEXEC_EXECUTION")
+LINKS = "ooxml-links"
+REFERENCE_AUTOLOAD = ("office", "OFFICE_EXTERNAL_AUTOLOAD")
+REFERENCE_OBJECTS = {("office", r) for r in ("OFFICE_EMBEDDED_OLE", "OFFICE_EMBEDDED_BINARY", "OFFICE_PACKAGE_OBJECT",
+                                             "OFFICE_PACKAGE_EXECUTABLE", "OFFICE_EQUATION_EDITOR")}
+LINK_RULES = {  # activation -> (rule, severity, summary); hyperlinks (click) are not reported
+    ooxml_links.ON_OPEN: ("ENGINE_OFFICE_EXTERNAL_LOADS_ON_OPEN", Severity.MEDIUM,
+                          "A part Office loads references an external target that is used when the document opens."),
+    ooxml_links.IMAGE: ("ENGINE_OFFICE_LINKED_PICTURE_LOADS_ON_OPEN", Severity.LOW,
+                        "The document shows a picture that is fetched from outside the file when it is displayed."),
+    ooxml_links.ON_ACTION: ("ENGINE_OFFICE_EXTERNAL_ON_USER_ACTION", Severity.INFO,
+                            "External targets are used only when the user updates or expands them."),
+    ooxml_links.DISPLAYED: ("ENGINE_OFFICE_EMBEDDED_OBJECT_DISPLAYED", Severity.INFO,
+                            "Embedded objects are shown in the document; they run only when activated."),
+    ooxml_links.UNDETERMINED: ("ENGINE_OFFICE_ACTIVATION_UNDETERMINED", Severity.INFO,
+                               "Whether these relationships are used could not be determined."),
+}
 
 RULES = {  # rule -> (severity, summary)
     "ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT": (
@@ -135,6 +151,38 @@ def vba_findings(result: vba_chains.VbaChains) -> list[Finding]:
     return found
 
 
+def link_findings(result: ooxml_links.Links) -> list[Finding]:
+    def make(rule: str, severity: Severity, text: str, items: list[str]) -> Finding:
+        return finding(rule, severity, f"{text} Evidence: {listing([clean(i, 240) for i in items])}.",
+                       scanner=LINKS, category="office-activation")
+
+    by: dict[str, list[ooxml_links.Activation]] = {}
+    for a in result.activations:
+        by.setdefault(a.state, []).append(a)
+    found = [make(*LINK_RULES[state], [f"{a.chain} ({a.why})" for a in items])
+             for state, items in by.items() if state in LINK_RULES]
+    idle = by.get(ooxml_links.NOT_ACTIVATED, [])
+    if external := [a for a in idle if a.relationship.external]:
+        found.append(make("ENGINE_OFFICE_EXTERNAL_NOT_ACTIVATED", Severity.INFO,
+                          "External relationships are declared, but nothing shows that Office uses them.",
+                          [f"{a.relationship.id} -> {a.relationship.target}: {a.why}" for a in external]))
+    internal = [a for a in idle if not a.relationship.external]
+    if internal or result.unrelated_objects:
+        found.append(make("ENGINE_OFFICE_EMBEDDED_OBJECT_NOT_DISPLAYED", Severity.INFO,
+                          "Embedded object parts are present, but no element shows them in the document.",
+                          [f"{a.relationship.target}: {a.why}" for a in internal]
+                          + [f"{p}: no relationship leads to it" for p in result.unrelated_objects]))
+    return found
+
+
+class LinkScanner:
+    name = LINKS
+
+    def scan(self, filename: str, data: bytes) -> list[Finding] | None:
+        result = ooxml_links.scan(data)
+        return None if result is None else link_findings(result)
+
+
 class VbaChainScanner:
     name = VBA
 
@@ -170,6 +218,24 @@ def correlate(report: WorkerReport) -> WorkerReport:
                          "cannot be checked for VBA stomping here")
         else:
             notes.append(f"{REFERENCE_MACRO[1]} (Office scanner) kept: the macro call path could not be determined")
+    if status.get(LINKS) == "completed":
+        # Never removed either: an element this analysis does not model, or Office behaviour beyond
+        # the specification, could still use a relationship the graph calls not activated.
+        engine = {r for s, r in rules if s == LINKS}
+        if REFERENCE_AUTOLOAD in rules:
+            notes.append(f"{REFERENCE_AUTOLOAD[1]} (Office scanner) " + (
+                "confirmed: a part Office loads references an external target used on open"
+                if "ENGINE_OFFICE_EXTERNAL_LOADS_ON_OPEN" in engine else
+                "kept: whether the relationship is used could not be determined"
+                if "ENGINE_OFFICE_ACTIVATION_UNDETERMINED" in engine else
+                "kept although no part Office loads references it: its use is not demonstrated"))
+        if found := sorted(r for s, r in rules & REFERENCE_OBJECTS):
+            notes.append(f"{', '.join(found)} (Office scanner) kept; " + (
+                "the object is shown in the document and runs only when activated"
+                if "ENGINE_OFFICE_EMBEDDED_OBJECT_DISPLAYED" in engine else
+                "no element shows the object in the document"
+                if "ENGINE_OFFICE_EMBEDDED_OBJECT_NOT_DISPLAYED" in engine else
+                "its display could not be determined"))
     if not notes:
         return report
     findings = [f for f in report.findings if (f.scanner, f.rule_id) not in drop]
