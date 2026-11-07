@@ -121,20 +121,45 @@ def check(result: dict, engine: str, frozen: dict | None, expected_verdict: str 
     return problems
 
 
-def run(lab: str, api: str, frozen_dir: Path | None) -> dict:
+def items() -> list[tuple[str, bytes, str | None]]:
+    return [(c["id"], c["data"], None) for c in cases()] + EXTRA
+
+
+def run(lab: str, api: str, frozen_dir: Path | None, batch: int | None = None, batch_size: int = 6,
+        scans: bool = True, failure_checks: bool = True, require_isolation: bool = False) -> dict:
+    """batch/batch_size: scan only that slice of the fixtures (each costs one token per engine), so a
+    run can respect the Lab's token limit. require_isolation: a result with missing isolation
+    controls is a failure, and scanning stops at the first one."""
     lab, api = lab.rstrip("/"), api.rstrip("/")
-    _, _, raw = request(f"{api}/health")
+    _, _, raw = request(f"{api}/health")  # also wakes a sleeping instance before any token is taken
     health = json.loads(raw)
     frozen = {e: {r["id"]: r for r in json.loads((frozen_dir / e / "results.json").read_text())["results"]}
               for e in ENGINES} if frozen_dir else {e: {} for e in ENGINES}
-    rows = []
-    items = [(c["id"], c["data"], None) for c in cases()] + EXTRA
-    for case, data, expected in items:
+    rows, stopped = [], None
+    selected = items() if batch is None else items()[batch * batch_size:(batch + 1) * batch_size]
+    for case, data, expected in (selected if scans else []):
         for engine in ENGINES:
             result = scan(lab, api, data, engine, f"{case}.bin")
             problems = check(result, engine, frozen[engine].get(case), expected)
+            if require_isolation and result.get("http") == 200 and result.get("isolation_missing"):
+                problems.append(f"required isolation missing: {result['isolation_missing']}")
+                stopped = f"isolation missing at {case} ({engine}); scanning stopped"
             rows.append({"case": case, "engine": engine, "result": result, "problems": problems})
-    # Failure handling over HTTP.
+            if stopped:
+                break
+        if stopped:
+            break
+    if failure_checks and not stopped:
+        rows += failure_rows(lab, api, health)
+    failed = [r for r in rows if r["problems"]]
+    return {"lab": lab, "api": api, "health": health, "timestamp_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "batch": batch, "batch_size": batch_size, "stopped": stopped,
+            "checks": len(rows), "failed": len(failed), "rows": rows}
+
+
+def failure_rows(lab: str, api: str, health: dict) -> list[dict]:
+    """Failure handling over HTTP; uses one token (for the oversized upload)."""
+    rows = []
     oversized = b"\0" * (MAX_UPLOAD_BYTES + 1)
     status, issued = token(lab, oversized)
     rows.append({"case": "oversized-token", "engine": "-", "result": {"http": status, "detail": issued.get("detail")},
@@ -153,9 +178,7 @@ def run(lab: str, api: str, frozen_dir: Path | None) -> dict:
     want = 401 if "unified" in health.get("engines", []) else 403
     rows.append({"case": "bad-token", "engine": "unified", "result": {"http": s},
                  "problems": [] if s == want else [f"engine answered {s} for an invalid token, expected {want}"]})
-    failed = [r for r in rows if r["problems"]]
-    return {"lab": lab, "api": api, "health": health, "timestamp_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-            "checks": len(rows), "failed": len(failed), "rows": rows}
+    return rows
 
 
 def main(argv=None) -> int:
@@ -164,8 +187,15 @@ def main(argv=None) -> int:
     parser.add_argument("--api", required=True)
     parser.add_argument("--frozen", type=Path)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--batch", type=int, help="scan only this slice of the fixtures (0-based); no failure checks")
+    parser.add_argument("--batch-size", type=int, default=6, help="fixtures per batch (two tokens each)")
+    parser.add_argument("--failure-checks-only", action="store_true", help="run only the failure checks (one token)")
+    parser.add_argument("--require-isolation", action="store_true",
+                        help="fail, and stop scanning, if any result has missing isolation controls")
     args = parser.parse_args(argv)
-    report = run(args.lab, args.api, args.frozen)
+    report = run(args.lab, args.api, args.frozen, batch=args.batch, batch_size=args.batch_size,
+                 scans=not args.failure_checks_only, failure_checks=args.batch is None,
+                 require_isolation=args.require_isolation)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, indent=2))
     for r in report["rows"]:
@@ -175,6 +205,8 @@ def main(argv=None) -> int:
               f"{'; '.join(r['problems'])}")
     print(f"{report['checks'] - report['failed']} of {report['checks']} checks passed; engine commit "
           f"{report['health'].get('commit')}; engines {report['health'].get('engines')}")
+    if report["stopped"]:
+        print(f"STOPPED: {report['stopped']}")
     return 1 if report["failed"] else 0
 
 
