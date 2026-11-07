@@ -6,6 +6,15 @@ export const SEVERITIES = ["INFO", "LOW", "MEDIUM", "HIGH", "CRITICAL"] as const
 export type Verdict = (typeof VERDICTS)[number];
 export type Severity = (typeof SEVERITIES)[number];
 
+// reference: the four original scanners (what FilesMagic uses); unified: the custom engine candidate,
+// accepted only by engines started with SECURITY_ENGINE_RESEARCH_ENGINES=1.
+export const ENGINES = ["reference", "unified"] as const;
+export type Engine = (typeof ENGINES)[number];
+export const ENGINE_LABELS: Record<Engine, string> = {
+  reference: "Original Engine",
+  unified: "Custom Unified Engine",
+};
+
 // Mirrors app/models.py in the engine.
 export interface Finding {
   scanner: string;
@@ -13,6 +22,8 @@ export interface Finding {
   severity: Severity;
   description: string;
   rule_id: string | null;
+  // Custom engine findings: every action chain, call path or relationship chain behind them.
+  evidence?: string[];
 }
 
 export interface ScannerStatus {
@@ -23,10 +34,14 @@ export interface ScannerStatus {
   // unexpected: possible scanner bug; worker: the isolated worker crashed or timed out.
   error_kind: "malformed_input" | "invalid_structure" | "unexpected" | "worker" | null;
   error_type: string | null;
+  // Time this scanner spent inside the isolated worker; null if the worker never reported it.
+  duration_ms?: number | null;
 }
 
 export interface ScanResult {
   request_id: string;
+  // The engine that produced this result, as reported by the API.
+  engine: Engine;
   filename: string;
   verdict: Verdict;
   findings: Finding[];
@@ -71,6 +86,7 @@ function isScanResult(value: unknown): value is ScanResult {
     typeof r === "object" &&
     r !== null &&
     typeof r.filename === "string" &&
+    ENGINES.includes(r.engine) &&
     VERDICTS.includes(r.verdict) &&
     typeof r.message === "string" &&
     Array.isArray(r.findings) &&
@@ -121,10 +137,34 @@ async function scanToken(sha256: string, size: number): Promise<string> {
   return token;
 }
 
+export interface EngineHealth {
+  engines: Engine[];
+  defaultEngine: Engine;
+  commit: string;
+}
+
+// Which engines this API accepts (GET /health). null if the API cannot be reached or is too old
+// to report engines; the page then offers the original engine only.
+export async function engineHealth(): Promise<EngineHealth | null> {
+  if (!API_URL) return null;
+  try {
+    const response = await fetch(`${API_URL.replace(/\/+$/, "")}/health`, { cache: "no-store" });
+    const data = (await readJson(response)) as { engines?: unknown; default_engine?: unknown; commit?: unknown } | undefined;
+    if (!response.ok || !Array.isArray(data?.engines)) return null;
+    return {
+      engines: data.engines.filter((e): e is Engine => ENGINES.includes(e as Engine)),
+      defaultEngine: data.default_engine === "unified" ? "unified" : "reference",
+      commit: typeof data.commit === "string" ? data.commit : "unknown",
+    };
+  } catch {
+    return null;
+  }
+}
+
 // 1. Hash the file in the browser. 2. Ask the Lab (server-side, no login) for a
-// short-lived token bound to that hash and size. 3. Upload the raw file straight to the engine.
-// The file never passes through Vercel.
-export async function scanFile(file: File): Promise<ScanResult> {
+// short-lived token bound to that hash and size. 3. Upload the raw file straight to the engine,
+// naming the engine to run. The file never passes through Vercel.
+export async function scanFile(file: File, engine: Engine = "reference"): Promise<ScanResult> {
   if (!API_URL) {
     throw new ApiError(
       "NEXT_PUBLIC_SECURITY_ENGINE_URL is not set. Configure frontend/.env.local and restart the dev server.",
@@ -141,7 +181,7 @@ export async function scanFile(file: File): Promise<ScanResult> {
   for (let attempt = 0; attempt < 2 && (!response || response.status === 401); attempt++) {
     const token = await scanToken(sha256, file.size);
     try {
-      response = await fetch(`${API_URL.replace(/\/+$/, "")}/scan`, {
+      response = await fetch(`${API_URL.replace(/\/+$/, "")}/scan?engine=${engine}`, {
         method: "POST",
         body: file,
         headers: {
@@ -162,6 +202,10 @@ export async function scanFile(file: File): Promise<ScanResult> {
   }
   if (!isScanResult(data)) {
     throw new ApiError("The Security Engine returned a response in an unexpected format.");
+  }
+  // Never show one engine's result as another's.
+  if (data.engine !== engine) {
+    throw new ApiError(`Requested the ${ENGINE_LABELS[engine]}, but the response came from the ${ENGINE_LABELS[data.engine]}.`);
   }
   return data;
 }

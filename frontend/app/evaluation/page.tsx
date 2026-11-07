@@ -14,6 +14,7 @@ import {
   type ScanResult,
   type Verdict,
 } from "@/lib/api";
+import { csvCell, download } from "@/lib/history";
 import styles from "../page.module.css";
 import table from "@/components/ScanResultView.module.css";
 
@@ -110,22 +111,6 @@ const CSV_COLUMNS: [string, (r: EvaluationRecord) => string | number | boolean |
   ["ruleset_sha256", (r) => r.versions?.ruleset_sha256 ?? ""],
   ["scanner_versions", (r) => Object.entries(r.versions ?? {}).filter(([k]) => !["engine", "ruleset_sha256"].includes(k)).map(([k, v]) => `${k}=${v}`).join(";")],
 ];
-
-function csvCell(value: string | number | boolean | null): string {
-  let text = value === null ? "" : String(value);
-  // Filenames and scanner text are attacker-influenced: stop spreadsheets evaluating them as formulas.
-  if (/^\s*[=+\-@]/.test(text) || /^[\t\r]/.test(text)) text = `'${text}`;
-  return `"${text.replace(/"/g, '""')}"`;
-}
-
-function download(name: string, type: string, content: string) {
-  const url = URL.createObjectURL(new Blob([content], { type }));
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = name;
-  a.click();
-  URL.revokeObjectURL(url);
-}
 
 // Records as a tiny external store over localStorage. `cache` is this tab's latest JSON and the
 // fallback when storage is unavailable (private mode, quota).

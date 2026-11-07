@@ -5,7 +5,9 @@ import { MAX_UPLOAD_BYTES, mintScanToken, NotConfiguredError, UPLOAD_TOO_LARGE }
 // Keep the per-file signature, upload size bound and a basic best-effort, per-instance throttle.
 // This in-memory limit is NOT a distributed rate limit across Vercel instances.
 const WINDOW_MS = 15 * 60 * 1000;
-const MAX_TOKENS_PER_WINDOW = 12;
+// One token per scan; a comparison uses two. LAB_SCAN_TOKENS_PER_WINDOW raises it for local test
+// runs of the fixture matrix (default 12, unchanged for hosted staging).
+const MAX_TOKENS_PER_WINDOW = Number(process.env.LAB_SCAN_TOKENS_PER_WINDOW) || 12;
 const issued = new Map<string, number[]>();
 
 // Only the SHA-256 and size reach Vercel; file bytes go directly to Render.

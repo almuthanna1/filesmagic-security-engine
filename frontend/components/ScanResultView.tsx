@@ -1,11 +1,14 @@
+import Breakable from "@/components/Breakable";
 import type { Ref } from "react";
 import { formatBytes } from "@/components/FileDropzone";
+import EvidenceSections from "@/components/EvidenceSections";
 import IsolationReport from "@/components/IsolationReport";
-import type { ScanResult, Verdict } from "@/lib/api";
+import { ENGINE_LABELS, type ScanResult, type Verdict } from "@/lib/api";
 import styles from "./ScanResultView.module.css";
 
 const VERDICT_LABELS: Record<Verdict, { title: string; className: string }> = {
-  SAFE: { title: "Safe", className: styles.safe },
+  // "No known indicators", never "safe": a SAFE verdict is not a guarantee (see the result message).
+  SAFE: { title: "No known indicators", className: styles.safe },
   SUSPICIOUS: { title: "Suspicious", className: styles.suspicious },
   MALICIOUS: { title: "Malicious", className: styles.malicious },
   UNABLE_TO_SCAN: { title: "Unable to scan", className: styles.unable },
@@ -15,17 +18,23 @@ const VERDICT_LABELS: Record<Verdict, { title: string; className: string }> = {
 export default function ScanResultView({
   result,
   ref,
+  heading = "Scan result",
 }: {
   result: ScanResult;
   ref?: Ref<HTMLHeadingElement>;
+  heading?: string;
 }) {
   const verdict = VERDICT_LABELS[result.verdict];
+  const headingId = `result-heading-${result.request_id}`;
 
   return (
-    <section className={styles.result} aria-labelledby="result-heading">
-      <h2 id="result-heading" ref={ref} tabIndex={-1} className={styles.heading}>
-        Scan result
+    <section className={styles.result} aria-labelledby={headingId}>
+      <h2 id={headingId} ref={ref} tabIndex={-1} className={styles.heading}>
+        {heading}
       </h2>
+      <p className={styles.engineBadge}>
+        Engine: <strong>{ENGINE_LABELS[result.engine]}</strong> <code className={styles.mono}>{result.engine}</code>
+      </p>
 
       <div className={`${styles.verdict} ${verdict.className}`}>
         <span className={styles.verdictLabel}>Verdict</span>
@@ -68,6 +77,7 @@ export default function ScanResultView({
             {result.scanners.map((s) => (
               <span key={s.name} className={styles.statusLine}>
                 <span className={styles.mono}>{s.name}</span>: {s.status.replace("_", " ")}
+                {typeof s.duration_ms === "number" && <> · {s.duration_ms} ms</>}
                 {s.error && <> ({s.error_kind ? `${s.error_kind}: ` : ""}{s.error})</>}
               </span>
             ))}
@@ -78,14 +88,21 @@ export default function ScanResultView({
           <dd><IsolationReport isolation={result.isolation} required={result.isolation_required} missing={result.isolation_missing} /></dd>
         </div>
         <div>
+          <dt>Commit</dt>
+          <dd className={styles.mono}>{result.versions.commit ?? "not reported"}</dd>
+        </div>
+        <div>
           <dt>Versions</dt>
           <dd className={styles.mono}>
             {Object.entries(result.versions)
-              .map(([k, v]) => `${k} ${k === "ruleset_sha256" ? v.slice(0, 12) : v}`)
+              .filter(([k]) => k !== "commit")
+              .map(([k, v]) => `${k} ${k.endsWith("ruleset_sha256") ? v.slice(0, 12) : v}`)
               .join(" · ")}
           </dd>
         </div>
       </dl>
+
+      <EvidenceSections findings={result.findings} />
 
       <h3 className={styles.subheading}>Findings ({result.findings.length})</h3>
       {result.findings.length === 0 ? (
@@ -113,7 +130,7 @@ export default function ScanResultView({
                   <td>{f.scanner}</td>
                   <td>{f.category}</td>
                   <td>{f.description}</td>
-                  <td className={styles.mono}>{f.rule_id ?? "—"}</td>
+                  <td className={styles.ruleCell}>{f.rule_id ? <Breakable text={f.rule_id} /> : "—"}</td>
                 </tr>
               ))}
             </tbody>

@@ -357,8 +357,13 @@ cp .env.example .env.local   # Windows PowerShell: Copy-Item .env.example .env.l
 |----------|---------|-------------|
 | `NEXT_PUBLIC_SECURITY_ENGINE_URL` | Base URL of the Security Engine API. Inlined at build time, so rebuild after changing it. | `http://localhost:8000` |
 | `LAB_SCAN_TOKEN_PRIVATE_KEY` | Server-only token signing, no login (see "Access control"). | generated locally |
+| `LAB_SCAN_TOKENS_PER_WINDOW` | Optional: tokens per client per 15 minutes (default 12). A comparison uses two. Raise it only for local test runs. | e.g. `500` |
 
-Pages: `/` (simple scanner) and `/evaluation` (Malware Evaluation: record each sample's
+Pages: `/` (scanner: choose the **Original Engine**, the **Custom Unified Engine**, or **Compare both**,
+which scans the file with each engine one after the other and shows verdict differences, retained,
+added and superseded findings, correlation explanations, latency and incomplete-analysis warnings),
+`/history` (every scan's engine, commit, file hash, verdict, findings and timing; export as CSV or
+JSON; results only, never file contents) and `/evaluation` (Malware Evaluation: record each sample's
 source dataset and independently verified classification next to the observed verdict,
 findings, scanner status, versions, duration and isolation; export as CSV or JSON). Records
 hold results only, never file contents, and stay in the browser's localStorage.
@@ -368,8 +373,9 @@ Never commit `.env.local` or any real `.env` file.
 **Run both services locally** (two terminals):
 
 ```bash
-# Terminal 1, repo root, venv active
-uvicorn app.main:app --reload --port 8000
+# Terminal 1, repo root, venv active. SECURITY_ENGINE_RESEARCH_ENGINES=1 lets /scan run the
+# custom unified engine as well as the original one (research only; leave unset in production).
+SECURITY_ENGINE_RESEARCH_ENGINES=1 uvicorn app.main:app --reload --port 8000
 
 # Terminal 2
 cd frontend
@@ -382,7 +388,25 @@ npm run dev
 | Engine API | http://localhost:8000 |
 | API docs | http://localhost:8000/docs |
 
-Other frontend commands: `npm run lint`, `npx tsc --noEmit`, `npm run build`.
+Other frontend commands: `npm run lint`, `npx tsc --noEmit`, `npm test`, `npm run build`.
+
+**Engine selection.** `POST /scan?engine=reference|unified`. `reference` (default) is the original
+four-scanner engine the FilesMagic pipeline uses. `unified` runs the custom engine in the same
+isolated worker and is accepted only when the API runs with `SECURITY_ENGINE_RESEARCH_ENGINES=1`;
+otherwise it is refused with HTTP 403, never answered by the other engine. The API requires the
+worker to report exactly the selected engine's scanners, and every response names its `engine`
+and source `commit` (`versions.commit`, from `SECURITY_ENGINE_COMMIT`, Render's
+`RENDER_GIT_COMMIT` or the git checkout). `/health` lists the accepted `engines`.
+
+**Acceptance over HTTP** (both services running, inert fixtures only):
+
+```bash
+python -m evaluation.lab_acceptance --lab http://localhost:3000 --api http://localhost:8000     --frozen docs/evidence/custom-engine-1668326 --out <report.json>
+```
+
+It requests a token from the Lab, uploads each fixture of `evaluation.cases` to `/scan` with the
+Lab's `Origin` for both engines, and compares verdicts, rules and scanner statuses with the frozen
+evaluation; it also checks oversized uploads, an unknown engine and an invalid token.
 
 ## Running tests
 
@@ -461,6 +485,8 @@ detects Next.js; no `vercel.json` is needed.
 | `SECURITY_ENGINE_WORKER_MEMORY_MB` | Render (optional) | Writable memory per worker, default `320`. |
 | `SECURITY_ENGINE_WORKER_TIMEOUT_SECONDS` | Render (optional) | Default `30`. |
 | `SECURITY_ENGINE_REQUIRE_ISOLATION` | Render (optional) | `1` = refuse to scan without every isolation control. Required for real malware. |
+| `SECURITY_ENGINE_RESEARCH_ENGINES` | Render research staging only (optional) | `1` = `/scan?engine=unified` runs the custom unified engine. Unset: only the original engine; `unified` is refused (403). |
+| `SECURITY_ENGINE_COMMIT` | Render (optional) | Source commit reported in every result; Render's own `RENDER_GIT_COMMIT` is used when unset. |
 | `SECURITY_ENGINE_NET_DIAGNOSTICS` | Render staging only (optional) | `1` = the worker describes its network namespace (interface names, flags, address and route counts; no addresses) and the API logs it per request ID. Never returned in responses. Diagnostic only: it never changes an isolation result. Leave unset elsewhere. |
 | `NEXT_PUBLIC_SECURITY_ENGINE_URL` | Vercel (Production) | The Render service URL, e.g. `https://<service>.onrender.com`. Inlined at build time, so **redeploy** the frontend after changing it. Public by design: never put secrets in `NEXT_PUBLIC_` variables. |
 | `SECURITY_ENGINE_CORS_ORIGINS` | Render | The exact Vercel production origin, e.g. `https://<project>.vercel.app`: scheme + host, no path, no trailing slash. Comma-separate multiple origins. Never `*` (the API refuses to start). |

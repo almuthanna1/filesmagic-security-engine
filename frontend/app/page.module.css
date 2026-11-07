@@ -145,3 +145,45 @@
 .gap {
   margin-bottom: 20px;
 }
+
+.engines {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+  padding: 0;
+  border: none;
+  min-width: 0;
+}
+
+.engineOption {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.engineOption:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.engineOption:has(input:disabled) {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.engineOption input {
+  margin-top: 4px;
+}
+
+.engineOption > span {
+  display: grid;
+  gap: 2px;
+}
+
+.wide {
+  max-width: 1200px;
+}

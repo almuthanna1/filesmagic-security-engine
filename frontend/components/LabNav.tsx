@@ -6,6 +6,7 @@ export default function LabNav() {
     <nav className={styles.nav} aria-label="Security Lab">
       <Link href="/">Scanner</Link>
       <Link href="/test-files">Test files</Link>
+      <Link href="/history">History</Link>
       <Link href="/evaluation">Malware evaluation</Link>
     </nav>
   );
