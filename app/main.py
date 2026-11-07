@@ -3,6 +3,7 @@ import hashlib
 import logging
 import os
 import re
+import subprocess
 import time
 import uuid
 from importlib import metadata
@@ -13,6 +14,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from app import auth, worker
+from app import engine as unified_engine
 from app.decision import decide
 from app.models import ScannerStatus, ScanResult, Verdict, WorkerReport
 from app.scanners import SCANNERS
@@ -36,6 +38,35 @@ MAX_CONCURRENT_SCANS = int(os.environ.get("SECURITY_ENGINE_MAX_CONCURRENT_SCANS"
 # Default runner: one isolated worker process per scan. Tests swap in an in-process runner.
 run_scan = worker.run
 _active_scans = 0
+
+# Engines /scan can run. "reference" (the four original scanners) is the default and what the
+# FilesMagic pipeline uses. "unified" (the custom engine candidate) is research-only: accepted
+# only when SECURITY_ENGINE_RESEARCH_ENGINES=1, otherwise refused, never replaced by the default.
+DEFAULT_ENGINE = "reference"
+RESEARCH_ENGINES = os.environ.get("SECURITY_ENGINE_RESEARCH_ENGINES") == "1"
+
+
+def engine_scanners(engine: str) -> list[str]:
+    """Names the worker must report for `engine`, read at call time (tests replace SCANNERS)."""
+    return [s.name for s in (SCANNERS if engine == "reference" else unified_engine.SCANNERS)]
+
+
+def available_engines() -> list[str]:
+    return ["reference", "unified"] if RESEARCH_ENGINES else ["reference"]
+
+
+def source_commit() -> str:
+    """The engine's source commit: SECURITY_ENGINE_COMMIT or Render's RENDER_GIT_COMMIT when set
+    (deployments have no .git), else `git rev-parse HEAD` in a checkout, else "unknown"."""
+    commit = os.environ.get("SECURITY_ENGINE_COMMIT") or os.environ.get("RENDER_GIT_COMMIT")
+    if commit:
+        return commit[:40]
+    try:
+        out = subprocess.run(["git", "rev-parse", "HEAD"], cwd=Path(__file__).resolve().parent.parent,
+                             capture_output=True, text=True, timeout=5)
+        return out.stdout.strip()[:40] if out.returncode == 0 and out.stdout.strip() else "unknown"
+    except (OSError, subprocess.SubprocessError):
+        return "unknown"
 
 
 # Fixed explanations for expected scanner failures (logged; nothing attacker-supplied).
@@ -74,7 +105,8 @@ app = FastAPI(
     version="0.2.0",
 )
 
-VERSIONS = {"engine": app.version, "ruleset_sha256": ruleset_hash()} | {
+VERSIONS = {"engine": app.version, "commit": source_commit(), "ruleset_sha256": ruleset_hash(),
+            "engine_ruleset_sha256": ruleset_hash(unified_engine.RULES_DIR)} | {
     pkg: metadata.version(pkg) for pkg in ("yara-x", "oletools", "olefile", "pypdf")
 }
 
@@ -98,6 +130,9 @@ async def health():
         "scanners_registered": len(SCANNERS),
         "scanners_ready": sum(1 for s in SCANNERS if getattr(s, "ready", True)),
         "auth_configured": auth.PUBLIC_KEY is not None,
+        "engines": available_engines(),
+        "default_engine": DEFAULT_ENGINE,
+        "commit": VERSIONS["commit"],
     }
 
 
@@ -150,6 +185,14 @@ async def scan_file(request: Request) -> ScanResult:
     if auth.too_many_failures(client):
         raise HTTPException(status_code=429, detail="Too many unauthorized requests. Try again later.",
                             headers={"Retry-After": "60"})
+    # Checked before the token, so a refused engine does not use up the single-use token.
+    engine = request.query_params.get("engine", DEFAULT_ENGINE)
+    if engine not in worker.ENGINE_ARGS:
+        raise HTTPException(status_code=400, detail=f"Unknown engine; use one of: {', '.join(worker.ENGINE_ARGS)}.")
+    if engine not in available_engines():
+        raise HTTPException(status_code=403, detail="The unified engine is research-only and is not enabled on "
+                            "this deployment (SECURITY_ENGINE_RESEARCH_ENGINES=1).")
+    expected = engine_scanners(engine)
     try:
         claims = auth.verify(request.headers.get("authorization", ""))
     except auth.AuthError as e:
@@ -172,14 +215,16 @@ async def scan_file(request: Request) -> ScanResult:
             raise HTTPException(status_code=403, detail="The uploaded file does not match the scan token.")
         start = time.perf_counter()
         try:
-            report = await run_scan(data)
-            if sorted(s.name for s in report.scanners) != sorted(s.name for s in SCANNERS):
-                raise worker.WorkerError("scan worker reported an unexpected set of scanners")
+            report = await run_scan(data, engine=engine)
+            # The selected engine's scanners, exactly: a worker that ran the other engine (or lost
+            # a scanner) fails the scan rather than answering for an engine that did not run.
+            if sorted(s.name for s in report.scanners) != sorted(expected):
+                raise worker.WorkerError(f"scan worker reported an unexpected set of scanners for the {engine} engine")
         except worker.WorkerError as e:
-            logger.error("scan worker failure request_id=%s: %s", request_id, e)  # message is the engine's own
+            logger.error("scan worker failure request_id=%s engine=%s: %s", request_id, engine, e)
             report = WorkerReport(
-                scanners=[ScannerStatus(name=s.name, status="failed", error=str(e), error_kind="worker")
-                          for s in SCANNERS],
+                scanners=[ScannerStatus(name=name, status="failed", error=str(e), error_kind="worker")
+                          for name in expected],
                 findings=[],
             )
         duration_ms = round((time.perf_counter() - start) * 1000, 1)
@@ -192,17 +237,17 @@ async def scan_file(request: Request) -> ScanResult:
     failed = sum(s.status == "failed" for s in report.scanners)
     not_applicable = sum(s.status == "not_applicable" for s in report.scanners)
     # Not-applicable scanners neither count as analysis nor as failure.
-    applicable = len(SCANNERS) - not_applicable
+    applicable = len(expected) - not_applicable
     verdict = decide(findings, scanners_run=applicable, scanners_failed=failed)
 
-    if not SCANNERS:
+    if not expected:
         message = "No security scanners are configured yet. This file has NOT been security-scanned."
     elif applicable == 0:
         message = "None of the configured scanners supports this file type. This file has NOT been security-scanned."
     elif failed and verdict == Verdict.UNABLE_TO_SCAN:
         message = f"{failed} of {applicable} applicable scanners failed, so the file could not be fully analysed."
     else:
-        message = f"Analysed by {applicable - failed} of {len(SCANNERS)} scanners"
+        message = f"Analysed by {applicable - failed} of {len(expected)} scanners"
         message += f" ({not_applicable} not applicable to this file type)." if not_applicable else "."
         if verdict == Verdict.SAFE:
             message += " No known indicators were found; this is not a guarantee that the file is harmless."
@@ -223,10 +268,11 @@ async def scan_file(request: Request) -> ScanResult:
     if report.diagnostics:  # staging only; validated by the WorkerReport model, never in the response
         logger.warning("network diagnostics request_id=%s %s", request_id,
                        report.diagnostics.model_dump_json(exclude_none=True))
-    logger.info("scan request_id=%s sha256=%s size=%d verdict=%s failed=%d duration_ms=%.0f",
-                request_id, sha256[:16], claims["size"], verdict.value, failed, duration_ms)
+    logger.info("scan request_id=%s engine=%s sha256=%s size=%d verdict=%s failed=%d duration_ms=%.0f",
+                request_id, engine, sha256[:16], claims["size"], verdict.value, failed, duration_ms)
     return ScanResult(
         request_id=request_id,
+        engine=engine,
         filename=clean_filename(request.headers.get("x-filename", "")),
         verdict=verdict,
         findings=findings,

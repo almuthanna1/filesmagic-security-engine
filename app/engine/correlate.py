@@ -90,9 +90,12 @@ RULES = {  # rule -> (severity, summary)
 }
 
 
-def finding(rule: str, severity: Severity, description: str, scanner: str = NAME, category: str = CATEGORY) -> Finding:
+def finding(rule: str, severity: Severity, description: str, scanner: str = NAME, category: str = CATEGORY,
+            evidence: list[str] = ()) -> Finding:
+    """`evidence`: every item the description summarises (it shows three), for display as a list."""
     return Finding(scanner=scanner, category=category, severity=severity, rule_id=rule,
-                   description=description + (NOT_PROOF if severity != Severity.INFO else ""))
+                   description=description + (NOT_PROOF if severity != Severity.INFO else ""),
+                   evidence=[clean(e, 300) for e in list(evidence)[:50]])
 
 
 def chain_text(chain: pdf_chains.Chain) -> str:
@@ -119,12 +122,12 @@ def chain_findings(result: pdf_chains.PdfChains) -> list[Finding]:
         if not delivered and any(a.script for a in chain.actions):
             evidence.setdefault("ENGINE_PDF_AUTO_CHAIN_SCRIPT", []).append(chain_text(chain))
     user = [chain_text(c) for c in result.chains if not c.automatic and any(a.script for a in c.actions)]
-    found = [finding(rule, RULES[rule][0], f"{RULES[rule][1]} Evidence: {listing(items)}.")
+    found = [finding(rule, RULES[rule][0], f"{RULES[rule][1]} Evidence: {listing(items)}.", evidence=items)
              for rule, items in evidence.items()]
     if user:
         found.append(finding("ENGINE_PDF_USER_TRIGGERED_SCRIPT", Severity.INFO,
                              f"{len(user)} JavaScript action chain(s) run only on user interaction (a click, "
-                             f"keystroke or form event), not automatically. Evidence: {listing(user)}."))
+                             f"keystroke or form event), not automatically. Evidence: {listing(user)}.", evidence=user))
     if result.repaired:
         found.append(finding("ENGINE_PDF_CHAINS_REPAIRED", Severity.INFO,
                              f"The PDF structure needed {result.repaired} repair(s); chain analysis is a best-effort "
@@ -141,34 +144,36 @@ class PdfChainScanner:
 
 
 def vba_findings(result: vba_chains.VbaChains) -> list[Finding]:
-    def make(rule: str, severity: Severity, text: str) -> Finding:
-        return finding(rule, severity, text, scanner=VBA, category="office-macro-chain")
+    def make(rule: str, severity: Severity, text: str, items: list[str]) -> Finding:
+        return finding(rule, severity, text, scanner=VBA, category="office-macro-chain", evidence=items)
 
     by = {o: [e for e in result.entries if e.outcome == o] for o in (vba_chains.LINKED, vba_chains.NO_PATH,
                                                                      vba_chains.UNDETERMINED)}
     found = []
     if linked := by[vba_chains.LINKED]:
+        paths = [" -> ".join(clean(p, 60) for p in e.path) + f" ({'; '.join(e.capabilities)})" for e in linked]
         found.append(make("ENGINE_VBA_AUTOEXEC_REACHES_CAPABILITY", Severity.HIGH,
                           "An automatically running macro procedure reaches a dangerous operation through its calls. "
-                          "Evidence: " + listing([" -> ".join(clean(p, 60) for p in e.path)
-                                                  + f" ({'; '.join(e.capabilities)})" for e in linked]) + "."))
-    reasons = [r for e in by[vba_chains.UNDETERMINED] for r in e.reasons] + result.problems
+                          f"Evidence: {listing(paths)}.", paths))
+    reasons = [clean(r, 120) for r in dict.fromkeys([r for e in by[vba_chains.UNDETERMINED] for r in e.reasons]
+                                                    + result.problems)]
     if reasons:
         found.append(make("ENGINE_VBA_CALL_PATH_UNDETERMINED", Severity.INFO,
                           "Whether automatically running macro code reaches a dangerous operation could not be "
-                          f"determined. Evidence: {listing([clean(r, 120) for r in dict.fromkeys(reasons)])}."))
+                          f"determined. Evidence: {listing(reasons)}.", reasons))
     if result.outcome == vba_chains.NO_PATH and by[vba_chains.NO_PATH]:
+        entries = [clean(e.entry, 60) for e in by[vba_chains.NO_PATH]]
         found.append(make("ENGINE_VBA_NO_CALL_PATH", Severity.INFO,
                           "No call path leads from the automatically running macro procedures to a dangerous "
                           "operation in the extracted source. The compiled P-code was not checked (VBA stomping). "
-                          f"Entries: {listing([clean(e.entry, 60) for e in by[vba_chains.NO_PATH]])}."))
+                          f"Entries: {listing(entries)}.", entries))
     return found
 
 
 def link_findings(result: ooxml_links.Links) -> list[Finding]:
     def make(rule: str, severity: Severity, text: str, items: list[str]) -> Finding:
         return finding(rule, severity, f"{text} Evidence: {listing([clean(i, 240) for i in items])}.",
-                       scanner=LINKS, category="office-activation")
+                       scanner=LINKS, category="office-activation", evidence=items)
 
     by: dict[str, list[ooxml_links.Activation]] = {}
     for a in result.activations:
@@ -253,5 +258,6 @@ def correlate(report: WorkerReport) -> WorkerReport:
     if not notes:
         return report
     findings = [f for f in report.findings if (f.scanner, f.rule_id) not in drop]
-    findings.append(finding("ENGINE_CORRELATION", Severity.INFO, "Evidence correlation: " + "; ".join(notes) + "."))
+    findings.append(finding("ENGINE_CORRELATION", Severity.INFO, "Evidence correlation: " + "; ".join(notes) + ".",
+                            evidence=notes))
     return report.model_copy(update={"findings": findings})

@@ -131,7 +131,7 @@ def test_concurrent_scans_are_limited(monkeypatch):
 
 
 def test_scan_slot_is_released_after_failures(monkeypatch):
-    async def explode(data):
+    async def explode(data, engine="reference"):
         raise RuntimeError("unexpected")
 
     monkeypatch.setattr(main, "run_scan", explode)
@@ -224,7 +224,7 @@ def test_worker_failure_is_unable_to_scan_not_an_api_crash(monkeypatch, mode):
 
 
 def test_worker_reporting_unexpected_scanners_is_rejected(monkeypatch):
-    async def liar(data):
+    async def liar(data, engine="reference"):
         return worker.WorkerReport(scanners=[], findings=[])  # "nothing applied", hiding every scanner
 
     monkeypatch.setattr(main, "run_scan", liar)

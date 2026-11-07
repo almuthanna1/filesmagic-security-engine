@@ -104,7 +104,7 @@ def test_unexpected_failure_wrapped_as_pdf_scan_error_is_still_an_error(monkeypa
 
 
 def test_worker_failure_logged_once_with_request_id(monkeypatch, caplog):
-    async def dead_worker(data):
+    async def dead_worker(data, engine="reference"):
         raise main.worker.WorkerError("scan worker timed out after 30s")
 
     monkeypatch.setattr(main, "run_scan", dead_worker)

@@ -29,6 +29,9 @@ class Finding(BaseModel):
     severity: Severity
     description: str
     rule_id: str | None = Field(default=None, description="Signature or rule name, if any.")
+    evidence: list[Annotated[str, Field(max_length=500)]] = Field(
+        default_factory=list, max_length=50,
+        description="Structured evidence items (custom engine): action chains, call paths, relationship chains.")
 
 
 class ScannerStatus(BaseModel):
@@ -90,6 +93,8 @@ class WorkerReport(BaseModel):
 
 class ScanResult(BaseModel):
     request_id: str = Field(default="", description="Correlates this result with the engine's log lines.")
+    engine: Literal["reference", "unified"] = Field(
+        default="reference", description="reference: the four original scanners; unified: the custom engine candidate.")
     filename: str
     verdict: Verdict
     findings: list[Finding] = Field(default_factory=list)

@@ -98,6 +98,12 @@ class WorkerError(RuntimeError):
 # ----------------------------------------------------------------------------- parent side
 
 
+# Worker arguments that select the scanner set: the reference scanners (app.scanners) or the
+# custom unified engine (app.engine). The API checks the reported scanner names against the
+# engine it asked for, so a worker that ran the other set fails the scan instead of passing.
+ENGINE_ARGS = {"reference": [], "unified": ["--engine=unified"]}
+
+
 def command() -> list[str]:
     # -E/-s: ignore PYTHON* variables and user site-packages; -B: write no bytecode.
     cmd = [sys.executable, "-B", "-E", "-s", "-m", "app.worker"]
@@ -137,11 +143,13 @@ async def _exchange(proc: asyncio.subprocess.Process, data: bytes) -> bytes:
     return bytes(out)
 
 
-async def run(data: bytes, cmd: list[str] | None = None, timeout: float | None = None) -> WorkerReport:
-    """Scan `data` in a fresh worker process. Raises WorkerError if no valid report comes back."""
+async def run(data: bytes, cmd: list[str] | None = None, timeout: float | None = None,
+              engine: str = "reference") -> WorkerReport:
+    """Scan `data` in a fresh worker process with the scanners of `engine` (ENGINE_ARGS).
+    Raises WorkerError if no valid report comes back."""
     timeout = TIMEOUT_SECONDS if timeout is None else timeout
     proc = await asyncio.create_subprocess_exec(
-        *(cmd or command()),
+        *(cmd or command()), *ENGINE_ARGS[engine],
         stdin=asyncio.subprocess.PIPE,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.DEVNULL,  # tracebacks may quote attacker-controlled text
