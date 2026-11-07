@@ -17,9 +17,11 @@ object is refreshed automatically. Office's runtime behaviour itself is not obse
 
 Activation of each relationship of interest (external ones, and internal ones to OLE objects,
 embedded packages and ActiveX controls):
-  on-open        an external target used when the document opens (template, frame, OLE link
-                 that updates automatically)
-  image-on-open  an external picture shown in the document
+  on-open        an external target the document asks for when it opens (template, frame, OLE
+                 link that updates automatically); whether it is fetched depends on the
+                 application's external-content and Protected View settings
+  linked-picture an external picture shown in the document, fetched only if the application
+                 loads external content
   on-action      an external target used when the user updates or expands it (OLE link on
                  request, subdocument)
   click          a hyperlink (not reported)
@@ -39,7 +41,7 @@ import defusedxml.ElementTree as SafeET
 from app.scanners.custom import ooxml_package as opc
 from app.scanners.custom.ooxml import REL_NAMESPACES, is_xml
 
-ON_OPEN, IMAGE, ON_ACTION, CLICK, DISPLAYED = "on-open", "image-on-open", "on-action", "click", "displayed"
+ON_OPEN, IMAGE, ON_ACTION, CLICK, DISPLAYED = "on-open", "linked-picture", "on-action", "click", "displayed"
 NOT_ACTIVATED, UNDETERMINED = "not-activated", "undetermined"
 EMBED_TYPES = {"oleobject", "package", "control"}  # internal relationship types to objects
 _REL_NS = {ns.decode() for ns in REL_NAMESPACES}
@@ -112,7 +114,7 @@ def classify(ref: Reference, external: bool) -> tuple[str, str]:
     if element == "sourceFileName":
         return ON_OPEN, "frame source: loaded when the document opens"
     if element in ("blip", "imagedata"):
-        return IMAGE, f"{element} {ref.attribute}: a picture displayed from outside the file"
+        return IMAGE, f"{element} {ref.attribute}: a picture stored outside the file"
     linked_ole = (element == "OLEObject" and a.get("Type", "").lower() == "link") or element in ("oleObj", "oleObject")
     if linked_ole:
         always = (a.get("UpdateMode", "").lower() == "always" or a.get("oleUpdate") == "OLEUPDATE_ALWAYS"

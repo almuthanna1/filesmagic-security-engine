@@ -141,11 +141,32 @@ def test_the_unified_verdict_is_never_lower_than_the_reference_verdict(case):
         or (reference, unified) == ("MALICIOUS", "SUSPICIOUS") and case.startswith("5a")  # the PDF correction
 
 
-def test_a_linked_picture_raises_the_verdict_and_reference_findings_stay():
+def by_rule(report):
+    return {f.rule_id: f for f in report.findings}
+
+
+# Risk policy (app.engine.correlate, LINK_RULES): a linked picture is ordinary Word output whose
+# fetch the application may block and which carries no code, so it is evidence (INFO), not a
+# reason for SUSPICIOUS; credential exposure through file:// or UNC stays the reference's MEDIUM.
+def test_an_ordinary_linked_picture_keeps_its_evidence_but_not_a_higher_verdict():
     unified = engine.correlate(worker.analyse(engine.SCANNERS, CASE["6d-docx-linked-picture"]))
-    rules = {f.rule_id for f in unified.findings}
-    assert {"OFFICE_EXTERNAL_RESOURCE", "ENGINE_OFFICE_LINKED_PICTURE_LOADS_ON_OPEN"} <= rules
+    picture = by_rule(unified)["ENGINE_OFFICE_LINKED_PICTURE"]
+    assert picture.severity.value == "INFO" and "a:blip" not in picture.description  # element names are local
+    assert "blip link='rId9' -> image https://images.example.invalid/pixel.png" in picture.description
+    assert verdicts(unified)["aggregate"] == "SAFE" == verdicts(worker.analyse(SCANNERS, CASE["6d-docx-linked-picture"]))["aggregate"]
+
+
+def test_a_linked_picture_on_a_file_share_stays_suspicious_through_the_reference_rule():
+    unified = engine.correlate(worker.analyse(engine.SCANNERS, CASE["6g-docx-linked-picture-file-share"]))
+    rules = by_rule(unified)
+    assert rules["OFFICE_EXTERNAL_NETWORK_PATH"].severity.value == "MEDIUM"
+    assert rules["ENGINE_OFFICE_LINKED_PICTURE"].severity.value == "INFO"
     assert verdicts(unified)["aggregate"] == "SUSPICIOUS"
+
+
+def test_a_template_used_on_open_stays_medium():
+    unified = engine.correlate(worker.analyse(engine.SCANNERS, CASE["6c-docx-template-referenced-by-settings"]))
+    assert by_rule(unified)["ENGINE_OFFICE_EXTERNAL_ON_OPEN"].severity.value == "MEDIUM"
 
 
 @pytest.mark.parametrize("case, note", [

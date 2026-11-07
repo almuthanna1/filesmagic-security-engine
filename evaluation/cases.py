@@ -19,6 +19,7 @@ whether isolation was complete, so numbers are compared only within one environm
 
 import argparse
 import asyncio
+import hashlib
 import json
 import platform
 import sys
@@ -38,6 +39,7 @@ FORM_KEYSTROKE_JS = ("<< /Type /Annot /Subtype /Widget /FT /Tx /T (amount) /Rect
                      "<< /S /JavaScript /JS (AFNumber_Keystroke\\(2, 0, 0, 0, \"\", true\\);) >> >> >>")
 CLICK_LINK_JS = "<< /Type /Annot /Subtype /Link /Rect [0 0 50 50] /A " + js_action("app.alert\\(1\\);") + " >>"
 LINKED_PICTURE = "https://images.example.invalid/pixel.png"  # RFC 2606 .invalid: never resolves
+SHARE_PICTURE = "file://fileserver.invalid/share/pixel.png"
 INERT_OLE = make_ole({"Contents": b"inert placeholder bytes"})  # an OLE container with no object in it
 EXPORT_JS = js_action("this.exportDataObject\\({cName: \"f\", nLaunch: 0}\\);")  # "f": the fixture's attachment key
 
@@ -74,6 +76,9 @@ def cases() -> list[dict]:
         case("6d-docx-linked-picture", f"a picture shown from {LINKED_PICTURE} (a:blip r:link; never fetched)",
              fx.linked_docx(body='<w:p><w:r><w:drawing><a:blip r:link="rId9"/></w:drawing></w:r></w:p>',
                             main_rels=(("rId9", f"{rel}/image", LINKED_PICTURE, "External"),))),
+        case("6g-docx-linked-picture-file-share", f"the same picture on a file share {SHARE_PICTURE} (never fetched)",
+             fx.linked_docx(body='<w:p><w:r><w:drawing><a:blip r:link="rId9"/></w:drawing></w:r></w:p>',
+                            main_rels=(("rId9", f"{rel}/image", SHARE_PICTURE, "External"),))),
         case("6e-docx-embedded-object-displayed", "an inert OLE container shown by o:OLEObject Type=Embed",
              fx.linked_docx(body='<w:p><w:r><w:object><o:OLEObject Type="Embed" r:id="rId10"/></w:object></w:r></w:p>',
                             main_rels=(("rId10", f"{rel}/oleObject", "embeddings/oleObject1.bin"),),
@@ -110,16 +115,23 @@ def scan_case(case: dict, trials: int, cmd: list[str]) -> dict:
     first = runs[0][1]
     rules = lambda r: sorted({f"{f.scanner}:{f.rule_id}:{f.severity.value}" for f in r.findings  # noqa: E731
                               if f.severity != Severity.INFO})
+    every = lambda r: [(f.scanner, f.rule_id, f.severity.value, f.description) for f in r.findings]  # noqa: E731
+    durations = [{s.name: s.duration_ms for s in r.scanners} for _, r in runs]
     return {
         "id": case["id"], "ground_truth": case["ground_truth"], "indicator": case["indicator"],
+        "sha256": hashlib.sha256(case["data"]).hexdigest(), "size_bytes": len(case["data"]),
         "verdicts": verdicts(first),
-        "deterministic": all(verdicts(r) == verdicts(first) and rules(r) == rules(first) for _, r in runs),
+        # Same verdicts and the same complete findings (INFO included) in every trial.
+        "deterministic": all(verdicts(r) == verdicts(first) and every(r) == every(first) for _, r in runs),
         "status": {s.name: s.status for s in first.scanners},
         "rules": rules(first),
+        "findings": [dict(scanner=s, rule_id=i, severity=v, description=d) for s, i, v, d in every(first)],
         "isolation_missing": worker.missing_controls(first.isolation),
         "timing_ms": {"harness_wall": latency([w for w, _ in runs]),
-                      **{s.name: latency([next(x.duration_ms for x in r.scanners if x.name == s.name) for _, r in runs])
-                         for s in first.scanners}},
+                      **{s.name: latency([d[s.name] for d in durations]) for s in first.scanners}},
+        # Raw per-trial values: wall time of the whole scan (worker start-up included) and each
+        # scanner's own time inside the worker.
+        "trials": [{"harness_wall_ms": w, "scanner_ms": d} for (w, _), d in zip(runs, durations)],
     }
 
 

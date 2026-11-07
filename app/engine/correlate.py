@@ -51,11 +51,25 @@ LINKS = "ooxml-links"
 REFERENCE_AUTOLOAD = ("office", "OFFICE_EXTERNAL_AUTOLOAD")
 REFERENCE_OBJECTS = {("office", r) for r in ("OFFICE_EMBEDDED_OLE", "OFFICE_EMBEDDED_BINARY", "OFFICE_PACKAGE_OBJECT",
                                              "OFFICE_PACKAGE_EXECUTABLE", "OFFICE_EQUATION_EDITOR")}
+# Risk policy for activation findings: severity follows what the target can do if the application
+# fetches it, never the mere chance that it does. Whether anything is fetched depends on the
+# consuming application: Office blocks external content by default in workbooks and presentations,
+# and files from the internet open in Protected View (Microsoft support: "Block or unblock external
+# content in Office documents"; "What is Protected View?"). So:
+#   MEDIUM  a target that can bring code into the document when it opens: an attached template
+#           (it can carry macros), a frame, an OLE link that updates automatically (as the
+#           reference scanner's OFFICE_EXTERNAL_AUTOLOAD);
+#   INFO    a linked picture: Word's ordinary "Link to File" output, which the C4-C6 policy keeps
+#           below LOW ("LOW marks a structure that standard Office generators do not produce").
+#           Its risk is a web beacon (the server learns the document was opened); credential
+#           exposure through a UNC or file:// target is already OFFICE_EXTERNAL_NETWORK_PATH (MEDIUM).
 LINK_RULES = {  # activation -> (rule, severity, summary); hyperlinks (click) are not reported
-    ooxml_links.ON_OPEN: ("ENGINE_OFFICE_EXTERNAL_LOADS_ON_OPEN", Severity.MEDIUM,
-                          "A part Office loads references an external target that is used when the document opens."),
-    ooxml_links.IMAGE: ("ENGINE_OFFICE_LINKED_PICTURE_LOADS_ON_OPEN", Severity.LOW,
-                        "The document shows a picture that is fetched from outside the file when it is displayed."),
+    ooxml_links.ON_OPEN: ("ENGINE_OFFICE_EXTERNAL_ON_OPEN", Severity.MEDIUM,
+                          "A part Office loads references an external target the document asks for when it opens "
+                          "(fetched unless the application blocks external content)."),
+    ooxml_links.IMAGE: ("ENGINE_OFFICE_LINKED_PICTURE", Severity.INFO,
+                        "The document shows a picture stored outside the file; it is fetched only if the application "
+                        "loads external content, and then tells that server the document was opened."),
     ooxml_links.ON_ACTION: ("ENGINE_OFFICE_EXTERNAL_ON_USER_ACTION", Severity.INFO,
                             "External targets are used only when the user updates or expands them."),
     ooxml_links.DISPLAYED: ("ENGINE_OFFICE_EMBEDDED_OBJECT_DISPLAYED", Severity.INFO,
@@ -225,7 +239,7 @@ def correlate(report: WorkerReport) -> WorkerReport:
         if REFERENCE_AUTOLOAD in rules:
             notes.append(f"{REFERENCE_AUTOLOAD[1]} (Office scanner) " + (
                 "confirmed: a part Office loads references an external target used on open"
-                if "ENGINE_OFFICE_EXTERNAL_LOADS_ON_OPEN" in engine else
+                if "ENGINE_OFFICE_EXTERNAL_ON_OPEN" in engine else
                 "kept: whether the relationship is used could not be determined"
                 if "ENGINE_OFFICE_ACTIVATION_UNDETERMINED" in engine else
                 "kept although no part Office loads references it: its use is not demonstrated"))

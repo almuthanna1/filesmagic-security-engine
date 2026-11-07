@@ -39,7 +39,7 @@ def rules(report: WorkerReport) -> set[str]:
      {"PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD", "ENGINE_PDF_AUTO_CHAIN_SCRIPT"}),
     # The reference AUTOLOAD stays; the activation graph adds that no loaded part references it.
     ("6b-docx-external-template", "SUSPICIOUS", {"OFFICE_EXTERNAL_AUTOLOAD", "ENGINE_OFFICE_EXTERNAL_NOT_ACTIVATED"},
-     {"ENGINE_OFFICE_EXTERNAL_LOADS_ON_OPEN"}),
+     {"ENGINE_OFFICE_EXTERNAL_ON_OPEN"}),
 ])
 def test_unified_verdicts_and_evidence(case, verdict, present, absent):
     report = unified(CASE[case])
