@@ -8,6 +8,7 @@ through the API for both engines. If detection changes on purpose, re-freeze tha
 
 import asyncio
 import functools
+import hashlib
 import json
 from pathlib import Path
 
@@ -93,7 +94,9 @@ def test_every_frozen_case_reproduces_through_the_api(research, engine_name, cas
     assert body["verdict"] == frozen["verdicts"]["aggregate"]
     assert rules(body) == frozen["rules"]
     assert {s["name"]: s["status"] for s in body["scanners"]} == frozen["status"]
-    assert body["sha256"] == frozen["sha256"]
+    # The hash of the bytes sent, not the frozen one: DEFLATE output (the Office fixtures are ZIPs)
+    # depends on the zlib build, so the same fixture can have different bytes on another platform.
+    assert body["sha256"] == hashlib.sha256(CASE[case]).hexdigest()
 
 
 def test_all_four_verdicts_through_the_unified_engine(research):

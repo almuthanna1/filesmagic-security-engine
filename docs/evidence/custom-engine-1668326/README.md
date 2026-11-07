@@ -24,8 +24,11 @@ python -m evaluation.cases --trials 20 --engine unified --out <dir>/unified
 python -m evaluation.poster --run <dir> --out <figures dir>
 ```
 
-The fixtures are deterministic (fixed ZIP timestamps, fixed PDF layout), so the SHA-256 of each
-case must match the one recorded here; timings will differ by machine.
+The fixtures are deterministic on one platform (fixed ZIP timestamps, fixed PDF layout), so a rerun
+on this machine reproduces each recorded SHA-256. Across platforms only the PDFs do: the Office
+fixtures are DEFLATE-compressed ZIPs, and the compressed bytes depend on Python's zlib build (Linux
+CI with Python 3.11 produced different bytes, and hashes, for the same parts; verdicts, rules and
+scanner statuses were identical there). Timings differ by machine.
 
 ## Files
 

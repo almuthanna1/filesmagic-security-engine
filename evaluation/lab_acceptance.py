@@ -91,7 +91,7 @@ def scan(lab: str, api: str, data: bytes, engine: str, name: str) -> dict:
         "rules": sorted({f"{f['scanner']}:{f['rule_id']}:{f['severity']}" for f in body["findings"]
                          if f["severity"] != "INFO"}),
         "status": {s["name"]: s["status"] for s in body["scanners"]}, "complete": body["complete"],
-        "duration_ms": body["duration_ms"], "sha256": body["sha256"],
+        "duration_ms": body["duration_ms"], "sha256": body["sha256"], "sent_sha256": hashlib.sha256(data).hexdigest(),
         "evidence_items": sum(len(f.get("evidence") or []) for f in body["findings"]),
         "isolation_missing": body.get("isolation_missing", []),
     }
@@ -103,13 +103,17 @@ def check(result: dict, engine: str, frozen: dict | None, expected_verdict: str 
         return [f"HTTP {result.get('http')} at {result.get('stage')}: {result.get('detail')}"]
     if not result["cors_allowed"]:
         problems.append("the engine did not allow the Lab's origin (CORS)")
+    if result["sha256"] != result["sent_sha256"]:
+        problems.append("the response describes different bytes than were uploaded")
     if result["engine"] != engine:
         problems.append(f"requested {engine}, response came from {result['engine']}")
     if sorted(result["status"]) != sorted(EXPECTED_SCANNERS[engine]):
         problems.append(f"unexpected scanners {sorted(result['status'])}")
     if frozen:
+        # Not the frozen SHA-256: DEFLATE output depends on the zlib build, so a ZIP fixture built on
+        # another platform has different bytes. The hash of the bytes actually sent is checked above.
         for key, want in (("verdict", frozen["verdicts"]["aggregate"]), ("rules", frozen["rules"]),
-                          ("status", frozen["status"]), ("sha256", frozen["sha256"])):
+                          ("status", frozen["status"])):
             if result[key] != want:
                 problems.append(f"{key}: got {result[key]}, frozen {want}")
     if expected_verdict and result["verdict"] != expected_verdict:
