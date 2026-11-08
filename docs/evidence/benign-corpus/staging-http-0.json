@@ -1,0 +1,320 @@
+[
+  {
+    "file": "pdf-06-word-export-pdfa.pdf",
+    "path": "http (Lab token route -> engine /scan)",
+    "reference": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 29071.2,
+      "cors_allowed": true,
+      "engine": "reference",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "complete": true,
+      "duration_ms": 6773.4,
+      "sha256": "81805bcb3c52cafce166d0d98bd8aa9a4ba66adcf12d70780e4a0cfa01634a7d",
+      "sent_sha256": "81805bcb3c52cafce166d0d98bd8aa9a4ba66adcf12d70780e4a0cfa01634a7d",
+      "evidence_items": 0,
+      "isolation_missing": []
+    },
+    "unified": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 6707.4,
+      "cors_allowed": true,
+      "engine": "unified",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable"
+      },
+      "complete": true,
+      "duration_ms": 6544.2,
+      "sha256": "81805bcb3c52cafce166d0d98bd8aa9a4ba66adcf12d70780e4a0cfa01634a7d",
+      "sent_sha256": "81805bcb3c52cafce166d0d98bd8aa9a4ba66adcf12d70780e4a0cfa01634a7d",
+      "evidence_items": 0,
+      "isolation_missing": []
+    }
+  },
+  {
+    "file": "pdf-07-libreoffice-hybrid.pdf",
+    "path": "http (Lab token route -> engine /scan)",
+    "reference": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 6627.1,
+      "cors_allowed": true,
+      "engine": "reference",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SUSPICIOUS",
+      "rules": [
+        "pdf:PDF_EMBEDDED_FILE:LOW",
+        "yara-x:PDF_Embedded_File:LOW"
+      ],
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "complete": true,
+      "duration_ms": 6318.2,
+      "sha256": "92e878c85710fa49e4609589ba9a81fe1cd67f0f3ac093735f5f69e435e6b0d6",
+      "sent_sha256": "92e878c85710fa49e4609589ba9a81fe1cd67f0f3ac093735f5f69e435e6b0d6",
+      "evidence_items": 0,
+      "isolation_missing": []
+    },
+    "unified": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 7115.6,
+      "cors_allowed": true,
+      "engine": "unified",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SUSPICIOUS",
+      "rules": [
+        "pdf:PDF_EMBEDDED_FILE:LOW",
+        "yara-x:PDF_Embedded_File:LOW"
+      ],
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable"
+      },
+      "complete": true,
+      "duration_ms": 6861.0,
+      "sha256": "92e878c85710fa49e4609589ba9a81fe1cd67f0f3ac093735f5f69e435e6b0d6",
+      "sent_sha256": "92e878c85710fa49e4609589ba9a81fe1cd67f0f3ac093735f5f69e435e6b0d6",
+      "evidence_items": 0,
+      "isolation_missing": []
+    }
+  },
+  {
+    "file": "pdf-08-edge-print.pdf",
+    "path": "http (Lab token route -> engine /scan)",
+    "reference": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 6792.1,
+      "cors_allowed": true,
+      "engine": "reference",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "complete": true,
+      "duration_ms": 6573.0,
+      "sha256": "24fa857b9bf4a799a4f5ce9ade71c412c32d3795ddc4bfd452ab1ca2f5f51d39",
+      "sent_sha256": "24fa857b9bf4a799a4f5ce9ade71c412c32d3795ddc4bfd452ab1ca2f5f51d39",
+      "evidence_items": 0,
+      "isolation_missing": []
+    },
+    "unified": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 7411.8,
+      "cors_allowed": true,
+      "engine": "unified",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable"
+      },
+      "complete": true,
+      "duration_ms": 7209.9,
+      "sha256": "24fa857b9bf4a799a4f5ce9ade71c412c32d3795ddc4bfd452ab1ca2f5f51d39",
+      "sent_sha256": "24fa857b9bf4a799a4f5ce9ade71c412c32d3795ddc4bfd452ab1ca2f5f51d39",
+      "evidence_items": 0,
+      "isolation_missing": []
+    }
+  },
+  {
+    "file": "pptx-01-ppt-plain.pptx",
+    "path": "http (Lab token route -> engine /scan)",
+    "reference": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 6552.9,
+      "cors_allowed": true,
+      "engine": "reference",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "complete": true,
+      "duration_ms": 6282.5,
+      "sha256": "a65abe8dc30c05f2547c8bc507312ecdca851ea8ef90ef8e4c3850178a04093b",
+      "sent_sha256": "a65abe8dc30c05f2547c8bc507312ecdca851ea8ef90ef8e4c3850178a04093b",
+      "evidence_items": 0,
+      "isolation_missing": []
+    },
+    "unified": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 7105.7,
+      "cors_allowed": true,
+      "engine": "unified",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "complete": true,
+      "duration_ms": 6928.1,
+      "sha256": "a65abe8dc30c05f2547c8bc507312ecdca851ea8ef90ef8e4c3850178a04093b",
+      "sent_sha256": "a65abe8dc30c05f2547c8bc507312ecdca851ea8ef90ef8e4c3850178a04093b",
+      "evidence_items": 0,
+      "isolation_missing": []
+    }
+  },
+  {
+    "file": "pptx-02-ppt-pictures-notes.pptx",
+    "path": "http (Lab token route -> engine /scan)",
+    "reference": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 7222.6,
+      "cors_allowed": true,
+      "engine": "reference",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "complete": true,
+      "duration_ms": 7032.3,
+      "sha256": "e80056f6db30078ca73f3e475f6629f2b929d564b2083202c3dc7a394bda3246",
+      "sent_sha256": "e80056f6db30078ca73f3e475f6629f2b929d564b2083202c3dc7a394bda3246",
+      "evidence_items": 0,
+      "isolation_missing": []
+    },
+    "unified": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 7265.4,
+      "cors_allowed": true,
+      "engine": "unified",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "complete": true,
+      "duration_ms": 7029.4,
+      "sha256": "e80056f6db30078ca73f3e475f6629f2b929d564b2083202c3dc7a394bda3246",
+      "sent_sha256": "e80056f6db30078ca73f3e475f6629f2b929d564b2083202c3dc7a394bda3246",
+      "evidence_items": 0,
+      "isolation_missing": []
+    }
+  },
+  {
+    "file": "pptx-03-ppt-chart-table.pptx",
+    "path": "http (Lab token route -> engine /scan)",
+    "reference": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 7116.9,
+      "cors_allowed": true,
+      "engine": "reference",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "complete": true,
+      "duration_ms": 6938.2,
+      "sha256": "4e45b6708596aca1123e20f16d5f55eb42172d0af7d19df160f3b5d6ae2c85ff",
+      "sent_sha256": "4e45b6708596aca1123e20f16d5f55eb42172d0af7d19df160f3b5d6ae2c85ff",
+      "evidence_items": 0,
+      "isolation_missing": []
+    },
+    "unified": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 6813.7,
+      "cors_allowed": true,
+      "engine": "unified",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "complete": true,
+      "duration_ms": 6632.1,
+      "sha256": "4e45b6708596aca1123e20f16d5f55eb42172d0af7d19df160f3b5d6ae2c85ff",
+      "sent_sha256": "4e45b6708596aca1123e20f16d5f55eb42172d0af7d19df160f3b5d6ae2c85ff",
+      "evidence_items": 1,
+      "isolation_missing": []
+    }
+  }
+]

@@ -1,0 +1,314 @@
+[
+  {
+    "file": "pptx-04-ppt-hyperlinks-actions.pptx",
+    "path": "http (Lab token route -> engine /scan)",
+    "reference": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 28256.7,
+      "cors_allowed": true,
+      "engine": "reference",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "complete": true,
+      "duration_ms": 6995.3,
+      "sha256": "0eb4c62644d0e07c1a0dd655b96a96f9b7b7a34610ebe72be9b7f5b02e67ec11",
+      "sent_sha256": "0eb4c62644d0e07c1a0dd655b96a96f9b7b7a34610ebe72be9b7f5b02e67ec11",
+      "evidence_items": 0,
+      "isolation_missing": []
+    },
+    "unified": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 6701.3,
+      "cors_allowed": true,
+      "engine": "unified",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "complete": true,
+      "duration_ms": 6513.6,
+      "sha256": "0eb4c62644d0e07c1a0dd655b96a96f9b7b7a34610ebe72be9b7f5b02e67ec11",
+      "sent_sha256": "0eb4c62644d0e07c1a0dd655b96a96f9b7b7a34610ebe72be9b7f5b02e67ec11",
+      "evidence_items": 0,
+      "isolation_missing": []
+    }
+  },
+  {
+    "file": "pptx-05-ppt-transitions-animations.pptx",
+    "path": "http (Lab token route -> engine /scan)",
+    "reference": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 6474.2,
+      "cors_allowed": true,
+      "engine": "reference",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "complete": true,
+      "duration_ms": 6287.4,
+      "sha256": "b6ce6c8172923dfe90559aa2674b724a2a070c8227900a35a720a8bac585f719",
+      "sent_sha256": "b6ce6c8172923dfe90559aa2674b724a2a070c8227900a35a720a8bac585f719",
+      "evidence_items": 0,
+      "isolation_missing": []
+    },
+    "unified": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 6889.6,
+      "cors_allowed": true,
+      "engine": "unified",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "complete": true,
+      "duration_ms": 6725.7,
+      "sha256": "b6ce6c8172923dfe90559aa2674b724a2a070c8227900a35a720a8bac585f719",
+      "sent_sha256": "b6ce6c8172923dfe90559aa2674b724a2a070c8227900a35a720a8bac585f719",
+      "evidence_items": 0,
+      "isolation_missing": []
+    }
+  },
+  {
+    "file": "pptx-06-ppt-embedded-excel.pptx",
+    "path": "http (Lab token route -> engine /scan)",
+    "reference": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 7029.9,
+      "cors_allowed": true,
+      "engine": "reference",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "complete": true,
+      "duration_ms": 6849.6,
+      "sha256": "80a76fef2c469fabba6a6f6dec969b18ae77b5b7ab4d947de3f276c78e37ebd1",
+      "sent_sha256": "80a76fef2c469fabba6a6f6dec969b18ae77b5b7ab4d947de3f276c78e37ebd1",
+      "evidence_items": 0,
+      "isolation_missing": []
+    },
+    "unified": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 6334.5,
+      "cors_allowed": true,
+      "engine": "unified",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "complete": true,
+      "duration_ms": 6145.1,
+      "sha256": "80a76fef2c469fabba6a6f6dec969b18ae77b5b7ab4d947de3f276c78e37ebd1",
+      "sent_sha256": "80a76fef2c469fabba6a6f6dec969b18ae77b5b7ab4d947de3f276c78e37ebd1",
+      "evidence_items": 1,
+      "isolation_missing": []
+    }
+  },
+  {
+    "file": "pptx-07-libreoffice-roundtrip.pptx",
+    "path": "http (Lab token route -> engine /scan)",
+    "reference": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 6815.9,
+      "cors_allowed": true,
+      "engine": "reference",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "complete": true,
+      "duration_ms": 6619.7,
+      "sha256": "c22a85eb1fc9070a6b74e51bccab38d84a6a83926ae38be5467510c8fd95707d",
+      "sent_sha256": "c22a85eb1fc9070a6b74e51bccab38d84a6a83926ae38be5467510c8fd95707d",
+      "evidence_items": 0,
+      "isolation_missing": []
+    },
+    "unified": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 7652.4,
+      "cors_allowed": true,
+      "engine": "unified",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "complete": true,
+      "duration_ms": 7471.8,
+      "sha256": "c22a85eb1fc9070a6b74e51bccab38d84a6a83926ae38be5467510c8fd95707d",
+      "sent_sha256": "c22a85eb1fc9070a6b74e51bccab38d84a6a83926ae38be5467510c8fd95707d",
+      "evidence_items": 0,
+      "isolation_missing": []
+    }
+  },
+  {
+    "file": "xlsx-01-excel-formulas.xlsx",
+    "path": "http (Lab token route -> engine /scan)",
+    "reference": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 7314.5,
+      "cors_allowed": true,
+      "engine": "reference",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "complete": true,
+      "duration_ms": 7171.9,
+      "sha256": "709f1cfa517407fe76fc068d6ffa14beae730829d8afd278e470d2e3bcbeb06c",
+      "sent_sha256": "709f1cfa517407fe76fc068d6ffa14beae730829d8afd278e470d2e3bcbeb06c",
+      "evidence_items": 0,
+      "isolation_missing": []
+    },
+    "unified": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 7631.4,
+      "cors_allowed": true,
+      "engine": "unified",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "complete": true,
+      "duration_ms": 7323.8,
+      "sha256": "709f1cfa517407fe76fc068d6ffa14beae730829d8afd278e470d2e3bcbeb06c",
+      "sent_sha256": "709f1cfa517407fe76fc068d6ffa14beae730829d8afd278e470d2e3bcbeb06c",
+      "evidence_items": 0,
+      "isolation_missing": []
+    }
+  },
+  {
+    "file": "xlsx-02-excel-chart-formatting.xlsx",
+    "path": "http (Lab token route -> engine /scan)",
+    "reference": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 6339.5,
+      "cors_allowed": true,
+      "engine": "reference",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "complete": true,
+      "duration_ms": 6180.2,
+      "sha256": "c828f185adf32e5baa9f3c2da9e88dd6e1e2b827e49fc23224a48f8b41e175e3",
+      "sent_sha256": "c828f185adf32e5baa9f3c2da9e88dd6e1e2b827e49fc23224a48f8b41e175e3",
+      "evidence_items": 0,
+      "isolation_missing": []
+    },
+    "unified": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 6806.7,
+      "cors_allowed": true,
+      "engine": "unified",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "complete": true,
+      "duration_ms": 6642.6,
+      "sha256": "c828f185adf32e5baa9f3c2da9e88dd6e1e2b827e49fc23224a48f8b41e175e3",
+      "sent_sha256": "c828f185adf32e5baa9f3c2da9e88dd6e1e2b827e49fc23224a48f8b41e175e3",
+      "evidence_items": 0,
+      "isolation_missing": []
+    }
+  }
+]
