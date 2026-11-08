@@ -1,0 +1,1021 @@
+[
+  {
+    "file": "docx-01-word-plain.docx",
+    "detected_format": "zip",
+    "reference": {
+      "verdict": "SAFE",
+      "wall_ms": 587.8,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 4.4
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 623.6,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 5.31
+    }
+  },
+  {
+    "file": "docx-02-word-rich.docx",
+    "detected_format": "zip",
+    "reference": {
+      "verdict": "SAFE",
+      "wall_ms": 596.3,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 6.83
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 630.6,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 7.63
+    }
+  },
+  {
+    "file": "docx-03-word-embedded-excel.docx",
+    "detected_format": "zip",
+    "reference": {
+      "verdict": "SAFE",
+      "wall_ms": 586.9,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 3.82
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 628.8,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "errors": {},
+      "findings": [
+        "ooxml-links:ENGINE_OFFICE_EMBEDDED_OBJECT_DISPLAYED:INFO"
+      ],
+      "scanner_ms": 5.39
+    }
+  },
+  {
+    "file": "docx-04-word-linked-picture.docx",
+    "detected_format": "zip",
+    "reference": {
+      "verdict": "SUSPICIOUS",
+      "wall_ms": 593.5,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [
+        "office:OFFICE_EXTERNAL_NETWORK_PATH:MEDIUM"
+      ],
+      "scanner_ms": 4.18
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 600.9,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "errors": {},
+      "findings": [
+        "ooxml-links:ENGINE_CORRELATION:INFO",
+        "ooxml-links:ENGINE_OFFICE_LINKED_PICTURE:INFO",
+        "ooxml-links:ENGINE_OFFICE_LOCAL_FILE_TARGETS:INFO"
+      ],
+      "scanner_ms": 5.35
+    }
+  },
+  {
+    "file": "docx-05-word-custom-template.docx",
+    "detected_format": "zip",
+    "reference": {
+      "verdict": "SUSPICIOUS",
+      "wall_ms": 591.9,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [
+        "office:OFFICE_EXTERNAL_AUTOLOAD:MEDIUM"
+      ],
+      "scanner_ms": 4.17
+    },
+    "unified": {
+      "verdict": "SUSPICIOUS",
+      "wall_ms": 603.6,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "errors": {},
+      "findings": [
+        "ooxml-links:ENGINE_CORRELATION:INFO",
+        "ooxml-links:ENGINE_OFFICE_LOCAL_TEMPLATE:LOW"
+      ],
+      "scanner_ms": 5.92
+    }
+  },
+  {
+    "file": "docx-06-word-content-controls.docx",
+    "detected_format": "zip",
+    "reference": {
+      "verdict": "SAFE",
+      "wall_ms": 584.2,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 5.14
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 601.3,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 5.5
+    }
+  },
+  {
+    "file": "docx-07-libreoffice.docx",
+    "detected_format": "zip",
+    "reference": {
+      "verdict": "SAFE",
+      "wall_ms": 580.2,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 3.63
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 599.9,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 4.65
+    }
+  },
+  {
+    "file": "pdf-01-word-export.pdf",
+    "detected_format": "pdf",
+    "reference": {
+      "verdict": "SAFE",
+      "wall_ms": 596.1,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 3.8
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 600.6,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 7.48
+    }
+  },
+  {
+    "file": "pdf-02-excel-export.pdf",
+    "detected_format": "pdf",
+    "reference": {
+      "verdict": "SAFE",
+      "wall_ms": 594.5,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 3.85
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 631.7,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 10.49
+    }
+  },
+  {
+    "file": "pdf-03-powerpoint-export.pdf",
+    "detected_format": "pdf",
+    "reference": {
+      "verdict": "SAFE",
+      "wall_ms": 607.2,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 2.6
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 625.3,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 4.6
+    }
+  },
+  {
+    "file": "pdf-04-libreoffice-tagged.pdf",
+    "detected_format": "pdf",
+    "reference": {
+      "verdict": "SAFE",
+      "wall_ms": 598.4,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 3.29
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 620.1,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 6.97
+    }
+  },
+  {
+    "file": "pdf-05-libreoffice-pdfa.pdf",
+    "detected_format": "pdf",
+    "reference": {
+      "verdict": "SAFE",
+      "wall_ms": 588.2,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 3.95
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 619.1,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 7.63
+    }
+  },
+  {
+    "file": "pdf-06-word-export-pdfa.pdf",
+    "detected_format": "pdf",
+    "reference": {
+      "verdict": "SAFE",
+      "wall_ms": 575.7,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 2.88
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 615.8,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 6.23
+    }
+  },
+  {
+    "file": "pdf-07-libreoffice-hybrid.pdf",
+    "detected_format": "pdf",
+    "reference": {
+      "verdict": "SUSPICIOUS",
+      "wall_ms": 587.8,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [
+        "custom:CUSTOM_PDF_UNNECESSARY_NAME_ESCAPES:INFO",
+        "pdf:PDF_EMBEDDED_FILE:LOW",
+        "yara-x:PDF_Embedded_File:LOW"
+      ],
+      "scanner_ms": 3.78
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 619.8,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable"
+      },
+      "errors": {},
+      "findings": [
+        "custom:CUSTOM_PDF_UNNECESSARY_NAME_ESCAPES:INFO",
+        "pdf-chains:ENGINE_CORRELATION:INFO",
+        "pdf-chains:ENGINE_PDF_ATTACHMENTS_VERIFIED:INFO"
+      ],
+      "scanner_ms": 6.87
+    }
+  },
+  {
+    "file": "pdf-08-edge-print.pdf",
+    "detected_format": "pdf",
+    "reference": {
+      "verdict": "SAFE",
+      "wall_ms": 570.4,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 3.51
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 601.1,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 6.74
+    }
+  },
+  {
+    "file": "pptx-01-ppt-plain.pptx",
+    "detected_format": "zip",
+    "reference": {
+      "verdict": "SAFE",
+      "wall_ms": 592.9,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 5.68
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 620.8,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 10.08
+    }
+  },
+  {
+    "file": "pptx-02-ppt-pictures-notes.pptx",
+    "detected_format": "zip",
+    "reference": {
+      "verdict": "SAFE",
+      "wall_ms": 628.9,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 6.64
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 642.0,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 10.62
+    }
+  },
+  {
+    "file": "pptx-03-ppt-chart-table.pptx",
+    "detected_format": "zip",
+    "reference": {
+      "verdict": "SAFE",
+      "wall_ms": 628.8,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 6.22
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 612.1,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "errors": {},
+      "findings": [
+        "ooxml-links:ENGINE_OFFICE_ACTIVATION_UNDETERMINED:INFO"
+      ],
+      "scanner_ms": 10.08
+    }
+  },
+  {
+    "file": "pptx-04-ppt-hyperlinks-actions.pptx",
+    "detected_format": "zip",
+    "reference": {
+      "verdict": "SAFE",
+      "wall_ms": 602.9,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 5.88
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 619.3,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 8.93
+    }
+  },
+  {
+    "file": "pptx-05-ppt-transitions-animations.pptx",
+    "detected_format": "zip",
+    "reference": {
+      "verdict": "SAFE",
+      "wall_ms": 565.1,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 6.07
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 617.3,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 8.76
+    }
+  },
+  {
+    "file": "pptx-06-ppt-embedded-excel.pptx",
+    "detected_format": "zip",
+    "reference": {
+      "verdict": "SAFE",
+      "wall_ms": 567.0,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 5.31
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 639.3,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "errors": {},
+      "findings": [
+        "ooxml-links:ENGINE_OFFICE_EMBEDDED_OBJECT_DISPLAYED:INFO"
+      ],
+      "scanner_ms": 9.0
+    }
+  },
+  {
+    "file": "pptx-07-libreoffice-roundtrip.pptx",
+    "detected_format": "zip",
+    "reference": {
+      "verdict": "SAFE",
+      "wall_ms": 606.6,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 6.84
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 630.7,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 8.4
+    }
+  },
+  {
+    "file": "xlsx-01-excel-formulas.xlsx",
+    "detected_format": "zip",
+    "reference": {
+      "verdict": "SAFE",
+      "wall_ms": 593.7,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 3.21
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 636.0,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 3.87
+    }
+  },
+  {
+    "file": "xlsx-02-excel-chart-formatting.xlsx",
+    "detected_format": "zip",
+    "reference": {
+      "verdict": "SAFE",
+      "wall_ms": 587.7,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 3.53
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 620.4,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 6.32
+    }
+  },
+  {
+    "file": "xlsx-03-excel-hyperlinks-validation.xlsx",
+    "detected_format": "zip",
+    "reference": {
+      "verdict": "SAFE",
+      "wall_ms": 615.4,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 3.37
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 621.9,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 4.77
+    }
+  },
+  {
+    "file": "xlsx-04-excel-external-workbook-link.xlsx",
+    "detected_format": "zip",
+    "reference": {
+      "verdict": "SUSPICIOUS",
+      "wall_ms": 581.7,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [
+        "office:OFFICE_EXTERNAL_NETWORK_PATH:MEDIUM",
+        "office:OFFICE_EXTERNAL_RESOURCE:INFO"
+      ],
+      "scanner_ms": 3.59
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 621.2,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "errors": {},
+      "findings": [
+        "office:OFFICE_EXTERNAL_RESOURCE:INFO",
+        "ooxml-links:ENGINE_CORRELATION:INFO",
+        "ooxml-links:ENGINE_OFFICE_ACTIVATION_UNDETERMINED:INFO",
+        "ooxml-links:ENGINE_OFFICE_LOCAL_FILE_TARGETS:INFO"
+      ],
+      "scanner_ms": 5.29
+    }
+  },
+  {
+    "file": "xlsx-05-excel-table-pivot.xlsx",
+    "detected_format": "zip",
+    "reference": {
+      "verdict": "SAFE",
+      "wall_ms": 596.1,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 3.96
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 596.9,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 4.88
+    }
+  },
+  {
+    "file": "xlsx-06-excel-picture-notes.xlsx",
+    "detected_format": "zip",
+    "reference": {
+      "verdict": "SAFE",
+      "wall_ms": 611.2,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 3.79
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 629.6,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 5.35
+    }
+  },
+  {
+    "file": "xlsx-07-libreoffice.xlsx",
+    "detected_format": "zip",
+    "reference": {
+      "verdict": "SAFE",
+      "wall_ms": 620.2,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 1.87
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 612.6,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 2.82
+    }
+  }
+]

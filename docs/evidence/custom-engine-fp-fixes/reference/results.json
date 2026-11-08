@@ -1,0 +1,4436 @@
+{
+  "environment": {
+    "timestamp_utc": "2026-11-08T05:35:04+00:00",
+    "engine_commit": "812bb7d4693dc0b059291c44af5eaa9434566a7d",
+    "working_tree_dirty": true,
+    "manifest_sha256": null,
+    "engine_version": "0.2.0",
+    "ruleset_sha256": "0be9918509e95e639f866291dc297c45c8e72812d602fb149fad3484435ae3b0",
+    "strict_isolation_configured": false,
+    "python": "3.14.3",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "packages": {
+      "yara-x": "1.21.0",
+      "oletools": "0.60.2",
+      "pypdf": "6.19.0",
+      "msoffcrypto-tool": "6.0.0",
+      "defusedxml": "0.7.1",
+      "fastapi": "0.142.4"
+    },
+    "harness_peak_rss_mib": null,
+    "worker_memory_measured": false,
+    "worker_command": [
+      "-s",
+      "-m",
+      "app.worker"
+    ],
+    "trials": 20
+  },
+  "results": [
+    {
+      "id": "1-pdf-clean",
+      "ground_truth": "BENIGN",
+      "indicator": "none (negative control)",
+      "sha256": "d5784991fd896bc6b3c21c3c384d9a376a3b4b6009b83a25e0c5d8f77939011b",
+      "size_bytes": 465,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "n/a",
+        "pdf": "SAFE",
+        "custom": "SAFE",
+        "aggregate": "SAFE"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "rules": [],
+      "findings": [],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 550.62,
+          "median_ms": 550.62,
+          "p95_ms": 570.41,
+          "max_ms": 570.803,
+          "min_ms": 536.069
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.34,
+          "median_ms": 0.34,
+          "p95_ms": 0.418,
+          "max_ms": 0.469,
+          "min_ms": 0.296
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.005,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.46,
+          "median_ms": 0.43,
+          "p95_ms": 0.523,
+          "max_ms": 0.815,
+          "min_ms": 0.399
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.08,
+          "median_ms": 0.08,
+          "p95_ms": 0.086,
+          "max_ms": 0.087,
+          "min_ms": 0.073
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 539.303,
+          "scanner_ms": {
+            "yara-x": 0.337,
+            "office": 0.003,
+            "pdf": 0.448,
+            "custom": 0.085
+          }
+        },
+        {
+          "harness_wall_ms": 536.069,
+          "scanner_ms": {
+            "yara-x": 0.351,
+            "office": 0.003,
+            "pdf": 0.428,
+            "custom": 0.08
+          }
+        },
+        {
+          "harness_wall_ms": 546.89,
+          "scanner_ms": {
+            "yara-x": 0.337,
+            "office": 0.003,
+            "pdf": 0.423,
+            "custom": 0.074
+          }
+        },
+        {
+          "harness_wall_ms": 553.609,
+          "scanner_ms": {
+            "yara-x": 0.418,
+            "office": 0.004,
+            "pdf": 0.489,
+            "custom": 0.077
+          }
+        },
+        {
+          "harness_wall_ms": 547.989,
+          "scanner_ms": {
+            "yara-x": 0.325,
+            "office": 0.003,
+            "pdf": 0.502,
+            "custom": 0.086
+          }
+        },
+        {
+          "harness_wall_ms": 541.969,
+          "scanner_ms": {
+            "yara-x": 0.321,
+            "office": 0.003,
+            "pdf": 0.416,
+            "custom": 0.076
+          }
+        },
+        {
+          "harness_wall_ms": 552.792,
+          "scanner_ms": {
+            "yara-x": 0.32,
+            "office": 0.002,
+            "pdf": 0.399,
+            "custom": 0.073
+          }
+        },
+        {
+          "harness_wall_ms": 553.854,
+          "scanner_ms": {
+            "yara-x": 0.296,
+            "office": 0.004,
+            "pdf": 0.815,
+            "custom": 0.082
+          }
+        },
+        {
+          "harness_wall_ms": 552.826,
+          "scanner_ms": {
+            "yara-x": 0.313,
+            "office": 0.003,
+            "pdf": 0.422,
+            "custom": 0.08
+          }
+        },
+        {
+          "harness_wall_ms": 553.95,
+          "scanner_ms": {
+            "yara-x": 0.399,
+            "office": 0.004,
+            "pdf": 0.442,
+            "custom": 0.078
+          }
+        },
+        {
+          "harness_wall_ms": 543.782,
+          "scanner_ms": {
+            "yara-x": 0.306,
+            "office": 0.002,
+            "pdf": 0.428,
+            "custom": 0.074
+          }
+        },
+        {
+          "harness_wall_ms": 543.423,
+          "scanner_ms": {
+            "yara-x": 0.297,
+            "office": 0.003,
+            "pdf": 0.418,
+            "custom": 0.074
+          }
+        },
+        {
+          "harness_wall_ms": 552.298,
+          "scanner_ms": {
+            "yara-x": 0.347,
+            "office": 0.003,
+            "pdf": 0.402,
+            "custom": 0.077
+          }
+        },
+        {
+          "harness_wall_ms": 554.293,
+          "scanner_ms": {
+            "yara-x": 0.334,
+            "office": 0.003,
+            "pdf": 0.523,
+            "custom": 0.086
+          }
+        },
+        {
+          "harness_wall_ms": 548.112,
+          "scanner_ms": {
+            "yara-x": 0.315,
+            "office": 0.002,
+            "pdf": 0.42,
+            "custom": 0.074
+          }
+        },
+        {
+          "harness_wall_ms": 570.41,
+          "scanner_ms": {
+            "yara-x": 0.469,
+            "office": 0.005,
+            "pdf": 0.493,
+            "custom": 0.087
+          }
+        },
+        {
+          "harness_wall_ms": 557.171,
+          "scanner_ms": {
+            "yara-x": 0.371,
+            "office": 0.002,
+            "pdf": 0.432,
+            "custom": 0.082
+          }
+        },
+        {
+          "harness_wall_ms": 570.803,
+          "scanner_ms": {
+            "yara-x": 0.341,
+            "office": 0.003,
+            "pdf": 0.423,
+            "custom": 0.076
+          }
+        },
+        {
+          "harness_wall_ms": 548.948,
+          "scanner_ms": {
+            "yara-x": 0.327,
+            "office": 0.004,
+            "pdf": 0.435,
+            "custom": 0.079
+          }
+        },
+        {
+          "harness_wall_ms": 543.897,
+          "scanner_ms": {
+            "yara-x": 0.347,
+            "office": 0.002,
+            "pdf": 0.418,
+            "custom": 0.077
+          }
+        }
+      ]
+    },
+    {
+      "id": "2-pdf-form-keystroke-js",
+      "ground_truth": "BENIGN",
+      "indicator": "form-field keystroke JavaScript (user-triggered /AA /K)",
+      "sha256": "8fb92bebda2330b5f0bb6803db1da54f63a42a8cf28a34e49c0b621612263fd5",
+      "size_bytes": 704,
+      "verdicts": {
+        "yara-x": "SUSPICIOUS",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "rules": [
+        "pdf:PDF_JAVASCRIPT:MEDIUM",
+        "yara-x:PDF_JavaScript_With_Automatic_Action:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "yara-x",
+          "rule_id": "PDF_JavaScript_With_Automatic_Action",
+          "severity": "MEDIUM",
+          "description": "PDF contains JavaScript together with an automatic action (/OpenAction or /AA) that can run it when the document is opened."
+        },
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 1 JavaScript action(s)."
+        },
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_ACROFORM",
+          "severity": "INFO",
+          "description": "PDF contains an interactive form (AcroForm)."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 554.56,
+          "median_ms": 533.23,
+          "p95_ms": 624.344,
+          "max_ms": 659.361,
+          "min_ms": 524.107
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.43,
+          "median_ms": 0.41,
+          "p95_ms": 0.541,
+          "max_ms": 0.741,
+          "min_ms": 0.37
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.59,
+          "median_ms": 0.58,
+          "p95_ms": 0.657,
+          "max_ms": 0.662,
+          "min_ms": 0.544
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.09,
+          "median_ms": 0.09,
+          "p95_ms": 0.102,
+          "max_ms": 0.11,
+          "min_ms": 0.086
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 551.277,
+          "scanner_ms": {
+            "yara-x": 0.387,
+            "office": 0.003,
+            "pdf": 0.567,
+            "custom": 0.092
+          }
+        },
+        {
+          "harness_wall_ms": 604.211,
+          "scanner_ms": {
+            "yara-x": 0.475,
+            "office": 0.004,
+            "pdf": 0.6,
+            "custom": 0.088
+          }
+        },
+        {
+          "harness_wall_ms": 659.361,
+          "scanner_ms": {
+            "yara-x": 0.436,
+            "office": 0.003,
+            "pdf": 0.626,
+            "custom": 0.096
+          }
+        },
+        {
+          "harness_wall_ms": 624.344,
+          "scanner_ms": {
+            "yara-x": 0.541,
+            "office": 0.004,
+            "pdf": 0.586,
+            "custom": 0.091
+          }
+        },
+        {
+          "harness_wall_ms": 601.119,
+          "scanner_ms": {
+            "yara-x": 0.456,
+            "office": 0.004,
+            "pdf": 0.606,
+            "custom": 0.102
+          }
+        },
+        {
+          "harness_wall_ms": 563.025,
+          "scanner_ms": {
+            "yara-x": 0.4,
+            "office": 0.003,
+            "pdf": 0.662,
+            "custom": 0.091
+          }
+        },
+        {
+          "harness_wall_ms": 596.795,
+          "scanner_ms": {
+            "yara-x": 0.741,
+            "office": 0.004,
+            "pdf": 0.586,
+            "custom": 0.093
+          }
+        },
+        {
+          "harness_wall_ms": 528.65,
+          "scanner_ms": {
+            "yara-x": 0.404,
+            "office": 0.003,
+            "pdf": 0.564,
+            "custom": 0.088
+          }
+        },
+        {
+          "harness_wall_ms": 530.292,
+          "scanner_ms": {
+            "yara-x": 0.423,
+            "office": 0.003,
+            "pdf": 0.597,
+            "custom": 0.093
+          }
+        },
+        {
+          "harness_wall_ms": 524.107,
+          "scanner_ms": {
+            "yara-x": 0.376,
+            "office": 0.003,
+            "pdf": 0.583,
+            "custom": 0.099
+          }
+        },
+        {
+          "harness_wall_ms": 533.402,
+          "scanner_ms": {
+            "yara-x": 0.37,
+            "office": 0.004,
+            "pdf": 0.547,
+            "custom": 0.088
+          }
+        },
+        {
+          "harness_wall_ms": 533.832,
+          "scanner_ms": {
+            "yara-x": 0.384,
+            "office": 0.003,
+            "pdf": 0.557,
+            "custom": 0.089
+          }
+        },
+        {
+          "harness_wall_ms": 533.061,
+          "scanner_ms": {
+            "yara-x": 0.404,
+            "office": 0.004,
+            "pdf": 0.657,
+            "custom": 0.11
+          }
+        },
+        {
+          "harness_wall_ms": 524.542,
+          "scanner_ms": {
+            "yara-x": 0.385,
+            "office": 0.003,
+            "pdf": 0.558,
+            "custom": 0.086
+          }
+        },
+        {
+          "harness_wall_ms": 528.151,
+          "scanner_ms": {
+            "yara-x": 0.403,
+            "office": 0.003,
+            "pdf": 0.558,
+            "custom": 0.088
+          }
+        },
+        {
+          "harness_wall_ms": 529.157,
+          "scanner_ms": {
+            "yara-x": 0.408,
+            "office": 0.003,
+            "pdf": 0.564,
+            "custom": 0.087
+          }
+        },
+        {
+          "harness_wall_ms": 527.196,
+          "scanner_ms": {
+            "yara-x": 0.413,
+            "office": 0.003,
+            "pdf": 0.569,
+            "custom": 0.09
+          }
+        },
+        {
+          "harness_wall_ms": 533.929,
+          "scanner_ms": {
+            "yara-x": 0.457,
+            "office": 0.004,
+            "pdf": 0.595,
+            "custom": 0.088
+          }
+        },
+        {
+          "harness_wall_ms": 531.768,
+          "scanner_ms": {
+            "yara-x": 0.412,
+            "office": 0.003,
+            "pdf": 0.576,
+            "custom": 0.097
+          }
+        },
+        {
+          "harness_wall_ms": 533.045,
+          "scanner_ms": {
+            "yara-x": 0.388,
+            "office": 0.002,
+            "pdf": 0.544,
+            "custom": 0.088
+          }
+        }
+      ]
+    },
+    {
+      "id": "2b-pdf-open-at-page-click-js",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction page destination + click-only link JavaScript",
+      "sha256": "09add801d7ce300528a624a753c79ebff0f1240905f2ffd0523c242f63572770",
+      "size_bytes": 651,
+      "verdicts": {
+        "yara-x": "SUSPICIOUS",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "rules": [
+        "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+        "pdf:PDF_JAVASCRIPT:MEDIUM",
+        "yara-x:PDF_JavaScript_With_Automatic_Action:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "yara-x",
+          "rule_id": "PDF_JavaScript_With_Automatic_Action",
+          "severity": "MEDIUM",
+          "description": "PDF contains JavaScript together with an automatic action (/OpenAction or /AA) that can run it when the document is opened."
+        },
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 2 JavaScript action(s)."
+        },
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_AUTO_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "1 JavaScript action(s) run automatically when the document or a page is opened."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 531.27,
+          "median_ms": 530.19,
+          "p95_ms": 538.261,
+          "max_ms": 542.012,
+          "min_ms": 524.868
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.4,
+          "median_ms": 0.4,
+          "p95_ms": 0.431,
+          "max_ms": 0.481,
+          "min_ms": 0.347
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.59,
+          "median_ms": 0.57,
+          "p95_ms": 0.737,
+          "max_ms": 0.741,
+          "min_ms": 0.54
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.09,
+          "median_ms": 0.08,
+          "p95_ms": 0.098,
+          "max_ms": 0.1,
+          "min_ms": 0.083
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 527.833,
+          "scanner_ms": {
+            "yara-x": 0.431,
+            "office": 0.004,
+            "pdf": 0.569,
+            "custom": 0.084
+          }
+        },
+        {
+          "harness_wall_ms": 530.08,
+          "scanner_ms": {
+            "yara-x": 0.426,
+            "office": 0.004,
+            "pdf": 0.546,
+            "custom": 0.085
+          }
+        },
+        {
+          "harness_wall_ms": 538.261,
+          "scanner_ms": {
+            "yara-x": 0.397,
+            "office": 0.003,
+            "pdf": 0.689,
+            "custom": 0.097
+          }
+        },
+        {
+          "harness_wall_ms": 531.086,
+          "scanner_ms": {
+            "yara-x": 0.431,
+            "office": 0.003,
+            "pdf": 0.583,
+            "custom": 0.087
+          }
+        },
+        {
+          "harness_wall_ms": 534.352,
+          "scanner_ms": {
+            "yara-x": 0.378,
+            "office": 0.002,
+            "pdf": 0.573,
+            "custom": 0.092
+          }
+        },
+        {
+          "harness_wall_ms": 538.251,
+          "scanner_ms": {
+            "yara-x": 0.403,
+            "office": 0.002,
+            "pdf": 0.579,
+            "custom": 0.089
+          }
+        },
+        {
+          "harness_wall_ms": 533.229,
+          "scanner_ms": {
+            "yara-x": 0.374,
+            "office": 0.002,
+            "pdf": 0.547,
+            "custom": 0.084
+          }
+        },
+        {
+          "harness_wall_ms": 530.877,
+          "scanner_ms": {
+            "yara-x": 0.411,
+            "office": 0.003,
+            "pdf": 0.741,
+            "custom": 0.1
+          }
+        },
+        {
+          "harness_wall_ms": 524.868,
+          "scanner_ms": {
+            "yara-x": 0.387,
+            "office": 0.003,
+            "pdf": 0.546,
+            "custom": 0.084
+          }
+        },
+        {
+          "harness_wall_ms": 534.231,
+          "scanner_ms": {
+            "yara-x": 0.416,
+            "office": 0.004,
+            "pdf": 0.553,
+            "custom": 0.084
+          }
+        },
+        {
+          "harness_wall_ms": 525.85,
+          "scanner_ms": {
+            "yara-x": 0.41,
+            "office": 0.003,
+            "pdf": 0.549,
+            "custom": 0.084
+          }
+        },
+        {
+          "harness_wall_ms": 528.46,
+          "scanner_ms": {
+            "yara-x": 0.481,
+            "office": 0.003,
+            "pdf": 0.565,
+            "custom": 0.083
+          }
+        },
+        {
+          "harness_wall_ms": 530.119,
+          "scanner_ms": {
+            "yara-x": 0.386,
+            "office": 0.003,
+            "pdf": 0.737,
+            "custom": 0.098
+          }
+        },
+        {
+          "harness_wall_ms": 529.838,
+          "scanner_ms": {
+            "yara-x": 0.395,
+            "office": 0.003,
+            "pdf": 0.579,
+            "custom": 0.084
+          }
+        },
+        {
+          "harness_wall_ms": 528.234,
+          "scanner_ms": {
+            "yara-x": 0.347,
+            "office": 0.002,
+            "pdf": 0.54,
+            "custom": 0.083
+          }
+        },
+        {
+          "harness_wall_ms": 530.728,
+          "scanner_ms": {
+            "yara-x": 0.378,
+            "office": 0.003,
+            "pdf": 0.571,
+            "custom": 0.084
+          }
+        },
+        {
+          "harness_wall_ms": 527.08,
+          "scanner_ms": {
+            "yara-x": 0.382,
+            "office": 0.003,
+            "pdf": 0.551,
+            "custom": 0.084
+          }
+        },
+        {
+          "harness_wall_ms": 530.269,
+          "scanner_ms": {
+            "yara-x": 0.421,
+            "office": 0.003,
+            "pdf": 0.574,
+            "custom": 0.085
+          }
+        },
+        {
+          "harness_wall_ms": 542.012,
+          "scanner_ms": {
+            "yara-x": 0.395,
+            "office": 0.003,
+            "pdf": 0.589,
+            "custom": 0.093
+          }
+        },
+        {
+          "harness_wall_ms": 529.762,
+          "scanner_ms": {
+            "yara-x": 0.364,
+            "office": 0.002,
+            "pdf": 0.559,
+            "custom": 0.085
+          }
+        }
+      ]
+    },
+    {
+      "id": "2c-pdf-open-at-page-page-open-js",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction page destination + that page's own open trigger /AA /O",
+      "sha256": "830dd24170f6ecf8eacb6136d7d9c8dba6ebef2fc90b804eedc46aae33b67599",
+      "size_bytes": 597,
+      "verdicts": {
+        "yara-x": "SUSPICIOUS",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "rules": [
+        "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+        "pdf:PDF_JAVASCRIPT:MEDIUM",
+        "yara-x:PDF_JavaScript_With_Automatic_Action:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "yara-x",
+          "rule_id": "PDF_JavaScript_With_Automatic_Action",
+          "severity": "MEDIUM",
+          "description": "PDF contains JavaScript together with an automatic action (/OpenAction or /AA) that can run it when the document is opened."
+        },
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 1 JavaScript action(s)."
+        },
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_AUTO_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "1 JavaScript action(s) run automatically when the document or a page is opened."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 530.66,
+          "median_ms": 529.05,
+          "p95_ms": 540.277,
+          "max_ms": 551.621,
+          "min_ms": 523.847
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.41,
+          "median_ms": 0.4,
+          "p95_ms": 0.461,
+          "max_ms": 0.469,
+          "min_ms": 0.358
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.005,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.54,
+          "median_ms": 0.54,
+          "p95_ms": 0.568,
+          "max_ms": 0.685,
+          "min_ms": 0.506
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.09,
+          "median_ms": 0.09,
+          "p95_ms": 0.102,
+          "max_ms": 0.104,
+          "min_ms": 0.084
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 540.277,
+          "scanner_ms": {
+            "yara-x": 0.429,
+            "office": 0.004,
+            "pdf": 0.536,
+            "custom": 0.089
+          }
+        },
+        {
+          "harness_wall_ms": 531.187,
+          "scanner_ms": {
+            "yara-x": 0.442,
+            "office": 0.004,
+            "pdf": 0.524,
+            "custom": 0.093
+          }
+        },
+        {
+          "harness_wall_ms": 529.246,
+          "scanner_ms": {
+            "yara-x": 0.398,
+            "office": 0.003,
+            "pdf": 0.54,
+            "custom": 0.084
+          }
+        },
+        {
+          "harness_wall_ms": 525.102,
+          "scanner_ms": {
+            "yara-x": 0.391,
+            "office": 0.003,
+            "pdf": 0.538,
+            "custom": 0.093
+          }
+        },
+        {
+          "harness_wall_ms": 539.293,
+          "scanner_ms": {
+            "yara-x": 0.469,
+            "office": 0.004,
+            "pdf": 0.553,
+            "custom": 0.09
+          }
+        },
+        {
+          "harness_wall_ms": 528.526,
+          "scanner_ms": {
+            "yara-x": 0.432,
+            "office": 0.004,
+            "pdf": 0.533,
+            "custom": 0.085
+          }
+        },
+        {
+          "harness_wall_ms": 523.847,
+          "scanner_ms": {
+            "yara-x": 0.409,
+            "office": 0.002,
+            "pdf": 0.515,
+            "custom": 0.095
+          }
+        },
+        {
+          "harness_wall_ms": 525.995,
+          "scanner_ms": {
+            "yara-x": 0.383,
+            "office": 0.003,
+            "pdf": 0.52,
+            "custom": 0.087
+          }
+        },
+        {
+          "harness_wall_ms": 533.018,
+          "scanner_ms": {
+            "yara-x": 0.396,
+            "office": 0.003,
+            "pdf": 0.52,
+            "custom": 0.085
+          }
+        },
+        {
+          "harness_wall_ms": 529.905,
+          "scanner_ms": {
+            "yara-x": 0.408,
+            "office": 0.003,
+            "pdf": 0.506,
+            "custom": 0.084
+          }
+        },
+        {
+          "harness_wall_ms": 551.621,
+          "scanner_ms": {
+            "yara-x": 0.384,
+            "office": 0.003,
+            "pdf": 0.53,
+            "custom": 0.096
+          }
+        },
+        {
+          "harness_wall_ms": 526.88,
+          "scanner_ms": {
+            "yara-x": 0.358,
+            "office": 0.002,
+            "pdf": 0.544,
+            "custom": 0.093
+          }
+        },
+        {
+          "harness_wall_ms": 526.438,
+          "scanner_ms": {
+            "yara-x": 0.368,
+            "office": 0.002,
+            "pdf": 0.529,
+            "custom": 0.087
+          }
+        },
+        {
+          "harness_wall_ms": 531.294,
+          "scanner_ms": {
+            "yara-x": 0.364,
+            "office": 0.002,
+            "pdf": 0.561,
+            "custom": 0.086
+          }
+        },
+        {
+          "harness_wall_ms": 525.235,
+          "scanner_ms": {
+            "yara-x": 0.384,
+            "office": 0.002,
+            "pdf": 0.544,
+            "custom": 0.104
+          }
+        },
+        {
+          "harness_wall_ms": 534.473,
+          "scanner_ms": {
+            "yara-x": 0.368,
+            "office": 0.003,
+            "pdf": 0.514,
+            "custom": 0.086
+          }
+        },
+        {
+          "harness_wall_ms": 524.936,
+          "scanner_ms": {
+            "yara-x": 0.458,
+            "office": 0.005,
+            "pdf": 0.568,
+            "custom": 0.088
+          }
+        },
+        {
+          "harness_wall_ms": 528.845,
+          "scanner_ms": {
+            "yara-x": 0.401,
+            "office": 0.003,
+            "pdf": 0.536,
+            "custom": 0.085
+          }
+        },
+        {
+          "harness_wall_ms": 531.847,
+          "scanner_ms": {
+            "yara-x": 0.461,
+            "office": 0.004,
+            "pdf": 0.685,
+            "custom": 0.102
+          }
+        },
+        {
+          "harness_wall_ms": 525.174,
+          "scanner_ms": {
+            "yara-x": 0.404,
+            "office": 0.004,
+            "pdf": 0.553,
+            "custom": 0.088
+          }
+        }
+      ]
+    },
+    {
+      "id": "3-pdf-escaped-openaction-js",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction JavaScript written /J#61vaScript /J#53",
+      "sha256": "a1d1340bde10797020a3bf5fbf34f4d3a74dc5327b902c55268a0245b49e2a3c",
+      "size_bytes": 578,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SUSPICIOUS",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "rules": [
+        "custom:CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME:MEDIUM",
+        "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+        "pdf:PDF_JAVASCRIPT:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 1 JavaScript action(s)."
+        },
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_AUTO_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "1 JavaScript action(s) run automatically when the document or a page is opened."
+        },
+        {
+          "scanner": "custom",
+          "rule_id": "CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME",
+          "severity": "MEDIUM",
+          "description": "PDF writes 2 active-content name(s) with unnecessary #-escapes, which hides them from plain-text inspection without changing their meaning. Evidence: '/J#61vaScript' decodes to /JavaScript (1x); '/J#53' decodes to /JS (1x). Location: object 5 0. This is a structural indicator, not proof that the file is malicious."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 539.2,
+          "median_ms": 532.12,
+          "p95_ms": 590.111,
+          "max_ms": 600.537,
+          "min_ms": 524.848
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.33,
+          "median_ms": 0.33,
+          "p95_ms": 0.386,
+          "max_ms": 0.396,
+          "min_ms": 0.291
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.005,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.54,
+          "median_ms": 0.51,
+          "p95_ms": 0.656,
+          "max_ms": 0.705,
+          "min_ms": 0.486
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.18,
+          "median_ms": 0.18,
+          "p95_ms": 0.224,
+          "max_ms": 0.242,
+          "min_ms": 0.166
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 556.555,
+          "scanner_ms": {
+            "yara-x": 0.386,
+            "office": 0.005,
+            "pdf": 0.573,
+            "custom": 0.187
+          }
+        },
+        {
+          "harness_wall_ms": 537.34,
+          "scanner_ms": {
+            "yara-x": 0.311,
+            "office": 0.003,
+            "pdf": 0.705,
+            "custom": 0.224
+          }
+        },
+        {
+          "harness_wall_ms": 524.848,
+          "scanner_ms": {
+            "yara-x": 0.309,
+            "office": 0.003,
+            "pdf": 0.486,
+            "custom": 0.166
+          }
+        },
+        {
+          "harness_wall_ms": 538.669,
+          "scanner_ms": {
+            "yara-x": 0.317,
+            "office": 0.003,
+            "pdf": 0.543,
+            "custom": 0.175
+          }
+        },
+        {
+          "harness_wall_ms": 532.132,
+          "scanner_ms": {
+            "yara-x": 0.351,
+            "office": 0.004,
+            "pdf": 0.505,
+            "custom": 0.242
+          }
+        },
+        {
+          "harness_wall_ms": 533.592,
+          "scanner_ms": {
+            "yara-x": 0.357,
+            "office": 0.004,
+            "pdf": 0.538,
+            "custom": 0.182
+          }
+        },
+        {
+          "harness_wall_ms": 527.802,
+          "scanner_ms": {
+            "yara-x": 0.309,
+            "office": 0.003,
+            "pdf": 0.514,
+            "custom": 0.167
+          }
+        },
+        {
+          "harness_wall_ms": 590.111,
+          "scanner_ms": {
+            "yara-x": 0.334,
+            "office": 0.003,
+            "pdf": 0.608,
+            "custom": 0.203
+          }
+        },
+        {
+          "harness_wall_ms": 600.537,
+          "scanner_ms": {
+            "yara-x": 0.337,
+            "office": 0.003,
+            "pdf": 0.514,
+            "custom": 0.175
+          }
+        },
+        {
+          "harness_wall_ms": 544.953,
+          "scanner_ms": {
+            "yara-x": 0.396,
+            "office": 0.003,
+            "pdf": 0.501,
+            "custom": 0.176
+          }
+        },
+        {
+          "harness_wall_ms": 532.102,
+          "scanner_ms": {
+            "yara-x": 0.347,
+            "office": 0.003,
+            "pdf": 0.656,
+            "custom": 0.176
+          }
+        },
+        {
+          "harness_wall_ms": 527.569,
+          "scanner_ms": {
+            "yara-x": 0.345,
+            "office": 0.004,
+            "pdf": 0.507,
+            "custom": 0.177
+          }
+        },
+        {
+          "harness_wall_ms": 530.331,
+          "scanner_ms": {
+            "yara-x": 0.318,
+            "office": 0.002,
+            "pdf": 0.492,
+            "custom": 0.173
+          }
+        },
+        {
+          "harness_wall_ms": 528.821,
+          "scanner_ms": {
+            "yara-x": 0.302,
+            "office": 0.003,
+            "pdf": 0.501,
+            "custom": 0.166
+          }
+        },
+        {
+          "harness_wall_ms": 525.391,
+          "scanner_ms": {
+            "yara-x": 0.324,
+            "office": 0.003,
+            "pdf": 0.497,
+            "custom": 0.179
+          }
+        },
+        {
+          "harness_wall_ms": 534.556,
+          "scanner_ms": {
+            "yara-x": 0.291,
+            "office": 0.003,
+            "pdf": 0.504,
+            "custom": 0.166
+          }
+        },
+        {
+          "harness_wall_ms": 528.467,
+          "scanner_ms": {
+            "yara-x": 0.331,
+            "office": 0.003,
+            "pdf": 0.549,
+            "custom": 0.176
+          }
+        },
+        {
+          "harness_wall_ms": 526.567,
+          "scanner_ms": {
+            "yara-x": 0.341,
+            "office": 0.004,
+            "pdf": 0.527,
+            "custom": 0.191
+          }
+        },
+        {
+          "harness_wall_ms": 528.422,
+          "scanner_ms": {
+            "yara-x": 0.364,
+            "office": 0.003,
+            "pdf": 0.493,
+            "custom": 0.221
+          }
+        },
+        {
+          "harness_wall_ms": 535.284,
+          "scanner_ms": {
+            "yara-x": 0.305,
+            "office": 0.003,
+            "pdf": 0.509,
+            "custom": 0.169
+          }
+        }
+      ]
+    },
+    {
+      "id": "4-pdf-objstm-escaped-js",
+      "ground_truth": "BENIGN",
+      "indicator": "the same action inside a FlateDecode object stream",
+      "sha256": "b256fc5452921634ec592f87184478ad91ccb9cd4167923cef881dbc0ca05cdd",
+      "size_bytes": 657,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SUSPICIOUS",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "rules": [
+        "custom:CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME:MEDIUM",
+        "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+        "pdf:PDF_JAVASCRIPT:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 1 JavaScript action(s)."
+        },
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_AUTO_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "1 JavaScript action(s) run automatically when the document or a page is opened."
+        },
+        {
+          "scanner": "custom",
+          "rule_id": "CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME",
+          "severity": "MEDIUM",
+          "description": "PDF writes 2 active-content name(s) with unnecessary #-escapes, which hides them from plain-text inspection without changing their meaning. Evidence: '/J#61vaScript' decodes to /JavaScript (1x); '/J#53' decodes to /JS (1x). Location: object stream of object 6 0. This is a structural indicator, not proof that the file is malicious."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 532.94,
+          "median_ms": 529.96,
+          "p95_ms": 548.86,
+          "max_ms": 549.28,
+          "min_ms": 525.469
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.33,
+          "median_ms": 0.32,
+          "p95_ms": 0.359,
+          "max_ms": 0.363,
+          "min_ms": 0.301
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.69,
+          "median_ms": 0.67,
+          "p95_ms": 0.712,
+          "max_ms": 0.945,
+          "min_ms": 0.655
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.2,
+          "median_ms": 0.2,
+          "p95_ms": 0.219,
+          "max_ms": 0.22,
+          "min_ms": 0.193
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 530.777,
+          "scanner_ms": {
+            "yara-x": 0.363,
+            "office": 0.003,
+            "pdf": 0.68,
+            "custom": 0.196
+          }
+        },
+        {
+          "harness_wall_ms": 528.876,
+          "scanner_ms": {
+            "yara-x": 0.301,
+            "office": 0.003,
+            "pdf": 0.683,
+            "custom": 0.198
+          }
+        },
+        {
+          "harness_wall_ms": 542.688,
+          "scanner_ms": {
+            "yara-x": 0.352,
+            "office": 0.002,
+            "pdf": 0.667,
+            "custom": 0.193
+          }
+        },
+        {
+          "harness_wall_ms": 549.28,
+          "scanner_ms": {
+            "yara-x": 0.358,
+            "office": 0.003,
+            "pdf": 0.663,
+            "custom": 0.209
+          }
+        },
+        {
+          "harness_wall_ms": 528.612,
+          "scanner_ms": {
+            "yara-x": 0.324,
+            "office": 0.003,
+            "pdf": 0.712,
+            "custom": 0.219
+          }
+        },
+        {
+          "harness_wall_ms": 531.173,
+          "scanner_ms": {
+            "yara-x": 0.336,
+            "office": 0.003,
+            "pdf": 0.66,
+            "custom": 0.202
+          }
+        },
+        {
+          "harness_wall_ms": 526.84,
+          "scanner_ms": {
+            "yara-x": 0.316,
+            "office": 0.003,
+            "pdf": 0.667,
+            "custom": 0.22
+          }
+        },
+        {
+          "harness_wall_ms": 528.712,
+          "scanner_ms": {
+            "yara-x": 0.316,
+            "office": 0.003,
+            "pdf": 0.672,
+            "custom": 0.2
+          }
+        },
+        {
+          "harness_wall_ms": 533.543,
+          "scanner_ms": {
+            "yara-x": 0.326,
+            "office": 0.003,
+            "pdf": 0.658,
+            "custom": 0.196
+          }
+        },
+        {
+          "harness_wall_ms": 548.86,
+          "scanner_ms": {
+            "yara-x": 0.314,
+            "office": 0.003,
+            "pdf": 0.655,
+            "custom": 0.203
+          }
+        },
+        {
+          "harness_wall_ms": 529.603,
+          "scanner_ms": {
+            "yara-x": 0.337,
+            "office": 0.003,
+            "pdf": 0.664,
+            "custom": 0.201
+          }
+        },
+        {
+          "harness_wall_ms": 528.994,
+          "scanner_ms": {
+            "yara-x": 0.319,
+            "office": 0.003,
+            "pdf": 0.674,
+            "custom": 0.205
+          }
+        },
+        {
+          "harness_wall_ms": 528.667,
+          "scanner_ms": {
+            "yara-x": 0.32,
+            "office": 0.003,
+            "pdf": 0.664,
+            "custom": 0.198
+          }
+        },
+        {
+          "harness_wall_ms": 537.296,
+          "scanner_ms": {
+            "yara-x": 0.317,
+            "office": 0.003,
+            "pdf": 0.673,
+            "custom": 0.205
+          }
+        },
+        {
+          "harness_wall_ms": 525.469,
+          "scanner_ms": {
+            "yara-x": 0.314,
+            "office": 0.003,
+            "pdf": 0.945,
+            "custom": 0.211
+          }
+        },
+        {
+          "harness_wall_ms": 528.326,
+          "scanner_ms": {
+            "yara-x": 0.319,
+            "office": 0.003,
+            "pdf": 0.699,
+            "custom": 0.198
+          }
+        },
+        {
+          "harness_wall_ms": 528.565,
+          "scanner_ms": {
+            "yara-x": 0.326,
+            "office": 0.002,
+            "pdf": 0.663,
+            "custom": 0.216
+          }
+        },
+        {
+          "harness_wall_ms": 533.932,
+          "scanner_ms": {
+            "yara-x": 0.359,
+            "office": 0.002,
+            "pdf": 0.659,
+            "custom": 0.205
+          }
+        },
+        {
+          "harness_wall_ms": 538.196,
+          "scanner_ms": {
+            "yara-x": 0.353,
+            "office": 0.003,
+            "pdf": 0.661,
+            "custom": 0.199
+          }
+        },
+        {
+          "harness_wall_ms": 530.321,
+          "scanner_ms": {
+            "yara-x": 0.309,
+            "office": 0.003,
+            "pdf": 0.685,
+            "custom": 0.216
+          }
+        }
+      ]
+    },
+    {
+      "id": "5a-pdf-auto-js-unrelated-attachment",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction JavaScript + a text attachment it never references",
+      "sha256": "48ac8dc02c326363f7d91d947c4fbb2b8b077d1a7ec7c310c801f1fadcc382c8",
+      "size_bytes": 866,
+      "verdicts": {
+        "yara-x": "SUSPICIOUS",
+        "office": "n/a",
+        "pdf": "MALICIOUS",
+        "custom": "SAFE",
+        "aggregate": "MALICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "rules": [
+        "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+        "pdf:PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD:HIGH",
+        "pdf:PDF_EMBEDDED_FILE:LOW",
+        "pdf:PDF_JAVASCRIPT:MEDIUM",
+        "yara-x:PDF_Embedded_File:LOW",
+        "yara-x:PDF_JavaScript_With_Automatic_Action:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "yara-x",
+          "rule_id": "PDF_JavaScript_With_Automatic_Action",
+          "severity": "MEDIUM",
+          "description": "PDF contains JavaScript together with an automatic action (/OpenAction or /AA) that can run it when the document is opened."
+        },
+        {
+          "scanner": "yara-x",
+          "rule_id": "PDF_Embedded_File",
+          "severity": "LOW",
+          "description": "PDF carries an embedded file attachment."
+        },
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 1 JavaScript action(s)."
+        },
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_AUTO_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "1 JavaScript action(s) run automatically when the document or a page is opened."
+        },
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_EMBEDDED_FILE",
+          "severity": "LOW",
+          "description": "PDF carries 1 embedded file(s) (e.g. 'notes.txt')."
+        },
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD",
+          "severity": "HIGH",
+          "description": "JavaScript runs automatically in a PDF that also carries an embedded file or launch action, a common way to drop and open a payload."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 531.89,
+          "median_ms": 528.83,
+          "p95_ms": 544.767,
+          "max_ms": 561.221,
+          "min_ms": 522.484
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.42,
+          "median_ms": 0.41,
+          "p95_ms": 0.49,
+          "max_ms": 0.49,
+          "min_ms": 0.373
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.68,
+          "median_ms": 0.66,
+          "p95_ms": 0.717,
+          "max_ms": 0.85,
+          "min_ms": 0.633
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.13,
+          "median_ms": 0.13,
+          "p95_ms": 0.139,
+          "max_ms": 0.139,
+          "min_ms": 0.122
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 526.191,
+          "scanner_ms": {
+            "yara-x": 0.458,
+            "office": 0.003,
+            "pdf": 0.663,
+            "custom": 0.127
+          }
+        },
+        {
+          "harness_wall_ms": 544.767,
+          "scanner_ms": {
+            "yara-x": 0.49,
+            "office": 0.003,
+            "pdf": 0.717,
+            "custom": 0.123
+          }
+        },
+        {
+          "harness_wall_ms": 523.524,
+          "scanner_ms": {
+            "yara-x": 0.385,
+            "office": 0.003,
+            "pdf": 0.711,
+            "custom": 0.124
+          }
+        },
+        {
+          "harness_wall_ms": 528.913,
+          "scanner_ms": {
+            "yara-x": 0.373,
+            "office": 0.003,
+            "pdf": 0.647,
+            "custom": 0.126
+          }
+        },
+        {
+          "harness_wall_ms": 525.342,
+          "scanner_ms": {
+            "yara-x": 0.399,
+            "office": 0.003,
+            "pdf": 0.669,
+            "custom": 0.126
+          }
+        },
+        {
+          "harness_wall_ms": 537.409,
+          "scanner_ms": {
+            "yara-x": 0.373,
+            "office": 0.002,
+            "pdf": 0.662,
+            "custom": 0.139
+          }
+        },
+        {
+          "harness_wall_ms": 536.627,
+          "scanner_ms": {
+            "yara-x": 0.414,
+            "office": 0.003,
+            "pdf": 0.686,
+            "custom": 0.124
+          }
+        },
+        {
+          "harness_wall_ms": 526.365,
+          "scanner_ms": {
+            "yara-x": 0.401,
+            "office": 0.003,
+            "pdf": 0.66,
+            "custom": 0.125
+          }
+        },
+        {
+          "harness_wall_ms": 529.786,
+          "scanner_ms": {
+            "yara-x": 0.395,
+            "office": 0.003,
+            "pdf": 0.656,
+            "custom": 0.124
+          }
+        },
+        {
+          "harness_wall_ms": 532.104,
+          "scanner_ms": {
+            "yara-x": 0.424,
+            "office": 0.003,
+            "pdf": 0.705,
+            "custom": 0.129
+          }
+        },
+        {
+          "harness_wall_ms": 522.484,
+          "scanner_ms": {
+            "yara-x": 0.438,
+            "office": 0.002,
+            "pdf": 0.643,
+            "custom": 0.13
+          }
+        },
+        {
+          "harness_wall_ms": 527.32,
+          "scanner_ms": {
+            "yara-x": 0.449,
+            "office": 0.003,
+            "pdf": 0.648,
+            "custom": 0.123
+          }
+        },
+        {
+          "harness_wall_ms": 528.748,
+          "scanner_ms": {
+            "yara-x": 0.4,
+            "office": 0.004,
+            "pdf": 0.663,
+            "custom": 0.122
+          }
+        },
+        {
+          "harness_wall_ms": 524.875,
+          "scanner_ms": {
+            "yara-x": 0.39,
+            "office": 0.003,
+            "pdf": 0.633,
+            "custom": 0.122
+          }
+        },
+        {
+          "harness_wall_ms": 526.763,
+          "scanner_ms": {
+            "yara-x": 0.439,
+            "office": 0.003,
+            "pdf": 0.85,
+            "custom": 0.139
+          }
+        },
+        {
+          "harness_wall_ms": 527.92,
+          "scanner_ms": {
+            "yara-x": 0.49,
+            "office": 0.004,
+            "pdf": 0.704,
+            "custom": 0.13
+          }
+        },
+        {
+          "harness_wall_ms": 533.632,
+          "scanner_ms": {
+            "yara-x": 0.416,
+            "office": 0.004,
+            "pdf": 0.657,
+            "custom": 0.131
+          }
+        },
+        {
+          "harness_wall_ms": 561.221,
+          "scanner_ms": {
+            "yara-x": 0.403,
+            "office": 0.003,
+            "pdf": 0.649,
+            "custom": 0.124
+          }
+        },
+        {
+          "harness_wall_ms": 539.749,
+          "scanner_ms": {
+            "yara-x": 0.437,
+            "office": 0.003,
+            "pdf": 0.665,
+            "custom": 0.126
+          }
+        },
+        {
+          "harness_wall_ms": 534.047,
+          "scanner_ms": {
+            "yara-x": 0.464,
+            "office": 0.003,
+            "pdf": 0.706,
+            "custom": 0.123
+          }
+        }
+      ]
+    },
+    {
+      "id": "5b-pdf-auto-js-exports-attachment",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction JavaScript that exports the attachment (nLaunch 0)",
+      "sha256": "f55c21380da9580df93ba96674baa1f865aaed4d6675d3a16a5d463d3d69dec4",
+      "size_bytes": 903,
+      "verdicts": {
+        "yara-x": "SUSPICIOUS",
+        "office": "n/a",
+        "pdf": "MALICIOUS",
+        "custom": "SAFE",
+        "aggregate": "MALICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "rules": [
+        "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+        "pdf:PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD:HIGH",
+        "pdf:PDF_EMBEDDED_FILE:LOW",
+        "pdf:PDF_JAVASCRIPT:MEDIUM",
+        "yara-x:PDF_Embedded_File:LOW",
+        "yara-x:PDF_JavaScript_With_Automatic_Action:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "yara-x",
+          "rule_id": "PDF_JavaScript_With_Automatic_Action",
+          "severity": "MEDIUM",
+          "description": "PDF contains JavaScript together with an automatic action (/OpenAction or /AA) that can run it when the document is opened."
+        },
+        {
+          "scanner": "yara-x",
+          "rule_id": "PDF_Embedded_File",
+          "severity": "LOW",
+          "description": "PDF carries an embedded file attachment."
+        },
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 1 JavaScript action(s)."
+        },
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_AUTO_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "1 JavaScript action(s) run automatically when the document or a page is opened."
+        },
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_EMBEDDED_FILE",
+          "severity": "LOW",
+          "description": "PDF carries 1 embedded file(s) (e.g. 'notes.txt')."
+        },
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD",
+          "severity": "HIGH",
+          "description": "JavaScript runs automatically in a PDF that also carries an embedded file or launch action, a common way to drop and open a payload."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 529.73,
+          "median_ms": 527.1,
+          "p95_ms": 543.836,
+          "max_ms": 552.057,
+          "min_ms": 521.843
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.42,
+          "median_ms": 0.41,
+          "p95_ms": 0.476,
+          "max_ms": 0.602,
+          "min_ms": 0.368
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.005,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.72,
+          "median_ms": 0.68,
+          "p95_ms": 0.909,
+          "max_ms": 0.944,
+          "min_ms": 0.651
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.13,
+          "median_ms": 0.13,
+          "p95_ms": 0.149,
+          "max_ms": 0.167,
+          "min_ms": 0.119
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 526.71,
+          "scanner_ms": {
+            "yara-x": 0.383,
+            "office": 0.002,
+            "pdf": 0.661,
+            "custom": 0.141
+          }
+        },
+        {
+          "harness_wall_ms": 530.871,
+          "scanner_ms": {
+            "yara-x": 0.451,
+            "office": 0.003,
+            "pdf": 0.665,
+            "custom": 0.125
+          }
+        },
+        {
+          "harness_wall_ms": 523.801,
+          "scanner_ms": {
+            "yara-x": 0.476,
+            "office": 0.003,
+            "pdf": 0.661,
+            "custom": 0.127
+          }
+        },
+        {
+          "harness_wall_ms": 531.609,
+          "scanner_ms": {
+            "yara-x": 0.441,
+            "office": 0.003,
+            "pdf": 0.909,
+            "custom": 0.137
+          }
+        },
+        {
+          "harness_wall_ms": 529.976,
+          "scanner_ms": {
+            "yara-x": 0.436,
+            "office": 0.003,
+            "pdf": 0.77,
+            "custom": 0.149
+          }
+        },
+        {
+          "harness_wall_ms": 533.953,
+          "scanner_ms": {
+            "yara-x": 0.368,
+            "office": 0.002,
+            "pdf": 0.663,
+            "custom": 0.123
+          }
+        },
+        {
+          "harness_wall_ms": 524.614,
+          "scanner_ms": {
+            "yara-x": 0.373,
+            "office": 0.002,
+            "pdf": 0.7,
+            "custom": 0.167
+          }
+        },
+        {
+          "harness_wall_ms": 526.885,
+          "scanner_ms": {
+            "yara-x": 0.415,
+            "office": 0.003,
+            "pdf": 0.675,
+            "custom": 0.128
+          }
+        },
+        {
+          "harness_wall_ms": 552.057,
+          "scanner_ms": {
+            "yara-x": 0.411,
+            "office": 0.003,
+            "pdf": 0.651,
+            "custom": 0.137
+          }
+        },
+        {
+          "harness_wall_ms": 525.744,
+          "scanner_ms": {
+            "yara-x": 0.446,
+            "office": 0.003,
+            "pdf": 0.811,
+            "custom": 0.13
+          }
+        },
+        {
+          "harness_wall_ms": 527.304,
+          "scanner_ms": {
+            "yara-x": 0.453,
+            "office": 0.004,
+            "pdf": 0.781,
+            "custom": 0.128
+          }
+        },
+        {
+          "harness_wall_ms": 530.594,
+          "scanner_ms": {
+            "yara-x": 0.406,
+            "office": 0.003,
+            "pdf": 0.662,
+            "custom": 0.123
+          }
+        },
+        {
+          "harness_wall_ms": 531.75,
+          "scanner_ms": {
+            "yara-x": 0.377,
+            "office": 0.003,
+            "pdf": 0.676,
+            "custom": 0.119
+          }
+        },
+        {
+          "harness_wall_ms": 526.877,
+          "scanner_ms": {
+            "yara-x": 0.602,
+            "office": 0.005,
+            "pdf": 0.944,
+            "custom": 0.146
+          }
+        },
+        {
+          "harness_wall_ms": 527.288,
+          "scanner_ms": {
+            "yara-x": 0.404,
+            "office": 0.002,
+            "pdf": 0.799,
+            "custom": 0.146
+          }
+        },
+        {
+          "harness_wall_ms": 525.264,
+          "scanner_ms": {
+            "yara-x": 0.403,
+            "office": 0.003,
+            "pdf": 0.682,
+            "custom": 0.12
+          }
+        },
+        {
+          "harness_wall_ms": 526.906,
+          "scanner_ms": {
+            "yara-x": 0.398,
+            "office": 0.003,
+            "pdf": 0.694,
+            "custom": 0.122
+          }
+        },
+        {
+          "harness_wall_ms": 526.629,
+          "scanner_ms": {
+            "yara-x": 0.424,
+            "office": 0.003,
+            "pdf": 0.696,
+            "custom": 0.123
+          }
+        },
+        {
+          "harness_wall_ms": 521.843,
+          "scanner_ms": {
+            "yara-x": 0.401,
+            "office": 0.003,
+            "pdf": 0.674,
+            "custom": 0.129
+          }
+        },
+        {
+          "harness_wall_ms": 543.836,
+          "scanner_ms": {
+            "yara-x": 0.418,
+            "office": 0.003,
+            "pdf": 0.68,
+            "custom": 0.136
+          }
+        }
+      ]
+    },
+    {
+      "id": "6a-docx-hyperlink",
+      "ground_truth": "BENIGN",
+      "indicator": "ordinary external hyperlink (negative control)",
+      "sha256": "7a0db7d17fdf8541df4177df056be5629cd37e37b262238532653068a1913ff0",
+      "size_bytes": 1713,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SAFE",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "aggregate": "SAFE"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "rules": [],
+      "findings": [],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 529.27,
+          "median_ms": 528.64,
+          "p95_ms": 537.82,
+          "max_ms": 539.919,
+          "min_ms": 522.649
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.33,
+          "median_ms": 0.31,
+          "p95_ms": 0.408,
+          "max_ms": 0.427,
+          "min_ms": 0.284
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 1.7,
+          "median_ms": 1.68,
+          "p95_ms": 1.876,
+          "max_ms": 1.893,
+          "min_ms": 1.58
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.003
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.57,
+          "median_ms": 0.56,
+          "p95_ms": 0.636,
+          "max_ms": 0.789,
+          "min_ms": 0.527
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 528.59,
+          "scanner_ms": {
+            "yara-x": 0.291,
+            "office": 1.795,
+            "pdf": 0.003,
+            "custom": 0.527
+          }
+        },
+        {
+          "harness_wall_ms": 530.036,
+          "scanner_ms": {
+            "yara-x": 0.315,
+            "office": 1.652,
+            "pdf": 0.003,
+            "custom": 0.56
+          }
+        },
+        {
+          "harness_wall_ms": 528.697,
+          "scanner_ms": {
+            "yara-x": 0.353,
+            "office": 1.815,
+            "pdf": 0.004,
+            "custom": 0.561
+          }
+        },
+        {
+          "harness_wall_ms": 526.684,
+          "scanner_ms": {
+            "yara-x": 0.327,
+            "office": 1.678,
+            "pdf": 0.003,
+            "custom": 0.541
+          }
+        },
+        {
+          "harness_wall_ms": 528.195,
+          "scanner_ms": {
+            "yara-x": 0.427,
+            "office": 1.773,
+            "pdf": 0.003,
+            "custom": 0.541
+          }
+        },
+        {
+          "harness_wall_ms": 529.476,
+          "scanner_ms": {
+            "yara-x": 0.327,
+            "office": 1.664,
+            "pdf": 0.003,
+            "custom": 0.538
+          }
+        },
+        {
+          "harness_wall_ms": 529.452,
+          "scanner_ms": {
+            "yara-x": 0.3,
+            "office": 1.876,
+            "pdf": 0.004,
+            "custom": 0.592
+          }
+        },
+        {
+          "harness_wall_ms": 529.667,
+          "scanner_ms": {
+            "yara-x": 0.312,
+            "office": 1.67,
+            "pdf": 0.004,
+            "custom": 0.557
+          }
+        },
+        {
+          "harness_wall_ms": 525.089,
+          "scanner_ms": {
+            "yara-x": 0.309,
+            "office": 1.595,
+            "pdf": 0.003,
+            "custom": 0.596
+          }
+        },
+        {
+          "harness_wall_ms": 529.871,
+          "scanner_ms": {
+            "yara-x": 0.311,
+            "office": 1.631,
+            "pdf": 0.003,
+            "custom": 0.542
+          }
+        },
+        {
+          "harness_wall_ms": 528.546,
+          "scanner_ms": {
+            "yara-x": 0.284,
+            "office": 1.662,
+            "pdf": 0.003,
+            "custom": 0.548
+          }
+        },
+        {
+          "harness_wall_ms": 537.82,
+          "scanner_ms": {
+            "yara-x": 0.306,
+            "office": 1.673,
+            "pdf": 0.003,
+            "custom": 0.531
+          }
+        },
+        {
+          "harness_wall_ms": 528.578,
+          "scanner_ms": {
+            "yara-x": 0.294,
+            "office": 1.633,
+            "pdf": 0.003,
+            "custom": 0.54
+          }
+        },
+        {
+          "harness_wall_ms": 526.524,
+          "scanner_ms": {
+            "yara-x": 0.323,
+            "office": 1.58,
+            "pdf": 0.004,
+            "custom": 0.566
+          }
+        },
+        {
+          "harness_wall_ms": 525.273,
+          "scanner_ms": {
+            "yara-x": 0.3,
+            "office": 1.893,
+            "pdf": 0.004,
+            "custom": 0.577
+          }
+        },
+        {
+          "harness_wall_ms": 528.416,
+          "scanner_ms": {
+            "yara-x": 0.298,
+            "office": 1.689,
+            "pdf": 0.003,
+            "custom": 0.536
+          }
+        },
+        {
+          "harness_wall_ms": 522.649,
+          "scanner_ms": {
+            "yara-x": 0.408,
+            "office": 1.686,
+            "pdf": 0.004,
+            "custom": 0.636
+          }
+        },
+        {
+          "harness_wall_ms": 529.424,
+          "scanner_ms": {
+            "yara-x": 0.367,
+            "office": 1.737,
+            "pdf": 0.003,
+            "custom": 0.581
+          }
+        },
+        {
+          "harness_wall_ms": 539.919,
+          "scanner_ms": {
+            "yara-x": 0.333,
+            "office": 1.752,
+            "pdf": 0.003,
+            "custom": 0.559
+          }
+        },
+        {
+          "harness_wall_ms": 532.449,
+          "scanner_ms": {
+            "yara-x": 0.362,
+            "office": 1.592,
+            "pdf": 0.004,
+            "custom": 0.789
+          }
+        }
+      ]
+    },
+    {
+      "id": "6b-docx-external-template",
+      "ground_truth": "BENIGN",
+      "indicator": "external attachedTemplate https://template.example.invalid/normal.dotm (never fetched)",
+      "sha256": "1930d78d93347a087551bf547bba07dbcdc4fe7d1b79d00cc12960e3b962ab9e",
+      "size_bytes": 1731,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "rules": [
+        "office:OFFICE_EXTERNAL_AUTOLOAD:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_EXTERNAL_AUTOLOAD",
+          "severity": "MEDIUM",
+          "description": "An external 'attachedTemplate' relationship loads external content when the document is opened (e.g. 'https://template.example.invalid/normal.dotm')."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 533.44,
+          "median_ms": 531.58,
+          "p95_ms": 551.037,
+          "max_ms": 558.414,
+          "min_ms": 523.296
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.32,
+          "median_ms": 0.31,
+          "p95_ms": 0.361,
+          "max_ms": 0.372,
+          "min_ms": 0.29
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 1.73,
+          "median_ms": 1.71,
+          "p95_ms": 1.854,
+          "max_ms": 1.868,
+          "min_ms": 1.615
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.003
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.57,
+          "median_ms": 0.56,
+          "p95_ms": 0.666,
+          "max_ms": 0.724,
+          "min_ms": 0.528
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 526.122,
+          "scanner_ms": {
+            "yara-x": 0.299,
+            "office": 1.689,
+            "pdf": 0.003,
+            "custom": 0.609
+          }
+        },
+        {
+          "harness_wall_ms": 527.574,
+          "scanner_ms": {
+            "yara-x": 0.316,
+            "office": 1.615,
+            "pdf": 0.003,
+            "custom": 0.543
+          }
+        },
+        {
+          "harness_wall_ms": 533.533,
+          "scanner_ms": {
+            "yara-x": 0.325,
+            "office": 1.753,
+            "pdf": 0.003,
+            "custom": 0.576
+          }
+        },
+        {
+          "harness_wall_ms": 528.379,
+          "scanner_ms": {
+            "yara-x": 0.295,
+            "office": 1.748,
+            "pdf": 0.003,
+            "custom": 0.542
+          }
+        },
+        {
+          "harness_wall_ms": 525.076,
+          "scanner_ms": {
+            "yara-x": 0.361,
+            "office": 1.704,
+            "pdf": 0.003,
+            "custom": 0.724
+          }
+        },
+        {
+          "harness_wall_ms": 536.964,
+          "scanner_ms": {
+            "yara-x": 0.313,
+            "office": 1.732,
+            "pdf": 0.003,
+            "custom": 0.533
+          }
+        },
+        {
+          "harness_wall_ms": 551.037,
+          "scanner_ms": {
+            "yara-x": 0.334,
+            "office": 1.729,
+            "pdf": 0.003,
+            "custom": 0.559
+          }
+        },
+        {
+          "harness_wall_ms": 535.639,
+          "scanner_ms": {
+            "yara-x": 0.328,
+            "office": 1.868,
+            "pdf": 0.004,
+            "custom": 0.557
+          }
+        },
+        {
+          "harness_wall_ms": 530.53,
+          "scanner_ms": {
+            "yara-x": 0.348,
+            "office": 1.759,
+            "pdf": 0.004,
+            "custom": 0.572
+          }
+        },
+        {
+          "harness_wall_ms": 534.499,
+          "scanner_ms": {
+            "yara-x": 0.309,
+            "office": 1.688,
+            "pdf": 0.003,
+            "custom": 0.666
+          }
+        },
+        {
+          "harness_wall_ms": 530.796,
+          "scanner_ms": {
+            "yara-x": 0.317,
+            "office": 1.803,
+            "pdf": 0.003,
+            "custom": 0.544
+          }
+        },
+        {
+          "harness_wall_ms": 532.221,
+          "scanner_ms": {
+            "yara-x": 0.309,
+            "office": 1.854,
+            "pdf": 0.004,
+            "custom": 0.588
+          }
+        },
+        {
+          "harness_wall_ms": 523.296,
+          "scanner_ms": {
+            "yara-x": 0.302,
+            "office": 1.679,
+            "pdf": 0.003,
+            "custom": 0.544
+          }
+        },
+        {
+          "harness_wall_ms": 558.414,
+          "scanner_ms": {
+            "yara-x": 0.314,
+            "office": 1.66,
+            "pdf": 0.003,
+            "custom": 0.542
+          }
+        },
+        {
+          "harness_wall_ms": 534.068,
+          "scanner_ms": {
+            "yara-x": 0.334,
+            "office": 1.673,
+            "pdf": 0.003,
+            "custom": 0.558
+          }
+        },
+        {
+          "harness_wall_ms": 530.945,
+          "scanner_ms": {
+            "yara-x": 0.315,
+            "office": 1.653,
+            "pdf": 0.003,
+            "custom": 0.543
+          }
+        },
+        {
+          "harness_wall_ms": 532.865,
+          "scanner_ms": {
+            "yara-x": 0.29,
+            "office": 1.724,
+            "pdf": 0.003,
+            "custom": 0.528
+          }
+        },
+        {
+          "harness_wall_ms": 540.085,
+          "scanner_ms": {
+            "yara-x": 0.305,
+            "office": 1.701,
+            "pdf": 0.003,
+            "custom": 0.559
+          }
+        },
+        {
+          "harness_wall_ms": 529.913,
+          "scanner_ms": {
+            "yara-x": 0.298,
+            "office": 1.704,
+            "pdf": 0.003,
+            "custom": 0.529
+          }
+        },
+        {
+          "harness_wall_ms": 526.929,
+          "scanner_ms": {
+            "yara-x": 0.372,
+            "office": 1.795,
+            "pdf": 0.004,
+            "custom": 0.573
+          }
+        }
+      ]
+    },
+    {
+      "id": "6c-docx-template-referenced-by-settings",
+      "ground_truth": "BENIGN",
+      "indicator": "the same template, referenced by w:attachedTemplate in the settings part, as Word writes it",
+      "sha256": "1f6250ac26083ce3d033715f2a5e48ec6b955199f0ed4c42e33d420ad65d9a8f",
+      "size_bytes": 2412,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "rules": [
+        "office:OFFICE_EXTERNAL_AUTOLOAD:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_EXTERNAL_AUTOLOAD",
+          "severity": "MEDIUM",
+          "description": "An external 'attachedTemplate' relationship loads external content when the document is opened (e.g. 'https://template.example.invalid/normal.dotm')."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 539.03,
+          "median_ms": 532.52,
+          "p95_ms": 597.22,
+          "max_ms": 601.011,
+          "min_ms": 522.394
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.37,
+          "median_ms": 0.34,
+          "p95_ms": 0.477,
+          "max_ms": 0.624,
+          "min_ms": 0.295
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 1.87,
+          "median_ms": 1.84,
+          "p95_ms": 2.094,
+          "max_ms": 2.127,
+          "min_ms": 1.671
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.003
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.67,
+          "median_ms": 0.66,
+          "p95_ms": 0.732,
+          "max_ms": 0.758,
+          "min_ms": 0.626
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 597.22,
+          "scanner_ms": {
+            "yara-x": 0.357,
+            "office": 2.025,
+            "pdf": 0.004,
+            "custom": 0.67
+          }
+        },
+        {
+          "harness_wall_ms": 601.011,
+          "scanner_ms": {
+            "yara-x": 0.624,
+            "office": 2.086,
+            "pdf": 0.004,
+            "custom": 0.654
+          }
+        },
+        {
+          "harness_wall_ms": 527.456,
+          "scanner_ms": {
+            "yara-x": 0.477,
+            "office": 1.862,
+            "pdf": 0.003,
+            "custom": 0.628
+          }
+        },
+        {
+          "harness_wall_ms": 537.781,
+          "scanner_ms": {
+            "yara-x": 0.35,
+            "office": 1.787,
+            "pdf": 0.003,
+            "custom": 0.629
+          }
+        },
+        {
+          "harness_wall_ms": 530.846,
+          "scanner_ms": {
+            "yara-x": 0.471,
+            "office": 1.807,
+            "pdf": 0.003,
+            "custom": 0.688
+          }
+        },
+        {
+          "harness_wall_ms": 534.67,
+          "scanner_ms": {
+            "yara-x": 0.313,
+            "office": 1.829,
+            "pdf": 0.003,
+            "custom": 0.65
+          }
+        },
+        {
+          "harness_wall_ms": 530.603,
+          "scanner_ms": {
+            "yara-x": 0.312,
+            "office": 1.927,
+            "pdf": 0.004,
+            "custom": 0.707
+          }
+        },
+        {
+          "harness_wall_ms": 532.956,
+          "scanner_ms": {
+            "yara-x": 0.319,
+            "office": 1.751,
+            "pdf": 0.003,
+            "custom": 0.7
+          }
+        },
+        {
+          "harness_wall_ms": 537.565,
+          "scanner_ms": {
+            "yara-x": 0.328,
+            "office": 1.698,
+            "pdf": 0.003,
+            "custom": 0.626
+          }
+        },
+        {
+          "harness_wall_ms": 528.988,
+          "scanner_ms": {
+            "yara-x": 0.295,
+            "office": 1.671,
+            "pdf": 0.003,
+            "custom": 0.626
+          }
+        },
+        {
+          "harness_wall_ms": 529.873,
+          "scanner_ms": {
+            "yara-x": 0.419,
+            "office": 1.714,
+            "pdf": 0.003,
+            "custom": 0.636
+          }
+        },
+        {
+          "harness_wall_ms": 539.63,
+          "scanner_ms": {
+            "yara-x": 0.33,
+            "office": 1.926,
+            "pdf": 0.004,
+            "custom": 0.715
+          }
+        },
+        {
+          "harness_wall_ms": 527.526,
+          "scanner_ms": {
+            "yara-x": 0.33,
+            "office": 1.809,
+            "pdf": 0.003,
+            "custom": 0.636
+          }
+        },
+        {
+          "harness_wall_ms": 522.394,
+          "scanner_ms": {
+            "yara-x": 0.384,
+            "office": 1.845,
+            "pdf": 0.003,
+            "custom": 0.732
+          }
+        },
+        {
+          "harness_wall_ms": 535.918,
+          "scanner_ms": {
+            "yara-x": 0.356,
+            "office": 1.766,
+            "pdf": 0.003,
+            "custom": 0.64
+          }
+        },
+        {
+          "harness_wall_ms": 535.328,
+          "scanner_ms": {
+            "yara-x": 0.37,
+            "office": 2.094,
+            "pdf": 0.004,
+            "custom": 0.758
+          }
+        },
+        {
+          "harness_wall_ms": 543.067,
+          "scanner_ms": {
+            "yara-x": 0.359,
+            "office": 1.859,
+            "pdf": 0.003,
+            "custom": 0.657
+          }
+        },
+        {
+          "harness_wall_ms": 525.869,
+          "scanner_ms": {
+            "yara-x": 0.316,
+            "office": 1.745,
+            "pdf": 0.003,
+            "custom": 0.634
+          }
+        },
+        {
+          "harness_wall_ms": 529.868,
+          "scanner_ms": {
+            "yara-x": 0.322,
+            "office": 1.997,
+            "pdf": 0.003,
+            "custom": 0.665
+          }
+        },
+        {
+          "harness_wall_ms": 532.087,
+          "scanner_ms": {
+            "yara-x": 0.307,
+            "office": 2.127,
+            "pdf": 0.003,
+            "custom": 0.666
+          }
+        }
+      ]
+    },
+    {
+      "id": "6d-docx-linked-picture",
+      "ground_truth": "BENIGN",
+      "indicator": "a picture shown from https://images.example.invalid/pixel.png (a:blip r:link; never fetched)",
+      "sha256": "2c123328e344f3bd2eb978d92683eb52ba5a3b4319226f3269b02609ec2e5113",
+      "size_bytes": 1768,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SAFE",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "aggregate": "SAFE"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "rules": [],
+      "findings": [
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_EXTERNAL_RESOURCE",
+          "severity": "INFO",
+          "description": "An external 'image' relationship references an external resource (e.g. 'https://images.example.invalid/pixel.png')."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 530.97,
+          "median_ms": 530.37,
+          "p95_ms": 535.922,
+          "max_ms": 542.989,
+          "min_ms": 526.101
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.33,
+          "median_ms": 0.33,
+          "p95_ms": 0.367,
+          "max_ms": 0.379,
+          "min_ms": 0.305
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 1.8,
+          "median_ms": 1.75,
+          "p95_ms": 1.916,
+          "max_ms": 2.458,
+          "min_ms": 1.628
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.003
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.58,
+          "median_ms": 0.55,
+          "p95_ms": 0.691,
+          "max_ms": 0.692,
+          "min_ms": 0.536
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 535.922,
+          "scanner_ms": {
+            "yara-x": 0.316,
+            "office": 1.666,
+            "pdf": 0.003,
+            "custom": 0.554
+          }
+        },
+        {
+          "harness_wall_ms": 526.772,
+          "scanner_ms": {
+            "yara-x": 0.305,
+            "office": 1.724,
+            "pdf": 0.003,
+            "custom": 0.546
+          }
+        },
+        {
+          "harness_wall_ms": 531.328,
+          "scanner_ms": {
+            "yara-x": 0.315,
+            "office": 1.746,
+            "pdf": 0.004,
+            "custom": 0.551
+          }
+        },
+        {
+          "harness_wall_ms": 534.178,
+          "scanner_ms": {
+            "yara-x": 0.329,
+            "office": 1.916,
+            "pdf": 0.004,
+            "custom": 0.6
+          }
+        },
+        {
+          "harness_wall_ms": 531.882,
+          "scanner_ms": {
+            "yara-x": 0.329,
+            "office": 1.842,
+            "pdf": 0.003,
+            "custom": 0.571
+          }
+        },
+        {
+          "harness_wall_ms": 542.989,
+          "scanner_ms": {
+            "yara-x": 0.332,
+            "office": 1.671,
+            "pdf": 0.003,
+            "custom": 0.543
+          }
+        },
+        {
+          "harness_wall_ms": 526.101,
+          "scanner_ms": {
+            "yara-x": 0.34,
+            "office": 1.798,
+            "pdf": 0.004,
+            "custom": 0.585
+          }
+        },
+        {
+          "harness_wall_ms": 530.246,
+          "scanner_ms": {
+            "yara-x": 0.337,
+            "office": 1.73,
+            "pdf": 0.003,
+            "custom": 0.549
+          }
+        },
+        {
+          "harness_wall_ms": 528.147,
+          "scanner_ms": {
+            "yara-x": 0.323,
+            "office": 1.801,
+            "pdf": 0.003,
+            "custom": 0.63
+          }
+        },
+        {
+          "harness_wall_ms": 531.065,
+          "scanner_ms": {
+            "yara-x": 0.335,
+            "office": 2.458,
+            "pdf": 0.004,
+            "custom": 0.691
+          }
+        },
+        {
+          "harness_wall_ms": 530.387,
+          "scanner_ms": {
+            "yara-x": 0.334,
+            "office": 1.689,
+            "pdf": 0.003,
+            "custom": 0.553
+          }
+        },
+        {
+          "harness_wall_ms": 533.013,
+          "scanner_ms": {
+            "yara-x": 0.327,
+            "office": 1.74,
+            "pdf": 0.003,
+            "custom": 0.547
+          }
+        },
+        {
+          "harness_wall_ms": 528.147,
+          "scanner_ms": {
+            "yara-x": 0.379,
+            "office": 1.725,
+            "pdf": 0.003,
+            "custom": 0.55
+          }
+        },
+        {
+          "harness_wall_ms": 530.343,
+          "scanner_ms": {
+            "yara-x": 0.341,
+            "office": 1.801,
+            "pdf": 0.003,
+            "custom": 0.544
+          }
+        },
+        {
+          "harness_wall_ms": 531.213,
+          "scanner_ms": {
+            "yara-x": 0.367,
+            "office": 1.887,
+            "pdf": 0.004,
+            "custom": 0.581
+          }
+        },
+        {
+          "harness_wall_ms": 531.307,
+          "scanner_ms": {
+            "yara-x": 0.306,
+            "office": 1.835,
+            "pdf": 0.003,
+            "custom": 0.621
+          }
+        },
+        {
+          "harness_wall_ms": 529.083,
+          "scanner_ms": {
+            "yara-x": 0.314,
+            "office": 1.628,
+            "pdf": 0.003,
+            "custom": 0.579
+          }
+        },
+        {
+          "harness_wall_ms": 528.958,
+          "scanner_ms": {
+            "yara-x": 0.352,
+            "office": 1.77,
+            "pdf": 0.003,
+            "custom": 0.536
+          }
+        },
+        {
+          "harness_wall_ms": 529.756,
+          "scanner_ms": {
+            "yara-x": 0.332,
+            "office": 1.75,
+            "pdf": 0.004,
+            "custom": 0.692
+          }
+        },
+        {
+          "harness_wall_ms": 528.524,
+          "scanner_ms": {
+            "yara-x": 0.34,
+            "office": 1.734,
+            "pdf": 0.003,
+            "custom": 0.549
+          }
+        }
+      ]
+    },
+    {
+      "id": "6g-docx-linked-picture-file-share",
+      "ground_truth": "BENIGN",
+      "indicator": "the same picture on a file share file://fileserver.invalid/share/pixel.png (never fetched)",
+      "sha256": "bdacf5acdcdd555fea3e6bd01827087899a55e42e16561664b16a26548bbc355",
+      "size_bytes": 1772,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "rules": [
+        "office:OFFICE_EXTERNAL_NETWORK_PATH:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_EXTERNAL_NETWORK_PATH",
+          "severity": "MEDIUM",
+          "description": "An external 'image' relationship points to a network/file path; opening it can leak Windows credentials (e.g. 'file://fileserver.invalid/share/pixel.png')."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 534.27,
+          "median_ms": 530.13,
+          "p95_ms": 554.465,
+          "max_ms": 565.05,
+          "min_ms": 523.306
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.34,
+          "median_ms": 0.33,
+          "p95_ms": 0.458,
+          "max_ms": 0.488,
+          "min_ms": 0.291
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 1.75,
+          "median_ms": 1.77,
+          "p95_ms": 1.834,
+          "max_ms": 1.856,
+          "min_ms": 1.595
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.003
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.6,
+          "median_ms": 0.59,
+          "p95_ms": 0.72,
+          "max_ms": 0.825,
+          "min_ms": 0.542
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 524.809,
+          "scanner_ms": {
+            "yara-x": 0.332,
+            "office": 1.595,
+            "pdf": 0.003,
+            "custom": 0.618
+          }
+        },
+        {
+          "harness_wall_ms": 540.986,
+          "scanner_ms": {
+            "yara-x": 0.352,
+            "office": 1.814,
+            "pdf": 0.003,
+            "custom": 0.556
+          }
+        },
+        {
+          "harness_wall_ms": 552.399,
+          "scanner_ms": {
+            "yara-x": 0.357,
+            "office": 1.76,
+            "pdf": 0.003,
+            "custom": 0.599
+          }
+        },
+        {
+          "harness_wall_ms": 529.899,
+          "scanner_ms": {
+            "yara-x": 0.318,
+            "office": 1.677,
+            "pdf": 0.003,
+            "custom": 0.627
+          }
+        },
+        {
+          "harness_wall_ms": 530.956,
+          "scanner_ms": {
+            "yara-x": 0.326,
+            "office": 1.808,
+            "pdf": 0.003,
+            "custom": 0.57
+          }
+        },
+        {
+          "harness_wall_ms": 554.465,
+          "scanner_ms": {
+            "yara-x": 0.342,
+            "office": 1.596,
+            "pdf": 0.003,
+            "custom": 0.556
+          }
+        },
+        {
+          "harness_wall_ms": 529.142,
+          "scanner_ms": {
+            "yara-x": 0.336,
+            "office": 1.711,
+            "pdf": 0.004,
+            "custom": 0.825
+          }
+        },
+        {
+          "harness_wall_ms": 529.379,
+          "scanner_ms": {
+            "yara-x": 0.488,
+            "office": 1.788,
+            "pdf": 0.003,
+            "custom": 0.589
+          }
+        },
+        {
+          "harness_wall_ms": 524.867,
+          "scanner_ms": {
+            "yara-x": 0.327,
+            "office": 1.834,
+            "pdf": 0.004,
+            "custom": 0.565
+          }
+        },
+        {
+          "harness_wall_ms": 565.05,
+          "scanner_ms": {
+            "yara-x": 0.319,
+            "office": 1.794,
+            "pdf": 0.003,
+            "custom": 0.545
+          }
+        },
+        {
+          "harness_wall_ms": 530.368,
+          "scanner_ms": {
+            "yara-x": 0.304,
+            "office": 1.756,
+            "pdf": 0.003,
+            "custom": 0.559
+          }
+        },
+        {
+          "harness_wall_ms": 529.786,
+          "scanner_ms": {
+            "yara-x": 0.291,
+            "office": 1.736,
+            "pdf": 0.003,
+            "custom": 0.575
+          }
+        },
+        {
+          "harness_wall_ms": 529.473,
+          "scanner_ms": {
+            "yara-x": 0.308,
+            "office": 1.653,
+            "pdf": 0.003,
+            "custom": 0.542
+          }
+        },
+        {
+          "harness_wall_ms": 535.687,
+          "scanner_ms": {
+            "yara-x": 0.458,
+            "office": 1.774,
+            "pdf": 0.004,
+            "custom": 0.576
+          }
+        },
+        {
+          "harness_wall_ms": 531.006,
+          "scanner_ms": {
+            "yara-x": 0.402,
+            "office": 1.793,
+            "pdf": 0.004,
+            "custom": 0.585
+          }
+        },
+        {
+          "harness_wall_ms": 533.203,
+          "scanner_ms": {
+            "yara-x": 0.324,
+            "office": 1.755,
+            "pdf": 0.003,
+            "custom": 0.591
+          }
+        },
+        {
+          "harness_wall_ms": 533.925,
+          "scanner_ms": {
+            "yara-x": 0.317,
+            "office": 1.856,
+            "pdf": 0.004,
+            "custom": 0.633
+          }
+        },
+        {
+          "harness_wall_ms": 527.289,
+          "scanner_ms": {
+            "yara-x": 0.328,
+            "office": 1.788,
+            "pdf": 0.004,
+            "custom": 0.595
+          }
+        },
+        {
+          "harness_wall_ms": 529.319,
+          "scanner_ms": {
+            "yara-x": 0.328,
+            "office": 1.812,
+            "pdf": 0.003,
+            "custom": 0.593
+          }
+        },
+        {
+          "harness_wall_ms": 523.306,
+          "scanner_ms": {
+            "yara-x": 0.323,
+            "office": 1.704,
+            "pdf": 0.004,
+            "custom": 0.72
+          }
+        }
+      ]
+    },
+    {
+      "id": "6e-docx-embedded-object-displayed",
+      "ground_truth": "BENIGN",
+      "indicator": "an inert OLE container shown by o:OLEObject Type=Embed",
+      "sha256": "f1202a9729ef09a77d8388da9a7d0e11dd705631bcfc45b434bd0d394469fbab",
+      "size_bytes": 2104,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "rules": [
+        "office:OFFICE_EMBEDDED_OLE:LOW"
+      ],
+      "findings": [
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_EMBEDDED_OLE",
+          "severity": "LOW",
+          "description": "Document contains an embedded OLE object."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 532.23,
+          "median_ms": 531.73,
+          "p95_ms": 537.822,
+          "max_ms": 550.087,
+          "min_ms": 522.72
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.34,
+          "median_ms": 0.34,
+          "p95_ms": 0.384,
+          "max_ms": 0.442,
+          "min_ms": 0.307
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 2.38,
+          "median_ms": 2.42,
+          "p95_ms": 2.545,
+          "max_ms": 2.549,
+          "min_ms": 2.174
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.003
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.64,
+          "median_ms": 0.58,
+          "p95_ms": 0.847,
+          "max_ms": 0.937,
+          "min_ms": 0.542
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 527.793,
+          "scanner_ms": {
+            "yara-x": 0.308,
+            "office": 2.271,
+            "pdf": 0.003,
+            "custom": 0.561
+          }
+        },
+        {
+          "harness_wall_ms": 537.822,
+          "scanner_ms": {
+            "yara-x": 0.442,
+            "office": 2.465,
+            "pdf": 0.003,
+            "custom": 0.555
+          }
+        },
+        {
+          "harness_wall_ms": 532.69,
+          "scanner_ms": {
+            "yara-x": 0.307,
+            "office": 2.294,
+            "pdf": 0.003,
+            "custom": 0.847
+          }
+        },
+        {
+          "harness_wall_ms": 550.087,
+          "scanner_ms": {
+            "yara-x": 0.322,
+            "office": 2.248,
+            "pdf": 0.003,
+            "custom": 0.937
+          }
+        },
+        {
+          "harness_wall_ms": 533.17,
+          "scanner_ms": {
+            "yara-x": 0.368,
+            "office": 2.549,
+            "pdf": 0.003,
+            "custom": 0.542
+          }
+        },
+        {
+          "harness_wall_ms": 530.053,
+          "scanner_ms": {
+            "yara-x": 0.357,
+            "office": 2.376,
+            "pdf": 0.004,
+            "custom": 0.632
+          }
+        },
+        {
+          "harness_wall_ms": 529.147,
+          "scanner_ms": {
+            "yara-x": 0.307,
+            "office": 2.44,
+            "pdf": 0.004,
+            "custom": 0.622
+          }
+        },
+        {
+          "harness_wall_ms": 530.928,
+          "scanner_ms": {
+            "yara-x": 0.354,
+            "office": 2.186,
+            "pdf": 0.003,
+            "custom": 0.57
+          }
+        },
+        {
+          "harness_wall_ms": 522.72,
+          "scanner_ms": {
+            "yara-x": 0.382,
+            "office": 2.47,
+            "pdf": 0.004,
+            "custom": 0.806
+          }
+        },
+        {
+          "harness_wall_ms": 535.11,
+          "scanner_ms": {
+            "yara-x": 0.328,
+            "office": 2.174,
+            "pdf": 0.003,
+            "custom": 0.553
+          }
+        },
+        {
+          "harness_wall_ms": 528.089,
+          "scanner_ms": {
+            "yara-x": 0.323,
+            "office": 2.427,
+            "pdf": 0.003,
+            "custom": 0.605
+          }
+        },
+        {
+          "harness_wall_ms": 532.536,
+          "scanner_ms": {
+            "yara-x": 0.325,
+            "office": 2.323,
+            "pdf": 0.003,
+            "custom": 0.563
+          }
+        },
+        {
+          "harness_wall_ms": 531.227,
+          "scanner_ms": {
+            "yara-x": 0.348,
+            "office": 2.545,
+            "pdf": 0.004,
+            "custom": 0.634
+          }
+        },
+        {
+          "harness_wall_ms": 535.334,
+          "scanner_ms": {
+            "yara-x": 0.382,
+            "office": 2.41,
+            "pdf": 0.003,
+            "custom": 0.567
+          }
+        },
+        {
+          "harness_wall_ms": 532.411,
+          "scanner_ms": {
+            "yara-x": 0.384,
+            "office": 2.45,
+            "pdf": 0.003,
+            "custom": 0.555
+          }
+        },
+        {
+          "harness_wall_ms": 530.366,
+          "scanner_ms": {
+            "yara-x": 0.31,
+            "office": 2.208,
+            "pdf": 0.003,
+            "custom": 0.623
+          }
+        },
+        {
+          "harness_wall_ms": 532.237,
+          "scanner_ms": {
+            "yara-x": 0.311,
+            "office": 2.426,
+            "pdf": 0.004,
+            "custom": 0.836
+          }
+        },
+        {
+          "harness_wall_ms": 533.505,
+          "scanner_ms": {
+            "yara-x": 0.314,
+            "office": 2.537,
+            "pdf": 0.004,
+            "custom": 0.586
+          }
+        },
+        {
+          "harness_wall_ms": 531.041,
+          "scanner_ms": {
+            "yara-x": 0.383,
+            "office": 2.329,
+            "pdf": 0.003,
+            "custom": 0.557
+          }
+        },
+        {
+          "harness_wall_ms": 528.253,
+          "scanner_ms": {
+            "yara-x": 0.345,
+            "office": 2.456,
+            "pdf": 0.003,
+            "custom": 0.564
+          }
+        }
+      ]
+    },
+    {
+      "id": "6f-docx-embedded-object-not-displayed",
+      "ground_truth": "BENIGN",
+      "indicator": "the same object with its relationship but no element",
+      "sha256": "e24251266152ceb67bd3e8d0ae646176ccda7c6015957c3e2202d7bdaaec1820",
+      "size_bytes": 2067,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "rules": [
+        "office:OFFICE_EMBEDDED_OLE:LOW"
+      ],
+      "findings": [
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_EMBEDDED_OLE",
+          "severity": "LOW",
+          "description": "Document contains an embedded OLE object."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 532.33,
+          "median_ms": 530.82,
+          "p95_ms": 537.823,
+          "max_ms": 547.406,
+          "min_ms": 524.421
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.34,
+          "median_ms": 0.34,
+          "p95_ms": 0.402,
+          "max_ms": 0.408,
+          "min_ms": 0.294
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 2.36,
+          "median_ms": 2.29,
+          "p95_ms": 2.518,
+          "max_ms": 3.195,
+          "min_ms": 2.145
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.003
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.6,
+          "median_ms": 0.58,
+          "p95_ms": 0.649,
+          "max_ms": 0.835,
+          "min_ms": 0.543
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 529.873,
+          "scanner_ms": {
+            "yara-x": 0.343,
+            "office": 2.292,
+            "pdf": 0.003,
+            "custom": 0.628
+          }
+        },
+        {
+          "harness_wall_ms": 529.159,
+          "scanner_ms": {
+            "yara-x": 0.348,
+            "office": 2.168,
+            "pdf": 0.003,
+            "custom": 0.549
+          }
+        },
+        {
+          "harness_wall_ms": 530.887,
+          "scanner_ms": {
+            "yara-x": 0.312,
+            "office": 2.161,
+            "pdf": 0.003,
+            "custom": 0.543
+          }
+        },
+        {
+          "harness_wall_ms": 524.421,
+          "scanner_ms": {
+            "yara-x": 0.345,
+            "office": 2.456,
+            "pdf": 0.004,
+            "custom": 0.569
+          }
+        },
+        {
+          "harness_wall_ms": 529.4,
+          "scanner_ms": {
+            "yara-x": 0.366,
+            "office": 2.236,
+            "pdf": 0.003,
+            "custom": 0.626
+          }
+        },
+        {
+          "harness_wall_ms": 528.701,
+          "scanner_ms": {
+            "yara-x": 0.318,
+            "office": 2.282,
+            "pdf": 0.003,
+            "custom": 0.576
+          }
+        },
+        {
+          "harness_wall_ms": 526.554,
+          "scanner_ms": {
+            "yara-x": 0.309,
+            "office": 2.145,
+            "pdf": 0.003,
+            "custom": 0.608
+          }
+        },
+        {
+          "harness_wall_ms": 533.029,
+          "scanner_ms": {
+            "yara-x": 0.327,
+            "office": 2.335,
+            "pdf": 0.003,
+            "custom": 0.646
+          }
+        },
+        {
+          "harness_wall_ms": 532.356,
+          "scanner_ms": {
+            "yara-x": 0.402,
+            "office": 2.472,
+            "pdf": 0.003,
+            "custom": 0.547
+          }
+        },
+        {
+          "harness_wall_ms": 530.753,
+          "scanner_ms": {
+            "yara-x": 0.361,
+            "office": 2.426,
+            "pdf": 0.003,
+            "custom": 0.548
+          }
+        },
+        {
+          "harness_wall_ms": 535.894,
+          "scanner_ms": {
+            "yara-x": 0.305,
+            "office": 2.518,
+            "pdf": 0.003,
+            "custom": 0.547
+          }
+        },
+        {
+          "harness_wall_ms": 537.823,
+          "scanner_ms": {
+            "yara-x": 0.408,
+            "office": 3.195,
+            "pdf": 0.004,
+            "custom": 0.632
+          }
+        },
+        {
+          "harness_wall_ms": 533.664,
+          "scanner_ms": {
+            "yara-x": 0.305,
+            "office": 2.22,
+            "pdf": 0.004,
+            "custom": 0.58
+          }
+        },
+        {
+          "harness_wall_ms": 530.508,
+          "scanner_ms": {
+            "yara-x": 0.343,
+            "office": 2.298,
+            "pdf": 0.003,
+            "custom": 0.835
+          }
+        },
+        {
+          "harness_wall_ms": 533.532,
+          "scanner_ms": {
+            "yara-x": 0.35,
+            "office": 2.211,
+            "pdf": 0.003,
+            "custom": 0.552
+          }
+        },
+        {
+          "harness_wall_ms": 535.505,
+          "scanner_ms": {
+            "yara-x": 0.33,
+            "office": 2.38,
+            "pdf": 0.003,
+            "custom": 0.561
+          }
+        },
+        {
+          "harness_wall_ms": 530.582,
+          "scanner_ms": {
+            "yara-x": 0.332,
+            "office": 2.457,
+            "pdf": 0.003,
+            "custom": 0.649
+          }
+        },
+        {
+          "harness_wall_ms": 537.173,
+          "scanner_ms": {
+            "yara-x": 0.359,
+            "office": 2.382,
+            "pdf": 0.004,
+            "custom": 0.604
+          }
+        },
+        {
+          "harness_wall_ms": 547.406,
+          "scanner_ms": {
+            "yara-x": 0.294,
+            "office": 2.271,
+            "pdf": 0.003,
+            "custom": 0.617
+          }
+        },
+        {
+          "harness_wall_ms": 529.362,
+          "scanner_ms": {
+            "yara-x": 0.339,
+            "office": 2.247,
+            "pdf": 0.003,
+            "custom": 0.549
+          }
+        }
+      ]
+    },
+    {
+      "id": "7-docx-macro-declaration-mismatch",
+      "ground_truth": "BENIGN",
+      "indicator": "macro-free DOCX declaration with a vbaProject.bin placeholder",
+      "sha256": "298b3823825cc1fd82f19edfaa811cb5630b2f35b8e42f05cb986b8868b0ea3d",
+      "size_bytes": 1885,
+      "verdicts": {
+        "yara-x": "SUSPICIOUS",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "SUSPICIOUS",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "rules": [
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "office:OFFICE_VBA_UNPARSED:LOW",
+        "yara-x:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "yara-x",
+          "rule_id": "OOXML_VBA_Macros",
+          "severity": "MEDIUM",
+          "description": "Office Open XML (ZIP-based) document contains a VBA macro project (vbaProject.bin)."
+        },
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_VBA_UNPARSED",
+          "severity": "LOW",
+          "description": "Document contains a VBA project storage that could not be parsed."
+        },
+        {
+          "scanner": "custom",
+          "rule_id": "CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH",
+          "severity": "MEDIUM",
+          "description": "The package is declared as a macro-free Word document but contains macro code or macro sheets, so its declared type misrepresents what it carries. Evidence: declared main type 'application/vnd.openxmlformats-officedocument.wordprocessin\u2026'; macro part 'word/vbaProject.bin'; relationship 'rId3' of type vbaProject in 'word/_rels/document.xml.rels'. Location: [Content_Types].xml; _rels/.rels. This is a structural indicator, not proof that the file is malicious."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 540.39,
+          "median_ms": 530.87,
+          "p95_ms": 591.905,
+          "max_ms": 596.071,
+          "min_ms": 526.511
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.41,
+          "median_ms": 0.41,
+          "p95_ms": 0.466,
+          "max_ms": 0.507,
+          "min_ms": 0.364
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 1.75,
+          "median_ms": 1.73,
+          "p95_ms": 2.031,
+          "max_ms": 2.036,
+          "min_ms": 1.611
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.003
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.62,
+          "median_ms": 0.61,
+          "p95_ms": 0.718,
+          "max_ms": 0.777,
+          "min_ms": 0.562
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 530.836,
+          "scanner_ms": {
+            "yara-x": 0.42,
+            "office": 1.616,
+            "pdf": 0.004,
+            "custom": 0.592
+          }
+        },
+        {
+          "harness_wall_ms": 530.034,
+          "scanner_ms": {
+            "yara-x": 0.37,
+            "office": 1.611,
+            "pdf": 0.003,
+            "custom": 0.575
+          }
+        },
+        {
+          "harness_wall_ms": 540.087,
+          "scanner_ms": {
+            "yara-x": 0.375,
+            "office": 1.7,
+            "pdf": 0.003,
+            "custom": 0.575
+          }
+        },
+        {
+          "harness_wall_ms": 531.08,
+          "scanner_ms": {
+            "yara-x": 0.364,
+            "office": 1.674,
+            "pdf": 0.003,
+            "custom": 0.562
+          }
+        },
+        {
+          "harness_wall_ms": 528.835,
+          "scanner_ms": {
+            "yara-x": 0.449,
+            "office": 1.71,
+            "pdf": 0.003,
+            "custom": 0.627
+          }
+        },
+        {
+          "harness_wall_ms": 530.956,
+          "scanner_ms": {
+            "yara-x": 0.405,
+            "office": 2.031,
+            "pdf": 0.003,
+            "custom": 0.718
+          }
+        },
+        {
+          "harness_wall_ms": 530.908,
+          "scanner_ms": {
+            "yara-x": 0.441,
+            "office": 1.818,
+            "pdf": 0.004,
+            "custom": 0.651
+          }
+        },
+        {
+          "harness_wall_ms": 526.511,
+          "scanner_ms": {
+            "yara-x": 0.425,
+            "office": 1.725,
+            "pdf": 0.003,
+            "custom": 0.611
+          }
+        },
+        {
+          "harness_wall_ms": 531.896,
+          "scanner_ms": {
+            "yara-x": 0.384,
+            "office": 1.621,
+            "pdf": 0.003,
+            "custom": 0.777
+          }
+        },
+        {
+          "harness_wall_ms": 530.659,
+          "scanner_ms": {
+            "yara-x": 0.391,
+            "office": 1.69,
+            "pdf": 0.004,
+            "custom": 0.609
+          }
+        },
+        {
+          "harness_wall_ms": 574.852,
+          "scanner_ms": {
+            "yara-x": 0.39,
+            "office": 1.712,
+            "pdf": 0.003,
+            "custom": 0.578
+          }
+        },
+        {
+          "harness_wall_ms": 530.817,
+          "scanner_ms": {
+            "yara-x": 0.408,
+            "office": 1.64,
+            "pdf": 0.003,
+            "custom": 0.572
+          }
+        },
+        {
+          "harness_wall_ms": 591.905,
+          "scanner_ms": {
+            "yara-x": 0.507,
+            "office": 2.031,
+            "pdf": 0.005,
+            "custom": 0.673
+          }
+        },
+        {
+          "harness_wall_ms": 596.071,
+          "scanner_ms": {
+            "yara-x": 0.466,
+            "office": 2.036,
+            "pdf": 0.004,
+            "custom": 0.684
+          }
+        },
+        {
+          "harness_wall_ms": 546.9,
+          "scanner_ms": {
+            "yara-x": 0.453,
+            "office": 1.793,
+            "pdf": 0.003,
+            "custom": 0.583
+          }
+        },
+        {
+          "harness_wall_ms": 530.582,
+          "scanner_ms": {
+            "yara-x": 0.382,
+            "office": 1.729,
+            "pdf": 0.003,
+            "custom": 0.584
+          }
+        },
+        {
+          "harness_wall_ms": 529.948,
+          "scanner_ms": {
+            "yara-x": 0.455,
+            "office": 1.736,
+            "pdf": 0.003,
+            "custom": 0.625
+          }
+        },
+        {
+          "harness_wall_ms": 529.733,
+          "scanner_ms": {
+            "yara-x": 0.425,
+            "office": 1.728,
+            "pdf": 0.005,
+            "custom": 0.652
+          }
+        },
+        {
+          "harness_wall_ms": 535.062,
+          "scanner_ms": {
+            "yara-x": 0.374,
+            "office": 1.725,
+            "pdf": 0.003,
+            "custom": 0.58
+          }
+        },
+        {
+          "harness_wall_ms": 530.183,
+          "scanner_ms": {
+            "yara-x": 0.392,
+            "office": 1.729,
+            "pdf": 0.003,
+            "custom": 0.603
+          }
+        }
+      ]
+    }
+  ]
+}

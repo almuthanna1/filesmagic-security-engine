@@ -31,10 +31,32 @@ its own precondition; if it does not hold, the reference finding stands (fail cl
     CAPABILITY (HIGH, with the call path) confirms it; ENGINE_VBA_NO_CALL_PATH and
     ENGINE_VBA_CALL_PATH_UNDETERMINED (INFO) qualify it. "No call path" holds for the source only:
     the P-code Office may run instead cannot be checked for VBA stomping in the isolated worker.
-Every decision is listed in one INFO finding, ENGINE_CORRELATION, so nothing changes silently.
+  - Accounting (benign-corpus validation, docs/evidence/benign-corpus): an engine finding may
+    carry "accounts for <scanner>:<rule>" lines. It then replaces that reference finding, if both
+    scanners completed (and, for PDF, the structure needed no repair). Only three rules may replace
+    a finding of higher severity, each after examining every item behind it:
+      ENGINE_OFFICE_LOCAL_FILE_TARGETS (INFO) for OFFICE_EXTERNAL_NETWORK_PATH: every relationship
+        behind it (listed exactly as the Office scanner lists them) is a picture or linked
+        workbook whose target is an unambiguous local drive path (app.engine.file_paths, RFC 8089).
+      ENGINE_OFFICE_LOCAL_TEMPLATE (LOW) for OFFICE_EXTERNAL_AUTOLOAD: every relationship behind it
+        is an attached template on a local drive path that w:attachedTemplate attaches. Still LOW:
+        the template is not inspected and can carry macros; only the server is ruled out.
+      ENGINE_PDF_ATTACHMENTS_VERIFIED (INFO) for PDF_EMBEDDED_FILE and PDF_Embedded_File: every
+        attachment in every object of the file is an OpenDocument package without code under its
+        type's extension, and no action runs a script, launches a file or opens an embedded document
+        (app.engine.pdf_attachments).
+    Any other accounting finding only merges a reference finding of the same or lower severity, so
+    one piece of evidence is counted once (ENGINE_OFFICE_EXTERNAL_ON_OPEN for AUTOLOAD when every
+    relationship behind it is used on open; ENGINE_PDF_ATTACHMENTS_UNVERIFIED, LOW, for the two
+    LOW attachment findings). The reference scanner's name stays in the evidence line.
+Every decision is listed in an INFO finding, ENGINE_CORRELATION, under the engine scanner that made
+it, so nothing changes silently.
 """
 
+import re
+
 from app.engine import ooxml_links, pdf_chains, vba_chains
+from app.engine.file_paths import local_drive_path
 from app.models import Finding, Severity, WorkerReport
 from app.scanners.custom.indicators import NOT_PROOF, clean, listing
 
@@ -49,6 +71,19 @@ VBA = "vba-chains"
 REFERENCE_MACRO = ("office", "OFFICE_MACRO_AUTOEXEC_EXECUTION")
 LINKS = "ooxml-links"
 REFERENCE_AUTOLOAD = ("office", "OFFICE_EXTERNAL_AUTOLOAD")
+NETWORK_PATH = ("office", "OFFICE_EXTERNAL_NETWORK_PATH")
+LOCAL_DATA_TYPES = {"image", "externallinkpath"}  # targets loaded as data; a file: hyperlink can start a program
+ATTACHMENT_REFERENCE = [("pdf", "PDF_EMBEDDED_FILE"), ("yara-x", "PDF_Embedded_File")]
+# An engine finding names each reference finding it accounts for with this evidence line: all the
+# relationships or attachments behind that finding, re-listed and examined by the engine.
+ACCOUNTS = "accounts for {}:{}"
+ACCOUNTS_LINE = re.compile(r"accounts for ([\w-]+):(\w+)")
+# Only these may account for a reference finding of higher severity: each rests on complete,
+# independently examined evidence (module docstring). Any other engine finding may only merge a
+# reference finding of the same or lower severity.
+SUPERSEDING = {(LINKS, "ENGINE_OFFICE_LOCAL_FILE_TARGETS"), (LINKS, "ENGINE_OFFICE_LOCAL_TEMPLATE"),
+               (NAME, "ENGINE_PDF_ATTACHMENTS_VERIFIED")}
+RANK = {s: i for i, s in enumerate(Severity)}
 REFERENCE_OBJECTS = {("office", r) for r in ("OFFICE_EMBEDDED_OLE", "OFFICE_EMBEDDED_BINARY", "OFFICE_PACKAGE_OBJECT",
                                              "OFFICE_PACKAGE_EXECUTABLE", "OFFICE_EQUATION_EDITOR")}
 # Risk policy for activation findings: severity follows what the target can do if the application
@@ -132,7 +167,31 @@ def chain_findings(result: pdf_chains.PdfChains) -> list[Finding]:
         found.append(finding("ENGINE_PDF_CHAINS_REPAIRED", Severity.INFO,
                              f"The PDF structure needed {result.repaired} repair(s); chain analysis is a best-effort "
                              "reading, so reference findings are not superseded."))
-    return found
+    return found + attachment_findings(result)
+
+
+def attachment_findings(result: pdf_chains.PdfChains) -> list[Finding]:
+    """One finding for all attachments (app.engine.pdf_attachments). It accounts for the reference
+    attachment findings only when the attachment list is complete."""
+    if result.files_problem:
+        return [finding("ENGINE_PDF_ATTACHMENTS_INCOMPLETE", Severity.INFO,
+                        f"Attachments could not all be read ({clean(result.files_problem, 160)}); the reference "
+                        "attachment findings stand.")]
+    if not result.files:
+        return []
+    items = [f"{a.name}: {a.verified or 'not verified: ' + a.reason}" for a in result.files]
+    actions = [chain_text(c) for c in result.chains if any(a.script or a.kind in ("Launch", "GoToE") for a in c.actions)]
+    accounts = [ACCOUNTS.format(*r) for r in ATTACHMENT_REFERENCE]
+    if all(a.verified for a in result.files) and not actions:
+        return [finding("ENGINE_PDF_ATTACHMENTS_VERIFIED", Severity.INFO,
+                        "Every attachment was read and is an OpenDocument file without macros, scripts or external "
+                        "links, saved under its type's extension, and no action in this PDF runs a script, launches "
+                        f"a file or opens an embedded document. Evidence: {listing(items)}.", evidence=items + accounts)]
+    why = [f"actions that could use an attachment: {listing(actions)}"] if actions else []
+    return [finding("ENGINE_PDF_ATTACHMENTS_UNVERIFIED", Severity.LOW,
+                    "The PDF carries attachments that could not be verified as content without code. "
+                    f"Evidence: {listing([i for i in items if 'not verified' in i] + why)}.",
+                    evidence=items + why + accounts)]
 
 
 class PdfChainScanner:
@@ -171,15 +230,41 @@ def vba_findings(result: vba_chains.VbaChains) -> list[Finding]:
 
 
 def link_findings(result: ooxml_links.Links) -> list[Finding]:
-    def make(rule: str, severity: Severity, text: str, items: list[str]) -> Finding:
+    def make(rule: str, severity: Severity, text: str, items: list[str], accounts: list[str] = ()) -> Finding:
         return finding(rule, severity, f"{text} Evidence: {listing([clean(i, 240) for i in items])}.",
-                       scanner=LINKS, category="office-activation", evidence=items)
+                       scanner=LINKS, category="office-activation", evidence=[*items, *accounts])
+
+    reference = result.reference or {}
+    paths, autoload = reference.get(NETWORK_PATH[1], []), reference.get(REFERENCE_AUTOLOAD[1], [])
+    acts = [result.activation(t) for t in autoload]
+    local_templates = result.reference is not None and bool(autoload) and all(
+        t.type.lower() == "attachedtemplate" and local_drive_path(t.target) and a is not None
+        and a.state == ooxml_links.ON_OPEN and a.why.startswith("w:attachedTemplate") for t, a in zip(autoload, acts))
 
     by: dict[str, list[ooxml_links.Activation]] = {}
     for a in result.activations:
-        by.setdefault(a.state, []).append(a)
-    found = [make(*LINK_RULES[state], [f"{a.chain} ({a.why})" for a in items])
+        if not (local_templates and a in acts):
+            by.setdefault(a.state, []).append(a)
+    # The same relationships as the Office scanner's OFFICE_EXTERNAL_AUTOLOAD, all used on open: one finding.
+    merged = result.reference is not None and bool(autoload) and not local_templates and all(
+        a is not None and a.state == ooxml_links.ON_OPEN for a in acts)
+    found = [make(*LINK_RULES[state], [f"{a.chain} ({a.why})" for a in items],
+                  [ACCOUNTS.format(*REFERENCE_AUTOLOAD)] if merged and state == ooxml_links.ON_OPEN else [])
              for state, items in by.items() if state in LINK_RULES]
+    if local_templates:
+        found.append(make("ENGINE_OFFICE_LOCAL_TEMPLATE", Severity.LOW,
+                          "The document attaches a template from a local drive path when it opens. The path names no "
+                          "host (RFC 8089), so this is not template injection from a server; but Word loads that "
+                          "template, which is outside this file and was not inspected, and a template can carry macros.",
+                          [f"{a.chain} ({a.why})" for a in acts], [ACCOUNTS.format(*REFERENCE_AUTOLOAD)]))
+    if result.reference is not None and paths and all(t.type.lower() in LOCAL_DATA_TYPES and local_drive_path(t.target)
+                                                      for t in paths):
+        found.append(make("ENGINE_OFFICE_LOCAL_FILE_TARGETS", Severity.INFO,
+                          "Every target the Office scanner reports as a network path is a picture or linked-workbook "
+                          "path on a local drive (RFC 8089): none names a host, so using it cannot send Windows "
+                          "credentials to a server. The files themselves are outside this document and were not "
+                          "inspected.", [f"{t.rels_part} {t.id} ({t.type}) -> {t.target}" for t in paths],
+                          [ACCOUNTS.format(*NETWORK_PATH)]))
     idle = by.get(ooxml_links.NOT_ACTIVATED, [])
     if external := [a for a in idle if a.relationship.external]:
         found.append(make("ENGINE_OFFICE_EXTERNAL_NOT_ACTIVATED", Severity.INFO,
@@ -210,46 +295,73 @@ class VbaChainScanner:
         return None if result is None else vba_findings(result)
 
 
+def accounted(f: Finding) -> list[tuple[str, str]]:
+    """The reference findings (scanner, rule) an engine finding accounts for (ACCOUNTS lines)."""
+    return [m.groups() for e in f.evidence if (m := ACCOUNTS_LINE.fullmatch(e))]
+
+
 def correlate(report: WorkerReport) -> WorkerReport:
     status = {s.name: s.status for s in report.scanners}
     rules = {(f.scanner, f.rule_id) for f in report.findings}
     chains_ok = status.get(NAME) == "completed" and (NAME, "ENGINE_PDF_CHAINS_REPAIRED") not in rules
-    drop, notes = set(), []
+    drop, notes = set(), {}  # notes: engine scanner -> its decisions, reported under that scanner
+
+    def note(scanner: str, text: str) -> None:
+        notes.setdefault(scanner, []).append(text)
+
     if chains_ok and status.get("pdf") == "completed" and (found := rules & STRUCTURAL):
         drop |= found
-        notes.append(f"replaced {', '.join(sorted(r for _, r in found))} (PDF scanner) by the action-chain rules")
+        note(NAME, f"replaced {', '.join(sorted(r for _, r in found))} (PDF scanner) by the action-chain rules")
     if status.get(SIGNATURES) == "completed" and REFERENCE_SIGNATURE in rules:
         drop.add(REFERENCE_SIGNATURE)
-        notes.append(f"replaced {REFERENCE_SIGNATURE[1]} (YARA-X) by {REFINED_SIGNATURE[1]}, which "
-                     + ("also matched" if REFINED_SIGNATURE in rules else
-                        "did not match: the bytes show every /OpenAction and /AA here is not automatic"))
+        note(SIGNATURES, f"replaced {REFERENCE_SIGNATURE[1]} (YARA-X) by {REFINED_SIGNATURE[1]}, which "
+             + ("also matched" if REFINED_SIGNATURE in rules else
+                "did not match: the bytes show every /OpenAction and /AA here is not automatic"))
     claim = next((r for r in (REFINED_SIGNATURE, REFERENCE_SIGNATURE) if r in rules and r not in drop), None)
     if chains_ok and claim and not any(s == NAME and r in SCRIPT_RULES for s, r in rules):
-        notes.append(f"{claim[1]} ({claim[0]}) kept but not confirmed: no automatic action chain runs a script")
+        note(NAME, f"{claim[1]} ({claim[0]}) kept but not confirmed: no automatic action chain runs a script")
+
+    # Accounting: an engine finding that re-listed and examined everything behind a reference
+    # finding replaces it, keeping the reference scanner's name in its evidence. Both scanners must
+    # have completed (and the PDF structure needed no repair). Lowering the severity is allowed only
+    # for SUPERSEDING rules; anything else may only merge a finding of the same or lower severity.
+    for f in report.findings:
+        for scanner, rule in accounted(f):
+            behind = [r for r in report.findings if (r.scanner, r.rule_id) == (scanner, rule)]
+            if (not behind or status.get(scanner) != "completed" or status.get(f.scanner) != "completed"
+                    or (f.scanner == NAME and not chains_ok)):
+                continue
+            lower = max(RANK[r.severity] for r in behind) > RANK[f.severity]
+            if lower and (f.scanner, f.rule_id) not in SUPERSEDING:
+                continue
+            drop.add((scanner, rule))
+            note(f.scanner, f"{'superseded' if lower else 'merged'} {rule} ({scanner}) into {f.rule_id}"
+                 + (", which examined every item behind it" if lower else ": the same evidence, counted once"))
+
     if status.get(VBA) == "completed" and REFERENCE_MACRO in rules:
         # ponytail: never removed. Lowering it on "no call path" needs the P-code checked for VBA
         # stomping, which olevba does only on files on disk; the worker cannot write any.
         if (VBA, "ENGINE_VBA_AUTOEXEC_REACHES_CAPABILITY") in rules:
-            notes.append(f"{REFERENCE_MACRO[1]} (Office scanner) confirmed by a macro call path")
+            note(VBA, f"{REFERENCE_MACRO[1]} (Office scanner) confirmed by a macro call path")
         elif (VBA, "ENGINE_VBA_NO_CALL_PATH") in rules:
-            notes.append(f"{REFERENCE_MACRO[1]} (Office scanner) kept although the source shows no call path from "
-                         "the automatic procedures to the dangerous operation: the P-code that may run instead "
-                         "cannot be checked for VBA stomping here")
+            note(VBA, f"{REFERENCE_MACRO[1]} (Office scanner) kept although the source shows no call path from "
+                      "the automatic procedures to the dangerous operation: the P-code that may run instead "
+                      "cannot be checked for VBA stomping here")
         else:
-            notes.append(f"{REFERENCE_MACRO[1]} (Office scanner) kept: the macro call path could not be determined")
+            note(VBA, f"{REFERENCE_MACRO[1]} (Office scanner) kept: the macro call path could not be determined")
     if status.get(LINKS) == "completed":
-        # Never removed either: an element this analysis does not model, or Office behaviour beyond
-        # the specification, could still use a relationship the graph calls not activated.
+        # Kept unless accounted for above: an element this analysis does not model, or Office
+        # behaviour beyond the specification, could still use a relationship the graph calls not activated.
         engine = {r for s, r in rules if s == LINKS}
-        if REFERENCE_AUTOLOAD in rules:
-            notes.append(f"{REFERENCE_AUTOLOAD[1]} (Office scanner) " + (
+        if REFERENCE_AUTOLOAD in rules and REFERENCE_AUTOLOAD not in drop:
+            note(LINKS, f"{REFERENCE_AUTOLOAD[1]} (Office scanner) " + (
                 "confirmed: a part Office loads references an external target used on open"
                 if "ENGINE_OFFICE_EXTERNAL_ON_OPEN" in engine else
                 "kept: whether the relationship is used could not be determined"
                 if "ENGINE_OFFICE_ACTIVATION_UNDETERMINED" in engine else
                 "kept although no part Office loads references it: its use is not demonstrated"))
         if found := sorted(r for s, r in rules & REFERENCE_OBJECTS):
-            notes.append(f"{', '.join(found)} (Office scanner) kept; " + (
+            note(LINKS, f"{', '.join(found)} (Office scanner) kept; " + (
                 "the object is shown in the document and runs only when activated"
                 if "ENGINE_OFFICE_EMBEDDED_OBJECT_DISPLAYED" in engine else
                 "no element shows the object in the document"
@@ -258,6 +370,7 @@ def correlate(report: WorkerReport) -> WorkerReport:
     if not notes:
         return report
     findings = [f for f in report.findings if (f.scanner, f.rule_id) not in drop]
-    findings.append(finding("ENGINE_CORRELATION", Severity.INFO, "Evidence correlation: " + "; ".join(notes) + ".",
-                            evidence=notes))
+    findings += [finding("ENGINE_CORRELATION", Severity.INFO, "Evidence correlation: " + "; ".join(items) + ".",
+                         scanner=scanner, category="evidence-correlation", evidence=items)
+                 for scanner, items in notes.items()]
     return report.model_copy(update={"findings": findings})

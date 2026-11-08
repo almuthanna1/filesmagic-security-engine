@@ -169,9 +169,19 @@ def test_a_template_used_on_open_stays_medium():
     assert by_rule(unified)["ENGINE_OFFICE_EXTERNAL_ON_OPEN"].severity.value == "MEDIUM"
 
 
+def test_a_template_used_on_open_is_reported_once():
+    # The Office scanner's AUTOLOAD and the graph's ON_OPEN describe the same relationship: one
+    # MEDIUM finding, which names the Office scanner's rule it accounts for.
+    unified = engine.correlate(worker.analyse(engine.SCANNERS, CASE["6c-docx-template-referenced-by-settings"]))
+    on_open = by_rule(unified)["ENGINE_OFFICE_EXTERNAL_ON_OPEN"]
+    assert on_open.severity.value == "MEDIUM" and "accounts for office:OFFICE_EXTERNAL_AUTOLOAD" in on_open.evidence
+    assert "OFFICE_EXTERNAL_AUTOLOAD" not in by_rule(unified) and verdicts(unified)["aggregate"] == "SUSPICIOUS"
+    note = by_rule(unified)["ENGINE_CORRELATION"]
+    assert note.scanner == "ooxml-links" and "merged OFFICE_EXTERNAL_AUTOLOAD (office)" in note.description
+
+
 @pytest.mark.parametrize("case, note", [
     ("6b-docx-external-template", "kept although no part Office loads references it"),
-    ("6c-docx-template-referenced-by-settings", "confirmed: a part Office loads references an external target"),
     ("6e-docx-embedded-object-displayed", "shown in the document and runs only when activated"),
     ("6f-docx-embedded-object-not-displayed", "no element shows the object"),
 ])

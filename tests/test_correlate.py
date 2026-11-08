@@ -33,8 +33,9 @@ def rules(report: WorkerReport) -> set[str]:
     ("3-pdf-escaped-openaction-js", "SUSPICIOUS", {"ENGINE_PDF_AUTO_CHAIN_SCRIPT", "CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME"},
      {"PDF_AUTO_JAVASCRIPT"}),
     # The reference engine says MALICIOUS here: an automatic script plus an attachment it never uses.
-    ("5a-pdf-auto-js-unrelated-attachment", "SUSPICIOUS", {"ENGINE_PDF_AUTO_CHAIN_SCRIPT", "PDF_EMBEDDED_FILE"},
-     {"PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD", "ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT"}),
+    # The two LOW attachment findings (PDF scanner, YARA-X) are one attachment: merged, still LOW.
+    ("5a-pdf-auto-js-unrelated-attachment", "SUSPICIOUS", {"ENGINE_PDF_AUTO_CHAIN_SCRIPT", "ENGINE_PDF_ATTACHMENTS_UNVERIFIED"},
+     {"PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD", "ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT", "PDF_EMBEDDED_FILE"}),
     ("5b-pdf-auto-js-exports-attachment", "MALICIOUS", {"ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT"},
      {"PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD", "ENGINE_PDF_AUTO_CHAIN_SCRIPT"}),
     # The reference AUTOLOAD stays; the activation graph adds that no loaded part references it.

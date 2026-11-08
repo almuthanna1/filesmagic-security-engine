@@ -2,7 +2,7 @@
 
 Most tests run the selected engine in this process (tests/conftest.py); the ones marked
 "real worker" run it in the isolated worker subprocess, exactly as the deployed API does.
-The acceptance test replays the frozen evaluation matrix (docs/evidence/custom-engine-1668326)
+The acceptance test replays the frozen evaluation matrix (docs/evidence/custom-engine-fp-fixes)
 through the API for both engines. If detection changes on purpose, re-freeze that evidence.
 """
 
@@ -26,7 +26,7 @@ from tests.test_vba_chains import RELATED, SourceOnlyOfficeParser
 
 client = TestClient(main.app)
 CASE = {c["id"]: c["data"] for c in cases()}
-FROZEN = Path(__file__).resolve().parent.parent / "docs/evidence/custom-engine-1668326"
+FROZEN = Path(__file__).resolve().parent.parent / "docs/evidence/custom-engine-fp-fixes"
 REFERENCE_SCANNERS = ["yara-x", "office", "pdf", "custom"]
 UNIFIED_SCANNERS = REFERENCE_SCANNERS + ["yara-x-engine", "pdf-chains", "vba-chains", "ooxml-links"]
 CORRUPT_PDF = b"%PDF-1.7\n1 0 obj\n<< /Length 10 >>\nstream\nno end marker follows"
@@ -121,8 +121,10 @@ def test_structured_evidence_reaches_the_response(research):
     body = scan(CASE["5b-pdf-auto-js-exports-attachment"], "unified").json()
     chain = next(f for f in body["findings"] if f["rule_id"] == "ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT")
     assert chain["evidence"] == ["catalog /OpenAction: JavaScript (object 7 0) (exports 'f')"]
-    note = next(f for f in body["findings"] if f["rule_id"] == "ENGINE_CORRELATION")
-    assert len(note["evidence"]) == 2 and "PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD" in note["evidence"][0]
+    notes = {f["scanner"]: f["evidence"] for f in body["findings"] if f["rule_id"] == "ENGINE_CORRELATION"}
+    assert "PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD" in notes["pdf-chains"][0]
+    assert "PDF_JavaScript_With_Automatic_Action" in notes["yara-x-engine"][0]  # its own scanner's decision
+    assert any(n.startswith("merged PDF_EMBEDDED_FILE (pdf)") for n in notes["pdf-chains"])
     relationship = scan(CASE["6c-docx-template-referenced-by-settings"], "unified").json()
     on_open = next(f for f in relationship["findings"] if f["rule_id"] == "ENGINE_OFFICE_EXTERNAL_ON_OPEN")
     assert on_open["evidence"][0].startswith("package -> word/document.xml (officedocument) -> word/settings.xml")

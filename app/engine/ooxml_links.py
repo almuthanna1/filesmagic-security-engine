@@ -33,11 +33,13 @@ embedded packages and ActiveX controls):
 """
 
 import io
+import zipfile
 from collections import deque
 from dataclasses import dataclass, field
 
 import defusedxml.ElementTree as SafeET
 
+from app.scanners import office
 from app.scanners.custom import ooxml_package as opc
 from app.scanners.custom.ooxml import REL_NAMESPACES, is_xml
 
@@ -65,10 +67,55 @@ class Activation:
     chain: str  # how Office reaches the source part, and the referencing element
 
 
+@dataclass(frozen=True)
+class ReferenceTarget:
+    rels_part: str  # lower case, as the Office scanner keys members
+    id: str
+    type: str  # last segment of the relationship type, as written
+    target: str
+
+
 @dataclass
 class Links:
     activations: list[Activation] = field(default_factory=list)
     unrelated_objects: list[str] = field(default_factory=list)  # object parts no relationship leads to
+    # Office-scanner rule -> every external relationship behind it; None: not established, so no
+    # reference finding about relationships may be superseded or merged.
+    reference: dict[str, list[ReferenceTarget]] | None = None
+
+    def activation(self, t: ReferenceTarget) -> Activation | None:
+        found = [a for a in self.activations
+                 if a.relationship.rels_part.lower() == t.rels_part and a.relationship.id == t.id]
+        return found[0] if len(found) == 1 else None
+
+
+def reference_targets(data: bytes) -> dict[str, list[ReferenceTarget]] | None:
+    """The external relationships behind each Office-scanner finding, listed exactly as
+    app.scanners.office.scan_ooxml lists them: the same members, XML reader and classifier
+    (external_relationship), so the two analyses talk about the same relationships. None when the
+    package can be read in more than one way (duplicate, encrypted or unsafe member names), when the
+    Office scanner would stop at its size limits, or when anything here fails."""
+    try:
+        with zipfile.ZipFile(io.BytesIO(data)) as zf:
+            infos = zf.infolist()
+            if (len(infos) > office.MAX_ZIP_ENTRIES or sum(i.file_size for i in infos) > office.MAX_TOTAL_UNCOMPRESSED
+                    or len({i.filename.lower() for i in infos}) != len(infos)
+                    or any(i.flag_bits & 0x1 or office.unsafe_member_name(i.filename) for i in infos)):
+                return None
+            found: dict[str, list[ReferenceTarget]] = {}
+            for info in infos:
+                if not info.filename.lower().endswith(".rels"):
+                    continue
+                for el in office.iter_xml(zf, info):
+                    if office.local(el.tag) != "Relationship" or el.get("TargetMode", "").lower() != "external":
+                        continue
+                    rel_type, target = el.get("Type", "").rsplit("/", 1)[-1], el.get("Target", "")
+                    if verdict := office.external_relationship(rel_type, target):
+                        found.setdefault(verdict[2], []).append(
+                            ReferenceTarget(info.filename.lower(), el.get("Id", ""), rel_type, target))
+            return found
+    except Exception:  # ponytail: any doubt means "not established"; the Office scanner reports its own failure
+        return None
 
 
 def _local(name: str) -> tuple[str, str]:
@@ -209,4 +256,8 @@ def scan(data: bytes) -> Links | None:
     """None if this is not an OPC package. Raises CustomScanError (fail closed) when its
     content types or relationship parts cannot be read."""
     package = opc.open_package(data)
-    return None if package is None else analyse(package)
+    if package is None:
+        return None
+    result = analyse(package)
+    result.reference = reference_targets(data)
+    return result

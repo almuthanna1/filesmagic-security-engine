@@ -32,6 +32,7 @@ from pypdf import PasswordType, PdfReader, apply_configuration
 from pypdf.errors import PdfReadError
 from pypdf.generic import ArrayObject, DictionaryObject, IndirectObject
 
+from app.engine import pdf_attachments
 from app.scanners.base import ScanError
 from app.scanners.pdf import (
     AUTO_TRIGGERS, MAX_DEPTH, MAX_JS_BYTES, MAX_OBJECTS, PDF_LIMITS, SKIP_KEYS, _RepairLog, clean, filespec_name,
@@ -72,6 +73,8 @@ class PdfChains:
     chains: list[Chain] = field(default_factory=list)
     attachments: set[str] = field(default_factory=set)  # name-tree keys and file names of /EF file specs
     repaired: int = 0  # pypdf repair warnings: the structure is a best-effort reading
+    files: list = field(default_factory=list)  # pdf_attachments.Attachment, from every object of the file
+    files_problem: str = ""  # why `files` may be incomplete ("" if it is complete)
 
     def linked(self, chain: Chain) -> list[tuple[Action, str, str]]:
         """(action, attachment, how) for every payload of `chain` that names an attachment."""
@@ -159,7 +162,8 @@ def _name_tree(tree):
             todo.extend((kid, depth + 1) for kid in kids)
 
 
-def extract(data: bytes) -> PdfChains:
+def extract(data: bytes, log: _RepairLog | None = None) -> PdfChains:
+    log = log or _RepairLog()
     reader = PdfReader(io.BytesIO(data), strict=False)
     if reader.is_encrypted and reader.decrypt("") == PasswordType.NOT_DECRYPTED:
         raise ChainScanError("PDF is password-protected; its actions cannot be read")
@@ -214,6 +218,15 @@ def extract(data: bytes) -> PdfChains:
                 result.attachments.update(name for name, _ in _name_tree(v))
             stack.append((v, depth + 1, owner))  # triggers too: their objects may hold file specs
     result.attachments.discard("")
+    # Repairs while reading attachments make the attachment list incomplete, not the chains.
+    result.repaired = log.count
+    try:
+        result.files, result.files_problem = pdf_attachments.inspect(reader, data)
+    except Exception as e:  # never fails the chain scanner: an incomplete list only blocks supersession
+        result.files, result.files_problem = [], f"attachment inspection failed: {type(e).__name__}: {clean(e, 120)}"
+    if log.count > result.repaired:
+        result.files_problem = result.files_problem or f"pypdf repaired {log.count - result.repaired} problem(s) " \
+                                                       "while reading attachments"
     return result
 
 
@@ -225,12 +238,11 @@ def scan(data: bytes) -> PdfChains | None:
     pypdf_logger.addHandler(log)
     try:
         with apply_configuration(**PDF_LIMITS):
-            result = extract(data)
+            result = extract(data, log)
     except ChainScanError:
         raise
     except Exception as e:  # any parser failure, including RecursionError on hostile nesting
         raise ChainScanError(f"PDF action-chain analysis failed: {type(e).__name__}: {clean(e, 200)}") from e
     finally:
         pypdf_logger.removeHandler(log)
-    result.repaired = log.count
     return result
