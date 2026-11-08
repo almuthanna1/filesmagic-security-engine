@@ -1,7 +1,7 @@
 """Internal baseline: every corpus file through both engines in the real worker subprocess, with the
 verdict rules /scan applies (evaluation.cases.verdicts). No token, no network.
 
-    python -m evaluation.benign_corpus.local --out <results.json>
+    python -m evaluation.benign_corpus.local --out <results.json> [--dir evaluation/benign_corpus/independent]
 """
 
 import argparse
@@ -29,9 +29,10 @@ def scan(data: bytes, engine: str) -> dict:
 def main_(argv=None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--dir", type=Path, default=FILES, help="folder of documents (default: files/)")
     args = parser.parse_args(argv)
     rows = []
-    for f in sorted(FILES.iterdir()):
+    for f in sorted(p for p in args.dir.iterdir() if p.name != "manifest.json"):
         data = f.read_bytes()
         row = {"file": f.name, "detected_format": main.detect_format(data)}
         row |= {e: scan(data, e) for e in ("reference", "unified")}
