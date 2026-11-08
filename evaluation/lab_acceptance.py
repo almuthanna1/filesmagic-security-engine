@@ -167,8 +167,13 @@ def failure_rows(lab: str, api: str, health: dict) -> list[dict]:
     # The engine refuses on Content-Length and closes the connection, so send only the headers and
     # read the answer before any body byte (a client still sending 10 MB would see a reset instead).
     status, issued = token(lab, b"x")
-    s = headers_only_status(f"{api}/scan?engine=reference", MAX_UPLOAD_BYTES + 1, {
-        "Authorization": f"Bearer {issued.get('token', '')}", "Origin": lab})
+    url, auth = f"{api}/scan?engine=reference", {"Authorization": f"Bearer {issued.get('token', '')}", "Origin": lab}
+    try:
+        s = headers_only_status(url, MAX_UPLOAD_BYTES + 1, auth)
+    except ConnectionError:
+        # A proxy in front of the engine (Render's edge) resets a request whose body never comes;
+        # send the inert zero bytes, as a browser would (the engine still refuses on Content-Length).
+        s = request(url, oversized, {**auth, "Content-Type": "application/octet-stream"}, "POST")[0]
     rows.append({"case": "oversized-upload", "engine": "reference", "result": {"http": s},
                  "problems": [] if s == 413 else [f"engine answered {s} for an oversized upload"]})
     s, _, raw = request(f"{api}/scan?engine=fastest", b"x", {"Origin": lab}, "POST")

@@ -1,0 +1,186 @@
+{
+  "lab": "https://filesmagic-security-lab-staging.vercel.app",
+  "api": "https://filesmagic-security-engine-staging.onrender.com",
+  "health": {
+    "status": "ok",
+    "service": "filesmagic-security-engine",
+    "scanners_registered": 4,
+    "scanners_ready": 4,
+    "auth_configured": true,
+    "engines": [
+      "reference",
+      "unified"
+    ],
+    "default_engine": "reference",
+    "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8"
+  },
+  "timestamp_utc": "2026-11-07T21:15:11Z",
+  "batch": 2,
+  "batch_size": 6,
+  "stopped": null,
+  "checks": 12,
+  "failed": 11,
+  "rows": [
+    {
+      "case": "6g-docx-linked-picture-file-share",
+      "engine": "reference",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 7243.2,
+        "cors_allowed": true,
+        "engine": "reference",
+        "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "office:OFFICE_EXTERNAL_NETWORK_PATH:MEDIUM"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "completed",
+          "pdf": "not_applicable",
+          "custom": "completed"
+        },
+        "complete": true,
+        "duration_ms": 6944.0,
+        "sha256": "bdacf5acdcdd555fea3e6bd01827087899a55e42e16561664b16a26548bbc355",
+        "sent_sha256": "bdacf5acdcdd555fea3e6bd01827087899a55e42e16561664b16a26548bbc355",
+        "evidence_items": 0,
+        "isolation_missing": []
+      },
+      "problems": []
+    },
+    {
+      "case": "6g-docx-linked-picture-file-share",
+      "engine": "unified",
+      "result": {
+        "http": 429,
+        "stage": "token",
+        "detail": "Scan limit reached. Please try again in 15 minutes."
+      },
+      "problems": [
+        "HTTP 429 at token: Scan limit reached. Please try again in 15 minutes."
+      ]
+    },
+    {
+      "case": "6e-docx-embedded-object-displayed",
+      "engine": "reference",
+      "result": {
+        "http": 429,
+        "stage": "token",
+        "detail": "Scan limit reached. Please try again in 15 minutes."
+      },
+      "problems": [
+        "HTTP 429 at token: Scan limit reached. Please try again in 15 minutes."
+      ]
+    },
+    {
+      "case": "6e-docx-embedded-object-displayed",
+      "engine": "unified",
+      "result": {
+        "http": 429,
+        "stage": "token",
+        "detail": "Scan limit reached. Please try again in 15 minutes."
+      },
+      "problems": [
+        "HTTP 429 at token: Scan limit reached. Please try again in 15 minutes."
+      ]
+    },
+    {
+      "case": "6f-docx-embedded-object-not-displayed",
+      "engine": "reference",
+      "result": {
+        "http": 429,
+        "stage": "token",
+        "detail": "Scan limit reached. Please try again in 15 minutes."
+      },
+      "problems": [
+        "HTTP 429 at token: Scan limit reached. Please try again in 15 minutes."
+      ]
+    },
+    {
+      "case": "6f-docx-embedded-object-not-displayed",
+      "engine": "unified",
+      "result": {
+        "http": 429,
+        "stage": "token",
+        "detail": "Scan limit reached. Please try again in 15 minutes."
+      },
+      "problems": [
+        "HTTP 429 at token: Scan limit reached. Please try again in 15 minutes."
+      ]
+    },
+    {
+      "case": "7-docx-macro-declaration-mismatch",
+      "engine": "reference",
+      "result": {
+        "http": 429,
+        "stage": "token",
+        "detail": "Scan limit reached. Please try again in 15 minutes."
+      },
+      "problems": [
+        "HTTP 429 at token: Scan limit reached. Please try again in 15 minutes."
+      ]
+    },
+    {
+      "case": "7-docx-macro-declaration-mismatch",
+      "engine": "unified",
+      "result": {
+        "http": 429,
+        "stage": "token",
+        "detail": "Scan limit reached. Please try again in 15 minutes."
+      },
+      "problems": [
+        "HTTP 429 at token: Scan limit reached. Please try again in 15 minutes."
+      ]
+    },
+    {
+      "case": "office-clean-xlsx",
+      "engine": "reference",
+      "result": {
+        "http": 429,
+        "stage": "token",
+        "detail": "Scan limit reached. Please try again in 15 minutes."
+      },
+      "problems": [
+        "HTTP 429 at token: Scan limit reached. Please try again in 15 minutes."
+      ]
+    },
+    {
+      "case": "office-clean-xlsx",
+      "engine": "unified",
+      "result": {
+        "http": 429,
+        "stage": "token",
+        "detail": "Scan limit reached. Please try again in 15 minutes."
+      },
+      "problems": [
+        "HTTP 429 at token: Scan limit reached. Please try again in 15 minutes."
+      ]
+    },
+    {
+      "case": "office-clean-pptx",
+      "engine": "reference",
+      "result": {
+        "http": 429,
+        "stage": "token",
+        "detail": "Scan limit reached. Please try again in 15 minutes."
+      },
+      "problems": [
+        "HTTP 429 at token: Scan limit reached. Please try again in 15 minutes."
+      ]
+    },
+    {
+      "case": "office-clean-pptx",
+      "engine": "unified",
+      "result": {
+        "http": 429,
+        "stage": "token",
+        "detail": "Scan limit reached. Please try again in 15 minutes."
+      },
+      "problems": [
+        "HTTP 429 at token: Scan limit reached. Please try again in 15 minutes."
+      ]
+    }
+  ]
+}

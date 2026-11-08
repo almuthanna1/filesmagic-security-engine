@@ -1,0 +1,196 @@
+{
+  "lab": "https://filesmagic-security-lab-staging.vercel.app",
+  "api": "https://filesmagic-security-engine-staging.onrender.com",
+  "health": {
+    "status": "ok",
+    "service": "filesmagic-security-engine",
+    "scanners_registered": 4,
+    "scanners_ready": 4,
+    "auth_configured": true,
+    "engines": [
+      "reference",
+      "unified"
+    ],
+    "default_engine": "reference",
+    "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8"
+  },
+  "timestamp_utc": "2026-11-07T20:58:46Z",
+  "batch": 1,
+  "batch_size": 6,
+  "stopped": null,
+  "checks": 12,
+  "failed": 11,
+  "rows": [
+    {
+      "case": "5a-pdf-auto-js-unrelated-attachment",
+      "engine": "reference",
+      "result": {
+        "http": 429,
+        "stage": "scan",
+        "wall_ms": 159.9,
+        "cors_allowed": true,
+        "detail": "The engine is busy with another scan. Try again shortly."
+      },
+      "problems": [
+        "HTTP 429 at scan: The engine is busy with another scan. Try again shortly."
+      ]
+    },
+    {
+      "case": "5a-pdf-auto-js-unrelated-attachment",
+      "engine": "unified",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 6514.0,
+        "cors_allowed": true,
+        "engine": "unified",
+        "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+          "pdf:PDF_EMBEDDED_FILE:LOW",
+          "pdf:PDF_JAVASCRIPT:MEDIUM",
+          "yara-x-engine:ENGINE_PDF_JavaScript_With_Automatic_Trigger:MEDIUM",
+          "yara-x:PDF_Embedded_File:LOW"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "not_applicable",
+          "pdf": "completed",
+          "custom": "completed",
+          "yara-x-engine": "completed",
+          "pdf-chains": "completed",
+          "vba-chains": "not_applicable",
+          "ooxml-links": "not_applicable"
+        },
+        "complete": true,
+        "duration_ms": 6375.2,
+        "sha256": "48ac8dc02c326363f7d91d947c4fbb2b8b077d1a7ec7c310c801f1fadcc382c8",
+        "sent_sha256": "48ac8dc02c326363f7d91d947c4fbb2b8b077d1a7ec7c310c801f1fadcc382c8",
+        "evidence_items": 3,
+        "isolation_missing": []
+      },
+      "problems": []
+    },
+    {
+      "case": "5b-pdf-auto-js-exports-attachment",
+      "engine": "reference",
+      "result": {
+        "http": 429,
+        "stage": "token",
+        "detail": "Scan limit reached. Please try again in 15 minutes."
+      },
+      "problems": [
+        "HTTP 429 at token: Scan limit reached. Please try again in 15 minutes."
+      ]
+    },
+    {
+      "case": "5b-pdf-auto-js-exports-attachment",
+      "engine": "unified",
+      "result": {
+        "http": 429,
+        "stage": "token",
+        "detail": "Scan limit reached. Please try again in 15 minutes."
+      },
+      "problems": [
+        "HTTP 429 at token: Scan limit reached. Please try again in 15 minutes."
+      ]
+    },
+    {
+      "case": "6a-docx-hyperlink",
+      "engine": "reference",
+      "result": {
+        "http": 429,
+        "stage": "token",
+        "detail": "Scan limit reached. Please try again in 15 minutes."
+      },
+      "problems": [
+        "HTTP 429 at token: Scan limit reached. Please try again in 15 minutes."
+      ]
+    },
+    {
+      "case": "6a-docx-hyperlink",
+      "engine": "unified",
+      "result": {
+        "http": 429,
+        "stage": "token",
+        "detail": "Scan limit reached. Please try again in 15 minutes."
+      },
+      "problems": [
+        "HTTP 429 at token: Scan limit reached. Please try again in 15 minutes."
+      ]
+    },
+    {
+      "case": "6b-docx-external-template",
+      "engine": "reference",
+      "result": {
+        "http": 429,
+        "stage": "token",
+        "detail": "Scan limit reached. Please try again in 15 minutes."
+      },
+      "problems": [
+        "HTTP 429 at token: Scan limit reached. Please try again in 15 minutes."
+      ]
+    },
+    {
+      "case": "6b-docx-external-template",
+      "engine": "unified",
+      "result": {
+        "http": 429,
+        "stage": "token",
+        "detail": "Scan limit reached. Please try again in 15 minutes."
+      },
+      "problems": [
+        "HTTP 429 at token: Scan limit reached. Please try again in 15 minutes."
+      ]
+    },
+    {
+      "case": "6c-docx-template-referenced-by-settings",
+      "engine": "reference",
+      "result": {
+        "http": 429,
+        "stage": "token",
+        "detail": "Scan limit reached. Please try again in 15 minutes."
+      },
+      "problems": [
+        "HTTP 429 at token: Scan limit reached. Please try again in 15 minutes."
+      ]
+    },
+    {
+      "case": "6c-docx-template-referenced-by-settings",
+      "engine": "unified",
+      "result": {
+        "http": 429,
+        "stage": "token",
+        "detail": "Scan limit reached. Please try again in 15 minutes."
+      },
+      "problems": [
+        "HTTP 429 at token: Scan limit reached. Please try again in 15 minutes."
+      ]
+    },
+    {
+      "case": "6d-docx-linked-picture",
+      "engine": "reference",
+      "result": {
+        "http": 429,
+        "stage": "token",
+        "detail": "Scan limit reached. Please try again in 15 minutes."
+      },
+      "problems": [
+        "HTTP 429 at token: Scan limit reached. Please try again in 15 minutes."
+      ]
+    },
+    {
+      "case": "6d-docx-linked-picture",
+      "engine": "unified",
+      "result": {
+        "http": 429,
+        "stage": "token",
+        "detail": "Scan limit reached. Please try again in 15 minutes."
+      },
+      "problems": [
+        "HTTP 429 at token: Scan limit reached. Please try again in 15 minutes."
+      ]
+    }
+  ]
+}
