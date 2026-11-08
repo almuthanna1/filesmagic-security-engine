@@ -5,7 +5,7 @@ import CompareView from "@/components/CompareView";
 import FileDropzone from "@/components/FileDropzone";
 import LabNav from "@/components/LabNav";
 import ScanResultView from "@/components/ScanResultView";
-import { ApiError, ENGINE_LABELS, engineHealth, scanFile, type Engine, type EngineHealth, type ScanResult } from "@/lib/api";
+import { ApiError, ENGINE_LABELS, engineHealth, scanFile, type Engine, type HealthResult, type ScanResult } from "@/lib/api";
 import { addRecords, toRecord } from "@/lib/history";
 import styles from "./page.module.css";
 
@@ -21,16 +21,18 @@ const MODES: { value: Mode; label: string; note: string }[] = [
 export default function SecurityLabPage() {
   const [file, setFile] = useState<File | null>(null);
   const [mode, setMode] = useState<Mode>("reference");
-  const [health, setHealth] = useState<EngineHealth | null | undefined>(undefined);
+  const [health, setHealth] = useState<HealthResult | undefined>(undefined);
+  const [waking, setWaking] = useState<string | null>(null);
   const [scanning, setScanning] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const resultHeading = useRef<HTMLHeadingElement>(null);
-  const unifiedAvailable = health?.engines.includes("unified") ?? false;
+  const unifiedAvailable = !!health && !("error" in health) && health.engines.includes("unified");
 
   useEffect(() => {
-    engineHealth().then(setHealth);
+    engineHealth((attempt, attempts) => setWaking(`The engine may be waking up; retrying (attempt ${attempt} of ${attempts})…`))
+      .then(setHealth);
   }, []);
 
   // Move focus to the result so keyboard and screen-reader users land on it.
@@ -115,8 +117,8 @@ export default function SecurityLabPage() {
             );
           })}
           <p className={styles.status}>
-            {health === undefined ? "Checking which engines this API accepts…" :
-              health === null ? "Could not read the API's engine list; only the Original Engine is offered." :
+            {health === undefined ? (waking ?? "Checking which engines this API accepts…") :
+              "error" in health ? `Could not read the API's engine list: ${health.error} Only the Original Engine is offered.` :
                 unifiedAvailable ? `This API accepts both engines (commit ${health.commit.slice(0, 12)}).` :
                   "This API runs the Original Engine only (the custom engine is research-only and not enabled here)."}
           </p>

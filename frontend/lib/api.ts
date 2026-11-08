@@ -143,22 +143,50 @@ export interface EngineHealth {
   commit: string;
 }
 
-// Which engines this API accepts (GET /health). null if the API cannot be reached or is too old
-// to report engines; the page then offers the original engine only.
-export async function engineHealth(): Promise<EngineHealth | null> {
-  if (!API_URL) return null;
-  try {
-    const response = await fetch(`${API_URL.replace(/\/+$/, "")}/health`, { cache: "no-store" });
+export type HealthResult = EngineHealth | { error: string };
+
+// A sleeping instance (Render's Free plan) can answer 5xx or drop the connection for a while as it
+// wakes, so those are retried after these delays (5 attempts, 30 s of waiting at most). Each request
+// keeps the browser's own timeout. A 4xx or a reply without an engine list is not a cold start and
+// fails at once.
+export const HEALTH_RETRY_DELAYS_MS = [2000, 4000, 8000, 16000];
+
+// Which engines this API accepts (GET /health). On failure, the reason; the page then offers the
+// original engine only.
+export async function engineHealth(
+  onRetry?: (attempt: number, attempts: number) => void,
+  get: (url: string) => Promise<Response> = url => fetch(url, { cache: "no-store" }),
+  sleep: (ms: number) => Promise<void> = ms => new Promise(resolve => setTimeout(resolve, ms)),
+): Promise<HealthResult> {
+  if (!API_URL) return { error: "NEXT_PUBLIC_SECURITY_ENGINE_URL is not set." };
+  const url = `${API_URL.replace(/\/+$/, "")}/health`;
+  const attempts = HEALTH_RETRY_DELAYS_MS.length + 1;
+  let last = "";
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    if (attempt > 1) {
+      onRetry?.(attempt, attempts);
+      await sleep(HEALTH_RETRY_DELAYS_MS[attempt - 2]);
+    }
+    let response: Response;
+    try {
+      response = await get(url);
+    } catch {
+      last = "no response (network error or blocked request)";
+      continue;
+    }
     const data = (await readJson(response)) as { engines?: unknown; default_engine?: unknown; commit?: unknown } | undefined;
-    if (!response.ok || !Array.isArray(data?.engines)) return null;
-    return {
-      engines: data.engines.filter((e): e is Engine => ENGINES.includes(e as Engine)),
-      defaultEngine: data.default_engine === "unified" ? "unified" : "reference",
-      commit: typeof data.commit === "string" ? data.commit : "unknown",
-    };
-  } catch {
-    return null;
+    if (response.ok && Array.isArray(data?.engines)) {
+      return {
+        engines: data.engines.filter((e): e is Engine => ENGINES.includes(e as Engine)),
+        defaultEngine: data.default_engine === "unified" ? "unified" : "reference",
+        commit: typeof data.commit === "string" ? data.commit : "unknown",
+      };
+    }
+    if (response.ok) return { error: "the API's /health reports no engine list (an older engine version)." };
+    last = `HTTP ${response.status}`;
+    if (response.status < 500) return { error: `the API's /health answered ${last}.` };
   }
+  return { error: `the API did not answer after ${attempts} attempts over about 30 s (last: ${last}).` };
 }
 
 // 1. Hash the file in the browser. 2. Ask the Lab (server-side, no login) for a

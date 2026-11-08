@@ -20,6 +20,11 @@ Combined: 38/38 scans (19 fixtures x 2 engines) match the frozen evaluation (ver
 scanner statuses) or the expected verdict, CORS allows the Lab origin, each response describes the
 uploaded bytes and names the requested engine, and every scan reports `isolation_missing: []`.
 
+Engine agreement: the reference and unified verdicts agree on 18 of 19 files. Only
+`5a-pdf-auto-js-unrelated-attachment` differs (reference MALICIOUS, unified SUSPICIOUS: the
+attachment is not used by the automatic JavaScript chain). The unified engine reports different
+*rules* on several agreeing files (refined signature, chain rules, correlation), not different verdicts.
+
 ## Staging UI (Chrome, isolated profile)
 
 - `7b4f838-staging-ui-compare-5a.png`: Compare both on `5a-pdf-auto-js-unrelated-attachment.pdf`:
