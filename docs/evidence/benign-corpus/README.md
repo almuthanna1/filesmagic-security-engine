@@ -59,3 +59,25 @@ measurement.
   rates beyond this corpus.
 - SAFE means no known indicator was found. It is a correct negative here because the ground truth is
   known; for a file of unknown origin it would not show the file is harmless.
+
+# After the false-positive fixes (commit `5b0e682`, 2026-11-08)
+
+Unified engine only; the original four scanners are unchanged. Algorithms: `app/engine/correlate.py`
+(module docstring), `app/engine/file_paths.py`, `app/engine/pdf_attachments.py`.
+
+| Set | Original engine, non-SAFE | Unified, before | Unified, after |
+|---|---|---|---|
+| Development: 29 authored files (`after-local.json`) | 4 | 4 | **1** (docx-05, local template: LOW by design) |
+| Held out: 4 government documents (`independent-after-local.json`) | 3 (IRS forms MALICIOUS) | 3 (SUSPICIOUS) | 3 (SUSPICIOUS, unchanged) |
+| Synthetic: 16 inert cases (`../custom-engine-fp-fixes/`) | unchanged | - | no verdict changes |
+
+Changed verdicts (unified): `docx-04` and `xlsx-04` SUSPICIOUS -> SAFE (every network-path target
+is a picture or linked workbook on a local drive path); `pdf-07` SUSPICIOUS -> SAFE (the
+attachment is an OpenDocument text without macros, scripts or links, and the PDF has no actions).
+No added scanner failures or incomplete scans. Detection time rose on PDFs with many objects
+(every object is now read and each attachment decoded): IRS forms about 58 -> 116 ms of a scan
+of several seconds; elsewhere within run-to-run noise.
+
+Staging (`staging-fp-fixes.json`, Render `5b0e682`, strict isolation, 12 tokens per window): the four
+changed files, 5a, 5b, the four held-out documents, the UNC picture (6g) and a truncated PDF.
+24/24 scans HTTP 200, `isolation_missing: []`, verdicts equal to the local results.
