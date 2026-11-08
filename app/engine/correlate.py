@@ -34,17 +34,24 @@ its own precondition; if it does not hold, the reference finding stands (fail cl
   - Accounting (benign-corpus validation, docs/evidence/benign-corpus): an engine finding may
     carry "accounts for <scanner>:<rule>" lines. It then replaces that reference finding, if both
     scanners completed (and, for PDF, the structure needed no repair). Only three rules may replace
-    a finding of higher severity, each after examining every item behind it:
+    a finding of higher severity, each after examining every item behind it, and only up to the
+    severity it was validated on (SUPERSEDING): a reference finding rated higher saw something
+    this examination does not model, and stands.
       ENGINE_OFFICE_LOCAL_FILE_TARGETS (INFO) for OFFICE_EXTERNAL_NETWORK_PATH: every relationship
-        behind it (listed exactly as the Office scanner lists them) is a picture or linked
-        workbook whose target is an unambiguous local drive path (app.engine.file_paths, RFC 8089).
+        behind it (listed exactly as the Office scanner lists them) is a picture (referenced only by
+        a:blip or v:imagedata) or a linked workbook (only by externalBook, absoluteUrl, relativeUrl)
+        whose target is an unambiguous drive path naming no host (app.engine.file_paths, RFC 8089).
+        The type alone is not enough: an image relationship referenced by a hyperlink is a link.
+        What it shows: the document does not direct Windows to a server of its author's choosing.
+        Not that the drive is a local disk (a mapped drive or junction on the opening machine).
       ENGINE_OFFICE_LOCAL_TEMPLATE (LOW) for OFFICE_EXTERNAL_AUTOLOAD: every relationship behind it
-        is an attached template on a local drive path that w:attachedTemplate attaches. Still LOW:
-        the template is not inspected and can carry macros; only the server is ruled out.
+        is an attached template on such a path, referenced only by w:attachedTemplate. Still LOW:
+        the template is not inspected and can carry macros; only an author-chosen server is ruled out.
       ENGINE_PDF_ATTACHMENTS_VERIFIED (INFO) for PDF_EMBEDDED_FILE and PDF_Embedded_File: every
-        attachment in every object of the file is an OpenDocument package without code under its
-        type's extension, and no action runs a script, launches a file or opens an embedded document
-        (app.engine.pdf_attachments).
+        attachment in every object of the file is an OpenDocument package without code, embedded
+        objects or automatically loaded content, under its type's extension (passive hyperlinks are
+        allowed and counted), and no action runs a script, launches a file or opens an embedded
+        document (app.engine.pdf_attachments).
     Any other accounting finding only merges a reference finding of the same or lower severity, so
     one piece of evidence is counted once (ENGINE_OFFICE_EXTERNAL_ON_OPEN for AUTOLOAD when every
     relationship behind it is used on open; ENGINE_PDF_ATTACHMENTS_UNVERIFIED, LOW, for the two
@@ -72,17 +79,20 @@ REFERENCE_MACRO = ("office", "OFFICE_MACRO_AUTOEXEC_EXECUTION")
 LINKS = "ooxml-links"
 REFERENCE_AUTOLOAD = ("office", "OFFICE_EXTERNAL_AUTOLOAD")
 NETWORK_PATH = ("office", "OFFICE_EXTERNAL_NETWORK_PATH")
-LOCAL_DATA_TYPES = {"image", "externallinkpath"}  # targets loaded as data; a file: hyperlink can start a program
+# Relationship type -> the only elements that may reference it: they load the target as data. A
+# file: hyperlink can start a program, so a relationship any other element uses is not superseded.
+DATA_ELEMENTS = {"image": {"blip", "imagedata"}, "externallinkpath": {"externalBook", "absoluteUrl", "relativeUrl"}}
 ATTACHMENT_REFERENCE = [("pdf", "PDF_EMBEDDED_FILE"), ("yara-x", "PDF_Embedded_File")]
 # An engine finding names each reference finding it accounts for with this evidence line: all the
 # relationships or attachments behind that finding, re-listed and examined by the engine.
 ACCOUNTS = "accounts for {}:{}"
 ACCOUNTS_LINE = re.compile(r"accounts for ([\w-]+):(\w+)")
-# Only these may account for a reference finding of higher severity: each rests on complete,
-# independently examined evidence (module docstring). Any other engine finding may only merge a
-# reference finding of the same or lower severity.
-SUPERSEDING = {(LINKS, "ENGINE_OFFICE_LOCAL_FILE_TARGETS"), (LINKS, "ENGINE_OFFICE_LOCAL_TEMPLATE"),
-               (NAME, "ENGINE_PDF_ATTACHMENTS_VERIFIED")}
+# Only these may account for a reference finding of higher severity, up to the severity given: each
+# rests on complete, independently examined evidence (module docstring). Any other engine finding
+# may only merge a reference finding of the same or lower severity.
+SUPERSEDING = {(LINKS, "ENGINE_OFFICE_LOCAL_FILE_TARGETS"): Severity.MEDIUM,
+               (LINKS, "ENGINE_OFFICE_LOCAL_TEMPLATE"): Severity.MEDIUM,
+               (NAME, "ENGINE_PDF_ATTACHMENTS_VERIFIED"): Severity.LOW}
 RANK = {s: i for i, s in enumerate(Severity)}
 REFERENCE_OBJECTS = {("office", r) for r in ("OFFICE_EMBEDDED_OLE", "OFFICE_EMBEDDED_BINARY", "OFFICE_PACKAGE_OBJECT",
                                              "OFFICE_PACKAGE_EXECUTABLE", "OFFICE_EQUATION_EDITOR")}
@@ -184,9 +194,11 @@ def attachment_findings(result: pdf_chains.PdfChains) -> list[Finding]:
     accounts = [ACCOUNTS.format(*r) for r in ATTACHMENT_REFERENCE]
     if all(a.verified for a in result.files) and not actions:
         return [finding("ENGINE_PDF_ATTACHMENTS_VERIFIED", Severity.INFO,
-                        "Every attachment was read and is an OpenDocument file without macros, scripts or external "
-                        "links, saved under its type's extension, and no action in this PDF runs a script, launches "
-                        f"a file or opens an embedded document. Evidence: {listing(items)}.", evidence=items + accounts)]
+                        "Every attachment was read and is an OpenDocument file without macros, scripts, embedded "
+                        "objects or automatically loaded external content, saved under its type's extension; it may "
+                        "hold hyperlinks, which open only on a click. No action in this PDF runs a script, launches "
+                        "a file or opens an embedded document. This shows what the attachments do not contain, not "
+                        f"that they are harmless. Evidence: {listing(items)}.", evidence=items + accounts)]
     why = [f"actions that could use an attachment: {listing(actions)}"] if actions else []
     return [finding("ENGINE_PDF_ATTACHMENTS_UNVERIFIED", Severity.LOW,
                     "The PDF carries attachments that could not be verified as content without code. "
@@ -239,7 +251,11 @@ def link_findings(result: ooxml_links.Links) -> list[Finding]:
     acts = [result.activation(t) for t in autoload]
     local_templates = result.reference is not None and bool(autoload) and all(
         t.type.lower() == "attachedtemplate" and local_drive_path(t.target) and a is not None
-        and a.state == ooxml_links.ON_OPEN and a.why.startswith("w:attachedTemplate") for t, a in zip(autoload, acts))
+        and a.state == ooxml_links.ON_OPEN and a.elements == ("attachedTemplate",) for t, a in zip(autoload, acts))
+
+    def loaded_as_data(t: ooxml_links.ReferenceTarget) -> bool:
+        a = result.activation(t)
+        return a is not None and bool(a.elements) and set(a.elements) <= DATA_ELEMENTS.get(t.type.lower(), set())
 
     by: dict[str, list[ooxml_links.Activation]] = {}
     for a in result.activations:
@@ -253,17 +269,19 @@ def link_findings(result: ooxml_links.Links) -> list[Finding]:
              for state, items in by.items() if state in LINK_RULES]
     if local_templates:
         found.append(make("ENGINE_OFFICE_LOCAL_TEMPLATE", Severity.LOW,
-                          "The document attaches a template from a local drive path when it opens. The path names no "
-                          "host (RFC 8089), so this is not template injection from a server; but Word loads that "
-                          "template, which is outside this file and was not inspected, and a template can carry macros.",
+                          "The document attaches a template from a drive path when it opens. The path names no host "
+                          "(RFC 8089), so the document does not fetch a template from a server its author chose "
+                          "(remote template injection); but Word loads that template, which is outside this file and "
+                          "was not inspected, and a template can carry macros. The drive may still be network storage "
+                          "the opening machine maps.",
                           [f"{a.chain} ({a.why})" for a in acts], [ACCOUNTS.format(*REFERENCE_AUTOLOAD)]))
-    if result.reference is not None and paths and all(t.type.lower() in LOCAL_DATA_TYPES and local_drive_path(t.target)
-                                                      for t in paths):
+    if result.reference is not None and paths and all(local_drive_path(t.target) and loaded_as_data(t) for t in paths):
         found.append(make("ENGINE_OFFICE_LOCAL_FILE_TARGETS", Severity.INFO,
-                          "Every target the Office scanner reports as a network path is a picture or linked-workbook "
-                          "path on a local drive (RFC 8089): none names a host, so using it cannot send Windows "
-                          "credentials to a server. The files themselves are outside this document and were not "
-                          "inspected.", [f"{t.rels_part} {t.id} ({t.type}) -> {t.target}" for t in paths],
+                          "Every target the Office scanner reports as a network path is a picture or linked workbook, "
+                          "used only as data, on a drive path that names no host (RFC 8089), so the document does not "
+                          "direct Windows to a server its author chose. A drive or folder on the opening machine can "
+                          "still be network storage that machine maps; the files are outside this document and were "
+                          "not inspected.", [f"{t.rels_part} {t.id} ({t.type}) -> {t.target}" for t in paths],
                           [ACCOUNTS.format(*NETWORK_PATH)]))
     idle = by.get(ooxml_links.NOT_ACTIVATED, [])
     if external := [a for a in idle if a.relationship.external]:
@@ -331,8 +349,9 @@ def correlate(report: WorkerReport) -> WorkerReport:
             if (not behind or status.get(scanner) != "completed" or status.get(f.scanner) != "completed"
                     or (f.scanner == NAME and not chains_ok)):
                 continue
-            lower = max(RANK[r.severity] for r in behind) > RANK[f.severity]
-            if lower and (f.scanner, f.rule_id) not in SUPERSEDING:
+            highest = max(RANK[r.severity] for r in behind)
+            lower, ceiling = highest > RANK[f.severity], SUPERSEDING.get((f.scanner, f.rule_id))
+            if lower and (ceiling is None or highest > RANK[ceiling]):
                 continue
             drop.add((scanner, rule))
             note(f.scanner, f"{'superseded' if lower else 'merged'} {rule} ({scanner}) into {f.rule_id}"

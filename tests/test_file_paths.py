@@ -16,6 +16,7 @@ NOT_LOCAL = [
     "file:///C://server/share", r"C:\\server\share", " file:///C:/x.png", "file:///C:/x.png ",
     "C:x.png", "/tmp/x.png", "../x.png", "x.png", "file:///tmp/x.png", "http://example.com/x.png",
     "https://example.com/C:/x.png", "smb://server/share", "", "file:",
+    "\u212a:/x.png", "file://localho\u017ft/C:/x.png",  # Kelvin sign, long s: Unicode case folding only
 ]
 
 

@@ -65,6 +65,7 @@ class Activation:
     state: str
     why: str
     chain: str  # how Office reaches the source part, and the referencing element
+    elements: tuple[str, ...] = ()  # local names of every element that references it (state: the strongest)
 
 
 @dataclass(frozen=True)
@@ -230,7 +231,8 @@ def analyse(package: opc.Package) -> Links:
         state, why = min((classify(ref, r.external) for ref in found), key=lambda s: _STRENGTH.index(s[0]))
         element = next(ref for ref in found if classify(ref, r.external)[0] == state)
         result.activations.append(Activation(r, state, why, f"{chain} -> {element.element} {element.attribute}="
-                                             f"{r.id!r} -> {how} {target}"))
+                                             f"{r.id!r} -> {how} {target}",
+                                             tuple(sorted({ref.element for ref in found}))))
     related = {r.resolved for r in package.relationships if not r.external}
     result.unrelated_objects = [package.name(p) for p in package.parts
                                 if ("/embeddings/" in p or "/activex/" in p) and p not in related]

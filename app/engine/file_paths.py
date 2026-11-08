@@ -16,14 +16,23 @@ file:////host/share as in E.3.2, file://host/share), device paths (\\\\?\\, \\\\
 (is "C:" an authority or a drive?), the historic file:///C|/f (E.2.2), a drive letter written
 percent-encoded, a percent-decoded path that still has escapes (double encoding) or is not UTF-8,
 control characters, a second colon (another drive or an NTFS stream), a separator straight after the
-drive (C://host), surrounding whitespace, relative and rooted paths. Rejecting is always safe:
-it only means the reference finding is not superseded.
+drive (C://host), surrounding whitespace, relative and rooted paths, and any letter outside ASCII
+in the scheme, host or drive (Unicode case folding would read "localhoſt" as localhost and the
+Kelvin sign K as a drive letter). Rejecting is always safe: it only means the reference finding is
+not superseded.
+
+What a True result proves, and what it does not: the target names no host, share or device, so
+the document itself does not direct Windows to a server (the UNC and file://host forms through
+which a document can make Windows authenticate to a server its author chose). It does not prove
+the location is on a local disk: on the machine that opens the file, a drive letter can be mapped
+to a network share, and a folder can be a junction, symbolic link, DFS path or cloud-sync folder.
+That storage, and the server behind it, is configured by the machine's owner, not by the document.
 """
 
 import re
 from urllib.parse import unquote_to_bytes
 
-_DRIVE_PATH = re.compile(r"(?:file:(?://(?:localhost)?/|/)?)?[A-Za-z]:[\\/](.*)", re.IGNORECASE | re.DOTALL)
+_DRIVE_PATH = re.compile(r"(?:file:(?://(?:localhost)?/|/)?)?[A-Za-z]:[\\/](.*)", re.IGNORECASE | re.DOTALL | re.ASCII)
 _ESCAPE = re.compile(r"%[0-9A-Fa-f]{2}")
 _UNSAFE = re.compile(r"[\x00-\x1f\x7f:|]")
 
