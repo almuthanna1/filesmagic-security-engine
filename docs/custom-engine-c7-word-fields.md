@@ -107,7 +107,7 @@ reported by the reference and not by C7, and stays HIGH in the unified engine.
 | Existing evaluation: 16 synthetic, 29 + 4 benign corpus, 2 corrupt, both engines | 102 of 102 results identical to the frozen Windows evidence (verdict and every finding, INFO included); 9 of 9 contribution claims pass (`evaluation.offline_validation` logic, run in-process) |
 | Benign corpus | fields present only in `docx-02` (`TOC`, `PAGEREF`), parsed and not reported; no C7 finding on any corpus file |
 | `word-fields` status | `completed` on the 8 DOCX cases and 7 corpus DOCX, `not_applicable` on PDF, XLSX, PPTX; `failed` on the truncated DOCX (fails closed, like `office`, `custom`, `vba-chains`, `ooxml-links`) |
-| Full suite | 933 passed, 38 skipped (Linux-only) on Windows; Linux CI: see the commit's run |
+| Full suite | Windows: 933 passed, 38 skipped (Linux-only tests). Linux CI, Python 3.11, commit `4a598f1` ([run 42551205597](https://github.com/almuthanna1/filesmagic-security-engine/actions/runs/42551205597)): 971 passed, 0 skipped |
 
 The frozen evidence (`docs/evidence/custom-engine-fp-fixes/`) is not regenerated: it records the
 engine before C7. `tests/test_api_engines.py` compares its scanner statuses without `word-fields`,
