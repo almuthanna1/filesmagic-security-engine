@@ -149,6 +149,12 @@ uses zlib-ng 1.3.1, the guest zlib 1.3.2, so the compressed bytes differ while e
 content is the same (as already recorded for Linux CI in `custom-engine-1668326`). The PDFs
 and every corpus file (pinned by manifest) have identical hashes.
 
+**Host restored (2026-11-09).** ACPI shutdown (powered off after 10 s, nothing forced); the drive
+set back to `emptydrive`. `showvminfo` against the baseline taken before the swap shows only
+optical-drive keys and runtime-only fields changed. Unchanged: nic1-8 `none`, clipboard and drag
+and drop disabled, no shared folders, USB, audio, VRDE, serial and parallel ports off, the six
+snapshots and the current snapshot "C11 - Offline Research Evaluation Ready".
+
 ### 5.3 Latency (median over files of each file's median of 5 or 20 trials, ms)
 
 | | Ubuntu VM ref | Ubuntu VM unified | Windows ref | Windows unified | Staging ref | Staging unified |
@@ -176,9 +182,48 @@ does not break down. Timings are from one VM on one laptop and are not a benchma
 | 9 in `tests/test_vm_scripts.py` (all that run `trusted_tree.sh`) | `PermissionError: 'bash'`. The kernel log shows `apparmor="DENIED" operation="exec" profile="filesmagic-eval-python" name="/usr/bin/bash"` | **new, VM-specific, intended**: the profile forbids the confined interpreter from starting a shell. The script itself ran under the guest's normal bash in `guest_checks.sh` and passed on the real tree |
 
 No failure points at the engine. The 9 new ones follow from these tests being added after
-C9.2. A possible correction, not applied: skip `test_vm_scripts.py` when the process runs under
-an AppArmor label other than `unconfined`. That would change the test suite, which waits for
-your approval like the C9.2 corrections.
+C9.2.
+
+In detail (from `phase6-996db77-pytest.log` and the guest kernel log):
+
+| # | Test | Observed | Why | Kind |
+|---|---|---|---|---|
+| 1 | `test_network_namespace_blocks_connections_when_available` | connect fails with `EACCES` (13), test expects `ENETUNREACH` (101) | the profile has no `network inet stream` rule, so the socket is refused before routing | stronger restriction than the test assumes |
+| 2 | `test_network_verification_detects_the_host_network` | the host checks pass; the test expects them to fail | the VM's host namespace is itself `lo` only with no routes | unsupported condition: needs a networked host |
+| 3 | `test_diagnostics_read_real_interface_state_in_the_host_namespace` | 1 interface (`lo`), 0 routes; expects a non-loopback interface with a route | same | unsupported condition |
+| 4 | `test_capabilities_are_dropped_in_the_kernel_and_cannot_be_regained` | first step `EPERM`; expects `ok` (reconfiguring `lo` before the drop); the 11 later assertions hold | the profile denies `net_admin` before the drop | stronger restriction |
+| 5-13 | 9 tests in `tests/test_vm_scripts.py` that run `bash trusted_tree.sh` | `PermissionError: 'bash'`; kernel: `apparmor="DENIED" operation="exec" profile="filesmagic-eval-python" name="/usr/bin/bash"` | the profile does not let the confined interpreter start programs | unsupported condition: needs exec |
+
+### 5.5 Proposal: explicit skips for unsupported conditions (not applied; needs approval)
+
+The aim is that the VM run reports *0 failed* only when nothing is wrong, without hiding a
+failure or changing AppArmor. Each failure kind gets its own treatment:
+
+1. **Unsupported condition → an explicit skip, decided by measuring the condition.** No opt-out
+   variable is involved, and the reason text goes into the log (`pytest -rs`):
+   - Rows 5-13: skip only if *both* hold: the process's AppArmor label (from
+     `/proc/self/attr/apparmor/current`) is not `unconfined`, *and* starting `/usr/bin/bash` raises
+     `PermissionError`. Reason: "confined as <label>: exec of bash denied (intended); trusted_tree.sh
+     is checked by guest_checks.sh and Linux CI". Bash missing or failing for any other reason
+     still fails.
+   - Rows 2-3: skip only if the host namespace is measured to have only `lo` and no usable
+     route. Reason: "offline host: no network to detect". Add one test that asserts the
+     opposite in that case (exactly `lo`, `ARPHRD_LOOPBACK` 772, 0 routes), so the offline state
+     is positive evidence rather than a skip alone.
+2. **Stronger restriction → still a passing assertion, not a skip** (rows 1 and 4). Under a
+   confining label, accept `EACCES` for the connect and `EPERM` for the pre-drop step. Keep
+   `ENETUNREACH` and `ok` when unconfined. Every later assertion is unchanged. This is the C9.2
+   Section 6 proposal.
+3. **Guard rails:**
+   - Every skip condition requires confinement or an offline host, neither of which GitHub's
+     Linux runners have, so CI keeps running and asserting all 13 tests.
+   - The VM run's log lists each skip with its reason.
+   - `evaluation.offline_validation` copies that skip list into `run_status.json`, so the
+     evidence states what was not exercised.
+   - Any skip whose condition does not hold is a failure.
+
+Nothing here changes the profile, the worker or the isolation checks. It changes only what the
+tests assert, in the environment where their assumption is measured to be false.
 
 ## 6. What this run can and cannot show
 
