@@ -34,8 +34,11 @@ echo "INFO  optical medium mounted: $optical (unmount it before scanning)"
 
 owner=$(stat -c '%U:%G' "$INTERP" 2>/dev/null)
 [ "$owner" = "root:root" ]; check "interpreter" $? "$INTERP owned by ${owner:-missing}"
-loose=$(find /opt/filesmagic \( ! -user root -o -perm /022 \) -print 2>/dev/null | wc -l)
-[ "$loose" = 0 ] && [ -d /opt/filesmagic ]; check "interpreter tree" $? "$loose entries not root-owned or group/other-writable (0 expected)"
+# Owners, write permissions, and where every symlink resolves (trusted_tree.sh): a link's own
+# mode is always 777 and says nothing, so it is judged by its target, never its mode.
+tree=$(bash "$(dirname "${BASH_SOURCE[0]}")/trusted_tree.sh" /opt/filesmagic root 2>&1); ok=$?
+check "interpreter tree" $ok "$(printf '%s\n' "$tree" | tail -n 1)"
+[ "$ok" = 0 ] || printf '%s\n' "$tree" | grep '^PROBLEM' | sed 's/^/      /'
 target=$(readlink -f "$PY")
 [ "$target" = "$INTERP" ]; check "venv interpreter" $? "$PY -> $target"
 
