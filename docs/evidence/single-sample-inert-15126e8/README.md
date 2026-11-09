@@ -85,3 +85,19 @@ No configuration change was needed.
 
 The inert fixture files themselves are not committed: `--write-inert` rebuilds them from the
 source, byte for byte (their hashes are in `write-inert.log`).
+
+## Addendum: intended input path `~/fm-eval/samples/` (same session)
+
+`samplepath/`: the confined interpreter read a benign fixture copied under
+`~/fm-eval/samples/inert-samplepath/` and scanned it — `completed · PASS`, both engines SAFE,
+deterministic, `isolation_missing` empty, and **no AppArmor denial on the samples path** (the
+3 denials in the window are the usual `git` index.lock and `uname`). This confirms the path the
+real sample will use, and that the profile grants the read. Verified against
+`samplepath/SHA256SUMS-samplepath.txt` (`b8ab484b…e992`).
+
+A later commit (`47fb891`) adds `inert-benign-macro-doc`, a benign document carrying a **real**
+VBA module (AutoOpen computing 2 + 2), so the actual oletools extraction path is exercised, not the
+mocked results the unit tests use. Validated on the host (both engines SUSPICIOUS: the
+auto-execution macro is detected, no dangerous capability, so not MALICIOUS) and in CI (run
+42681865761, all three jobs; backend 1038 passed). Its in-VM run awaits approval to swap to the
+`47fb891` transfer ISO.
