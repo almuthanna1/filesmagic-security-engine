@@ -39,9 +39,23 @@ git -C "$REPO" checkout --quiet --detach "$COMMIT"
 [ "$(git -C "$REPO" rev-parse HEAD)" = "$COMMIT" ] && [ -z "$(git -C "$REPO" status --porcelain)" ] \
     || fail "checkout did not produce a clean tree at $COMMIT"
 
+mkdir -p "$HOME/fm-eval/results"
+if [ ! -d "$SRC/samples" ]; then
+    # Engine-validation medium: source only. Its fixtures are built from the source and its benign
+    # corpus is committed in it, checked against its manifest by evaluation.offline_validation.
+    echo "4/6 No samples on this medium (engine validation); nothing to copy"
+    echo "5/6 Skipped"
+    echo "6/6 Done."
+    echo "  commit   $COMMIT (detached HEAD in $REPO; your previous branch is untouched)"
+    echo "  next     SECURITY_ENGINE_REQUIRE_ISOLATION=1 /opt/filesmagic/venv/bin/python -B -m evaluation.offline_validation \\"
+    echo "               --expect-commit $COMMIT --out ~/fm-eval/results/phase6-${COMMIT:0:7}   (from $REPO)"
+    echo "Now unmount the ISO (sudo umount <mount point>); detach it on the host after shutdown."
+    exit 0
+fi
+
 echo "4/6 Copying samples to $SAMPLES and tools to $TOOLS"
 [ ! -e "$SAMPLES" ] && [ ! -e "$TOOLS" ] || fail "$SAMPLES or $TOOLS already exists; this script never overwrites"
-mkdir -p "$HOME/fm-eval/samples" "$HOME/fm-eval/results"
+mkdir -p "$HOME/fm-eval/samples"
 cp -r "$SRC/samples" "$SAMPLES"
 cp -r "$SRC/acquired" "$TOOLS"
 

@@ -126,7 +126,8 @@ def scan_case(case: dict, trials: int, cmd: list[str]) -> dict:
         "status": {s.name: s.status for s in first.scanners},
         "rules": rules(first),
         "findings": [dict(scanner=s, rule_id=i, severity=v, description=d) for s, i, v, d in every(first)],
-        "isolation_missing": worker.missing_controls(first.isolation),
+        # Any control missing in any trial, not only the first.
+        "isolation_missing": sorted({k for _, r in runs for k in worker.missing_controls(r.isolation)}),
         "timing_ms": {"harness_wall": latency([w for w, _ in runs]),
                       **{s.name: latency([d[s.name] for d in durations]) for s in first.scanners}},
         # Raw per-trial values: wall time of the whole scan (worker start-up included) and each

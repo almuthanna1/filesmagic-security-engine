@@ -1,21 +1,30 @@
 # Build the read-only transfer ISO for the offline evaluation VM (Windows host, PowerShell 5.1+).
 #
+#   EICAR/Didier study (docs/eicar-didier-evaluation.md):
 #   powershell -NoProfile -ExecutionPolicy Bypass -File evaluation\vm\build_transfer_iso.ps1 `
 #       -Samples C:\tmp\fm-study\samples -Acquired C:\tmp\fm-study\acquired -OutDir C:\tmp\fm-study
+#   Engine validation (docs/offline-vm-validation-phase6.md): source only, no -Samples/-Acquired:
+#   powershell -NoProfile -ExecutionPolicy Bypass -File evaluation\vm\build_transfer_iso.ps1 `
+#       -Branch feature/custom-unified-engine-nov18 -OutDir C:\tmp\fm-phase6
 #
 # Contents: the exact committed source (git bundle of the branch + git archive of the commit),
-# COMMIT.txt, the benign samples and their manifest, the verified Didier Stevens tools with their
-# provenance, install_from_iso.sh taken from the commit itself, and SHA256SUMS over everything.
-# Refuses uncommitted changes, EICAR material, and samples that do not match their manifest.
+# COMMIT.txt, BRANCH.txt, MANIFEST.txt (the commit's identity), install_from_iso.sh taken from the
+# commit itself, and SHA256SUMS over everything; for the study also the benign samples and their
+# manifest and the verified Didier Stevens tools with their provenance. The engine validation
+# needs nothing else: its inert fixtures are built from the source and its benign corpus is
+# committed with it, pinned by manifest. Refuses uncommitted or unpushed code, a commit containing
+# the EICAR signature, EICAR material, and samples that do not match their manifest.
 # The image is UDF (mount -t udf in the guest); an optical medium is read-only by nature.
 param(
-    [Parameter(Mandatory = $true)][string]$Samples,
-    [Parameter(Mandatory = $true)][string]$Acquired,
+    [string]$Samples,
+    [string]$Acquired,
     [Parameter(Mandatory = $true)][string]$OutDir,
     [string]$Branch = "security/malware-research-hardening"
 )
 $ErrorActionPreference = "Stop"
 $repo = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
+$study = [bool]($Samples -or $Acquired)
+if ($study -and -not ($Samples -and $Acquired)) { throw "give both -Samples and -Acquired, or neither" }
 
 # The executable, never a function or alias of the same name (a function called "Git" that runs
 # "& git" would call itself: PowerShell resolves names case-insensitively, functions first).
@@ -27,19 +36,26 @@ if ((Invoke-Git rev-parse "refs/heads/$Branch").Trim() -ne $commit) { throw "HEA
 if (Invoke-Git status --porcelain) { throw "the working tree has uncommitted changes; the ISO must hold exactly one commit" }
 if ((Invoke-Git rev-parse "refs/remotes/origin/$Branch").Trim() -ne $commit) { throw "$commit is not pushed to origin/$Branch" }
 
-# Refuse EICAR and anything else that is not part of this transfer.
-foreach ($dir in @($Samples, $Acquired)) {
-    if (Get-ChildItem -Recurse -Force $dir | Where-Object { $_.Name -match "eicar" }) { throw "EICAR material found in $dir" }
-}
-$allowedTools = @("ds-pdfid", "ds-mpdf", "ds-make-pdf-javascript", "ds-make-pdf-embedded")
-foreach ($d in Get-ChildItem -Directory $Acquired) { if ($allowedTools -notcontains $d.Name) { throw "unexpected tool directory $($d.Name)" } }
+# The committed source must not carry the EICAR test file (its signature string, split here so
+# this script does not contain it either). git grep exits 0 on a match, 1 on none.
+& $gitExe -C $repo grep -q -F ("EICAR-STANDARD-" + "ANTIVIRUS-TEST-FILE") $commit
+if ($LASTEXITCODE -eq 0) { throw "the commit contains the EICAR signature" } elseif ($LASTEXITCODE -ne 1) { throw "git grep failed" }
 
-# Every sample must match the manifest before it is packaged.
-$rows = Import-Csv (Join-Path $Samples "manifest.csv")
-if ($rows.Count -ne 13) { throw "expected the 13 approved samples, found $($rows.Count)" }
-foreach ($r in $rows) {
-    $actual = (Get-FileHash -Algorithm SHA256 (Join-Path $Samples $r.path)).Hash.ToLower()
-    if ($actual -ne $r.sha256) { throw "$($r.sample_id): file does not match the manifest" }
+if ($study) {
+    # Refuse EICAR and anything else that is not part of this transfer.
+    foreach ($dir in @($Samples, $Acquired)) {
+        if (Get-ChildItem -Recurse -Force $dir | Where-Object { $_.Name -match "eicar" }) { throw "EICAR material found in $dir" }
+    }
+    $allowedTools = @("ds-pdfid", "ds-mpdf", "ds-make-pdf-javascript", "ds-make-pdf-embedded")
+    foreach ($d in Get-ChildItem -Directory $Acquired) { if ($allowedTools -notcontains $d.Name) { throw "unexpected tool directory $($d.Name)" } }
+
+    # Every sample must match the manifest before it is packaged.
+    $rows = Import-Csv (Join-Path $Samples "manifest.csv")
+    if ($rows.Count -ne 13) { throw "expected the 13 approved samples, found $($rows.Count)" }
+    foreach ($r in $rows) {
+        $actual = (Get-FileHash -Algorithm SHA256 (Join-Path $Samples $r.path)).Hash.ToLower()
+        if ($actual -ne $r.sha256) { throw "$($r.sample_id): file does not match the manifest" }
+    }
 }
 
 $short = $commit.Substring(0, 7)
@@ -53,16 +69,24 @@ Invoke-Git archive --format=zip -o (Join-Path $stage "script.zip") $commit evalu
 Expand-Archive (Join-Path $stage "script.zip") $stage
 Move-Item (Join-Path $stage "evaluation\vm\install_from_iso.sh") (Join-Path $stage "install_from_iso.sh")
 Remove-Item -Recurse -Force (Join-Path $stage "evaluation"), (Join-Path $stage "script.zip")
-Copy-Item -Recurse $Samples (Join-Path $stage "samples")
-Copy-Item -Recurse $Acquired (Join-Path $stage "acquired")
+if ($study) {
+    Copy-Item -Recurse $Samples (Join-Path $stage "samples")
+    Copy-Item -Recurse $Acquired (Join-Path $stage "acquired")
+}
 [IO.File]::WriteAllText((Join-Path $stage "COMMIT.txt"), "$commit`n")
 [IO.File]::WriteAllText((Join-Path $stage "BRANCH.txt"), "$Branch`n")
+$identity = (Invoke-Git log -1 --format="commit %H%ntree %T%nparents %P%ncommitted %cI%nsubject %s" $commit) -join "`n"
+$requirements = (Invoke-Git rev-parse "${commit}:requirements.txt").Trim()
+[IO.File]::WriteAllText((Join-Path $stage "MANIFEST.txt"), "$identity`nbranch $Branch`nrequirements.txt blob $requirements`n")
+$contents = if ($study) {
+    "13 benign samples with manifest.csv, the verified Didier Stevens tools with provenance.json,"
+} else { "no samples or tools (the inert fixtures are built from the source; the benign corpus is in it)," }
+$next = if ($study) { "(see docs/eicar-didier-evaluation.md)" } else { "then evaluation.offline_validation (docs/offline-vm-validation-phase6.md)" }
 [IO.File]::WriteAllText((Join-Path $stage "README.txt"), @"
 FilesMagic evaluation transfer medium (read-only). Commit $commit on $Branch.
-Contains: the commit (filesmagic.bundle, source-$short.tar), 13 benign samples with manifest.csv,
-the verified Didier Stevens tools with provenance.json, install_from_iso.sh, SHA256SUMS.
-No EICAR, no third-party sample documents, no executables.
-In the VM: bash <mount point>/install_from_iso.sh  (see docs/eicar-didier-evaluation.md)
+Contains: the commit (filesmagic.bundle, source-$short.tar, MANIFEST.txt), $contents
+install_from_iso.sh, SHA256SUMS. No EICAR, no executables, no genuine malware.
+In the VM: bash <mount point>/install_from_iso.sh  $next
 "@.Replace("`r`n", "`n"))
 
 $lines = Get-ChildItem -Recurse -File $stage | Sort-Object FullName | ForEach-Object {
