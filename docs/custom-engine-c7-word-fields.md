@@ -39,8 +39,9 @@ becomes part of the outer instruction. That is how the known DDE obfuscation bui
 2. It reads every XML part Word reaches through relationships (`ooxml_links.loaded_parts`):
    body, headers, footers, notes, comments, glossary, under any part name. It reads only the
    two WordprocessingML namespaces.
-3. It reassembles each instruction across runs. Text in tracked deletions
-   (`w:delInstrText`) is included and marked. A nested field becomes a placeholder, because
+3. It reassembles each instruction across runs, keeping apart text inside tracked deletions
+   (`w:delInstrText`, or anything inside `w:del`/`w:moveFrom`). Only the *live* text is
+   classified (Section 2.1). A nested field becomes a placeholder, because
    its result does not exist until Word updates it.
 4. It tokenises the instruction as Word does (17.16.1):
    - quoted and unquoted arguments, with `\\` and `\"` unescaped;
@@ -58,6 +59,7 @@ through defusedxml and inside the isolated worker.
 | `ENGINE_WORD_REMOTE_INCLUDE` | MEDIUM | `INCLUDETEXT` from a URL, UNC path, file URI with a host, another scheme, or a nested field; `INCLUDEPICTURE` from a network file path, another scheme or a nested field |
 | `ENGINE_WORD_WEB_PICTURE` | INFO | `INCLUDEPICTURE` from http(s)/ftp |
 | `ENGINE_WORD_LOCAL_INCLUDE` | INFO | either include field from a drive path that names no host (RFC 8089, `app.engine.file_paths`) or a relative path |
+| `ENGINE_WORD_DELETED_INSTRUCTION` | INFO | instruction text in tracked deletions that, restored, would give one of the rules above: recorded, no execution claimed (Section 2.1) |
 | `ENGINE_WORD_FIELDS_UNDETERMINED` | INFO | a loaded part unreadable or malformed, a field type built by a nested field, or an imported chunk (`w:altChunk`) present |
 
 `INCLUDE` and `IMPORT`, the old names, count as `INCLUDETEXT` and `INCLUDEPICTURE`. All other
@@ -75,6 +77,29 @@ links or starting a DDE server, and the defaults depend on version and policy.
   It is rated like `ENGINE_OFFICE_LINKED_PICTURE` (INFO), so ordinary documents copied from a
   browser are not flagged.
 
+### 2.1 Tracked deletions: presence is not evaluation
+
+The first C7 version (`4a598f1`) joined deleted instruction text into the field and classified
+the result, so a `DDEAUTO cmd` that a reviewer had deleted was reported HIGH. That claimed more
+than the evidence shows.
+
+ECMA-376 Part 1, 17.13.5 defines `w:del` and `w:moveFrom` as content removed in a tracked
+revision, and `w:delInstrText` as field-code text so removed. That text is not part of the
+document as it now stands. It comes back only if a reviewer rejects the deletion, which is a
+user action. From the release-freeze revision of C7 on (the commit that added this section):
+- each field is classified on its **live** text alone: text outside deletions, insertions
+  (`w:ins`, `w:moveTo`) included;
+- a field whose begin is inside a deletion is entirely deleted;
+- deleted text gives only `ENGINE_WORD_DELETED_INSTRUCTION` (INFO), and only when restoring it
+  would change the classification. Its evidence says what the field would read as with the
+  deletion rejected. It claims nothing about execution.
+
+Whether Word evaluates a field while the document is under review was not observed. A deletion
+can also change the live text: removing a space between `DDE` and `AUTO cmd` leaves a live
+`DDEAUTO cmd`, which is HIGH, because that is what the document now says. Regression tests:
+`test_instructions_only_in_tracked_deletions_are_recorded_without_an_execution_claim` (five
+forms) and `test_live_text_is_classified_and_a_deletion_that_would_change_it_is_noted`.
+
 ## 3. Relation to the original four scanners
 
 The reference Office scanner already reports any `DDEAUTO` (`OFFICE_DDEAUTO_FIELD`, HIGH) and
@@ -90,7 +115,7 @@ What C7 adds, each shown by a regression test against the reference engine
 | Inert test document | Reference | Unified |
 |---|---|---|
 | `DDEAUTO` built with a nested `QUOTE` field | SAFE (its reassembly restarts at the nested begin and loses the outer type) | MALICIOUS |
-| `DDEAUTO cmd` in a tracked deletion | SAFE | MALICIOUS |
+| `DDEAUTO cmd` only in a tracked deletion | SAFE | SAFE (INFO: recorded, no execution claimed) |
 | `DDEAUTO cmd` in a header Word loads from `word/parts/h.xml` | SAFE (not a name it reads) | MALICIOUS |
 | `INCLUDETEXT` from `https://example.invalid/` | SAFE | SUSPICIOUS |
 | `INCLUDEPICTURE` from `\\server.invalid\` | SAFE | SUSPICIOUS |
@@ -103,8 +128,9 @@ reported by the reference and not by C7, and stays HIGH in the unified engine.
 
 | Check | Result (commit of this document) |
 |---|---|
-| Unit and regression tests (`tests/test_word_fields.py`) | 62 pass: reassembly across runs, nesting, tracked deletions, unterminated fields, strict namespace, foreign namespace ignored, tokenising and escapes, every rule, fields not reported, loaded vs unloaded parts, malformed parts, `altChunk`, non-Word files, both engines, the isolated worker |
+| Unit and regression tests (`tests/test_word_fields.py`) | 69 pass: reassembly across runs, nesting, tracked deletions and insertions, unterminated fields, strict namespace, foreign namespace ignored, tokenising and escapes, every rule, fields not reported, loaded vs unloaded parts, malformed parts, `altChunk`, non-Word files, both engines, the isolated worker |
 | Existing evaluation: 16 synthetic, 29 + 4 benign corpus, 2 corrupt, both engines | 102 of 102 results identical to the frozen Windows evidence (verdict and every finding, INFO included); 9 of 9 contribution claims pass (`evaluation.offline_validation` logic, run in-process) |
+| C7 evaluation cases (`evaluation.cases.field_cases`, set `c7` of `evaluation.offline_validation`) | 6 inert DOCX: nested DDEAUTO, plain DDEAUTO, remote INCLUDETEXT, file-share INCLUDEPICTURE, DDEAUTO only in a deletion, ordinary fields. In-process (`tests/test_offline_validation.py::test_every_claim_and_expected_result_holds_in_process`, every commit, Windows and Linux CI): 12 of 12 verdicts as expected, 11 of 11 claims. Through the real isolated worker in the offline VM: the final run (`docs/offline-vm-validation-phase6.md`, Section 7) |
 | Benign corpus | fields present only in `docx-02` (`TOC`, `PAGEREF`), parsed and not reported; no C7 finding on any corpus file |
 | `word-fields` status | `completed` on the 8 DOCX cases and 7 corpus DOCX, `not_applicable` on PDF, XLSX, PPTX; `failed` on the truncated DOCX (fails closed, like `office`, `custom`, `vba-chains`, `ooxml-links`) |
 | Full suite | Windows: 933 passed, 38 skipped (Linux-only tests). Linux CI, Python 3.11, commit `4a598f1` ([run 42551205597](https://github.com/almuthanna1/filesmagic-security-engine/actions/runs/42551205597)): 971 passed, 0 skipped |
@@ -128,6 +154,8 @@ whose status is pinned in `tests/test_word_fields.py` instead.
     (click only), `MERGEFIELD` data sources, `DATABASE`;
   - imported chunks (`w:altChunk`): reported as undetermined, not analysed;
   - the `w:updateFields` setting (update fields on open), which is not used to raise severity.
+- **Tracked changes** are read as the document now stands (Section 2.1). Word's behaviour on
+  fields during review, and on fields whose live text is unusual after a deletion, was not observed.
 - **Unloaded parts are ignored**: fields there are not reported by C7 (Word does not read them;
   the reference still reports DDE there).
 - **No Office runtime is observed.** Whether Word prompts, blocks or updates a field depends on

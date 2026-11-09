@@ -8,6 +8,7 @@ import io
 import struct
 import zipfile
 import zlib
+from xml.sax.saxutils import quoteattr
 
 from tests.pdf_fixtures import make_pdf
 
@@ -276,3 +277,56 @@ def patch(data: bytes, name: str, local: dict | None = None, central: dict | Non
             else:
                 out[base + offset:base + offset + len(value)] = value
     return bytes(out)
+
+
+# ----------------------------------------------------------------------------- Word fields (C7)
+# Inert: hosts are RFC 2606 .invalid names and the only command text is `rem inert`. Built in
+# memory; nothing is written to disk or opened in Word.
+
+def field_run(inner: str) -> str:
+    return f"<w:r>{inner}</w:r>"
+
+
+FIELD_BEGIN, FIELD_SEPARATE, FIELD_END = (field_run(f'<w:fldChar w:fldCharType="{k}"/>')
+                                          for k in ("begin", "separate", "end"))
+REVISION = 'w:id="{}" w:author="inert" w:date="2026-11-09T00:00:00Z"'
+
+
+def simple_field(instr: str) -> str:
+    return f"<w:p><w:fldSimple w:instr={quoteattr(instr)}><w:r><w:t>shown</w:t></w:r></w:fldSimple></w:p>"
+
+
+def field_runs(*pieces, result: str = "shown") -> str:
+    """The runs of one complex field. A piece is instruction text (one w:instrText run), raw XML
+    runs (starting with "<", e.g. a nested field), or (text, "del" | "moveFrom" | "ins"[, tag]):
+    the text inside that tracked change, as w:delInstrText in a removal unless `tag` says otherwise."""
+    out = []
+    for n, p in enumerate(pieces):
+        if isinstance(p, tuple):
+            text, change, *tag = p
+            tag = tag[0] if tag else ("instrText" if change == "ins" else "delInstrText")
+            run = field_run(f'<w:{tag} xml:space="preserve">{text}</w:{tag}>')
+            out.append(f"<w:{change} {REVISION.format(n)}>{run}</w:{change}>")
+        elif p.startswith("<"):
+            out.append(p)
+        else:
+            out.append(field_run(f'<w:instrText xml:space="preserve">{p}</w:instrText>'))
+    return f"{FIELD_BEGIN}{''.join(out)}{FIELD_SEPARATE}{field_run('<w:t>' + result + '</w:t>')}{FIELD_END}"
+
+
+def complex_field(*pieces, result: str = "shown") -> str:
+    return f"<w:p>{field_runs(*pieces, result=result)}</w:p>"
+
+
+def nested_field(instr: str) -> str:
+    """A nested field's runs (begin, instruction, end), to use as a piece of an outer field."""
+    return f'{FIELD_BEGIN}{field_run(f"<w:instrText>{instr}</w:instrText>")}{FIELD_END}'
+
+
+def word_document(body: str, ns: str = W) -> str:
+    return f'{XML}<w:document xmlns:w="{ns}"><w:body>{body}</w:body></w:document>'
+
+
+def field_docx(body: str = "", **kw) -> bytes:
+    """A valid DOCX whose body is `body` (WordprocessingML, prefix w); kw as office_package."""
+    return office_package("docx", main_xml=word_document(body), **kw)

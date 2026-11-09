@@ -60,3 +60,32 @@ def test_the_committed_windows_evidence_is_readable():
 def test_the_corpus_matches_its_manifests():
     items, problems = ov.corpus_items()
     assert problems == [] and len(items) == 33
+
+
+def test_the_c7_cases_have_expected_verdicts_for_both_engines():
+    c7 = {k: v for k, v in ov.expectations().items() if k[0] == "c7"}
+    assert len(c7) == 12 and all(findings is None for _, findings in c7.values())
+
+
+def test_every_claim_and_expected_result_holds_in_process():
+    # The same sets, engines, comparison and claims as the VM run, without the worker subprocess:
+    # a regression check on every commit (Windows and Linux CI) that no classification moved.
+    from app import engine, worker
+    from app.scanners import SCANNERS
+    from evaluation.cases import cases, field_cases, verdicts
+
+    corpus, _ = ov.corpus_items()
+    results = []
+    for name, items in (("synthetic", cases()), ("corpus", corpus), ("corrupt", ov.corrupt_items()),
+                        ("c7", field_cases())):
+        for item in items:
+            for name_ in ov.ENGINES:
+                report = (worker.analyse(SCANNERS, item["data"]) if name_ == "reference"
+                          else engine.correlate(worker.analyse(engine.SCANNERS, item["data"])))
+                results.append({"set": name, "id": item["id"], "engine": name_, "verdicts": verdicts(report),
+                                "status": {s.name: s.status for s in report.scanners},
+                                "findings": [{"scanner": f.scanner, "rule_id": f.rule_id, "severity": f.severity.value}
+                                             for f in report.findings]})
+    assert len(results) == 2 * (16 + 33 + 2 + 6)
+    assert [r for r in ov.compare(results, ov.expectations()) if not r["same"]] == []
+    assert [claim for claim, ok in ov.checks(results) if not ok] == []

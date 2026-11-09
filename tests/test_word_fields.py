@@ -3,8 +3,6 @@ an RFC 2606 .invalid name; every command is `rem inert` (a comment that does not
 evaluated, updated or fetched."""
 
 import asyncio
-from xml.sax.saxutils import quoteattr
-
 import pytest
 
 from app import engine, worker
@@ -19,30 +17,8 @@ WEB = "https://example.invalid"
 CMD = r'DDEAUTO c:\\windows\\system32\\cmd.exe "/c rem inert"'  # as Word stores it: \\ for one backslash
 
 
-def simple(instr: str) -> str:
-    return f"<w:p><w:fldSimple w:instr={quoteattr(instr)}><w:r><w:t>shown</w:t></w:r></w:fldSimple></w:p>"
-
-
-def run(inner: str) -> str:
-    return f"<w:r>{inner}</w:r>"
-
-
-BEGIN, SEPARATE, END = (run(f'<w:fldChar w:fldCharType="{k}"/>') for k in ("begin", "separate", "end"))
-
-
-def complex_field(*pieces: str, result: str = "shown", tag: str = "instrText") -> str:
-    """A complex field whose instruction is split over one run per piece."""
-    instr = "".join(run(f'<w:{tag} xml:space="preserve">' + p + f'</w:{tag}>') for p in pieces)
-    return (f'<w:p>{BEGIN}{instr}{SEPARATE}'
-            f'{run("<w:t>" + result + "</w:t>")}{END}</w:p>')
-
-
-def document(body: str, ns: str = W) -> str:
-    return f'{fx.XML}<w:document xmlns:w="{ns}"><w:body>{body}</w:body></w:document>'
-
-
-def docx(body: str = "", **kw) -> bytes:
-    return fx.office_package("docx", main_xml=document(body), **kw)
+simple, complex_field, run, document, docx = fx.simple_field, fx.complex_field, fx.field_run, fx.word_document, fx.field_docx
+BEGIN, SEPARATE, END = fx.FIELD_BEGIN, fx.FIELD_SEPARATE, fx.FIELD_END
 
 
 def rules(data: bytes) -> list[tuple[str, str]]:
@@ -68,8 +44,8 @@ def test_a_nested_field_leaves_a_placeholder_in_the_outer_instruction():
 
 
 def test_tracked_deletions_unterminated_fields_and_strict_namespace_are_read():
-    deleted = fields(document(complex_field("DDE cmd x", tag="delInstrText")).encode())
-    assert deleted == [Field("", "DDE cmd x", deleted=True)]
+    deleted = fields(document(complex_field(("DDE cmd x", "del"))).encode())
+    assert deleted == [Field("", "", deleted="DDE cmd x")]  # nothing live
     unterminated = f'<w:p>{BEGIN}{run("<w:instrText>DDE cmd x</w:instrText>")}</w:p>'
     assert [f.instruction for f in fields(document(unterminated).encode())] == ["DDE cmd x"]
     assert [f.instruction for f in fields(document(simple("DDE cmd x"), ns=STRICT_W).encode())] == ["DDE cmd x"]
@@ -77,6 +53,43 @@ def test_tracked_deletions_unterminated_fields_and_strict_namespace_are_read():
 
 def test_elements_with_the_same_names_in_another_namespace_are_not_fields():
     assert fields(document(simple("DDE cmd x"), ns="urn:example:not-word").encode()) == []
+
+
+# ----------------------------------------------------------------------------- tracked changes
+# A deletion records removed content: it is evidence of what the document contained, not that
+# Word evaluates it. Only live text is classified; deleted text gives INFO only.
+
+DELETED_RULE = "ENGINE_WORD_DELETED_INSTRUCTION"
+
+
+@pytest.mark.parametrize("body", [
+    complex_field(("DDEAUTO cmd x", "del")),  # w:delInstrText inside w:del, as Word writes it
+    complex_field(("DDEAUTO cmd x", "del", "instrText")),  # plain w:instrText inside w:del
+    complex_field(("DDEAUTO cmd x", "moveFrom")),  # the source of a tracked move
+    complex_field(("DDEAUTO cmd x", "ins", "delInstrText")),  # w:delInstrText alone marks it removed
+    f'<w:p><w:del {fx.REVISION.format(9)}>{fx.field_runs("DDEAUTO cmd x")}</w:del></w:p>',  # the whole field deleted
+])
+def test_instructions_only_in_tracked_deletions_are_recorded_without_an_execution_claim(body):
+    found = wf.findings(wf.scan(docx(body)))
+    assert [(f.rule_id, f.severity.value) for f in found] == [(DELETED_RULE, "INFO")]
+    assert "with the tracked deletion rejected: ENGINE_WORD_DDEAUTO_PROGRAM" in found[0].evidence[0]
+    assert "not that Word evaluates it" in found[0].description
+
+
+def test_live_text_is_classified_and_a_deletion_that_would_change_it_is_noted():
+    # live "DDE cmd x"; with "AUTO" restored it would read "DDEAUTO cmd x"
+    assert rules(docx(complex_field("DDE", ("AUTO", "del"), " cmd x"))) == [
+        ("ENGINE_WORD_DDE_PROGRAM", "MEDIUM"), (DELETED_RULE, "INFO")]
+    # a deleted space joins the live text into DDEAUTO: the live text stands
+    assert rules(docx(complex_field("DDE", (" ", "del"), "AUTO cmd x"))) == [
+        ("ENGINE_WORD_DDEAUTO_PROGRAM", "HIGH"), (DELETED_RULE, "INFO")]
+    # inserted (pending) text is live
+    assert rules(docx(complex_field(("DDEAUTO cmd x", "ins")))) == [("ENGINE_WORD_DDEAUTO_PROGRAM", "HIGH")]
+
+
+def test_deletions_that_change_nothing_reportable_give_nothing():
+    assert rules(docx(complex_field(("PAGE", "del")))) == []
+    assert rules(docx(complex_field("DDEAUTO cmd x", (" y", "del")))) == [("ENGINE_WORD_DDEAUTO_PROGRAM", "HIGH")]
 
 
 # ----------------------------------------------------------------------------- instruction syntax
@@ -181,7 +194,7 @@ HEADER = f'{fx.XML}<w:hdr xmlns:w="{W}">{simple("DDEAUTO cmd x")}</w:hdr>'
 
 @pytest.mark.parametrize("data, reference_verdict, unified_verdict, rule", [
     (docx(NESTED_DDE), "SAFE", "MALICIOUS", "ENGINE_WORD_DDEAUTO_PROGRAM"),  # QUOTE obfuscation
-    (docx(complex_field("DDEAUTO cmd x", tag="delInstrText")), "SAFE", "MALICIOUS", "ENGINE_WORD_DDEAUTO_PROGRAM"),
+    (docx(complex_field(("DDEAUTO cmd x", "del"))), "SAFE", "SAFE", "ENGINE_WORD_DELETED_INSTRUCTION"),  # no claim
     (docx(main_rels=(("rId9", f"{fx.REL}/header", "parts/h.xml"),),
           overrides={"word/parts/h.xml": f"{fx.OFFICE}.wordprocessingml.header+xml"}, parts={"word/parts/h.xml": HEADER}),
      "SAFE", "MALICIOUS", "ENGINE_WORD_DDEAUTO_PROGRAM"),  # a loaded part outside the reference's name list

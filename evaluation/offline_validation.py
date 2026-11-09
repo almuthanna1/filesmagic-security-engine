@@ -1,7 +1,7 @@
 """Phase 6 offline VM validation: both engines through the same isolated worker (app.worker.run,
 as /scan runs it) on the 16 inert synthetic cases, the known-benign corpus (29 authored + 4 public
-government documents, committed with the source) and two truncated documents. Inert and benign
-files only.
+government documents, committed with the source), two truncated documents and the 6 inert C7 Word
+field-code cases (evaluation.cases.field_cases). Inert and benign files only.
 
     SECURITY_ENGINE_REQUIRE_ISOLATION=1 /opt/filesmagic/venv/bin/python -B -m evaluation.offline_validation \\
         --expect-commit <sha> --out ~/fm-eval/results/phase6-<sha7>
@@ -14,7 +14,7 @@ isolation control and exactly that engine's scanners. Every later scan (every tr
 the same way, and the first that fails stops the run.
 
 Results: results.json, report.md, SHA256SUMS. Each result is compared with the committed Windows
-evidence (EXPECTED), so differences from Windows/Render are listed by rule, not judged by eye,
+evidence (EXPECTED; for the C7 cases, which postdate it, with the verdicts in field_cases), so differences from Windows/Render are listed by rule, not judged by eye,
 and the named CHECKS of the contributions are evaluated from the results.
 """
 
@@ -105,6 +105,9 @@ def expectations() -> dict[tuple[str, str, str], tuple[str, list[str]]]:
         for r in json.loads(path.read_text(encoding="utf-8")):
             for engine in ENGINES:
                 out["corpus", r["file"], engine] = r[engine]["verdict"], sorted(r[engine]["findings"])
+    for c in synthetic.field_cases():  # verdicts only; the rules each must report are in checks()
+        for engine in ENGINES:
+            out["c7", c["id"], engine] = c["expected"][engine][0], None
     return out
 
 
@@ -127,9 +130,23 @@ def _has(results: dict, key: tuple[str, str, str], rule: str) -> bool:
     return any(f"{f['scanner']}:{f['rule_id']}".endswith(rule) for f in results[key]["findings"])
 
 
+def _field_case_holds(by: dict, case: dict, info_only: bool = False) -> bool:
+    """Both engines give the expected verdict and report every expected rule; with info_only, C7
+    reports nothing above INFO."""
+    for engine in ENGINES:
+        r, (verdict, required) = by["c7", case["id"], engine], case["expected"][engine]
+        found = {f"{f['scanner']}:{f['rule_id']}" for f in r["findings"]}
+        if r["verdicts"]["aggregate"] != verdict or not set(required) <= found:
+            return False
+        if info_only and any(f["scanner"] == "word-fields" and f["severity"] != "INFO" for f in r["findings"]):
+            return False
+    return True
+
+
 def checks(results: list[dict]) -> list[tuple[str, bool]]:
     """The contributions, each a claim evaluated from this run's results."""
     by = {(r["set"], r["id"], r["engine"]): r for r in results}
+    fields = {c["id"]: c for c in synthetic.field_cases()}
     v = lambda s, i, e: by[s, i, e]["verdicts"]["aggregate"]  # noqa: E731
     syn, cor = "synthetic", "corpus"
     auto = ("2c-pdf-open-at-page-page-open-js", "5a-pdf-auto-js-unrelated-attachment", "5b-pdf-auto-js-exports-attachment")
@@ -164,6 +181,14 @@ def checks(results: list[dict]) -> list[tuple[str, bool]]:
         ("docx-05 local template lowered to LOW but not cleared (SUSPICIOUS)",
          v(cor, "docx-05-word-custom-template.docx", "unified") == "SUSPICIOUS"
          and _has(by, (cor, "docx-05-word-custom-template.docx", "unified"), ":ENGINE_OFFICE_LOCAL_TEMPLATE")),
+        ("C7 positives: c7a nested DDEAUTO MALICIOUS, c7c remote INCLUDETEXT and c7d file-share INCLUDEPICTURE "
+         "SUSPICIOUS (reference SAFE on all three), each with its C7 rule; c7b keeps OFFICE_DDEAUTO_FIELD",
+         all(_field_case_holds(by, fields[i]) for i in ("c7a-docx-nested-ddeauto", "c7b-docx-ddeauto-cmd",
+                                                        "c7c-docx-remote-includetext", "c7d-docx-remote-includepicture"))),
+        ("C7 negatives: c7e DDEAUTO only in a tracked deletion and c7f ordinary fields SAFE in both engines, "
+         "C7 evidence INFO only",
+         all(_field_case_holds(by, fields[i], info_only=True) for i in ("c7e-docx-deleted-ddeauto",
+                                                                         "c7f-docx-ordinary-fields"))),
         ("corrupted documents fail closed (UNABLE_TO_SCAN) in both engines",
          all(v("corrupt", c, e) == FAIL_CLOSED for c in ("corrupt-truncated-pdf", "corrupt-truncated-docx") for e in ENGINES)),
     ]
@@ -182,8 +207,12 @@ def report(env: dict, status: dict, comparison: list[dict], named: list[tuple[st
         lines += [f"| {claim} | {'PASS' if ok else '**FAIL**'} |" for claim, ok in named] + [""]
     if comparison:
         same = sum(r["same"] for r in comparison)
-        lines += ["## Against the Windows evidence", "",
-                  f"{same} of {len(comparison)} scan results identical (verdict and every finding, INFO included).", ""]
+        old = [r for r in comparison if r["set"] != "c7"]
+        lines += ["## Against the expected results", "",
+                  f"Windows evidence: {sum(r['same'] for r in old)} of {len(old)} scan results identical (verdict and "
+                  "every finding, INFO included).",
+                  f"C7 cases: {same - sum(r['same'] for r in old)} of {len(comparison) - len(old)} verdicts as expected "
+                  "(evaluation.cases.field_cases; the rules are checked in Contributions).", ""]
         if diff := [r for r in comparison if not r["same"]]:
             lines += ["| Set | File | Engine | Verdict here | Expected | Only here | Only expected |", "|---|---|---|---|---|---|---|"]
             lines += [f"| {r['set']} | {r['id']} | {r['engine']} | {r['verdict']} | {r['expected_verdict']} | "
@@ -230,7 +259,7 @@ def main_(argv=None) -> int:
     corpus, problems = corpus_items()
     status, preflight, results = {"status": "aborted", "problems": gates(env, args.expect_commit, problems)}, {}, []
     sets = [("synthetic", synthetic.cases(), args.trials), ("corpus", corpus, args.corpus_trials),
-            ("corrupt", corrupt_items(), args.corpus_trials)]
+            ("corrupt", corrupt_items(), args.corpus_trials), ("c7", synthetic.field_cases(), args.trials)]
     if not status["problems"]:
         for engine in ENGINES:  # preflight: an empty input, so nothing is parsed if isolation is not complete
             probe = synthetic.scan_case({"id": "preflight", "ground_truth": "-", "indicator": "-", "data": b""}, 1,

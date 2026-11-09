@@ -91,6 +91,42 @@ def cases() -> list[dict]:
     ]
 
 
+FIELD_SHARE = r"\\\\fileserver.invalid\\share\\pixel.png"  # as Word stores it: \\ for one backslash
+FIELD_WEB = "https://example.invalid"
+FIELD_CMD = r'cmd "/c rem inert"'  # rem: a comment that does nothing; never evaluated here anyway
+
+
+def field_cases() -> list[dict]:
+    """C7 (Word field codes): inert DOCX files, kept apart from the 16 cases above. Each carries
+    `expected`: engine -> (verdict, rules that engine must report as scanner:rule)."""
+    def case(id, indicator, body, reference, unified):
+        return dict(id=id, ground_truth="BENIGN", indicator=indicator, data=fx.field_docx(body),
+                    expected={"reference": reference, "unified": unified})
+    c7 = "word-fields:ENGINE_WORD_"
+    return [
+        case("c7a-docx-nested-ddeauto", "DDEAUTO whose application is the result of a nested QUOTE field (cmd)",
+             fx.complex_field("DDEAUTO ", fx.nested_field("QUOTE 99 109 100"), ' "/c rem inert"'),
+             ("SAFE", []), ("MALICIOUS", [c7 + "DDEAUTO_PROGRAM"])),
+        case("c7b-docx-ddeauto-cmd", f"DDEAUTO {FIELD_CMD} in one simple field", fx.simple_field(f"DDEAUTO {FIELD_CMD}"),
+             ("MALICIOUS", ["office:OFFICE_DDEAUTO_FIELD"]),
+             ("MALICIOUS", ["office:OFFICE_DDEAUTO_FIELD", c7 + "DDEAUTO_PROGRAM"])),
+        case("c7c-docx-remote-includetext", f"INCLUDETEXT from {FIELD_WEB}/chapter.docx (never fetched)",
+             fx.complex_field("INCLUDETEXT ", f'"{FIELD_WEB}/chapter.docx"'),
+             ("SAFE", []), ("SUSPICIOUS", [c7 + "REMOTE_INCLUDE"])),
+        case("c7d-docx-remote-includepicture", "INCLUDEPICTURE from a file share, not stored (\\d; never fetched)",
+             fx.simple_field(f'INCLUDEPICTURE "{FIELD_SHARE}" \\d'), ("SAFE", []), ("SUSPICIOUS", [c7 + "REMOTE_INCLUDE"])),
+        case("c7e-docx-deleted-ddeauto", f"DDEAUTO {FIELD_CMD} only inside a tracked deletion",
+             fx.complex_field((f"DDEAUTO {FIELD_CMD}", "del")), ("SAFE", []), ("SAFE", [c7 + "DELETED_INSTRUCTION"])),
+        case("c7f-docx-ordinary-fields", "PAGE, TOC, PAGEREF, HYPERLINK, a web INCLUDEPICTURE and a relative "
+             "INCLUDETEXT (negative control)",
+             fx.simple_field("PAGE") + fx.complex_field("TOC \\o \"1-3\" \\h") + fx.simple_field("PAGEREF _Toc1 \\h")
+             + fx.simple_field(f'HYPERLINK "{FIELD_WEB}/"')
+             + fx.simple_field(f'INCLUDEPICTURE "{FIELD_WEB}/pixel.png" \\* MERGEFORMATINET')
+             + fx.simple_field('INCLUDETEXT "chapter2.docx"'),
+             ("SAFE", []), ("SAFE", [c7 + "WEB_PICTURE", c7 + "LOCAL_INCLUDE"])),
+    ]
+
+
 def verdicts(report) -> dict[str, str]:
     """Each scanner's own verdict, and the aggregate, with the rules /scan applies."""
     out = {}

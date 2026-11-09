@@ -8,7 +8,16 @@ w:instr. A complex field is w:fldChar begin, then the instruction in w:instrText
 across any number of runs, w:delInstrText inside a tracked deletion), then optionally w:fldChar
 separate and the last displayed result, then w:fldChar end. Fields nest. A nested field inside an
 instruction is replaced by NESTED, because its result exists only once Word updates it (the
-QUOTE-field obfuscation of DDE builds the command that way). Only the two WordprocessingML
+QUOTE-field obfuscation of DDE builds the command that way).
+
+Tracked changes (17.13.5): w:del and w:moveFrom record content removed in a revision, and
+w:delInstrText is field-code text so removed. It is not part of the document as it now stands; it
+returns only if a reviewer rejects the change. So deleted instruction text is evidence of what the
+document contained, not that Word evaluates it: each field is classified on its live text (outside
+deletions) alone, and deleted text only yields ENGINE_WORD_DELETED_INSTRUCTION (INFO), which says
+how the field would read if the deletion were rejected. Whether Word evaluates fields while a
+document is under review was not observed. Insertions (w:ins, w:moveTo) are live. Only the two
+WordprocessingML
 namespaces (transitional and strict) are read, in every XML part Office reaches through
 relationships (ooxml_links.loaded_parts): body, headers, footers, notes, comments, glossary.
 
@@ -38,6 +47,8 @@ and policy (Microsoft ADV170021 turned DDE off by default).
                                         ENGINE_OFFICE_LINKED_PICTURE
   ENGINE_WORD_LOCAL_INCLUDE     INFO    INCLUDETEXT or INCLUDEPICTURE from a drive path naming no
                                         host (app.engine.file_paths) or a relative path
+  ENGINE_WORD_DELETED_INSTRUCTION INFO  instruction text in tracked deletions that, restored, would
+                                        give one of the rules above (no execution is claimed)
   ENGINE_WORD_FIELDS_UNDETERMINED INFO  a loaded part could not be read or parsed, a field type is
                                         itself built by a nested field, or an imported chunk
                                         (w:altChunk) is present, which C7 does not analyse
@@ -95,6 +106,10 @@ RULES = {  # rule -> (severity, summary)
                                 "opened."),
     "ENGINE_WORD_LOCAL_INCLUDE": (Severity.INFO, "An include field takes content from a drive or relative path that "
                                   "names no host; that file is outside this document and was not inspected."),
+    "ENGINE_WORD_DELETED_INSTRUCTION": (Severity.INFO, "Field instruction text is present only in tracked deletions: "
+                                        "it is not part of the document as it now stands and returns only if a reviewer "
+                                        "rejects the deletion. This records what the document contained, not that Word "
+                                        "evaluates it."),
     "ENGINE_WORD_FIELDS_UNDETERMINED": (Severity.INFO, "Some field codes could not be determined."),
 }
 
@@ -102,24 +117,27 @@ RULES = {  # rule -> (severity, summary)
 @dataclass(frozen=True)
 class Field:
     part: str  # as stored in the ZIP
-    instruction: str  # NESTED where a nested field's result goes
-    deleted: bool = False  # instruction text in a tracked deletion
+    instruction: str  # the live text, outside tracked deletions; NESTED where a nested field's result goes
+    deleted: str = ""  # if any of it is in tracked deletions: the instruction with that text restored
 
 
 @dataclass
 class _Open:
-    text: list[str] = field(default_factory=list)
+    pieces: list[tuple[str, bool]] = field(default_factory=list)  # (text, removed in a tracked deletion)
     instruction: bool = True  # until fldChar separate
-    deleted: bool = False
+    removed: bool = False  # the field's begin is itself inside a tracked deletion
 
 
 def fields(data: bytes, part: str = "") -> list[Field]:
     """Every field instruction in one XML part, outermost last. Raises opc.MALFORMED."""
     out: list[Field] = []
     stack: list[_Open] = []
+    removed = 0  # depth of w:del / w:moveFrom around the current element
 
     def close(f: _Open) -> None:
-        out.append(Field(part, "".join(f.text), f.deleted))
+        live = "".join(t for t, gone in f.pieces if not (gone or f.removed))
+        restored = "".join(t for t, _ in f.pieces)
+        out.append(Field(part, live, restored if restored != live else ""))
 
     for event, el in SafeET.iterparse(io.BytesIO(data), events=("start", "end"), forbid_dtd=True):
         ns, tag = ooxml_links._local(el.tag)
@@ -127,23 +145,25 @@ def fields(data: bytes, part: str = "") -> list[Field]:
             if event == "end":
                 el.clear()
             continue
+        if tag in ("del", "moveFrom"):
+            removed += 1 if event == "start" else -1
         if event == "start":
             if tag == "fldSimple":
-                out.append(Field(part, el.get(f"{{{ns}}}instr", "")))
+                instr = el.get(f"{{{ns}}}instr", "")
+                out.append(Field(part, "", instr) if removed else Field(part, instr))
             elif tag == "fldChar":
                 kind = el.get(f"{{{ns}}}fldCharType")
                 if kind == "begin":
                     if stack and stack[-1].instruction:
-                        stack[-1].text.append(NESTED)
-                    stack.append(_Open())
+                        stack[-1].pieces.append((NESTED, bool(removed)))
+                    stack.append(_Open(removed=bool(removed)))
                 elif kind == "separate" and stack:
                     stack[-1].instruction = False
                 elif kind == "end" and stack:
                     close(stack.pop())
         else:
             if tag in ("instrText", "delInstrText") and stack and stack[-1].instruction:
-                stack[-1].text.append(el.text or "")
-                stack[-1].deleted |= tag == "delInstrText"
+                stack[-1].pieces.append((el.text or "", bool(removed) or tag == "delInstrText"))
             el.clear()
     for f in reversed(stack):  # ponytail: an unterminated field is read as far as it goes
         close(f)
@@ -210,7 +230,7 @@ def classify(f: Field) -> tuple[str, str] | None:
         return None
     kind = ALIASES.get(words[0].upper(), words[0].upper())
     shown = clean(f.instruction.replace(NESTED, "{nested field}").strip(), 200)
-    where = f"{f.part}{' (tracked deletion)' if f.deleted else ''}: {shown}"
+    where = f"{f.part}: {shown}"
     if NESTED in words[0]:
         return "ENGINE_WORD_FIELDS_UNDETERMINED", f"{where} (field type built by a nested field)"
     if kind in ("DDE", "DDEAUTO"):
@@ -269,8 +289,13 @@ def scan(data: bytes) -> WordFields | None:
 def findings(result: WordFields) -> list[Finding]:
     by: dict[str, list[str]] = {}
     for f in result.fields:
-        if hit := classify(f):
-            by.setdefault(hit[0], []).append(hit[1])
+        live = classify(f)
+        if live:
+            by.setdefault(live[0], []).append(live[1])
+        restored = classify(Field(f.part, f.deleted)) if f.deleted else None
+        if restored and restored[0] != (live or ("",))[0]:
+            by.setdefault("ENGINE_WORD_DELETED_INSTRUCTION", []).append(
+                f"{restored[1]} (with the tracked deletion rejected: {restored[0]})")
     if result.problems:
         by.setdefault("ENGINE_WORD_FIELDS_UNDETERMINED", []).extend(result.problems)
     return [finding(rule, RULES[rule][0], f"{RULES[rule][1]} Evidence: {listing(items)}.", scanner=NAME,
