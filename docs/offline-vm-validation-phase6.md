@@ -292,5 +292,12 @@ report it not ended. The fallback alone must never call a zombie ended, and afte
 observations must report it ended. Every wait in the real-process tests is bounded. `alive()`,
 the worker, the profile and isolation are unchanged.
 
-**Run 3: pending**, on a new ISO built from the second correction's commit, into new result paths
-(`final-<sha7>`). Runs 1 and 2 are kept.
+**Run 3, at `eda2a08`: passed, the release evidence**
+([evidence/final-eda2a08-run3/](evidence/final-eda2a08-run3/README.md)). ISO SHA-256
+`86accc9c…dbd779`, built from a clean tree at the pushed commit; disc 7/7 OK in the guest; every
+isolation control PASS. **11/11 claims; 114/114 results as expected** (102/102 identical to
+Windows, 12/12 C7 verdicts); strict isolation, no missing control and deterministic results on
+every one; scanners failed only on the 2 truncated files (UNABLE_TO_SCAN in both engines). Test
+suite: 1004 tests, **993 passed, 0 failed, 0 errors**, exactly the 11 expected environment skips.
+Process-group termination verified in both modes (about 2 s of the 5 s deadline). Runs 1 and 2 are
+kept as found.
