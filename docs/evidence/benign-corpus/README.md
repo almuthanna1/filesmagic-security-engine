@@ -111,3 +111,10 @@ code elements, no references outside its own parts, and one hyperlink (`text:a` 
 `https://www.niu.edu/`), which is passive and now listed. docx-04's picture is referenced only by
 `a:blip`, xlsx-04's link only by `externalBook`/`absoluteUrl`/`relativeUrl`, both on drive paths that
 name no host. The corrections now claim only that.
+
+Staging (`staging-review.json`, Render `9111e5a`, strict isolation, 12 tokens per window, three
+windows): the 12 files of the previous staging check plus six inert regression fixtures for the
+gaps above (remote picture, prefixed and UTF-16 event listeners, NUL in the attachment name, an
+object outside the cross-reference table, an image relationship used as a hyperlink). 36/36 scans
+HTTP 200, `isolation_missing: []`, verdicts equal to the local results; the fixtures stay
+SUSPICIOUS in both engines. Vercel was not redeployed (frontend unchanged, still `37737f5`).
