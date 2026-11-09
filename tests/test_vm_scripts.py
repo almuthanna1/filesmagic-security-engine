@@ -9,6 +9,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.environment import exec_denied, unsupported
+
 pytestmark = pytest.mark.skipif(not sys.platform.startswith("linux"), reason="GNU find/readlink: Linux only")
 SCRIPTS = Path(__file__).resolve().parent.parent / "evaluation/vm"
 
@@ -17,8 +19,13 @@ def check(root: Path) -> subprocess.CompletedProcess:
     import pwd  # Unix only
 
     me = pwd.getpwuid(os.getuid()).pw_name
-    return subprocess.run(["bash", str(SCRIPTS / "trusted_tree.sh"), str(root), me],
-                          capture_output=True, text=True, timeout=60)
+    try:
+        return subprocess.run(["bash", str(SCRIPTS / "trusted_tree.sh"), str(root), me],
+                              capture_output=True, text=True, timeout=60)
+    except PermissionError:
+        if reason := exec_denied("bash"):  # the VM's evaluation interpreter: guest_checks.sh runs the script
+            unsupported(reason)
+        raise
 
 
 @pytest.fixture

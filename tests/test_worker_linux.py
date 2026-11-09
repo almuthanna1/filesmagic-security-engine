@@ -27,6 +27,7 @@ from app import main, worker
 from app.models import Verdict
 from tests.office_fixtures import make_ooxml, rels
 from tests.pdf_fixtures import make_pdf
+from tests.environment import enforced_profile, offline_host, unsupported
 from tests.scan_client import post_scan
 
 REQUIRED = os.environ.get("FM_REQUIRE_LINUX_TESTS") == "1"
@@ -173,7 +174,10 @@ else:
     out = probe(code).stdout.split()
     if out == ["unavailable"]:
         (pytest.fail if REQUIRED else pytest.skip)("unprivileged user/network namespaces are not available on this host")
-    assert out == ["blocked", str(errno.ENETUNREACH)]
+    # An enforced AppArmor profile without `network inet stream` refuses the socket first (EACCES):
+    # a stronger restriction than the namespace, accepted only when such a profile is enforced.
+    allowed = {errno.ENETUNREACH} | ({errno.EACCES} if enforced_profile() else set())
+    assert out[0] == "blocked" and int(out[1]) in allowed, (out, enforced_profile())
 
 
 # --------------------------------------------------------------------- termination and fail-closed behaviour
@@ -234,10 +238,20 @@ def test_network_verification_passes_inside_the_namespace():
 def test_network_verification_detects_the_host_network():
     # The runner's own namespace has real interfaces and routes, so the same checks must fail.
     # Only route lookups against a documentation address are made: no packet is sent.
+    if reason := offline_host():
+        unsupported(reason + "; there is no host network to detect")
     out = json.loads(probe(NET_PROBE.format(enter=False)).stdout)
     assert not out["net_loopback_only"] and not out["net_ipv4_no_route"], out
     assert not out["net_fallback_tunnel_inert"], out
     assert not all(out.values())
+
+
+def test_host_network_checks_agree_with_an_independent_measurement():
+    # Runs everywhere, offline or not: the worker's interface and route checks in the host
+    # namespace must say what /proc/self/net says (tests/environment.offline_host).
+    out = json.loads(probe(NET_PROBE.format(enter=False)).stdout)
+    offline = offline_host() is not None
+    assert (out["net_loopback_only"], out["net_ipv4_no_route"]) == (offline, offline), (out, offline_host())
 
 
 # --------------------------------------------------------------------- strict mode fails closed on failed verification
@@ -330,6 +344,8 @@ def test_diagnostics_inside_the_namespace_show_only_expected_interfaces():
 
 def test_diagnostics_read_real_interface_state_in_the_host_namespace():
     # The runner's own interfaces exercise the ioctl parsing on real data; nothing is sent.
+    if reason := offline_host():
+        unsupported(reason + "; no non-loopback interface to read")
     out = json.loads(probe(DIAG_PROBE.format(enter=False)).stdout)
     assert out["collection_error"] is None and out["usable_routes_v4"] >= 1, out
     assert any(i["loopback"] and i["link_type"] == 772 for i in out["interfaces"]), out
@@ -408,7 +424,9 @@ def test_capabilities_are_dropped_in_the_kernel_and_cannot_be_regained():
     out = json.loads(probe(CAP_PROBE).stdout)
     if out == "unavailable":
         (pytest.fail if REQUIRED else pytest.skip)("unprivileged user/network namespaces are not available on this host")
-    assert out["lo_up_before"] == "ok", out  # CAP_NET_ADMIN was really held before the drop
+    # CAP_NET_ADMIN was really held before the drop. An enforced profile that denies net_admin
+    # refuses this first step (EPERM); the drop below still needs setpcap, so it shows capabilities.
+    assert out["lo_up_before"] in ({"ok", "EPERM"} if enforced_profile() else {"ok"}), (out, enforced_profile())
     assert out["dropped"] is True, out
     assert {k: int(out["status"][k], 16) for k in worker.CAP_SETS} == dict.fromkeys(worker.CAP_SETS, 0), out
     assert out["status"]["NoNewPrivs"] == "1" and out["securebits"] & worker.SECUREBITS == worker.SECUREBITS, out

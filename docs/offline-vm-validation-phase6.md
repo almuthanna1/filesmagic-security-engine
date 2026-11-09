@@ -67,7 +67,7 @@ bash ~/filesmagic-security-engine/evaluation/vm/guest_checks.sh | tee $R-guest-c
 cd ~/filesmagic-security-engine
 SECURITY_ENGINE_REQUIRE_ISOLATION=1 /opt/filesmagic/venv/bin/python -B -m evaluation.offline_validation \
     --expect-commit $C --out $R 2>&1 | tee $R.log
-/opt/filesmagic/venv/bin/python -B -m pytest -q -rf -p no:cacheprovider tests 2>&1 | tee $R-pytest.log
+/opt/filesmagic/venv/bin/python -B -m pytest -q -rfs -p no:cacheprovider --junitxml $R-pytest.xml tests 2>&1 | tee $R-pytest.log
 ```
 
 `guest_checks.sh` verifies what the guest sees:
@@ -90,11 +90,10 @@ SECURITY_ENGINE_REQUIRE_ISOLATION=1 /opt/filesmagic/venv/bin/python -B -m evalua
 It re-checks every trial of every scan and stops at the first that fails. Exit 1 means it
 completed but one of the contribution checks failed.
 
-Expected in the test run: the four `tests/test_worker_linux.py` failures recorded in C9.2,
-Section 6, which come from the VM being offline and confined (proposed corrections still
-unapproved). From `e755786` on, also the 9 `tests/test_vm_scripts.py` tests that run bash,
-which the profile does not let the confined interpreter execute (Section 5.4). Any other
-failure is a discrepancy.
+Expected in the test run, from the release-freeze commit on: 0 failures, and exactly the
+environment skips of Section 5.5 (11 in this VM), each listed with its reason in the log and the
+JUnit XML. At `996db77` (before Section 5.5) the run had 13 failures (Section 5.4). Any failure, or
+any other skip with an `unsupported environment` reason, is a discrepancy.
 
 ## 4. Getting the results out (step G)
 
@@ -194,7 +193,7 @@ In detail (from `phase6-996db77-pytest.log` and the guest kernel log):
 | 4 | `test_capabilities_are_dropped_in_the_kernel_and_cannot_be_regained` | first step `EPERM`; expects `ok` (reconfiguring `lo` before the drop); the 11 later assertions hold | the profile denies `net_admin` before the drop | stronger restriction |
 | 5-13 | 9 tests in `tests/test_vm_scripts.py` that run `bash trusted_tree.sh` | `PermissionError: 'bash'`; kernel: `apparmor="DENIED" operation="exec" profile="filesmagic-eval-python" name="/usr/bin/bash"` | the profile does not let the confined interpreter start programs | unsupported condition: needs exec |
 
-### 5.5 Proposal: explicit skips for unsupported conditions (not applied; needs approval)
+### 5.5 Explicit skips for unsupported conditions (approved 2026-11-09, applied)
 
 The aim is that the VM run reports *0 failed* only when nothing is wrong, without hiding a
 failure or changing AppArmor. Each failure kind gets its own treatment:
@@ -217,10 +216,22 @@ failure or changing AppArmor. Each failure kind gets its own treatment:
 3. **Guard rails:**
    - Every skip condition requires confinement or an offline host, neither of which GitHub's
      Linux runners have, so CI keeps running and asserting all 13 tests.
-   - The VM run's log lists each skip with its reason.
-   - `evaluation.offline_validation` copies that skip list into `run_status.json`, so the
-     evidence states what was not exercised.
-   - Any skip whose condition does not hold is a failure.
+   - The VM run's log (`-rs`) and a JUnit XML file (`--junitxml`) list each skip with its test and
+     reason. Every such reason starts with `unsupported environment (demonstrated):`, so they are
+     counted apart from the platform skips (Linux-only tests on Windows).
+   - A skip whose condition does not hold is not taken: the test runs, and fails if it must.
+
+As implemented (`tests/environment.py`, tested by `tests/test_environment.py`):
+- `enforced_profile()` reads the process's AppArmor label; complain mode does not count.
+- `exec_denied("bash")` needs an enforced profile *and* a `PermissionError` when starting bash.
+- `offline_host()` reads `/proc/self/net/{dev,route,ipv6_route}` (allowed by the profile; no
+  socket, and not the worker's own checks): only `lo`, and every route on `lo`.
+- `unsupported(reason)` skips, or fails with `FM_REQUIRE_LINUX_TESTS=1` (CI).
+- New `test_host_network_checks_agree_with_an_independent_measurement` runs everywhere: the
+  worker's host-namespace view must equal the `/proc/self/net` measurement, online or offline.
+
+Expected in the VM: 11 skips (rows 2-3 and 5-13), each with its reason; rows 1 and 4 pass under
+the enforced profile; 0 failures. On CI: 0 skips.
 
 Nothing here changes the profile, the worker or the isolation checks. It changes only what the
 tests assert, in the environment where their assumption is measured to be false.
@@ -239,3 +250,8 @@ tests assert, in the environment where their assumption is measured to be false.
   MALICIOUS verdict on an inert case is the engine's reading of a constructed indicator, not
   detection of malware.
 - **Not measured**: detection of real malware (none is used), worker memory, and any rate.
+
+## 7. Final run (release freeze, with C7)
+
+Pending: the final committed code on a new ISO; same procedure (Sections 3-4). Adds the `c7` set
+(6 inert Word field-code cases) and the two C7 claims.
