@@ -571,7 +571,7 @@ is claimed.
 - Element semantics come from the specification, not from running Office; behaviour Office has
   beyond it (or bugs) is not modelled, which is why nothing is removed.
 - Not modelled: field codes that fetch content without a relationship (`INCLUDEPICTURE`,
-  `INCLUDETEXT`, `LINK`; Word fields are the planned C7), Excel external workbook links
+  `INCLUDETEXT`, `LINK`; Word fields are C7: [custom-engine-c7-word-fields.md](custom-engine-c7-word-fields.md), which covers DDE, INCLUDETEXT and INCLUDEPICTURE but not LINK), Excel external workbook links
   (`externalLink` parts), custom XML data bindings, embedded packages opened recursively.
 - "Not activated" is evidence of absence only within the elements modelled; it is reported as INFO.
 - Synthetic, BENIGN-by-ground-truth cases; no measurement on real documents.

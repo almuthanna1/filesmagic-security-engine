@@ -30,7 +30,7 @@ from tests import custom_fixtures as fx
 ENGINES = ["reference", "unified"]
 EXPECTED_SCANNERS = {"reference": ["yara-x", "office", "pdf", "custom"],
                      "unified": ["yara-x", "office", "pdf", "custom", "yara-x-engine", "pdf-chains", "vba-chains",
-                                 "ooxml-links"]}
+                                 "ooxml-links", "word-fields"]}
 # Extra cases: (id, data, expected verdict) - formats and a fail-closed parse failure.
 EXTRA = [
     ("office-clean-xlsx", fx.office_package("xlsx"), "SAFE"),
