@@ -28,6 +28,7 @@ from app.models import Verdict
 from tests.office_fixtures import make_ooxml, rels
 from tests.pdf_fixtures import make_pdf
 from tests.environment import enforced_profile, offline_host, unsupported
+from tests.processes import alive
 from tests.scan_client import post_scan
 
 REQUIRED = os.environ.get("FM_REQUIRE_LINUX_TESTS") == "1"
@@ -43,14 +44,6 @@ def probe(code: str, timeout: float = 30) -> subprocess.CompletedProcess:
     """Run Python code in a fresh interpreter from the application root."""
     return subprocess.run([sys.executable, "-B", "-c", code], cwd=worker.APP_ROOT, capture_output=True, text=True,
                           timeout=timeout)
-
-
-def alive(pid: int) -> bool:
-    try:
-        state = Path(f"/proc/{pid}/stat").read_text().rsplit(")", 1)[1].split()[0]
-    except (FileNotFoundError, ProcessLookupError):
-        return False
-    return state != "Z"  # a zombie has already terminated
 
 
 def wait_dead(pid: int, seconds: float = 5) -> bool:
@@ -193,6 +186,47 @@ def test_process_group_is_killed_including_grandchildren(mode, tmp_path):
     with pytest.raises(worker.WorkerError):
         asyncio.run(worker.run(b"x", cmd=fake(mode, str(pid_file)), timeout=2))
     assert wait_dead(int(pid_file.read_text())), "grandchild process survived the worker"
+
+
+class DeniedProc:
+    """A /proc whose stat entries cannot be read, to force tests.processes.alive onto its kill(pid, 0)
+    fallback on real processes."""
+
+    def __truediv__(self, _):
+        return self
+
+    def read_text(self):
+        raise PermissionError(13, "Permission denied")
+
+
+def test_process_observation_on_real_processes():
+    # A real child through its life: running, a zombie (exited, not yet reaped), reaped. The
+    # primary /proc observation sees all three; the kill(pid, 0) fallback never calls the zombie
+    # ended (it cannot tell), and calls the PID ended only once no process has it (ESRCH).
+    child = subprocess.Popen([sys.executable, "-B", "-c", "import time; time.sleep(30)"])
+    try:
+        assert alive(child.pid) and alive(child.pid, DeniedProc())
+        os.kill(child.pid, signal.SIGKILL)
+        deadline = time.monotonic() + 5
+        while alive(child.pid) and time.monotonic() < deadline:  # becomes a zombie: we have not waited
+            time.sleep(0.02)
+        assert not alive(child.pid), "the killed child is not a zombie within 5 s"
+        assert alive(child.pid, DeniedProc()), "the fallback called a zombie ended"
+    finally:
+        child.kill()
+        child.wait()
+    assert not alive(child.pid) and not alive(child.pid, DeniedProc())
+
+
+def test_a_surviving_grandchild_is_detected():
+    # The cleanup assertion itself: a process that outlives the deadline must make wait_dead
+    # fail, through either observation.
+    child = subprocess.Popen([sys.executable, "-B", "-c", "import time; time.sleep(30)"])
+    try:
+        assert wait_dead(child.pid, seconds=0.5) is False
+    finally:
+        child.kill()
+        child.wait()
 
 
 def test_native_crash_fails_closed(monkeypatch):

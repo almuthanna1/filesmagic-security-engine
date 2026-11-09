@@ -52,7 +52,7 @@ corrected in a later commit, and the whole validation is rerun (`final-<sha>-run
 
 All 9 match `final-d80a46d-guest-sha256.txt` on the host (copied with `VBoxManage guestcontrol
 copyfrom`). The denials file holds only kernel audit lines from the test suite's probes:
-- 14 `exec`: bash, plus 2 `uname` from the platform probe;
+- 14 `exec`: 10 of bash, 4 of `uname` (the platform probe);
 - 12 `mknod`: `.git/index.lock`, from git status probes;
 - 1 `create`: inet stream, the namespace-connect test, now accepted;
 - 1 `capable`: `net_admin`, the capability precondition, now accepted;

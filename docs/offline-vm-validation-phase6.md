@@ -253,5 +253,26 @@ tests assert, in the environment where their assumption is measured to be false.
 
 ## 7. Final run (release freeze, with C7)
 
-Pending: the final committed code on a new ISO; same procedure (Sections 3-4). Adds the `c7` set
-(6 inert Word field-code cases) and the two C7 claims.
+The final committed code on a new ISO; same procedure (Sections 3-4). Adds the `c7` set (6 inert
+Word field-code cases) and the two C7 claims.
+
+**Run 1, at `d80a46d`: superseded, kept as found**
+([evidence/final-d80a46d-run1/](evidence/final-d80a46d-run1/README.md)). 11/11 claims; 102/102
+results identical to Windows; 12/12 C7 verdicts as expected. The suite had 977 passed, 11 skipped
+(the expected skips) and **1 failed**:
+`test_process_group_is_killed_including_grandchildren[spawn-exit]`. AppArmor refused the test's
+read of the grandchild's `/proc/<pid>/stat`, an entry owned by root (`ouid=0`; the profile allows
+only `owner` reads). Process-group termination was therefore **unverified** in that run; no
+implementation defect was shown.
+
+**Correction (test measurement only).** `tests/processes.alive` keeps `/proc/<pid>/stat` as the
+primary observation. Only when that read is refused does it fall back to `kill(pid, 0)`, and it
+reports "ended" only on ESRCH. EPERM, EACCES or success count as not ended: a zombie, an
+inaccessible process or a reused PID make the test wait and fail at its deadline, never pass. The
+security assertion, the 5-second deadline, the worker, the profile and the isolation settings are
+unchanged. Regression tests: `tests/test_processes.py` (every fallback outcome, on every platform)
+and, in `tests/test_worker_linux.py`, real processes through running, zombie and reaped under both
+observations, plus a surviving process failing `wait_dead`.
+
+**Run 2: pending**, on a new ISO built from the correction's commit, into new result paths
+(`final-<sha7>`). Run 1's results are kept.
