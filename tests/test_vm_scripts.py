@@ -3,7 +3,6 @@ readlink -f). Regression: the Phase 6 check at 6ffd413 counted every symlink as 
 mode is always 777), so 1053 root-owned links inside /opt/filesmagic made it STOP."""
 
 import os
-import pwd
 import subprocess
 import sys
 from pathlib import Path
@@ -15,6 +14,8 @@ SCRIPTS = Path(__file__).resolve().parent.parent / "evaluation/vm"
 
 
 def check(root: Path) -> subprocess.CompletedProcess:
+    import pwd  # Unix only
+
     me = pwd.getpwuid(os.getuid()).pw_name
     return subprocess.run(["bash", str(SCRIPTS / "trusted_tree.sh"), str(root), me],
                           capture_output=True, text=True, timeout=60)
