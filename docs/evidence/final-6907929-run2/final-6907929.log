@@ -1,0 +1,262 @@
+synthetic 1-pdf-clean                                   reference SAFE           414.45 ms
+synthetic 1-pdf-clean                                   unified   SAFE           343.11 ms
+synthetic 2-pdf-form-keystroke-js                       reference SUSPICIOUS     305.74 ms
+synthetic 2-pdf-form-keystroke-js                       unified   SUSPICIOUS     302.54 ms
+synthetic 2b-pdf-open-at-page-click-js                  reference SUSPICIOUS     326.2 ms
+synthetic 2b-pdf-open-at-page-click-js                  unified   SUSPICIOUS     332.84 ms
+synthetic 2c-pdf-open-at-page-page-open-js              reference SUSPICIOUS     298.19 ms
+synthetic 2c-pdf-open-at-page-page-open-js              unified   SUSPICIOUS     311.42 ms
+synthetic 3-pdf-escaped-openaction-js                   reference SUSPICIOUS     259.98 ms
+synthetic 3-pdf-escaped-openaction-js                   unified   SUSPICIOUS     340.51 ms
+synthetic 4-pdf-objstm-escaped-js                       reference SUSPICIOUS     327.28 ms
+synthetic 4-pdf-objstm-escaped-js                       unified   SUSPICIOUS     312.52 ms
+synthetic 5a-pdf-auto-js-unrelated-attachment           reference MALICIOUS      407.43 ms
+synthetic 5a-pdf-auto-js-unrelated-attachment           unified   SUSPICIOUS     328.0 ms
+synthetic 5b-pdf-auto-js-exports-attachment             reference MALICIOUS      328.18 ms
+synthetic 5b-pdf-auto-js-exports-attachment             unified   MALICIOUS      365.16 ms
+synthetic 6a-docx-hyperlink                             reference SAFE           304.4 ms
+synthetic 6a-docx-hyperlink                             unified   SAFE           377.51 ms
+synthetic 6b-docx-external-template                     reference SUSPICIOUS     322.48 ms
+synthetic 6b-docx-external-template                     unified   SUSPICIOUS     471.44 ms
+synthetic 6c-docx-template-referenced-by-settings       reference SUSPICIOUS     335.58 ms
+synthetic 6c-docx-template-referenced-by-settings       unified   SUSPICIOUS     402.25 ms
+synthetic 6d-docx-linked-picture                        reference SAFE           361.61 ms
+synthetic 6d-docx-linked-picture                        unified   SAFE           419.01 ms
+synthetic 6g-docx-linked-picture-file-share             reference SUSPICIOUS     359.35 ms
+synthetic 6g-docx-linked-picture-file-share             unified   SUSPICIOUS     415.9 ms
+synthetic 6e-docx-embedded-object-displayed             reference SUSPICIOUS     371.88 ms
+synthetic 6e-docx-embedded-object-displayed             unified   SUSPICIOUS     360.94 ms
+synthetic 6f-docx-embedded-object-not-displayed         reference SUSPICIOUS     301.63 ms
+synthetic 6f-docx-embedded-object-not-displayed         unified   SUSPICIOUS     420.32 ms
+synthetic 7-docx-macro-declaration-mismatch             reference SUSPICIOUS     293.38 ms
+synthetic 7-docx-macro-declaration-mismatch             unified   SUSPICIOUS     379.73 ms
+corpus    docx-01-word-plain.docx                       reference SAFE           346.85 ms
+corpus    docx-01-word-plain.docx                       unified   SAFE           331.24 ms
+corpus    docx-02-word-rich.docx                        reference SAFE           304.43 ms
+corpus    docx-02-word-rich.docx                        unified   SAFE           446.03 ms
+corpus    docx-03-word-embedded-excel.docx              reference SAFE           303.62 ms
+corpus    docx-03-word-embedded-excel.docx              unified   SAFE           349.3 ms
+corpus    docx-04-word-linked-picture.docx              reference SUSPICIOUS     390.05 ms
+corpus    docx-04-word-linked-picture.docx              unified   SAFE           397.95 ms
+corpus    docx-05-word-custom-template.docx             reference SUSPICIOUS     306.72 ms
+corpus    docx-05-word-custom-template.docx             unified   SUSPICIOUS     347.84 ms
+corpus    docx-06-word-content-controls.docx            reference SAFE           2699.86 ms
+corpus    docx-06-word-content-controls.docx            unified   SAFE           403.01 ms
+corpus    docx-07-libreoffice.docx                      reference SAFE           1696.19 ms
+corpus    docx-07-libreoffice.docx                      unified   SAFE           2338.38 ms
+corpus    pdf-01-word-export.pdf                        reference SAFE           297.61 ms
+corpus    pdf-01-word-export.pdf                        unified   SAFE           419.69 ms
+corpus    pdf-02-excel-export.pdf                       reference SAFE           314.55 ms
+corpus    pdf-02-excel-export.pdf                       unified   SAFE           366.75 ms
+corpus    pdf-03-powerpoint-export.pdf                  reference SAFE           354.34 ms
+corpus    pdf-03-powerpoint-export.pdf                  unified   SAFE           362.48 ms
+corpus    pdf-04-libreoffice-tagged.pdf                 reference SAFE           303.07 ms
+corpus    pdf-04-libreoffice-tagged.pdf                 unified   SAFE           336.04 ms
+corpus    pdf-05-libreoffice-pdfa.pdf                   reference SAFE           347.88 ms
+corpus    pdf-05-libreoffice-pdfa.pdf                   unified   SAFE           355.38 ms
+corpus    pdf-06-word-export-pdfa.pdf                   reference SAFE           1681.38 ms
+corpus    pdf-06-word-export-pdfa.pdf                   unified   SAFE           409.4 ms
+corpus    pdf-07-libreoffice-hybrid.pdf                 reference SUSPICIOUS     383.2 ms
+corpus    pdf-07-libreoffice-hybrid.pdf                 unified   SAFE           391.36 ms
+corpus    pdf-08-edge-print.pdf                         reference SAFE           311.77 ms
+corpus    pdf-08-edge-print.pdf                         unified   SAFE           453.28 ms
+corpus    pptx-01-ppt-plain.pptx                        reference SAFE           379.19 ms
+corpus    pptx-01-ppt-plain.pptx                        unified   SAFE           370.3 ms
+corpus    pptx-02-ppt-pictures-notes.pptx               reference SAFE           314.57 ms
+corpus    pptx-02-ppt-pictures-notes.pptx               unified   SAFE           447.67 ms
+corpus    pptx-03-ppt-chart-table.pptx                  reference SAFE           317.17 ms
+corpus    pptx-03-ppt-chart-table.pptx                  unified   SAFE           338.94 ms
+corpus    pptx-04-ppt-hyperlinks-actions.pptx           reference SAFE           304.72 ms
+corpus    pptx-04-ppt-hyperlinks-actions.pptx           unified   SAFE           366.39 ms
+corpus    pptx-05-ppt-transitions-animations.pptx       reference SAFE           1509.82 ms
+corpus    pptx-05-ppt-transitions-animations.pptx       unified   SAFE           2511.77 ms
+corpus    pptx-06-ppt-embedded-excel.pptx               reference SAFE           323.78 ms
+corpus    pptx-06-ppt-embedded-excel.pptx               unified   SAFE           354.73 ms
+corpus    pptx-07-libreoffice-roundtrip.pptx            reference SAFE           301.97 ms
+corpus    pptx-07-libreoffice-roundtrip.pptx            unified   SAFE           342.61 ms
+corpus    xlsx-01-excel-formulas.xlsx                   reference SAFE           292.67 ms
+corpus    xlsx-01-excel-formulas.xlsx                   unified   SAFE           433.98 ms
+corpus    xlsx-02-excel-chart-formatting.xlsx           reference SAFE           427.27 ms
+corpus    xlsx-02-excel-chart-formatting.xlsx           unified   SAFE           351.46 ms
+corpus    xlsx-03-excel-hyperlinks-validation.xlsx      reference SAFE           407.42 ms
+corpus    xlsx-03-excel-hyperlinks-validation.xlsx      unified   SAFE           516.43 ms
+corpus    xlsx-04-excel-external-workbook-link.xlsx     reference SUSPICIOUS     1428.66 ms
+corpus    xlsx-04-excel-external-workbook-link.xlsx     unified   SAFE           469.64 ms
+corpus    xlsx-05-excel-table-pivot.xlsx                reference SAFE           307.47 ms
+corpus    xlsx-05-excel-table-pivot.xlsx                unified   SAFE           407.37 ms
+corpus    xlsx-06-excel-picture-notes.xlsx              reference SAFE           397.71 ms
+corpus    xlsx-06-excel-picture-notes.xlsx              unified   SAFE           386.89 ms
+corpus    xlsx-07-libreoffice.xlsx                      reference SAFE           529.63 ms
+corpus    xlsx-07-libreoffice.xlsx                      unified   SAFE           481.39 ms
+corpus    fw9.pdf                                       reference MALICIOUS      448.18 ms
+corpus    fw9.pdf                                       unified   SUSPICIOUS     366.77 ms
+corpus    fw4.pdf                                       reference MALICIOUS      342.55 ms
+corpus    fw4.pdf                                       unified   SUSPICIOUS     482.9 ms
+corpus    f1040.pdf                                     reference MALICIOUS      439.62 ms
+corpus    f1040.pdf                                     unified   SUSPICIOUS     471.19 ms
+corpus    NST-EST2023-POP.xlsx                          reference SAFE           307.72 ms
+corpus    NST-EST2023-POP.xlsx                          unified   SAFE           391.92 ms
+corrupt   corrupt-truncated-pdf                         reference UNABLE_TO_SCAN 384.67 ms
+corrupt   corrupt-truncated-pdf                         unified   UNABLE_TO_SCAN 2102.54 ms
+corrupt   corrupt-truncated-docx                        reference UNABLE_TO_SCAN 2650.42 ms
+corrupt   corrupt-truncated-docx                        unified   UNABLE_TO_SCAN 338.39 ms
+c7        c7a-docx-nested-ddeauto                       reference SAFE           299.67 ms
+c7        c7a-docx-nested-ddeauto                       unified   MALICIOUS      422.46 ms
+c7        c7b-docx-ddeauto-cmd                          reference MALICIOUS      364.64 ms
+c7        c7b-docx-ddeauto-cmd                          unified   MALICIOUS      401.27 ms
+c7        c7c-docx-remote-includetext                   reference SAFE           1392.25 ms
+c7        c7c-docx-remote-includetext                   unified   SUSPICIOUS     445.77 ms
+c7        c7d-docx-remote-includepicture                reference SAFE           374.23 ms
+c7        c7d-docx-remote-includepicture                unified   SUSPICIOUS     734.06 ms
+c7        c7e-docx-deleted-ddeauto                      reference SAFE           456.81 ms
+c7        c7e-docx-deleted-ddeauto                      unified   SAFE           410.35 ms
+c7        c7f-docx-ordinary-fields                      reference SAFE           476.3 ms
+c7        c7f-docx-ordinary-fields                      unified   SAFE           393.1 ms
+# Offline VM validation
+
+- Status: **completed**
+- Commit `6907929172732e4d5dc9468e20629d74320b44b4`, clean tree: True; engine 0.2.0; rules `0be9918509e95e639f866291dc297c45c8e72812d602fb149fad3484435ae3b0`, engine rules `988d991efb218328c97e8c00500ed6b434a33ee8e961548e817e159cc9f35b4e`
+- Linux-7.0.0-38-generic-x86_64-with-glibc2.39, Python 3.11.18; confinement `filesmagic-eval-python (enforce)`; strict isolation True; host network {'checked': True, 'offline': True, 'usable_routes_v4': 0, 'usable_routes_v6': 0}; drift []
+- Trials: synthetic 20, corpus and corrupt 5
+
+## Contributions
+
+| Claim | Result |
+|---|---|
+| 5a: unified SUSPICIOUS (the attachment is not on the automatic chain); reference MALICIOUS | PASS |
+| 5b: unified MALICIOUS with ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT | PASS |
+| refined YARA-X rule fires on every automatic page-open/OpenAction script case (2c, 5a, 5b) | PASS |
+| refined YARA-X rule is silent on the user-triggered cases (2, 2b), which the reference rule flags | PASS |
+| VBA call graph: case 7 reports ENGINE_VBA_CALL_PATH_UNDETERMINED and keeps the reference macro findings | PASS |
+| OOXML correlation: 6c template used on open -> ENGINE_OFFICE_EXTERNAL_ON_OPEN; 6g file share keeps OFFICE_EXTERNAL_NETWORK_PATH; 6e/6f object displayed / not displayed | PASS |
+| false-positive corrections: docx-04, xlsx-04 (local targets) and pdf-07 (verified attachment) SAFE in unified, SUSPICIOUS in reference | PASS |
+| docx-05 local template lowered to LOW but not cleared (SUSPICIOUS) | PASS |
+| C7 positives: c7a nested DDEAUTO MALICIOUS, c7c remote INCLUDETEXT and c7d file-share INCLUDEPICTURE SUSPICIOUS (reference SAFE on all three), each with its C7 rule; c7b keeps OFFICE_DDEAUTO_FIELD | PASS |
+| C7 negatives: c7e DDEAUTO only in a tracked deletion and c7f ordinary fields SAFE in both engines, C7 evidence INFO only | PASS |
+| corrupted documents fail closed (UNABLE_TO_SCAN) in both engines | PASS |
+
+## Against the expected results
+
+Windows evidence: 102 of 102 scan results identical (verdict and every finding, INFO included).
+C7 cases: 12 of 12 verdicts as expected (evaluation.cases.field_cases; the rules are checked in Contributions).
+
+
+## Results
+
+| Set | File | Engine | Verdict | Failed scanners | Wall p50 ms | Scanner p50 ms |
+|---|---|---|---|---|---|---|
+| synthetic | 1-pdf-clean | reference | SAFE | - | 414.45 | yara-x 0.64, pdf 0.6, custom 0.09 |
+| synthetic | 1-pdf-clean | unified | SAFE | - | 343.11 | yara-x 0.47, pdf 0.7, custom 0.08, yara-x-engine 0.4, pdf-chains 0.56 |
+| synthetic | 2-pdf-form-keystroke-js | reference | SUSPICIOUS | - | 305.74 | yara-x 0.55, pdf 0.8, custom 0.1 |
+| synthetic | 2-pdf-form-keystroke-js | unified | SUSPICIOUS | - | 302.54 | yara-x 0.49, pdf 0.8, custom 0.09, yara-x-engine 0.31, pdf-chains 0.7 |
+| synthetic | 2b-pdf-open-at-page-click-js | reference | SUSPICIOUS | - | 326.2 | yara-x 0.57, pdf 0.84, custom 0.1 |
+| synthetic | 2b-pdf-open-at-page-click-js | unified | SUSPICIOUS | - | 332.84 | yara-x 0.63, pdf 0.93, custom 0.1, yara-x-engine 0.35, pdf-chains 0.74 |
+| synthetic | 2c-pdf-open-at-page-page-open-js | reference | SUSPICIOUS | - | 298.19 | yara-x 0.53, pdf 0.78, custom 0.1 |
+| synthetic | 2c-pdf-open-at-page-page-open-js | unified | SUSPICIOUS | - | 311.42 | yara-x 0.52, pdf 0.83, custom 0.09, yara-x-engine 0.35, pdf-chains 0.62 |
+| synthetic | 3-pdf-escaped-openaction-js | reference | SUSPICIOUS | - | 259.98 | yara-x 0.45, pdf 0.75, custom 0.19 |
+| synthetic | 3-pdf-escaped-openaction-js | unified | SUSPICIOUS | - | 340.51 | yara-x 0.44, pdf 0.82, custom 0.19, yara-x-engine 0.35, pdf-chains 0.54 |
+| synthetic | 4-pdf-objstm-escaped-js | reference | SUSPICIOUS | - | 327.28 | yara-x 0.45, pdf 0.96, custom 0.33 |
+| synthetic | 4-pdf-objstm-escaped-js | unified | SUSPICIOUS | - | 312.52 | yara-x 0.47, pdf 0.98, custom 0.26, yara-x-engine 0.35, pdf-chains 0.8 |
+| synthetic | 5a-pdf-auto-js-unrelated-attachment | reference | MALICIOUS | - | 407.43 | yara-x 0.75, pdf 1.03, custom 0.17 |
+| synthetic | 5a-pdf-auto-js-unrelated-attachment | unified | SUSPICIOUS | - | 328.0 | yara-x 0.56, pdf 0.98, custom 0.13, yara-x-engine 0.36, pdf-chains 0.76 |
+| synthetic | 5b-pdf-auto-js-exports-attachment | reference | MALICIOUS | - | 328.18 | yara-x 0.53, pdf 0.99, custom 0.13 |
+| synthetic | 5b-pdf-auto-js-exports-attachment | unified | MALICIOUS | - | 365.16 | yara-x 0.51, pdf 1.24, custom 0.14, yara-x-engine 0.41, pdf-chains 0.97 |
+| synthetic | 6a-docx-hyperlink | reference | SAFE | - | 304.4 | yara-x 0.43, office 2.28, custom 0.83 |
+| synthetic | 6a-docx-hyperlink | unified | SAFE | - | 377.51 | yara-x 0.41, office 2.28, custom 1.01, yara-x-engine 0.47, ooxml-links 0.86, word-fields 0.54 |
+| synthetic | 6b-docx-external-template | reference | SUSPICIOUS | - | 322.48 | yara-x 0.48, office 2.25, custom 0.83 |
+| synthetic | 6b-docx-external-template | unified | SUSPICIOUS | - | 471.44 | yara-x 0.55, office 3.08, custom 1.13, yara-x-engine 0.49, ooxml-links 1.19, word-fields 0.91 |
+| synthetic | 6c-docx-template-referenced-by-settings | reference | SUSPICIOUS | - | 335.58 | yara-x 0.47, office 2.52, custom 1.27 |
+| synthetic | 6c-docx-template-referenced-by-settings | unified | SUSPICIOUS | - | 402.25 | yara-x 0.45, office 2.96, custom 0.94, yara-x-engine 0.36, ooxml-links 0.87, word-fields 0.7 |
+| synthetic | 6d-docx-linked-picture | reference | SAFE | - | 361.61 | yara-x 0.53, office 2.81, custom 0.83 |
+| synthetic | 6d-docx-linked-picture | unified | SAFE | - | 419.01 | yara-x 0.56, office 2.6, custom 1.11, yara-x-engine 0.5, ooxml-links 0.87, word-fields 0.51 |
+| synthetic | 6g-docx-linked-picture-file-share | reference | SUSPICIOUS | - | 359.35 | yara-x 0.57, office 2.52, custom 0.81 |
+| synthetic | 6g-docx-linked-picture-file-share | unified | SUSPICIOUS | - | 415.9 | yara-x 0.57, office 2.74, custom 0.81, yara-x-engine 0.4, ooxml-links 0.89, word-fields 0.57 |
+| synthetic | 6e-docx-embedded-object-displayed | reference | SUSPICIOUS | - | 371.88 | yara-x 0.53, office 3.14, custom 1.09 |
+| synthetic | 6e-docx-embedded-object-displayed | unified | SUSPICIOUS | - | 360.94 | yara-x 0.63, office 2.86, custom 0.81, yara-x-engine 0.41, ooxml-links 0.85, word-fields 0.47 |
+| synthetic | 6f-docx-embedded-object-not-displayed | reference | SUSPICIOUS | - | 301.63 | yara-x 0.46, office 2.65, custom 0.85 |
+| synthetic | 6f-docx-embedded-object-not-displayed | unified | SUSPICIOUS | - | 420.32 | yara-x 0.48, office 3.68, custom 1.03, yara-x-engine 0.57, ooxml-links 1.11, word-fields 0.58 |
+| synthetic | 7-docx-macro-declaration-mismatch | reference | SUSPICIOUS | - | 293.38 | yara-x 0.63, office 2.23, custom 0.79 |
+| synthetic | 7-docx-macro-declaration-mismatch | unified | SUSPICIOUS | - | 379.73 | yara-x 0.67, office 2.07, custom 1.02, yara-x-engine 0.37, vba-chains 0.17, ooxml-links 0.56, word-fields 0.54 |
+| corpus | docx-01-word-plain.docx | reference | SAFE | - | 346.85 | yara-x 0.49, office 2.64, custom 2.05 |
+| corpus | docx-01-word-plain.docx | unified | SAFE | - | 331.24 | yara-x 0.56, office 2.2, custom 1.84, yara-x-engine 0.67, ooxml-links 0.64, word-fields 4.54 |
+| corpus | docx-02-word-rich.docx | reference | SAFE | - | 304.43 | yara-x 0.52, office 4.06, custom 2.68 |
+| corpus | docx-02-word-rich.docx | unified | SAFE | - | 446.03 | yara-x 0.67, office 4.84, custom 4.37, yara-x-engine 0.59, ooxml-links 2.35, word-fields 8.27 |
+| corpus | docx-03-word-embedded-excel.docx | reference | SAFE | - | 303.62 | yara-x 0.45, office 2.38, custom 2.42 |
+| corpus | docx-03-word-embedded-excel.docx | unified | SAFE | - | 349.3 | yara-x 0.54, office 2.11, custom 1.76, yara-x-engine 0.48, ooxml-links 1.45, word-fields 4.76 |
+| corpus | docx-04-word-linked-picture.docx | reference | SUSPICIOUS | - | 390.05 | yara-x 0.76, office 2.93, custom 1.74 |
+| corpus | docx-04-word-linked-picture.docx | unified | SAFE | - | 397.95 | yara-x 0.74, office 2.54, custom 2.55, yara-x-engine 0.44, ooxml-links 1.14, word-fields 5.09 |
+| corpus | docx-05-word-custom-template.docx | reference | SUSPICIOUS | - | 306.72 | yara-x 0.63, office 2.62, custom 2.01 |
+| corpus | docx-05-word-custom-template.docx | unified | SUSPICIOUS | - | 347.84 | yara-x 0.68, office 2.49, custom 1.9, yara-x-engine 0.37, ooxml-links 1.14, word-fields 4.62 |
+| corpus | docx-06-word-content-controls.docx | reference | SAFE | - | 2699.86 | yara-x 0.54, office 2.44, custom 4.11 |
+| corpus | docx-06-word-content-controls.docx | unified | SAFE | - | 403.01 | yara-x 0.65, office 2.08, custom 3.12, yara-x-engine 0.36, ooxml-links 1.19, word-fields 7.24 |
+| corpus | docx-07-libreoffice.docx | reference | SAFE | - | 1696.19 | yara-x 1.86, office 11.31, custom 7.13 |
+| corpus | docx-07-libreoffice.docx | unified | SAFE | - | 2338.38 | yara-x 2.01, office 12.7, custom 10.42, yara-x-engine 2.82, ooxml-links 15.44, word-fields 26.24 |
+| corpus | pdf-01-word-export.pdf | reference | SAFE | - | 297.61 | yara-x 0.61, pdf 2.8, custom 1.46 |
+| corpus | pdf-01-word-export.pdf | unified | SAFE | - | 419.69 | yara-x 0.67, pdf 2.3, custom 1.79, yara-x-engine 0.44, pdf-chains 6.5 |
+| corpus | pdf-02-excel-export.pdf | reference | SAFE | - | 314.55 | yara-x 0.52, pdf 1.94, custom 1.44 |
+| corpus | pdf-02-excel-export.pdf | unified | SAFE | - | 366.75 | yara-x 0.43, pdf 1.75, custom 1.5, yara-x-engine 0.38, pdf-chains 8.0 |
+| corpus | pdf-03-powerpoint-export.pdf | reference | SAFE | - | 354.34 | yara-x 0.53, pdf 1.53, custom 0.94 |
+| corpus | pdf-03-powerpoint-export.pdf | unified | SAFE | - | 362.48 | yara-x 0.58, pdf 1.74, custom 1.09, yara-x-engine 0.53, pdf-chains 3.19 |
+| corpus | pdf-04-libreoffice-tagged.pdf | reference | SAFE | - | 303.07 | yara-x 0.48, pdf 1.57, custom 1.96 |
+| corpus | pdf-04-libreoffice-tagged.pdf | unified | SAFE | - | 336.04 | yara-x 0.48, pdf 1.26, custom 1.93, yara-x-engine 0.5, pdf-chains 4.71 |
+| corpus | pdf-05-libreoffice-pdfa.pdf | reference | SAFE | - | 347.88 | yara-x 0.65, pdf 1.82, custom 2.33 |
+| corpus | pdf-05-libreoffice-pdfa.pdf | unified | SAFE | - | 355.38 | yara-x 0.58, pdf 1.86, custom 2.48, yara-x-engine 0.34, pdf-chains 5.31 |
+| corpus | pdf-06-word-export-pdfa.pdf | reference | SAFE | - | 1681.38 | yara-x 1.16, pdf 2.38, custom 2.26 |
+| corpus | pdf-06-word-export-pdfa.pdf | unified | SAFE | - | 409.4 | yara-x 0.53, pdf 1.46, custom 1.85, yara-x-engine 0.54, pdf-chains 5.04 |
+| corpus | pdf-07-libreoffice-hybrid.pdf | reference | SUSPICIOUS | - | 383.2 | yara-x 0.59, pdf 2.13, custom 3.28 |
+| corpus | pdf-07-libreoffice-hybrid.pdf | unified | SAFE | - | 391.36 | yara-x 0.94, pdf 2.36, custom 2.06, yara-x-engine 0.4, pdf-chains 7.87 |
+| corpus | pdf-08-edge-print.pdf | reference | SAFE | - | 311.77 | yara-x 0.46, pdf 1.25, custom 2.61 |
+| corpus | pdf-08-edge-print.pdf | unified | SAFE | - | 453.28 | yara-x 0.71, pdf 1.19, custom 2.64, yara-x-engine 0.51, pdf-chains 5.83 |
+| corpus | pptx-01-ppt-plain.pptx | reference | SAFE | - | 379.19 | yara-x 0.5, office 4.31, custom 5.04 |
+| corpus | pptx-01-ppt-plain.pptx | unified | SAFE | - | 370.3 | yara-x 0.82, office 3.01, custom 3.58, yara-x-engine 0.38, ooxml-links 3.36 |
+| corpus | pptx-02-ppt-pictures-notes.pptx | reference | SAFE | - | 314.57 | yara-x 0.6, office 3.13, custom 4.34 |
+| corpus | pptx-02-ppt-pictures-notes.pptx | unified | SAFE | - | 447.67 | yara-x 0.5, office 3.4, custom 4.47, yara-x-engine 0.53, ooxml-links 2.58 |
+| corpus | pptx-03-ppt-chart-table.pptx | reference | SAFE | - | 317.17 | yara-x 0.79, office 3.66, custom 3.79 |
+| corpus | pptx-03-ppt-chart-table.pptx | unified | SAFE | - | 338.94 | yara-x 0.5, office 3.37, custom 3.77, yara-x-engine 0.42, ooxml-links 4.21 |
+| corpus | pptx-04-ppt-hyperlinks-actions.pptx | reference | SAFE | - | 304.72 | yara-x 0.59, office 3.81, custom 3.64 |
+| corpus | pptx-04-ppt-hyperlinks-actions.pptx | unified | SAFE | - | 366.39 | yara-x 0.49, office 3.64, custom 3.72, yara-x-engine 0.38, ooxml-links 2.81 |
+| corpus | pptx-05-ppt-transitions-animations.pptx | reference | SAFE | - | 1509.82 | yara-x 1.18, office 13.78, custom 28.56 |
+| corpus | pptx-05-ppt-transitions-animations.pptx | unified | SAFE | - | 2511.77 | yara-x 3.48, office 29.16, custom 37.2, yara-x-engine 4.29, ooxml-links 19.32 |
+| corpus | pptx-06-ppt-embedded-excel.pptx | reference | SAFE | - | 323.78 | yara-x 0.69, office 3.56, custom 4.01 |
+| corpus | pptx-06-ppt-embedded-excel.pptx | unified | SAFE | - | 354.73 | yara-x 0.72, office 3.26, custom 3.4, yara-x-engine 0.4, ooxml-links 2.99 |
+| corpus | pptx-07-libreoffice-roundtrip.pptx | reference | SAFE | - | 301.97 | yara-x 0.58, office 2.71, custom 5.32 |
+| corpus | pptx-07-libreoffice-roundtrip.pptx | unified | SAFE | - | 342.61 | yara-x 0.42, office 2.5, custom 5.28, yara-x-engine 0.41, ooxml-links 3.0 |
+| corpus | xlsx-01-excel-formulas.xlsx | reference | SAFE | - | 292.67 | yara-x 0.5, office 2.23, custom 1.18 |
+| corpus | xlsx-01-excel-formulas.xlsx | unified | SAFE | - | 433.98 | yara-x 0.72, office 2.33, custom 1.96, yara-x-engine 0.52, ooxml-links 0.73 |
+| corpus | xlsx-02-excel-chart-formatting.xlsx | reference | SAFE | - | 427.27 | yara-x 0.79, office 4.29, custom 3.75 |
+| corpus | xlsx-02-excel-chart-formatting.xlsx | unified | SAFE | - | 351.46 | yara-x 0.44, office 3.03, custom 2.73, yara-x-engine 0.4, ooxml-links 1.14 |
+| corpus | xlsx-03-excel-hyperlinks-validation.xlsx | reference | SAFE | - | 407.42 | yara-x 0.67, office 2.58, custom 1.5 |
+| corpus | xlsx-03-excel-hyperlinks-validation.xlsx | unified | SAFE | - | 516.43 | yara-x 1.21, office 4.18, custom 2.87, yara-x-engine 0.99, ooxml-links 2.59 |
+| corpus | xlsx-04-excel-external-workbook-link.xlsx | reference | SUSPICIOUS | - | 1428.66 | yara-x 1.81, office 9.43, custom 3.56 |
+| corpus | xlsx-04-excel-external-workbook-link.xlsx | unified | SAFE | - | 469.64 | yara-x 0.6, office 3.58, custom 1.33, yara-x-engine 0.51, ooxml-links 1.2 |
+| corpus | xlsx-05-excel-table-pivot.xlsx | reference | SAFE | - | 307.47 | yara-x 0.52, office 2.3, custom 1.52 |
+| corpus | xlsx-05-excel-table-pivot.xlsx | unified | SAFE | - | 407.37 | yara-x 0.59, office 2.47, custom 2.36, yara-x-engine 0.5, ooxml-links 1.76 |
+| corpus | xlsx-06-excel-picture-notes.xlsx | reference | SAFE | - | 397.71 | yara-x 0.76, office 2.73, custom 2.37 |
+| corpus | xlsx-06-excel-picture-notes.xlsx | unified | SAFE | - | 386.89 | yara-x 0.66, office 3.21, custom 1.65, yara-x-engine 0.46, ooxml-links 1.33 |
+| corpus | xlsx-07-libreoffice.xlsx | reference | SAFE | - | 529.63 | yara-x 1.01, office 1.53, custom 2.27 |
+| corpus | xlsx-07-libreoffice.xlsx | unified | SAFE | - | 481.39 | yara-x 0.64, office 1.83, custom 1.34, yara-x-engine 0.82, ooxml-links 1.8 |
+| corpus | fw9.pdf | reference | MALICIOUS | - | 448.18 | yara-x 0.61, pdf 34.49, custom 9.05 |
+| corpus | fw9.pdf | unified | SUSPICIOUS | - | 366.77 | yara-x 0.55, pdf 18.68, custom 7.59, yara-x-engine 0.49, pdf-chains 19.16 |
+| corpus | fw4.pdf | reference | MALICIOUS | - | 342.55 | yara-x 1.23, pdf 43.92, custom 13.98 |
+| corpus | fw4.pdf | unified | SUSPICIOUS | - | 482.9 | yara-x 0.63, pdf 33.19, custom 14.5, yara-x-engine 0.46, pdf-chains 31.58 |
+| corpus | f1040.pdf | reference | MALICIOUS | - | 439.62 | yara-x 0.73, pdf 69.0, custom 15.94 |
+| corpus | f1040.pdf | unified | SUSPICIOUS | - | 471.19 | yara-x 1.13, pdf 46.44, custom 14.57, yara-x-engine 0.45, pdf-chains 48.2 |
+| corpus | NST-EST2023-POP.xlsx | reference | SAFE | - | 307.72 | yara-x 0.52, office 2.48, custom 1.72 |
+| corpus | NST-EST2023-POP.xlsx | unified | SAFE | - | 391.92 | yara-x 0.63, office 2.14, custom 2.32, yara-x-engine 0.36, ooxml-links 0.96 |
+| corrupt | corrupt-truncated-pdf | reference | UNABLE_TO_SCAN | pdf, custom | 384.67 | yara-x 0.57, pdf 0.4, custom 0.03 |
+| corrupt | corrupt-truncated-pdf | unified | UNABLE_TO_SCAN | pdf, custom, pdf-chains | 2102.54 | yara-x 2.63, pdf 4.21, custom 0.06, yara-x-engine 1.56, pdf-chains 2.31 |
+| corrupt | corrupt-truncated-docx | reference | UNABLE_TO_SCAN | office, custom | 2650.42 | yara-x 2.1, office 0.67, custom 0.04 |
+| corrupt | corrupt-truncated-docx | unified | UNABLE_TO_SCAN | office, custom, vba-chains, ooxml-links, word-fields | 338.39 | yara-x 0.58, office 0.17, custom 0.03, yara-x-engine 0.34, vba-chains 0.04, ooxml-links 0.02, word-fields 0.01 |
+| c7 | c7a-docx-nested-ddeauto | reference | SAFE | - | 299.67 | yara-x 0.71, office 2.55, custom 0.52 |
+| c7 | c7a-docx-nested-ddeauto | unified | MALICIOUS | - | 422.46 | yara-x 0.52, office 2.29, custom 0.63, yara-x-engine 0.4, ooxml-links 0.67, word-fields 0.71 |
+| c7 | c7b-docx-ddeauto-cmd | reference | MALICIOUS | - | 364.64 | yara-x 0.53, office 2.3, custom 0.85 |
+| c7 | c7b-docx-ddeauto-cmd | unified | MALICIOUS | - | 401.27 | yara-x 0.5, office 2.15, custom 0.85, yara-x-engine 0.46, ooxml-links 0.63, word-fields 0.61 |
+| c7 | c7c-docx-remote-includetext | reference | SAFE | - | 1392.25 | yara-x 1.07, office 7.4, custom 1.59 |
+| c7 | c7c-docx-remote-includetext | unified | SUSPICIOUS | - | 445.77 | yara-x 0.58, office 2.49, custom 1.19, yara-x-engine 0.69, ooxml-links 1.17, word-fields 0.9 |
+| c7 | c7d-docx-remote-includepicture | reference | SAFE | - | 374.23 | yara-x 0.54, office 2.81, custom 0.68 |
+| c7 | c7d-docx-remote-includepicture | unified | SUSPICIOUS | - | 734.06 | yara-x 0.76, office 3.82, custom 1.23, yara-x-engine 0.74, ooxml-links 1.09, word-fields 0.83 |
+| c7 | c7e-docx-deleted-ddeauto | reference | SAFE | - | 456.81 | yara-x 0.75, office 3.35, custom 1.26 |
+| c7 | c7e-docx-deleted-ddeauto | unified | SAFE | - | 410.35 | yara-x 0.66, office 2.92, custom 0.78, yara-x-engine 0.52, ooxml-links 0.66, word-fields 0.82 |
+| c7 | c7f-docx-ordinary-fields | reference | SAFE | - | 476.3 | yara-x 0.83, office 3.48, custom 1.1 |
+| c7 | c7f-docx-ordinary-fields | unified | SAFE | - | 393.1 | yara-x 0.66, office 2.49, custom 0.63, yara-x-engine 0.44, ooxml-links 0.64, word-fields 0.69 |
+

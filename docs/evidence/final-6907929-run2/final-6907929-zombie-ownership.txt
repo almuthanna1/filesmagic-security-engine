@@ -1,0 +1,6 @@
+Post-run diagnostic (after final run 2), 2026-11-09T04:05:14Z, kernel 7.0.0-38-generic
+System python3 and 'sleep 30' only; not the evaluation interpreter, no document involved.
+python3 confinement: unconfined
+running: uid of /proc/<pid>/stat = 1000 ; uid of /proc/<pid> = 1000
+zombie (waitid WNOWAIT, si_code 2 = CLD_KILLED): state Z ; uid of /proc/<pid>/stat = 0 ; uid of /proc/<pid> = 1000
+reaped: /proc/<pid> exists: False

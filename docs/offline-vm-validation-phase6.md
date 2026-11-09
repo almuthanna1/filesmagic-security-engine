@@ -274,5 +274,23 @@ unchanged. Regression tests: `tests/test_processes.py` (every fallback outcome, 
 and, in `tests/test_worker_linux.py`, real processes through running, zombie and reaped under both
 observations, plus a surviving process failing `wait_dead`.
 
-**Run 2: pending**, on a new ISO built from the correction's commit, into new result paths
-(`final-<sha7>`). Run 1's results are kept.
+**Run 2, at `6907929`: superseded, kept as found**
+([evidence/final-6907929-run2/](evidence/final-6907929-run2/README.md)). 11/11 claims; 102/102
+identical to Windows; 12/12 C7 verdicts as expected. The suite had 992 passed, exactly the 11
+expected skips, and **1 failed**: the new regression test
+`test_process_observation_on_real_processes`, which expected `/proc` to show its killed child as a
+zombie. Measured after the run: a zombie's `/proc/<pid>/stat` is owned by root (uid 0) while the
+process's directory stays the user's, so under the profile a zombie is never readable, and
+`alive()` correctly reported it not ended. Process-group termination **was verified**: both
+`test_process_group_is_killed_including_grandchildren` cases passed (about 2 s of the 5 s
+deadline). With a zombie counted as not ended, that shows the grandchild killed and reaped.
+
+**Second correction (test expectation only).** The test observes the zombie independently with
+`waitid(WEXITED | WNOHANG | WNOWAIT)` in a 5-second bounded loop. It then reads `/proc/<pid>/stat`
+once directly: readable, `alive()` must report the zombie ended (state `Z`); refused, it must
+report it not ended. The fallback alone must never call a zombie ended, and after reaping both
+observations must report it ended. Every wait in the real-process tests is bounded. `alive()`,
+the worker, the profile and isolation are unchanged.
+
+**Run 3: pending**, on a new ISO built from the second correction's commit, into new result paths
+(`final-<sha7>`). Runs 1 and 2 are kept.

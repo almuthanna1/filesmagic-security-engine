@@ -200,21 +200,31 @@ class DeniedProc:
 
 
 def test_process_observation_on_real_processes():
-    # A real child through its life: running, a zombie (exited, not yet reaped), reaped. The
-    # primary /proc observation sees all three; the kill(pid, 0) fallback never calls the zombie
-    # ended (it cannot tell), and calls the PID ended only once no process has it (ESRCH).
+    # A real child through its life: running, a zombie (exited, not yet reaped), reaped. That it
+    # is a zombie is observed independently of /proc: waitid(WNOWAIT) reports the exit and leaves
+    # the child unreaped. Whether /proc shows the zombie depends on the environment: a zombie's
+    # /proc/<pid>/stat is owned by root, which the evaluation VM's profile (owner reads only)
+    # refuses (final run 2). Readable: alive() must call it ended (state Z). Refused: it must call
+    # it not ended, since kill(pid, 0) cannot tell a zombie. The fallback alone never calls a
+    # zombie ended, and calls the PID ended only once no process has it (ESRCH).
     child = subprocess.Popen([sys.executable, "-B", "-c", "import time; time.sleep(30)"])
     try:
         assert alive(child.pid) and alive(child.pid, DeniedProc())
         os.kill(child.pid, signal.SIGKILL)
         deadline = time.monotonic() + 5
-        while alive(child.pid) and time.monotonic() < deadline:  # becomes a zombie: we have not waited
+        while os.waitid(os.P_PID, child.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT) is None:
+            assert time.monotonic() < deadline, "the killed child has not exited within 5 s"
             time.sleep(0.02)
-        assert not alive(child.pid), "the killed child is not a zombie within 5 s"
+        try:
+            Path(f"/proc/{child.pid}/stat").read_text()
+            readable = True
+        except PermissionError:
+            readable = False
+        assert alive(child.pid) is (not readable), f"zombie misreported (/proc readable: {readable})"
         assert alive(child.pid, DeniedProc()), "the fallback called a zombie ended"
     finally:
         child.kill()
-        child.wait()
+        child.wait(timeout=5)
     assert not alive(child.pid) and not alive(child.pid, DeniedProc())
 
 
@@ -226,7 +236,7 @@ def test_a_surviving_grandchild_is_detected():
         assert wait_dead(child.pid, seconds=0.5) is False
     finally:
         child.kill()
-        child.wait()
+        child.wait(timeout=5)
 
 
 def test_native_crash_fails_closed(monkeypatch):

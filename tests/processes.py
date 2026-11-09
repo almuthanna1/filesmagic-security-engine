@@ -10,8 +10,11 @@ reported as ended.
    original ended, so neither case can report a living original as ended. Any other state:
    running.
 2. Only if that read is refused (PermissionError: under the evaluation VM's AppArmor profile,
-   /proc/<pid>/stat of a process whose entry is owned by root, final run 1 at d80a46d), kill(pid,
-   0) is the fallback:
+   which allows owner reads only, /proc/<pid>/stat of a process whose entry is owned by root,
+   final run 1 at d80a46d), kill(pid, 0) is the fallback. That includes every zombie: once a
+   process has exited, its /proc/<pid> files are owned by root (measured in final run 2,
+   docs/evidence/final-6907929-run2/). Under that profile a zombie therefore counts as not ended
+   until it is reaped, and termination is shown only once the PID is gone.
    - ESRCH (ProcessLookupError): no process has that PID: ended. The kernel looks the PID up
      before any permission check, AppArmor's included, so this answer does not depend on access.
    - success, or EPERM/EACCES (PermissionError): some process has that PID. It may be the one
