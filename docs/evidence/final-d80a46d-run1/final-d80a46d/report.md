@@ -1,0 +1,147 @@
+# Offline VM validation
+
+- Status: **completed**
+- Commit `d80a46d30183088c384296ee59bd60744dc0f2ed`, clean tree: True; engine 0.2.0; rules `0be9918509e95e639f866291dc297c45c8e72812d602fb149fad3484435ae3b0`, engine rules `988d991efb218328c97e8c00500ed6b434a33ee8e961548e817e159cc9f35b4e`
+- Linux-7.0.0-38-generic-x86_64-with-glibc2.39, Python 3.11.18; confinement `filesmagic-eval-python (enforce)`; strict isolation True; host network {'checked': True, 'offline': True, 'usable_routes_v4': 0, 'usable_routes_v6': 0}; drift []
+- Trials: synthetic 20, corpus and corrupt 5
+
+## Contributions
+
+| Claim | Result |
+|---|---|
+| 5a: unified SUSPICIOUS (the attachment is not on the automatic chain); reference MALICIOUS | PASS |
+| 5b: unified MALICIOUS with ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT | PASS |
+| refined YARA-X rule fires on every automatic page-open/OpenAction script case (2c, 5a, 5b) | PASS |
+| refined YARA-X rule is silent on the user-triggered cases (2, 2b), which the reference rule flags | PASS |
+| VBA call graph: case 7 reports ENGINE_VBA_CALL_PATH_UNDETERMINED and keeps the reference macro findings | PASS |
+| OOXML correlation: 6c template used on open -> ENGINE_OFFICE_EXTERNAL_ON_OPEN; 6g file share keeps OFFICE_EXTERNAL_NETWORK_PATH; 6e/6f object displayed / not displayed | PASS |
+| false-positive corrections: docx-04, xlsx-04 (local targets) and pdf-07 (verified attachment) SAFE in unified, SUSPICIOUS in reference | PASS |
+| docx-05 local template lowered to LOW but not cleared (SUSPICIOUS) | PASS |
+| C7 positives: c7a nested DDEAUTO MALICIOUS, c7c remote INCLUDETEXT and c7d file-share INCLUDEPICTURE SUSPICIOUS (reference SAFE on all three), each with its C7 rule; c7b keeps OFFICE_DDEAUTO_FIELD | PASS |
+| C7 negatives: c7e DDEAUTO only in a tracked deletion and c7f ordinary fields SAFE in both engines, C7 evidence INFO only | PASS |
+| corrupted documents fail closed (UNABLE_TO_SCAN) in both engines | PASS |
+
+## Against the expected results
+
+Windows evidence: 102 of 102 scan results identical (verdict and every finding, INFO included).
+C7 cases: 12 of 12 verdicts as expected (evaluation.cases.field_cases; the rules are checked in Contributions).
+
+
+## Results
+
+| Set | File | Engine | Verdict | Failed scanners | Wall p50 ms | Scanner p50 ms |
+|---|---|---|---|---|---|---|
+| synthetic | 1-pdf-clean | reference | SAFE | - | 314.11 | yara-x 0.63, pdf 0.6, custom 0.08 |
+| synthetic | 1-pdf-clean | unified | SAFE | - | 355.23 | yara-x 0.49, pdf 0.71, custom 0.09, yara-x-engine 0.37, pdf-chains 0.57 |
+| synthetic | 2-pdf-form-keystroke-js | reference | SUSPICIOUS | - | 276.26 | yara-x 0.63, pdf 0.82, custom 0.1 |
+| synthetic | 2-pdf-form-keystroke-js | unified | SUSPICIOUS | - | 322.95 | yara-x 0.58, pdf 0.9, custom 0.1, yara-x-engine 0.37, pdf-chains 0.85 |
+| synthetic | 2b-pdf-open-at-page-click-js | reference | SUSPICIOUS | - | 298.28 | yara-x 0.52, pdf 0.84, custom 0.1 |
+| synthetic | 2b-pdf-open-at-page-click-js | unified | SUSPICIOUS | - | 336.5 | yara-x 0.49, pdf 0.88, custom 0.1, yara-x-engine 0.33, pdf-chains 0.79 |
+| synthetic | 2c-pdf-open-at-page-page-open-js | reference | SUSPICIOUS | - | 296.05 | yara-x 0.57, pdf 0.72, custom 0.09 |
+| synthetic | 2c-pdf-open-at-page-page-open-js | unified | SUSPICIOUS | - | 345.09 | yara-x 0.55, pdf 0.87, custom 0.09, yara-x-engine 0.39, pdf-chains 0.79 |
+| synthetic | 3-pdf-escaped-openaction-js | reference | SUSPICIOUS | - | 282.35 | yara-x 0.51, pdf 0.75, custom 0.19 |
+| synthetic | 3-pdf-escaped-openaction-js | unified | SUSPICIOUS | - | 357.09 | yara-x 0.6, pdf 1.06, custom 0.23, yara-x-engine 0.55, pdf-chains 0.76 |
+| synthetic | 4-pdf-objstm-escaped-js | reference | SUSPICIOUS | - | 281.03 | yara-x 0.58, pdf 0.94, custom 0.24 |
+| synthetic | 4-pdf-objstm-escaped-js | unified | SUSPICIOUS | - | 343.69 | yara-x 0.41, pdf 0.92, custom 0.27, yara-x-engine 0.35, pdf-chains 0.81 |
+| synthetic | 5a-pdf-auto-js-unrelated-attachment | reference | MALICIOUS | - | 275.73 | yara-x 0.68, pdf 0.98, custom 0.13 |
+| synthetic | 5a-pdf-auto-js-unrelated-attachment | unified | SUSPICIOUS | - | 368.95 | yara-x 0.78, pdf 1.24, custom 0.15, yara-x-engine 0.46, pdf-chains 1.11 |
+| synthetic | 5b-pdf-auto-js-exports-attachment | reference | MALICIOUS | - | 295.86 | yara-x 0.65, pdf 1.01, custom 0.13 |
+| synthetic | 5b-pdf-auto-js-exports-attachment | unified | MALICIOUS | - | 319.6 | yara-x 0.56, pdf 0.93, custom 0.13, yara-x-engine 0.32, pdf-chains 0.77 |
+| synthetic | 6a-docx-hyperlink | reference | SAFE | - | 303.88 | yara-x 1.09, office 2.4, custom 0.85 |
+| synthetic | 6a-docx-hyperlink | unified | SAFE | - | 335.98 | yara-x 0.67, office 2.18, custom 0.98, yara-x-engine 0.39, ooxml-links 0.89, word-fields 0.51 |
+| synthetic | 6b-docx-external-template | reference | SUSPICIOUS | - | 303.03 | yara-x 0.47, office 2.26, custom 0.79 |
+| synthetic | 6b-docx-external-template | unified | SUSPICIOUS | - | 317.04 | yara-x 0.51, office 2.12, custom 0.72, yara-x-engine 0.34, ooxml-links 0.66, word-fields 0.39 |
+| synthetic | 6c-docx-template-referenced-by-settings | reference | SUSPICIOUS | - | 312.01 | yara-x 0.45, office 2.44, custom 1.16 |
+| synthetic | 6c-docx-template-referenced-by-settings | unified | SUSPICIOUS | - | 355.15 | yara-x 0.45, office 2.59, custom 1.09, yara-x-engine 0.42, ooxml-links 0.95, word-fields 0.77 |
+| synthetic | 6d-docx-linked-picture | reference | SAFE | - | 303.73 | yara-x 0.45, office 2.37, custom 0.82 |
+| synthetic | 6d-docx-linked-picture | unified | SAFE | - | 347.8 | yara-x 0.46, office 2.33, custom 0.88, yara-x-engine 0.42, ooxml-links 0.89, word-fields 0.56 |
+| synthetic | 6g-docx-linked-picture-file-share | reference | SUSPICIOUS | - | 315.0 | yara-x 0.52, office 2.38, custom 0.77 |
+| synthetic | 6g-docx-linked-picture-file-share | unified | SUSPICIOUS | - | 346.09 | yara-x 0.47, office 2.49, custom 0.79, yara-x-engine 0.39, ooxml-links 0.89, word-fields 0.56 |
+| synthetic | 6e-docx-embedded-object-displayed | reference | SUSPICIOUS | - | 306.39 | yara-x 0.53, office 2.95, custom 1.03 |
+| synthetic | 6e-docx-embedded-object-displayed | unified | SUSPICIOUS | - | 364.51 | yara-x 0.45, office 2.98, custom 0.87, yara-x-engine 0.43, ooxml-links 0.9, word-fields 0.55 |
+| synthetic | 6f-docx-embedded-object-not-displayed | reference | SUSPICIOUS | - | 309.94 | yara-x 0.56, office 3.06, custom 1.02 |
+| synthetic | 6f-docx-embedded-object-not-displayed | unified | SUSPICIOUS | - | 351.56 | yara-x 0.48, office 2.8, custom 0.85, yara-x-engine 0.46, ooxml-links 0.86, word-fields 0.55 |
+| synthetic | 7-docx-macro-declaration-mismatch | reference | SUSPICIOUS | - | 291.2 | yara-x 0.6, office 2.11, custom 0.87 |
+| synthetic | 7-docx-macro-declaration-mismatch | unified | SUSPICIOUS | - | 314.75 | yara-x 0.49, office 1.8, custom 0.76, yara-x-engine 0.32, vba-chains 0.15, ooxml-links 0.52, word-fields 0.4 |
+| corpus | docx-01-word-plain.docx | reference | SAFE | - | 312.83 | yara-x 0.49, office 2.59, custom 2.19 |
+| corpus | docx-01-word-plain.docx | unified | SAFE | - | 356.34 | yara-x 0.56, office 2.6, custom 2.28, yara-x-engine 0.38, ooxml-links 0.75, word-fields 5.04 |
+| corpus | docx-02-word-rich.docx | reference | SAFE | - | 284.92 | yara-x 1.12, office 3.55, custom 2.95 |
+| corpus | docx-02-word-rich.docx | unified | SAFE | - | 3469.55 | yara-x 3.3, office 37.57, custom 29.67, yara-x-engine 5.47, ooxml-links 19.12, word-fields 70.18 |
+| corpus | docx-03-word-embedded-excel.docx | reference | SAFE | - | 280.71 | yara-x 0.54, office 2.03, custom 1.92 |
+| corpus | docx-03-word-embedded-excel.docx | unified | SAFE | - | 308.92 | yara-x 0.78, office 2.02, custom 1.58, yara-x-engine 0.46, ooxml-links 0.9, word-fields 3.76 |
+| corpus | docx-04-word-linked-picture.docx | reference | SUSPICIOUS | - | 294.86 | yara-x 0.44, office 2.38, custom 2.18 |
+| corpus | docx-04-word-linked-picture.docx | unified | SAFE | - | 358.65 | yara-x 0.51, office 2.44, custom 2.02, yara-x-engine 0.39, ooxml-links 1.42, word-fields 4.79 |
+| corpus | docx-05-word-custom-template.docx | reference | SUSPICIOUS | - | 2079.67 | yara-x 3.55, office 19.42, custom 16.88 |
+| corpus | docx-05-word-custom-template.docx | unified | SUSPICIOUS | - | 332.12 | yara-x 0.44, office 2.33, custom 2.05, yara-x-engine 0.4, ooxml-links 1.03, word-fields 4.23 |
+| corpus | docx-06-word-content-controls.docx | reference | SAFE | - | 309.65 | yara-x 0.43, office 2.64, custom 3.09 |
+| corpus | docx-06-word-content-controls.docx | unified | SAFE | - | 369.67 | yara-x 0.56, office 2.71, custom 2.9, yara-x-engine 0.36, ooxml-links 0.91, word-fields 6.28 |
+| corpus | docx-07-libreoffice.docx | reference | SAFE | - | 300.39 | yara-x 0.52, office 1.59, custom 1.29 |
+| corpus | docx-07-libreoffice.docx | unified | SAFE | - | 342.52 | yara-x 0.51, office 1.67, custom 1.29, yara-x-engine 0.34, ooxml-links 2.1, word-fields 2.32 |
+| corpus | pdf-01-word-export.pdf | reference | SAFE | - | 1734.78 | yara-x 1.43, pdf 9.87, custom 8.84 |
+| corpus | pdf-01-word-export.pdf | unified | SAFE | - | 363.41 | yara-x 0.46, pdf 1.92, custom 1.75, yara-x-engine 0.48, pdf-chains 5.49 |
+| corpus | pdf-02-excel-export.pdf | reference | SAFE | - | 298.18 | yara-x 0.42, pdf 2.1, custom 1.62 |
+| corpus | pdf-02-excel-export.pdf | unified | SAFE | - | 348.84 | yara-x 0.41, pdf 2.05, custom 1.6, yara-x-engine 0.38, pdf-chains 8.62 |
+| corpus | pdf-03-powerpoint-export.pdf | reference | SAFE | - | 307.5 | yara-x 0.62, pdf 1.57, custom 1.06 |
+| corpus | pdf-03-powerpoint-export.pdf | unified | SAFE | - | 359.18 | yara-x 0.42, pdf 1.58, custom 0.99, yara-x-engine 0.49, pdf-chains 2.94 |
+| corpus | pdf-04-libreoffice-tagged.pdf | reference | SAFE | - | 306.67 | yara-x 0.49, pdf 1.63, custom 1.99 |
+| corpus | pdf-04-libreoffice-tagged.pdf | unified | SAFE | - | 352.95 | yara-x 0.46, pdf 1.69, custom 1.92, yara-x-engine 0.37, pdf-chains 5.84 |
+| corpus | pdf-05-libreoffice-pdfa.pdf | reference | SAFE | - | 300.73 | yara-x 0.45, pdf 1.71, custom 2.28 |
+| corpus | pdf-05-libreoffice-pdfa.pdf | unified | SAFE | - | 347.18 | yara-x 0.41, pdf 1.72, custom 2.5, yara-x-engine 0.34, pdf-chains 5.75 |
+| corpus | pdf-06-word-export-pdfa.pdf | reference | SAFE | - | 322.58 | yara-x 0.55, pdf 2.02, custom 1.84 |
+| corpus | pdf-06-word-export-pdfa.pdf | unified | SAFE | - | 345.03 | yara-x 0.48, pdf 1.42, custom 1.97, yara-x-engine 0.41, pdf-chains 4.62 |
+| corpus | pdf-07-libreoffice-hybrid.pdf | reference | SUSPICIOUS | - | 279.02 | yara-x 0.54, pdf 2.0, custom 2.12 |
+| corpus | pdf-07-libreoffice-hybrid.pdf | unified | SAFE | - | 339.15 | yara-x 1.0, pdf 1.73, custom 2.2, yara-x-engine 0.39, pdf-chains 5.91 |
+| corpus | pdf-08-edge-print.pdf | reference | SAFE | - | 318.61 | yara-x 0.68, pdf 1.44, custom 2.21 |
+| corpus | pdf-08-edge-print.pdf | unified | SAFE | - | 335.05 | yara-x 0.88, pdf 1.19, custom 2.1, yara-x-engine 0.35, pdf-chains 4.26 |
+| corpus | pptx-01-ppt-plain.pptx | reference | SAFE | - | 314.44 | yara-x 0.61, office 4.03, custom 3.97 |
+| corpus | pptx-01-ppt-plain.pptx | unified | SAFE | - | 360.12 | yara-x 0.5, office 3.34, custom 4.42, yara-x-engine 0.4, ooxml-links 2.46 |
+| corpus | pptx-02-ppt-pictures-notes.pptx | reference | SAFE | - | 277.13 | yara-x 0.57, office 3.08, custom 4.14 |
+| corpus | pptx-02-ppt-pictures-notes.pptx | unified | SAFE | - | 316.6 | yara-x 0.57, office 2.98, custom 3.71, yara-x-engine 0.45, ooxml-links 2.47 |
+| corpus | pptx-03-ppt-chart-table.pptx | reference | SAFE | - | 292.81 | yara-x 0.67, office 3.56, custom 3.77 |
+| corpus | pptx-03-ppt-chart-table.pptx | unified | SAFE | - | 312.51 | yara-x 0.56, office 2.92, custom 3.6, yara-x-engine 0.37, ooxml-links 3.4 |
+| corpus | pptx-04-ppt-hyperlinks-actions.pptx | reference | SAFE | - | 272.05 | yara-x 0.63, office 2.98, custom 3.42 |
+| corpus | pptx-04-ppt-hyperlinks-actions.pptx | unified | SAFE | - | 305.62 | yara-x 0.5, office 2.84, custom 3.51, yara-x-engine 0.39, ooxml-links 2.78 |
+| corpus | pptx-05-ppt-transitions-animations.pptx | reference | SAFE | - | 299.47 | yara-x 0.47, office 3.46, custom 4.81 |
+| corpus | pptx-05-ppt-transitions-animations.pptx | unified | SAFE | - | 335.87 | yara-x 0.47, office 3.09, custom 3.79, yara-x-engine 0.37, ooxml-links 2.65 |
+| corpus | pptx-06-ppt-embedded-excel.pptx | reference | SAFE | - | 277.73 | yara-x 0.69, office 3.03, custom 3.58 |
+| corpus | pptx-06-ppt-embedded-excel.pptx | unified | SAFE | - | 337.42 | yara-x 0.52, office 3.44, custom 3.73, yara-x-engine 0.42, ooxml-links 2.66 |
+| corpus | pptx-07-libreoffice-roundtrip.pptx | reference | SAFE | - | 327.51 | yara-x 0.53, office 2.25, custom 5.79 |
+| corpus | pptx-07-libreoffice-roundtrip.pptx | unified | SAFE | - | 910.52 | yara-x 0.79, office 2.46, custom 7.53, yara-x-engine 0.4, ooxml-links 3.24 |
+| corpus | xlsx-01-excel-formulas.xlsx | reference | SAFE | - | 323.72 | yara-x 0.69, office 2.32, custom 1.31 |
+| corpus | xlsx-01-excel-formulas.xlsx | unified | SAFE | - | 325.97 | yara-x 0.45, office 1.92, custom 1.1, yara-x-engine 0.33, ooxml-links 0.58 |
+| corpus | xlsx-02-excel-chart-formatting.xlsx | reference | SAFE | - | 2520.35 | yara-x 2.57, office 20.45, custom 12.94 |
+| corpus | xlsx-02-excel-chart-formatting.xlsx | unified | SAFE | - | 441.71 | yara-x 0.84, office 3.18, custom 2.43, yara-x-engine 0.56, ooxml-links 2.03 |
+| corpus | xlsx-03-excel-hyperlinks-validation.xlsx | reference | SAFE | - | 320.63 | yara-x 0.49, office 2.39, custom 1.64 |
+| corpus | xlsx-03-excel-hyperlinks-validation.xlsx | unified | SAFE | - | 315.63 | yara-x 0.4, office 2.12, custom 1.26, yara-x-engine 0.36, ooxml-links 1.24 |
+| corpus | xlsx-04-excel-external-workbook-link.xlsx | reference | SUSPICIOUS | - | 301.38 | yara-x 0.73, office 3.1, custom 1.39 |
+| corpus | xlsx-04-excel-external-workbook-link.xlsx | unified | SAFE | - | 354.19 | yara-x 0.52, office 2.6, custom 1.4, yara-x-engine 0.35, ooxml-links 1.4 |
+| corpus | xlsx-05-excel-table-pivot.xlsx | reference | SAFE | - | 309.68 | yara-x 0.45, office 2.39, custom 2.1 |
+| corpus | xlsx-05-excel-table-pivot.xlsx | unified | SAFE | - | 331.85 | yara-x 0.69, office 2.4, custom 1.84, yara-x-engine 0.38, ooxml-links 1.27 |
+| corpus | xlsx-06-excel-picture-notes.xlsx | reference | SAFE | - | 267.83 | yara-x 0.54, office 1.92, custom 1.45 |
+| corpus | xlsx-06-excel-picture-notes.xlsx | unified | SAFE | - | 347.06 | yara-x 0.44, office 2.28, custom 1.95, yara-x-engine 0.51, ooxml-links 1.08 |
+| corpus | xlsx-07-libreoffice.xlsx | reference | SAFE | - | 295.25 | yara-x 0.44, office 0.78, custom 1.25 |
+| corpus | xlsx-07-libreoffice.xlsx | unified | SAFE | - | 368.51 | yara-x 1.32, office 0.95, custom 1.45, yara-x-engine 0.47, ooxml-links 1.06 |
+| corpus | fw9.pdf | reference | MALICIOUS | - | 348.25 | yara-x 0.61, pdf 27.5, custom 7.67 |
+| corpus | fw9.pdf | unified | SUSPICIOUS | - | 2756.88 | yara-x 4.86, pdf 195.17, custom 37.44, yara-x-engine 2.66, pdf-chains 162.86 |
+| corpus | fw4.pdf | reference | MALICIOUS | - | 367.27 | yara-x 0.65, pdf 40.68, custom 13.6 |
+| corpus | fw4.pdf | unified | SUSPICIOUS | - | 440.82 | yara-x 0.73, pdf 29.51, custom 13.96, yara-x-engine 0.57, pdf-chains 30.39 |
+| corpus | f1040.pdf | reference | MALICIOUS | - | 350.24 | yara-x 0.7, pdf 53.18, custom 13.8 |
+| corpus | f1040.pdf | unified | SUSPICIOUS | - | 399.86 | yara-x 0.55, pdf 41.58, custom 13.35, yara-x-engine 0.57, pdf-chains 42.27 |
+| corpus | NST-EST2023-POP.xlsx | reference | SAFE | - | 289.43 | yara-x 0.46, office 2.2, custom 1.88 |
+| corpus | NST-EST2023-POP.xlsx | unified | SAFE | - | 334.7 | yara-x 0.55, office 2.18, custom 1.78, yara-x-engine 0.38, ooxml-links 0.87 |
+| corrupt | corrupt-truncated-pdf | reference | UNABLE_TO_SCAN | pdf, custom | 288.7 | yara-x 0.52, pdf 0.28, custom 0.03 |
+| corrupt | corrupt-truncated-pdf | unified | UNABLE_TO_SCAN | pdf, custom, pdf-chains | 370.43 | yara-x 0.45, pdf 0.45, custom 0.03, yara-x-engine 0.4, pdf-chains 0.37 |
+| corrupt | corrupt-truncated-docx | reference | UNABLE_TO_SCAN | office, custom | 360.01 | yara-x 0.58, office 0.22, custom 0.03 |
+| corrupt | corrupt-truncated-docx | unified | UNABLE_TO_SCAN | office, custom, vba-chains, ooxml-links, word-fields | 376.15 | yara-x 0.74, office 0.3, custom 0.04, yara-x-engine 0.5, vba-chains 0.07, ooxml-links 0.03, word-fields 0.02 |
+| c7 | c7a-docx-nested-ddeauto | reference | SAFE | - | 321.82 | yara-x 0.61, office 2.42, custom 0.73 |
+| c7 | c7a-docx-nested-ddeauto | unified | MALICIOUS | - | 342.71 | yara-x 0.47, office 2.33, custom 0.67, yara-x-engine 0.37, ooxml-links 0.69, word-fields 0.61 |
+| c7 | c7b-docx-ddeauto-cmd | reference | MALICIOUS | - | 283.28 | yara-x 0.53, office 2.28, custom 0.63 |
+| c7 | c7b-docx-ddeauto-cmd | unified | MALICIOUS | - | 306.05 | yara-x 0.57, office 1.87, custom 0.62, yara-x-engine 0.33, ooxml-links 0.52, word-fields 0.44 |
+| c7 | c7c-docx-remote-includetext | reference | SAFE | - | 277.36 | yara-x 0.56, office 2.03, custom 0.62 |
+| c7 | c7c-docx-remote-includetext | unified | SUSPICIOUS | - | 331.52 | yara-x 0.56, office 2.29, custom 0.67, yara-x-engine 0.35, ooxml-links 0.65, word-fields 0.56 |
+| c7 | c7d-docx-remote-includepicture | reference | SAFE | - | 302.58 | yara-x 0.48, office 2.14, custom 0.57 |
+| c7 | c7d-docx-remote-includepicture | unified | SUSPICIOUS | - | 312.36 | yara-x 0.48, office 2.12, custom 0.72, yara-x-engine 0.35, ooxml-links 0.51, word-fields 0.48 |
+| c7 | c7e-docx-deleted-ddeauto | reference | SAFE | - | 304.27 | yara-x 0.46, office 2.2, custom 0.61 |
+| c7 | c7e-docx-deleted-ddeauto | unified | SAFE | - | 323.39 | yara-x 0.45, office 2.18, custom 0.59, yara-x-engine 0.36, ooxml-links 0.58, word-fields 0.51 |
+| c7 | c7f-docx-ordinary-fields | reference | SAFE | - | 312.59 | yara-x 0.59, office 2.42, custom 0.7 |
+| c7 | c7f-docx-ordinary-fields | unified | SAFE | - | 365.43 | yara-x 0.57, office 2.48, custom 0.79, yara-x-engine 0.54, ooxml-links 0.71, word-fields 0.86 |
