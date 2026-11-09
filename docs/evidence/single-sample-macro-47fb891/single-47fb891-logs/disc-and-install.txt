@@ -1,0 +1,30 @@
+utc 2026-11-09T22:14:20Z
+BRANCH.txt: OK
+COMMIT.txt: OK
+filesmagic.bundle: OK
+install_from_iso.sh: OK
+MANIFEST.txt: OK
+README.txt: OK
+source-47fb891.tar: OK
+disc sha256sum -c exit 0
+COMMIT 47fb891502cd68db62e7cb43dd05e327ffaab021  BRANCH research/offline-single-sample
+whole disc /dev/sr0 b8ce7ce9277933054b3488cc8d3bdbbebd3baed49eaede294190897a43c24378
+EICAR: none
+--- install ---
+1/6 Verifying every file on the medium against SHA256SUMS
+2/6 Checking the repository at /home/almuthanna-shihab/filesmagic-security-engine
+/media/almuthanna-shihab/FM_EVAL_47fb891/filesmagic.bundle is okay
+3/6 Fetching research/offline-single-sample at 47fb891502cd68db62e7cb43dd05e327ffaab021 from the bundle (into a separate ref; nothing is reset or merged)
+4/6 No samples on this medium (engine validation); nothing to copy
+5/6 Skipped
+6/6 Done.
+  commit   47fb891502cd68db62e7cb43dd05e327ffaab021 (detached HEAD in /home/almuthanna-shihab/filesmagic-security-engine; your previous branch is untouched)
+  next     SECURITY_ENGINE_REQUIRE_ISOLATION=1 /opt/filesmagic/venv/bin/python -B -m evaluation.offline_validation \
+               --expect-commit 47fb891502cd68db62e7cb43dd05e327ffaab021 --out ~/fm-eval/results/phase6-47fb891   (from /home/almuthanna-shihab/filesmagic-security-engine)
+Now unmount the ISO (sudo umount <mount point>); detach it on the host after shutdown.
+install exit 0
+HEAD 47fb891502cd68db62e7cb43dd05e327ffaab021  status 0
+app c50b66c1eca593f17926f81d7d55dff6f9474c40 (frozen c50b66c1eca593f17926f81d7d55dff6f9474c40)
+requirements 5089f11d0ab103614d999bd51fa9bfe0a1b3e76e (frozen 5089f11d0ab103614d999bd51fa9bfe0a1b3e76e)
+disc unmounted
+sr0 mounts now 0
