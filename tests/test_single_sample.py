@@ -85,7 +85,29 @@ def test_inert_fixtures_are_the_registered_files():
         assert hashlib.sha256(data).hexdigest() == json.loads((EXPECTATIONS / f"{name}.json").read_text())["sample_sha256"]
 
 
-@pytest.mark.parametrize("name", ["inert-ole-vba-storage", "inert-benign-docx", "inert-truncated-docx"])
+def test_benign_macro_doc_exercises_the_real_oletools_extraction_path():
+    # Not mocked: the real oletools VBA_Parser extracts the source, and the Office scanner reports an
+    # auto-execution macro (never OFFICE_VBA_UNPARSED, which is the "could not parse" result).
+    from oletools.olevba import VBA_Parser
+
+    from app.scanners.office import OfficeScanner
+    from evaluation.vba_fixture import benign_macro_doc
+
+    data = benign_macro_doc()
+    assert data == benign_macro_doc()  # deterministic
+    parser = VBA_Parser("benign.doc", data=data)
+    try:
+        assert parser.detect_vba_macros()
+        code = "".join(c for _, _, _, c in parser.extract_macros())
+    finally:
+        parser.close()
+    assert "Sub AutoOpen()" in code and "Compute = 2 + 2" in code  # real source, no network/FS/exec
+    rules_found = {f.rule_id for f in OfficeScanner().scan("benign.doc", data)}
+    assert "OFFICE_MACRO_AUTOEXEC" in rules_found and "OFFICE_VBA_UNPARSED" not in rules_found
+
+
+@pytest.mark.parametrize("name", ["inert-ole-vba-storage", "inert-benign-macro-doc", "inert-benign-docx",
+                                  "inert-truncated-docx"])
 def test_inert_fixtures_meet_their_expectations_end_to_end(monkeypatch, tmp_path, gates_hold, name):
     monkeypatch.setattr(synthetic, "scan_case", in_process)
     a = args(tmp_path, name)

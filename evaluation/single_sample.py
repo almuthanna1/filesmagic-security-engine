@@ -302,12 +302,15 @@ def run(args, env: dict) -> int:
 
 
 def inert_fixtures() -> dict[str, bytes]:
-    """The inert validation documents (no code, no exploit): see evaluation/expectations/inert-*.json."""
+    """The inert validation documents (no exploit, no payload): see evaluation/expectations/inert-*.json.
+    inert-benign-macro-doc carries a real, benign VBA module so the oletools extraction path is exercised."""
+    from evaluation.vba_fixture import benign_macro_doc
     from tests.office_fixtures import make_ole
 
     docx = (ov.CORPUS[0] / "docx-01-word-plain.docx").read_bytes()
     return {"inert-ole-vba-storage": make_ole({"WordDocument": b"inert", "Macros/VBA/_VBA_PROJECT": b"inert",
                                                "Macros/VBA/dir": b"inert"}),
+            "inert-benign-macro-doc": benign_macro_doc(),
             "inert-benign-docx": docx, "inert-truncated-docx": docx[: len(docx) // 2]}
 
 

@@ -1,0 +1,29 @@
+{
+  "sample_id": "inert-benign-macro-doc",
+  "sample_sha256": "f1cd6d6d1386cedae533d5dcdb9376e64cb0d9f7af8087a6c80cd56892e157b1",
+  "ground_truth": "SECURITY_TEST",
+  "note": "Inert legacy OLE .doc with a real benign VBA module (AutoOpen computing 2+2), built by evaluation/vba_fixture.py. Exercises the real oletools VBA extraction path (not mocked): both engines detect the auto-execution macro and, lacking any dangerous capability, return SUSPICIOUS, not MALICIOUS.",
+  "require_complete": true,
+  "max_wall_ms": 30000,
+  "engines": {
+    "reference": {
+      "verdict": "SUSPICIOUS",
+      "rules": [
+        "yara-x:OLE_Office_VBA_Macros:MEDIUM",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM"
+      ],
+      "not_applicable": ["pdf", "custom"]
+    },
+    "unified": {
+      "verdict": "SUSPICIOUS",
+      "rules": [
+        "yara-x:OLE_Office_VBA_Macros:MEDIUM",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "vba-chains:ENGINE_VBA_NO_CALL_PATH:INFO"
+      ],
+      "not_applicable": ["pdf", "custom", "pdf-chains", "ooxml-links", "word-fields"]
+    }
+  }
+}
