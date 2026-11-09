@@ -1,0 +1,17 @@
+# after storageattach (powered off) vs running after boot (2026-11-09T18:36Z); only runtime keys may differ
+# <= powered off, => running
+=> VMState="running"
+=> VMStateChangeTime="2026-11-09T18:36:10.504000000"
+=> SessionName="GUI/Qt"
+=> VideoMode="1280,800,32"@0,0 1
+=> VRDEActiveConnection="off"
+=> VRDEClients==0
+=> GuestOSType="Linux26_64"
+=> GuestAdditionsRunLevel=2
+=> GuestAdditionsVersion="7.2.20 r175154"
+=> GuestAdditionsFacility_VirtualBox Base Driver=50,1794249385522
+=> GuestAdditionsFacility_VirtualBox System Service=50,1794249388566
+=> GuestAdditionsFacility_Seamless Mode=0,1794249388542
+=> GuestAdditionsFacility_Graphics Mode=50,1794249388542
+<= VMState="poweroff"
+<= VMStateChangeTime="2026-11-09T05:29:05.000000000"

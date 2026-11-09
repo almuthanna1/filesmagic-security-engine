@@ -1,0 +1,21 @@
+utc 2026-11-09T18:39:52Z
+1/6 Verifying every file on the medium against SHA256SUMS
+2/6 Checking the repository at /home/almuthanna-shihab/filesmagic-security-engine
+/media/almuthanna-shihab/FM_EVAL_15126e8/filesmagic.bundle is okay
+3/6 Fetching research/offline-single-sample at 15126e8d25b8c3f433fa331bc546a7dff9443e97 from the bundle (into a separate ref; nothing is reset or merged)
+4/6 No samples on this medium (engine validation); nothing to copy
+5/6 Skipped
+6/6 Done.
+  commit   15126e8d25b8c3f433fa331bc546a7dff9443e97 (detached HEAD in /home/almuthanna-shihab/filesmagic-security-engine; your previous branch is untouched)
+  next     SECURITY_ENGINE_REQUIRE_ISOLATION=1 /opt/filesmagic/venv/bin/python -B -m evaluation.offline_validation \
+               --expect-commit 15126e8d25b8c3f433fa331bc546a7dff9443e97 --out ~/fm-eval/results/phase6-15126e8   (from /home/almuthanna-shihab/filesmagic-security-engine)
+Now unmount the ISO (sudo umount <mount point>); detach it on the host after shutdown.
+install exit 0
+HEAD 15126e8d25b8c3f433fa331bc546a7dff9443e97
+status lines 0
+app tree c50b66c1eca593f17926f81d7d55dff6f9474c40 (frozen c50b66c1eca593f17926f81d7d55dff6f9474c40)
+requirements blob 5089f11d0ab103614d999bd51fa9bfe0a1b3e76e (frozen 5089f11d0ab103614d999bd51fa9bfe0a1b3e76e)
+tags in VM repo: 0
+Unmounted /dev/sr0.
+unmount exit 0
+sr0 mounts now: 0

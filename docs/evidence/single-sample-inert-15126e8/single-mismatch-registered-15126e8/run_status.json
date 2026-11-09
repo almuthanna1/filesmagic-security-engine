@@ -1,0 +1,6 @@
+{
+  "status": "stopped",
+  "problems": [
+    "--sha256 is not the SHA-256 the expectations were registered for"
+  ]
+}

@@ -1,0 +1,20 @@
+utc 2026-11-09T18:53:24Z (read-only queries; nothing changed)
+tracker index-recursive-directories: ['&DESKTOP', '&DOCUMENTS', '&MUSIC', '&PICTURES', '&VIDEOS']
+tracker index-single-directories: ['$HOME', '&DOWNLOAD']
+tracker index-removable-devices: false
+tracker index-optical-discs: false
+tracker enable-monitors: true
+nautilus show-image-thumbnails: 'local-only'
+thumbnailers disabled (desktop): false
+automount: true automount-open: true
+tracker processes:
+  2752 /usr/libexec/tracker-miner-fs-3
+  8454 /bin/bash -c set -uo pipefail L=$HOME/fm-eval/results/single-15126e8-logs { echo "utc $(date -u +%FT%TZ) (read-only queries; nothing changed)" for k in index-recursive-directories index-single-directories index-removable-devices index-optical-discs enable-monitors; do   echo "tracker $k: $(gsettings get org.freedesktop.Tracker3.Miner.Files $k 2>&1)" done echo "nautilus show-image-thumbnails: $(gsettings get org.gnome.nautilus.preferences show-image-thumbnails 2>&1)" echo "thumbnailers disabled (desktop): $(gsettings get org.gnome.desktop.thumbnailers disable-all 2>&1)" echo "automount: $(gsettings get org.gnome.desktop.media-handling automount 2>&1) automount-open: $(gsettings get org.gnome.desktop.media-handling automount-open 2>&1)" echo "tracker processes:"; pgrep -a -f 'tracker' | sed 's/^/  /' || echo "  none" echo "thumbnailers installed:"; ls /usr/share/thumbnailers 2>/dev/null | sed 's/^/  /' } 2>&1 | tee "$L/desktop-indexing-state.txt"
+  8455 /bin/bash -c set -uo pipefail L=$HOME/fm-eval/results/single-15126e8-logs { echo "utc $(date -u +%FT%TZ) (read-only queries; nothing changed)" for k in index-recursive-directories index-single-directories index-removable-devices index-optical-discs enable-monitors; do   echo "tracker $k: $(gsettings get org.freedesktop.Tracker3.Miner.Files $k 2>&1)" done echo "nautilus show-image-thumbnails: $(gsettings get org.gnome.nautilus.preferences show-image-thumbnails 2>&1)" echo "thumbnailers disabled (desktop): $(gsettings get org.gnome.desktop.thumbnailers disable-all 2>&1)" echo "automount: $(gsettings get org.gnome.desktop.media-handling automount 2>&1) automount-open: $(gsettings get org.gnome.desktop.media-handling automount-open 2>&1)" echo "tracker processes:"; pgrep -a -f 'tracker' | sed 's/^/  /' || echo "  none" echo "thumbnailers installed:"; ls /usr/share/thumbnailers 2>/dev/null | sed 's/^/  /' } 2>&1 | tee "$L/desktop-indexing-state.txt"
+thumbnailers installed:
+  evince.thumbnailer
+  gdk-pixbuf-thumbnailer.thumbnailer
+  gnome-font-viewer.thumbnailer
+  heif.thumbnailer
+  librsvg.thumbnailer
+  webp-pixbuf.thumbnailer

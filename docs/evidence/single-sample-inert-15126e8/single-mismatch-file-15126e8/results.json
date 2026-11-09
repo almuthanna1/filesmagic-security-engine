@@ -1,0 +1,79 @@
+{
+  "sample": {
+    "id": "inert-benign-docx",
+    "sha256_expected": "996c1deeec6d64f42d43ddfa2c958d9a9ac6e5124a4ebf1f29ddbb54789e9f42"
+  },
+  "environment": {
+    "timestamp_utc": "2026-11-09T18:52:39+00:00",
+    "engine_commit": "15126e8d25b8c3f433fa331bc546a7dff9443e97",
+    "working_tree_dirty": false,
+    "manifest_sha256": null,
+    "engine_version": "0.2.0",
+    "ruleset_sha256": "0be9918509e95e639f866291dc297c45c8e72812d602fb149fad3484435ae3b0",
+    "strict_isolation_configured": true,
+    "python": "3.11.18",
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+    "packages": {
+      "yara-x": "1.21.0",
+      "oletools": "0.60.2",
+      "pypdf": "6.19.0",
+      "msoffcrypto-tool": "6.0.0",
+      "defusedxml": "0.7.1",
+      "fastapi": "0.142.4"
+    },
+    "harness_peak_rss_mib": 89.0,
+    "worker_memory_measured": false,
+    "host_network": {
+      "checked": true,
+      "offline": true,
+      "usable_routes_v4": 0,
+      "usable_routes_v6": 0
+    },
+    "dependency_drift": [],
+    "confinement": "filesmagic-eval-python (enforce)",
+    "worker_command": [
+      "-s",
+      "-m",
+      "app.worker",
+      "--require-isolation"
+    ],
+    "engine_ruleset_sha256": "988d991efb218328c97e8c00500ed6b434a33ee8e961548e817e159cc9f35b4e"
+  },
+  "trials": 5,
+  "expectations_path": "evaluation/expectations/inert-benign-docx.json",
+  "expectations_sha256": "ea2aa4735b25ace9cb9ca03ea8bfeb6b6efaaec0e4680c81134d8ff336c2d626",
+  "expectations": {
+    "sample_id": "inert-benign-docx",
+    "sample_sha256": "996c1deeec6d64f42d43ddfa2c958d9a9ac6e5124a4ebf1f29ddbb54789e9f42",
+    "ground_truth": "BENIGN",
+    "note": "evaluation/benign_corpus/files/docx-01-word-plain.docx, unchanged.",
+    "require_complete": true,
+    "max_wall_ms": 30000,
+    "engines": {
+      "reference": {
+        "verdict": "SAFE",
+        "rules": [],
+        "not_applicable": [
+          "pdf"
+        ]
+      },
+      "unified": {
+        "verdict": "SAFE",
+        "rules": [],
+        "not_applicable": [
+          "pdf",
+          "pdf-chains",
+          "vba-chains"
+        ]
+      }
+    }
+  },
+  "preregistration_sha256": null,
+  "run_status": {
+    "status": "stopped",
+    "problems": [
+      "inert-truncated-docx.bin: SHA-256 03d51cfdbaf4dbcf40da9d05e2cf2039933bad2bc6f7a2905d87284a09bc781f is not the expected 996c1deeec6d64f42d43ddfa2c958d9a9ac6e5124a4ebf1f29ddbb54789e9f42"
+    ]
+  },
+  "results": []
+}

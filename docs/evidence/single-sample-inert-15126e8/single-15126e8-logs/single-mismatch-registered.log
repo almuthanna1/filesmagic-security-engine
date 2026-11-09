@@ -1,0 +1,3 @@
+STOPPED: --sha256 is not the SHA-256 the expectations were registered for
+stopped: /home/almuthanna-shihab/fm-eval/results/single-mismatch-registered-15126e8/report.html
+exit 3

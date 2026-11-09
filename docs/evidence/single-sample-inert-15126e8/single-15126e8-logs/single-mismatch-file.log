@@ -1,0 +1,3 @@
+STOPPED: inert-truncated-docx.bin: SHA-256 03d51cfdbaf4dbcf40da9d05e2cf2039933bad2bc6f7a2905d87284a09bc781f is not the expected 996c1deeec6d64f42d43ddfa2c958d9a9ac6e5124a4ebf1f29ddbb54789e9f42
+stopped: /home/almuthanna-shihab/fm-eval/results/single-mismatch-file-15126e8/report.html
+exit 3

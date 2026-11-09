@@ -1,0 +1,495 @@
+{
+  "sample": {
+    "id": "inert-benign-docx",
+    "sha256_expected": "996c1deeec6d64f42d43ddfa2c958d9a9ac6e5124a4ebf1f29ddbb54789e9f42",
+    "sha256_observed": "996c1deeec6d64f42d43ddfa2c958d9a9ac6e5124a4ebf1f29ddbb54789e9f42",
+    "size_bytes": 13862
+  },
+  "environment": {
+    "timestamp_utc": "2026-11-09T18:51:53+00:00",
+    "engine_commit": "15126e8d25b8c3f433fa331bc546a7dff9443e97",
+    "working_tree_dirty": false,
+    "manifest_sha256": null,
+    "engine_version": "0.2.0",
+    "ruleset_sha256": "0be9918509e95e639f866291dc297c45c8e72812d602fb149fad3484435ae3b0",
+    "strict_isolation_configured": true,
+    "python": "3.11.18",
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+    "packages": {
+      "yara-x": "1.21.0",
+      "oletools": "0.60.2",
+      "pypdf": "6.19.0",
+      "msoffcrypto-tool": "6.0.0",
+      "defusedxml": "0.7.1",
+      "fastapi": "0.142.4"
+    },
+    "harness_peak_rss_mib": 89.0,
+    "worker_memory_measured": false,
+    "host_network": {
+      "checked": true,
+      "offline": true,
+      "usable_routes_v4": 0,
+      "usable_routes_v6": 0
+    },
+    "dependency_drift": [],
+    "confinement": "filesmagic-eval-python (enforce)",
+    "worker_command": [
+      "-s",
+      "-m",
+      "app.worker",
+      "--require-isolation"
+    ],
+    "engine_ruleset_sha256": "988d991efb218328c97e8c00500ed6b434a33ee8e961548e817e159cc9f35b4e"
+  },
+  "trials": 5,
+  "expectations_path": "evaluation/expectations/inert-benign-docx.json",
+  "expectations_sha256": "ea2aa4735b25ace9cb9ca03ea8bfeb6b6efaaec0e4680c81134d8ff336c2d626",
+  "expectations": {
+    "sample_id": "inert-benign-docx",
+    "sample_sha256": "996c1deeec6d64f42d43ddfa2c958d9a9ac6e5124a4ebf1f29ddbb54789e9f42",
+    "ground_truth": "BENIGN",
+    "note": "evaluation/benign_corpus/files/docx-01-word-plain.docx, unchanged.",
+    "require_complete": true,
+    "max_wall_ms": 30000,
+    "engines": {
+      "reference": {
+        "verdict": "SAFE",
+        "rules": [],
+        "not_applicable": [
+          "pdf"
+        ]
+      },
+      "unified": {
+        "verdict": "SAFE",
+        "rules": [],
+        "not_applicable": [
+          "pdf",
+          "pdf-chains",
+          "vba-chains"
+        ]
+      }
+    }
+  },
+  "preregistration_sha256": null,
+  "preflight": {
+    "reference": {
+      "isolation_missing": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "not_applicable",
+        "custom": "not_applicable"
+      }
+    },
+    "unified": {
+      "isolation_missing": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "not_applicable",
+        "custom": "not_applicable",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      }
+    }
+  },
+  "run_status": {
+    "status": "completed",
+    "problems": []
+  },
+  "results": [
+    {
+      "engine": "reference",
+      "id": "inert-benign-docx",
+      "ground_truth": "BENIGN",
+      "indicator": "single sample",
+      "sha256": "996c1deeec6d64f42d43ddfa2c958d9a9ac6e5124a4ebf1f29ddbb54789e9f42",
+      "size_bytes": 13862,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SAFE",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "aggregate": "SAFE"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "rules": [],
+      "findings": [],
+      "isolation_missing": [],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 5,
+          "mean_ms": 1068.58,
+          "median_ms": 1352.28,
+          "p95_ms": 1762.626,
+          "max_ms": 1762.626,
+          "min_ms": 309.999
+        },
+        "yara-x": {
+          "n": 5,
+          "mean_ms": 2.6,
+          "median_ms": 1.42,
+          "p95_ms": 8.84,
+          "max_ms": 8.84,
+          "min_ms": 0.399
+        },
+        "office": {
+          "n": 5,
+          "mean_ms": 7.26,
+          "median_ms": 5.79,
+          "p95_ms": 13.255,
+          "max_ms": 13.255,
+          "min_ms": 2.951
+        },
+        "pdf": {
+          "n": 5,
+          "mean_ms": 0.01,
+          "median_ms": 0.01,
+          "p95_ms": 0.007,
+          "max_ms": 0.007,
+          "min_ms": 0.004
+        },
+        "custom": {
+          "n": 5,
+          "mean_ms": 5.54,
+          "median_ms": 6.92,
+          "p95_ms": 9.612,
+          "max_ms": 9.612,
+          "min_ms": 1.743
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 1586.89,
+          "scanner_ms": {
+            "yara-x": 8.84,
+            "office": 11.182,
+            "pdf": 0.006,
+            "custom": 6.918
+          }
+        },
+        {
+          "harness_wall_ms": 1352.28,
+          "scanner_ms": {
+            "yara-x": 1.551,
+            "office": 5.789,
+            "pdf": 0.005,
+            "custom": 7.436
+          }
+        },
+        {
+          "harness_wall_ms": 1762.626,
+          "scanner_ms": {
+            "yara-x": 1.422,
+            "office": 13.255,
+            "pdf": 0.007,
+            "custom": 9.612
+          }
+        },
+        {
+          "harness_wall_ms": 331.09,
+          "scanner_ms": {
+            "yara-x": 0.399,
+            "office": 3.11,
+            "pdf": 0.004,
+            "custom": 1.743
+          }
+        },
+        {
+          "harness_wall_ms": 309.999,
+          "scanner_ms": {
+            "yara-x": 0.768,
+            "office": 2.951,
+            "pdf": 0.004,
+            "custom": 2.005
+          }
+        }
+      ]
+    },
+    {
+      "engine": "unified",
+      "id": "inert-benign-docx",
+      "ground_truth": "BENIGN",
+      "indicator": "single sample",
+      "sha256": "996c1deeec6d64f42d43ddfa2c958d9a9ac6e5124a4ebf1f29ddbb54789e9f42",
+      "size_bytes": 13862,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SAFE",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "n/a",
+        "vba-chains": "n/a",
+        "ooxml-links": "SAFE",
+        "word-fields": "SAFE",
+        "aggregate": "SAFE"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "rules": [],
+      "findings": [],
+      "isolation_missing": [],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 5,
+          "mean_ms": 324.13,
+          "median_ms": 322.76,
+          "p95_ms": 334.451,
+          "max_ms": 334.451,
+          "min_ms": 319.201
+        },
+        "yara-x": {
+          "n": 5,
+          "mean_ms": 0.77,
+          "median_ms": 0.47,
+          "p95_ms": 2.138,
+          "max_ms": 2.138,
+          "min_ms": 0.338
+        },
+        "office": {
+          "n": 5,
+          "mean_ms": 2.22,
+          "median_ms": 2.11,
+          "p95_ms": 2.661,
+          "max_ms": 2.661,
+          "min_ms": 1.951
+        },
+        "pdf": {
+          "n": 5,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.006,
+          "max_ms": 0.006,
+          "min_ms": 0.002
+        },
+        "custom": {
+          "n": 5,
+          "mean_ms": 1.71,
+          "median_ms": 1.61,
+          "p95_ms": 2.122,
+          "max_ms": 2.122,
+          "min_ms": 1.539
+        },
+        "yara-x-engine": {
+          "n": 5,
+          "mean_ms": 0.42,
+          "median_ms": 0.39,
+          "p95_ms": 0.642,
+          "max_ms": 0.642,
+          "min_ms": 0.319
+        },
+        "pdf-chains": {
+          "n": 5,
+          "mean_ms": 0.02,
+          "median_ms": 0.03,
+          "p95_ms": 0.027,
+          "max_ms": 0.027,
+          "min_ms": 0.021
+        },
+        "vba-chains": {
+          "n": 5,
+          "mean_ms": 0.19,
+          "median_ms": 0.09,
+          "p95_ms": 0.435,
+          "max_ms": 0.435,
+          "min_ms": 0.081
+        },
+        "ooxml-links": {
+          "n": 5,
+          "mean_ms": 0.6,
+          "median_ms": 0.54,
+          "p95_ms": 0.75,
+          "max_ms": 0.75,
+          "min_ms": 0.519
+        },
+        "word-fields": {
+          "n": 5,
+          "mean_ms": 3.95,
+          "median_ms": 3.72,
+          "p95_ms": 4.435,
+          "max_ms": 4.435,
+          "min_ms": 3.52
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 323.7,
+          "scanner_ms": {
+            "yara-x": 0.489,
+            "office": 1.951,
+            "pdf": 0.002,
+            "custom": 1.55,
+            "yara-x-engine": 0.642,
+            "pdf-chains": 0.027,
+            "vba-chains": 0.435,
+            "ooxml-links": 0.75,
+            "word-fields": 3.72
+          }
+        },
+        {
+          "harness_wall_ms": 334.451,
+          "scanner_ms": {
+            "yara-x": 0.467,
+            "office": 2.107,
+            "pdf": 0.004,
+            "custom": 2.122,
+            "yara-x-engine": 0.411,
+            "pdf-chains": 0.025,
+            "vba-chains": 0.278,
+            "ooxml-links": 0.641,
+            "word-fields": 3.675
+          }
+        },
+        {
+          "harness_wall_ms": 322.759,
+          "scanner_ms": {
+            "yara-x": 0.338,
+            "office": 2.086,
+            "pdf": 0.006,
+            "custom": 1.614,
+            "yara-x-engine": 0.319,
+            "pdf-chains": 0.021,
+            "vba-chains": 0.081,
+            "ooxml-links": 0.519,
+            "word-fields": 4.435
+          }
+        },
+        {
+          "harness_wall_ms": 320.562,
+          "scanner_ms": {
+            "yara-x": 0.396,
+            "office": 2.661,
+            "pdf": 0.005,
+            "custom": 1.705,
+            "yara-x-engine": 0.387,
+            "pdf-chains": 0.025,
+            "vba-chains": 0.086,
+            "ooxml-links": 0.536,
+            "word-fields": 3.52
+          }
+        },
+        {
+          "harness_wall_ms": 319.201,
+          "scanner_ms": {
+            "yara-x": 2.138,
+            "office": 2.277,
+            "pdf": 0.004,
+            "custom": 1.539,
+            "yara-x-engine": 0.361,
+            "pdf-chains": 0.023,
+            "vba-chains": 0.082,
+            "ooxml-links": 0.542,
+            "word-fields": 4.412
+          }
+        }
+      ]
+    }
+  ],
+  "assessment": {
+    "outcome": "PASS",
+    "defects": [],
+    "checks": [
+      {
+        "engine": "reference",
+        "prediction": "verdict SAFE",
+        "held": true,
+        "observed": "SAFE"
+      },
+      {
+        "engine": "reference",
+        "prediction": "pdf not applicable",
+        "held": true,
+        "observed": "not_applicable"
+      },
+      {
+        "engine": "reference",
+        "prediction": "deterministic across trials",
+        "held": true,
+        "observed": "True"
+      },
+      {
+        "engine": "reference",
+        "prediction": "strict isolation complete in every trial",
+        "held": true,
+        "observed": "complete"
+      },
+      {
+        "engine": "reference",
+        "prediction": "slowest trial below 30000 ms",
+        "held": true,
+        "observed": "1762.626 ms"
+      },
+      {
+        "engine": "unified",
+        "prediction": "verdict SAFE",
+        "held": true,
+        "observed": "SAFE"
+      },
+      {
+        "engine": "unified",
+        "prediction": "pdf not applicable",
+        "held": true,
+        "observed": "not_applicable"
+      },
+      {
+        "engine": "unified",
+        "prediction": "pdf-chains not applicable",
+        "held": true,
+        "observed": "not_applicable"
+      },
+      {
+        "engine": "unified",
+        "prediction": "vba-chains not applicable",
+        "held": true,
+        "observed": "not_applicable"
+      },
+      {
+        "engine": "unified",
+        "prediction": "deterministic across trials",
+        "held": true,
+        "observed": "True"
+      },
+      {
+        "engine": "unified",
+        "prediction": "strict isolation complete in every trial",
+        "held": true,
+        "observed": "complete"
+      },
+      {
+        "engine": "unified",
+        "prediction": "slowest trial below 30000 ms",
+        "held": true,
+        "observed": "334.451 ms"
+      }
+    ],
+    "verdicts": {
+      "reference": "SAFE",
+      "unified": "SAFE"
+    },
+    "failed_scanners": {
+      "reference": [],
+      "unified": []
+    },
+    "objective_held": {}
+  }
+}

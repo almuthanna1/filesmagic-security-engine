@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Proposal. Nothing implemented, transferred or scanned. Validation will use inert fixtures only. |
+| Status | Implemented (`evaluation/single_sample.py`, `15126e8`) and validated offline on inert fixtures only: [evidence](evidence/single-sample-inert-15126e8/README.md). No genuine malware transferred or scanned. |
 | Date | 2026-11-09 |
 | Purpose | Inspect the first genuine-malware result ([Emotet pre-registration](malware-eval-e50c941c-preregistration.md)) inside the offline Ubuntu VM, with no network, no hosted service and no upload |
 | Release | `custom-engine-freeze-2026-11-09` (`2d586f6`): detection logic unchanged |

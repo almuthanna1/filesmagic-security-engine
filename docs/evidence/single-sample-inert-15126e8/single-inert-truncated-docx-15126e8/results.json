@@ -1,0 +1,497 @@
+{
+  "sample": {
+    "id": "inert-truncated-docx",
+    "sha256_expected": "03d51cfdbaf4dbcf40da9d05e2cf2039933bad2bc6f7a2905d87284a09bc781f",
+    "sha256_observed": "03d51cfdbaf4dbcf40da9d05e2cf2039933bad2bc6f7a2905d87284a09bc781f",
+    "size_bytes": 6931
+  },
+  "environment": {
+    "timestamp_utc": "2026-11-09T18:52:04+00:00",
+    "engine_commit": "15126e8d25b8c3f433fa331bc546a7dff9443e97",
+    "working_tree_dirty": false,
+    "manifest_sha256": null,
+    "engine_version": "0.2.0",
+    "ruleset_sha256": "0be9918509e95e639f866291dc297c45c8e72812d602fb149fad3484435ae3b0",
+    "strict_isolation_configured": true,
+    "python": "3.11.18",
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+    "packages": {
+      "yara-x": "1.21.0",
+      "oletools": "0.60.2",
+      "pypdf": "6.19.0",
+      "msoffcrypto-tool": "6.0.0",
+      "defusedxml": "0.7.1",
+      "fastapi": "0.142.4"
+    },
+    "harness_peak_rss_mib": 88.8,
+    "worker_memory_measured": false,
+    "host_network": {
+      "checked": true,
+      "offline": true,
+      "usable_routes_v4": 0,
+      "usable_routes_v6": 0
+    },
+    "dependency_drift": [],
+    "confinement": "filesmagic-eval-python (enforce)",
+    "worker_command": [
+      "-s",
+      "-m",
+      "app.worker",
+      "--require-isolation"
+    ],
+    "engine_ruleset_sha256": "988d991efb218328c97e8c00500ed6b434a33ee8e961548e817e159cc9f35b4e"
+  },
+  "trials": 5,
+  "expectations_path": "evaluation/expectations/inert-truncated-docx.json",
+  "expectations_sha256": "12076799280f455d425258676990117f653a5149862bb824346bccee24ecdcb5",
+  "expectations": {
+    "sample_id": "inert-truncated-docx",
+    "sample_sha256": "03d51cfdbaf4dbcf40da9d05e2cf2039933bad2bc6f7a2905d87284a09bc781f",
+    "ground_truth": "SECURITY_TEST",
+    "note": "The first half of docx-01-word-plain.docx: must fail closed (UNABLE_TO_SCAN) in both engines.",
+    "require_complete": false,
+    "max_wall_ms": 30000,
+    "engines": {
+      "reference": {
+        "verdict": "UNABLE_TO_SCAN",
+        "rules": [],
+        "not_applicable": [
+          "pdf"
+        ]
+      },
+      "unified": {
+        "verdict": "UNABLE_TO_SCAN",
+        "rules": [],
+        "not_applicable": [
+          "pdf",
+          "pdf-chains"
+        ]
+      }
+    }
+  },
+  "preregistration_sha256": null,
+  "preflight": {
+    "reference": {
+      "isolation_missing": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "not_applicable",
+        "custom": "not_applicable"
+      }
+    },
+    "unified": {
+      "isolation_missing": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "not_applicable",
+        "custom": "not_applicable",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      }
+    }
+  },
+  "run_status": {
+    "status": "completed",
+    "problems": []
+  },
+  "results": [
+    {
+      "engine": "reference",
+      "id": "inert-truncated-docx",
+      "ground_truth": "SECURITY_TEST",
+      "indicator": "single sample",
+      "sha256": "03d51cfdbaf4dbcf40da9d05e2cf2039933bad2bc6f7a2905d87284a09bc781f",
+      "size_bytes": 6931,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "UNABLE_TO_SCAN",
+        "pdf": "n/a",
+        "custom": "UNABLE_TO_SCAN",
+        "aggregate": "UNABLE_TO_SCAN"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "failed",
+        "pdf": "not_applicable",
+        "custom": "failed"
+      },
+      "rules": [],
+      "findings": [],
+      "isolation_missing": [],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 5,
+          "mean_ms": 325.87,
+          "median_ms": 314.58,
+          "p95_ms": 361.781,
+          "max_ms": 361.781,
+          "min_ms": 312.088
+        },
+        "yara-x": {
+          "n": 5,
+          "mean_ms": 0.58,
+          "median_ms": 0.54,
+          "p95_ms": 0.884,
+          "max_ms": 0.884,
+          "min_ms": 0.434
+        },
+        "office": {
+          "n": 5,
+          "mean_ms": 0.21,
+          "median_ms": 0.16,
+          "p95_ms": 0.338,
+          "max_ms": 0.338,
+          "min_ms": 0.132
+        },
+        "pdf": {
+          "n": 5,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.002
+        },
+        "custom": {
+          "n": 5,
+          "mean_ms": 0.03,
+          "median_ms": 0.03,
+          "p95_ms": 0.05,
+          "max_ms": 0.05,
+          "min_ms": 0.024
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 312.674,
+          "scanner_ms": {
+            "yara-x": 0.464,
+            "office": 0.132,
+            "pdf": 0.002,
+            "custom": 0.024
+          }
+        },
+        {
+          "harness_wall_ms": 361.781,
+          "scanner_ms": {
+            "yara-x": 0.537,
+            "office": 0.162,
+            "pdf": 0.003,
+            "custom": 0.026
+          }
+        },
+        {
+          "harness_wall_ms": 314.583,
+          "scanner_ms": {
+            "yara-x": 0.434,
+            "office": 0.338,
+            "pdf": 0.004,
+            "custom": 0.05
+          }
+        },
+        {
+          "harness_wall_ms": 312.088,
+          "scanner_ms": {
+            "yara-x": 0.884,
+            "office": 0.155,
+            "pdf": 0.003,
+            "custom": 0.025
+          }
+        },
+        {
+          "harness_wall_ms": 328.236,
+          "scanner_ms": {
+            "yara-x": 0.604,
+            "office": 0.245,
+            "pdf": 0.004,
+            "custom": 0.035
+          }
+        }
+      ]
+    },
+    {
+      "engine": "unified",
+      "id": "inert-truncated-docx",
+      "ground_truth": "SECURITY_TEST",
+      "indicator": "single sample",
+      "sha256": "03d51cfdbaf4dbcf40da9d05e2cf2039933bad2bc6f7a2905d87284a09bc781f",
+      "size_bytes": 6931,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "UNABLE_TO_SCAN",
+        "pdf": "n/a",
+        "custom": "UNABLE_TO_SCAN",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "n/a",
+        "vba-chains": "UNABLE_TO_SCAN",
+        "ooxml-links": "UNABLE_TO_SCAN",
+        "word-fields": "UNABLE_TO_SCAN",
+        "aggregate": "UNABLE_TO_SCAN"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "failed",
+        "pdf": "not_applicable",
+        "custom": "failed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "failed",
+        "ooxml-links": "failed",
+        "word-fields": "failed"
+      },
+      "rules": [],
+      "findings": [],
+      "isolation_missing": [],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 5,
+          "mean_ms": 467.33,
+          "median_ms": 447.07,
+          "p95_ms": 518.889,
+          "max_ms": 518.889,
+          "min_ms": 424.12
+        },
+        "yara-x": {
+          "n": 5,
+          "mean_ms": 0.51,
+          "median_ms": 0.49,
+          "p95_ms": 0.618,
+          "max_ms": 0.618,
+          "min_ms": 0.432
+        },
+        "office": {
+          "n": 5,
+          "mean_ms": 0.29,
+          "median_ms": 0.17,
+          "p95_ms": 0.502,
+          "max_ms": 0.502,
+          "min_ms": 0.155
+        },
+        "pdf": {
+          "n": 5,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.008,
+          "max_ms": 0.008,
+          "min_ms": 0.003
+        },
+        "custom": {
+          "n": 5,
+          "mean_ms": 0.04,
+          "median_ms": 0.04,
+          "p95_ms": 0.069,
+          "max_ms": 0.069,
+          "min_ms": 0.023
+        },
+        "yara-x-engine": {
+          "n": 5,
+          "mean_ms": 0.35,
+          "median_ms": 0.3,
+          "p95_ms": 0.473,
+          "max_ms": 0.473,
+          "min_ms": 0.26
+        },
+        "pdf-chains": {
+          "n": 5,
+          "mean_ms": 0.06,
+          "median_ms": 0.02,
+          "p95_ms": 0.243,
+          "max_ms": 0.243,
+          "min_ms": 0.019
+        },
+        "vba-chains": {
+          "n": 5,
+          "mean_ms": 0.04,
+          "median_ms": 0.04,
+          "p95_ms": 0.06,
+          "max_ms": 0.06,
+          "min_ms": 0.028
+        },
+        "ooxml-links": {
+          "n": 5,
+          "mean_ms": 0.02,
+          "median_ms": 0.02,
+          "p95_ms": 0.021,
+          "max_ms": 0.021,
+          "min_ms": 0.016
+        },
+        "word-fields": {
+          "n": 5,
+          "mean_ms": 0.01,
+          "median_ms": 0.01,
+          "p95_ms": 0.014,
+          "max_ms": 0.014,
+          "min_ms": 0.012
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 435.217,
+          "scanner_ms": {
+            "yara-x": 0.482,
+            "office": 0.491,
+            "pdf": 0.004,
+            "custom": 0.035,
+            "yara-x-engine": 0.298,
+            "pdf-chains": 0.019,
+            "vba-chains": 0.06,
+            "ooxml-links": 0.02,
+            "word-fields": 0.014
+          }
+        },
+        {
+          "harness_wall_ms": 518.889,
+          "scanner_ms": {
+            "yara-x": 0.432,
+            "office": 0.157,
+            "pdf": 0.003,
+            "custom": 0.025,
+            "yara-x-engine": 0.26,
+            "pdf-chains": 0.02,
+            "vba-chains": 0.028,
+            "ooxml-links": 0.016,
+            "word-fields": 0.012
+          }
+        },
+        {
+          "harness_wall_ms": 424.12,
+          "scanner_ms": {
+            "yara-x": 0.49,
+            "office": 0.155,
+            "pdf": 0.003,
+            "custom": 0.023,
+            "yara-x-engine": 0.27,
+            "pdf-chains": 0.019,
+            "vba-chains": 0.03,
+            "ooxml-links": 0.016,
+            "word-fields": 0.012
+          }
+        },
+        {
+          "harness_wall_ms": 447.068,
+          "scanner_ms": {
+            "yara-x": 0.549,
+            "office": 0.502,
+            "pdf": 0.008,
+            "custom": 0.069,
+            "yara-x-engine": 0.427,
+            "pdf-chains": 0.243,
+            "vba-chains": 0.054,
+            "ooxml-links": 0.021,
+            "word-fields": 0.014
+          }
+        },
+        {
+          "harness_wall_ms": 511.337,
+          "scanner_ms": {
+            "yara-x": 0.618,
+            "office": 0.169,
+            "pdf": 0.004,
+            "custom": 0.054,
+            "yara-x-engine": 0.473,
+            "pdf-chains": 0.023,
+            "vba-chains": 0.044,
+            "ooxml-links": 0.019,
+            "word-fields": 0.014
+          }
+        }
+      ]
+    }
+  ],
+  "assessment": {
+    "outcome": "PASS",
+    "defects": [],
+    "checks": [
+      {
+        "engine": "reference",
+        "prediction": "verdict UNABLE_TO_SCAN",
+        "held": true,
+        "observed": "UNABLE_TO_SCAN"
+      },
+      {
+        "engine": "reference",
+        "prediction": "pdf not applicable",
+        "held": true,
+        "observed": "not_applicable"
+      },
+      {
+        "engine": "reference",
+        "prediction": "deterministic across trials",
+        "held": true,
+        "observed": "True"
+      },
+      {
+        "engine": "reference",
+        "prediction": "strict isolation complete in every trial",
+        "held": true,
+        "observed": "complete"
+      },
+      {
+        "engine": "reference",
+        "prediction": "slowest trial below 30000 ms",
+        "held": true,
+        "observed": "361.781 ms"
+      },
+      {
+        "engine": "unified",
+        "prediction": "verdict UNABLE_TO_SCAN",
+        "held": true,
+        "observed": "UNABLE_TO_SCAN"
+      },
+      {
+        "engine": "unified",
+        "prediction": "pdf not applicable",
+        "held": true,
+        "observed": "not_applicable"
+      },
+      {
+        "engine": "unified",
+        "prediction": "pdf-chains not applicable",
+        "held": true,
+        "observed": "not_applicable"
+      },
+      {
+        "engine": "unified",
+        "prediction": "deterministic across trials",
+        "held": true,
+        "observed": "True"
+      },
+      {
+        "engine": "unified",
+        "prediction": "strict isolation complete in every trial",
+        "held": true,
+        "observed": "complete"
+      },
+      {
+        "engine": "unified",
+        "prediction": "slowest trial below 30000 ms",
+        "held": true,
+        "observed": "518.889 ms"
+      }
+    ],
+    "verdicts": {
+      "reference": "UNABLE_TO_SCAN",
+      "unified": "UNABLE_TO_SCAN"
+    },
+    "failed_scanners": {
+      "reference": [
+        "custom",
+        "office"
+      ],
+      "unified": [
+        "custom",
+        "office",
+        "ooxml-links",
+        "vba-chains",
+        "word-fields"
+      ]
+    },
+    "objective_held": {}
+  }
+}

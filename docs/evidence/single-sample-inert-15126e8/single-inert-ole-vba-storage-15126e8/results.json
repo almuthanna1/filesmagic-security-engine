@@ -1,0 +1,585 @@
+{
+  "sample": {
+    "id": "inert-ole-vba-storage",
+    "sha256_expected": "b4c5685d54402cb880a4c7f72b2988cac446915f07d4b4d6157401d6279cfb0b",
+    "sha256_observed": "b4c5685d54402cb880a4c7f72b2988cac446915f07d4b4d6157401d6279cfb0b",
+    "size_bytes": 14336
+  },
+  "environment": {
+    "timestamp_utc": "2026-11-09T18:51:43+00:00",
+    "engine_commit": "15126e8d25b8c3f433fa331bc546a7dff9443e97",
+    "working_tree_dirty": false,
+    "manifest_sha256": null,
+    "engine_version": "0.2.0",
+    "ruleset_sha256": "0be9918509e95e639f866291dc297c45c8e72812d602fb149fad3484435ae3b0",
+    "strict_isolation_configured": true,
+    "python": "3.11.18",
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.39",
+    "packages": {
+      "yara-x": "1.21.0",
+      "oletools": "0.60.2",
+      "pypdf": "6.19.0",
+      "msoffcrypto-tool": "6.0.0",
+      "defusedxml": "0.7.1",
+      "fastapi": "0.142.4"
+    },
+    "harness_peak_rss_mib": 88.9,
+    "worker_memory_measured": false,
+    "host_network": {
+      "checked": true,
+      "offline": true,
+      "usable_routes_v4": 0,
+      "usable_routes_v6": 0
+    },
+    "dependency_drift": [],
+    "confinement": "filesmagic-eval-python (enforce)",
+    "worker_command": [
+      "-s",
+      "-m",
+      "app.worker",
+      "--require-isolation"
+    ],
+    "engine_ruleset_sha256": "988d991efb218328c97e8c00500ed6b434a33ee8e961548e817e159cc9f35b4e"
+  },
+  "trials": 5,
+  "expectations_path": "evaluation/expectations/inert-ole-vba-storage.json",
+  "expectations_sha256": "fa57c14387e5e00f5843cf39d19f2fdf2eb7ee19f91451c4bfcd641a3db2c77c",
+  "expectations": {
+    "sample_id": "inert-ole-vba-storage",
+    "sample_sha256": "b4c5685d54402cb880a4c7f72b2988cac446915f07d4b4d6157401d6279cfb0b",
+    "ground_truth": "SECURITY_TEST",
+    "note": "Inert legacy OLE .doc with an empty VBA storage and no code (single_sample.inert_fixtures): the Emotet sample's OLE and VBA path.",
+    "require_complete": true,
+    "max_wall_ms": 30000,
+    "engines": {
+      "reference": {
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "yara-x:OLE_Office_VBA_Macros:MEDIUM",
+          "office:OFFICE_VBA_UNPARSED:LOW"
+        ],
+        "not_applicable": [
+          "pdf",
+          "custom"
+        ]
+      },
+      "unified": {
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "yara-x:OLE_Office_VBA_Macros:MEDIUM",
+          "office:OFFICE_VBA_UNPARSED:LOW"
+        ],
+        "not_applicable": [
+          "pdf",
+          "custom",
+          "pdf-chains",
+          "vba-chains",
+          "ooxml-links",
+          "word-fields"
+        ]
+      }
+    }
+  },
+  "preregistration_sha256": null,
+  "preflight": {
+    "reference": {
+      "isolation_missing": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "not_applicable",
+        "custom": "not_applicable"
+      }
+    },
+    "unified": {
+      "isolation_missing": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "not_applicable",
+        "custom": "not_applicable",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      }
+    }
+  },
+  "run_status": {
+    "status": "completed",
+    "problems": []
+  },
+  "results": [
+    {
+      "engine": "reference",
+      "id": "inert-ole-vba-storage",
+      "ground_truth": "SECURITY_TEST",
+      "indicator": "single sample",
+      "sha256": "b4c5685d54402cb880a4c7f72b2988cac446915f07d4b4d6157401d6279cfb0b",
+      "size_bytes": 14336,
+      "verdicts": {
+        "yara-x": "SUSPICIOUS",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "not_applicable"
+      },
+      "rules": [
+        "office:OFFICE_VBA_UNPARSED:LOW",
+        "yara-x:OLE_Office_VBA_Macros:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "yara-x",
+          "rule_id": "OLE_Office_VBA_Macros",
+          "severity": "MEDIUM",
+          "description": "Legacy Office (OLE) document contains a VBA macro project."
+        },
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_VBA_UNPARSED",
+          "severity": "LOW",
+          "description": "Document contains a VBA project storage that could not be parsed."
+        }
+      ],
+      "isolation_missing": [],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 5,
+          "mean_ms": 306.91,
+          "median_ms": 289.98,
+          "p95_ms": 389.844,
+          "max_ms": 389.844,
+          "min_ms": 275.851
+        },
+        "yara-x": {
+          "n": 5,
+          "mean_ms": 0.67,
+          "median_ms": 0.48,
+          "p95_ms": 1.252,
+          "max_ms": 1.252,
+          "min_ms": 0.435
+        },
+        "office": {
+          "n": 5,
+          "mean_ms": 5.06,
+          "median_ms": 3.76,
+          "p95_ms": 10.866,
+          "max_ms": 10.866,
+          "min_ms": 2.544
+        },
+        "pdf": {
+          "n": 5,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.002
+        },
+        "custom": {
+          "n": 5,
+          "mean_ms": 0.01,
+          "median_ms": 0.01,
+          "p95_ms": 0.006,
+          "max_ms": 0.006,
+          "min_ms": 0.005
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 299.217,
+          "scanner_ms": {
+            "yara-x": 0.435,
+            "office": 10.866,
+            "pdf": 0.003,
+            "custom": 0.006
+          }
+        },
+        {
+          "harness_wall_ms": 279.669,
+          "scanner_ms": {
+            "yara-x": 0.476,
+            "office": 4.569,
+            "pdf": 0.004,
+            "custom": 0.006
+          }
+        },
+        {
+          "harness_wall_ms": 275.851,
+          "scanner_ms": {
+            "yara-x": 0.453,
+            "office": 3.55,
+            "pdf": 0.003,
+            "custom": 0.006
+          }
+        },
+        {
+          "harness_wall_ms": 389.844,
+          "scanner_ms": {
+            "yara-x": 0.734,
+            "office": 3.757,
+            "pdf": 0.003,
+            "custom": 0.006
+          }
+        },
+        {
+          "harness_wall_ms": 289.983,
+          "scanner_ms": {
+            "yara-x": 1.252,
+            "office": 2.544,
+            "pdf": 0.002,
+            "custom": 0.005
+          }
+        }
+      ]
+    },
+    {
+      "engine": "unified",
+      "id": "inert-ole-vba-storage",
+      "ground_truth": "SECURITY_TEST",
+      "indicator": "single sample",
+      "sha256": "b4c5685d54402cb880a4c7f72b2988cac446915f07d4b4d6157401d6279cfb0b",
+      "size_bytes": 14336,
+      "verdicts": {
+        "yara-x": "SUSPICIOUS",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "n/a",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "n/a",
+        "vba-chains": "n/a",
+        "ooxml-links": "n/a",
+        "word-fields": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "not_applicable",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "rules": [
+        "office:OFFICE_VBA_UNPARSED:LOW",
+        "yara-x:OLE_Office_VBA_Macros:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "yara-x",
+          "rule_id": "OLE_Office_VBA_Macros",
+          "severity": "MEDIUM",
+          "description": "Legacy Office (OLE) document contains a VBA macro project."
+        },
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_VBA_UNPARSED",
+          "severity": "LOW",
+          "description": "Document contains a VBA project storage that could not be parsed."
+        }
+      ],
+      "isolation_missing": [],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 5,
+          "mean_ms": 321.85,
+          "median_ms": 323.11,
+          "p95_ms": 335.634,
+          "max_ms": 335.634,
+          "min_ms": 309.961
+        },
+        "yara-x": {
+          "n": 5,
+          "mean_ms": 0.47,
+          "median_ms": 0.41,
+          "p95_ms": 0.628,
+          "max_ms": 0.628,
+          "min_ms": 0.38
+        },
+        "office": {
+          "n": 5,
+          "mean_ms": 2.95,
+          "median_ms": 2.94,
+          "p95_ms": 3.794,
+          "max_ms": 3.794,
+          "min_ms": 2.162
+        },
+        "pdf": {
+          "n": 5,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.002
+        },
+        "custom": {
+          "n": 5,
+          "mean_ms": 0.0,
+          "median_ms": 0.01,
+          "p95_ms": 0.006,
+          "max_ms": 0.006,
+          "min_ms": 0.003
+        },
+        "yara-x-engine": {
+          "n": 5,
+          "mean_ms": 0.35,
+          "median_ms": 0.37,
+          "p95_ms": 0.428,
+          "max_ms": 0.428,
+          "min_ms": 0.297
+        },
+        "pdf-chains": {
+          "n": 5,
+          "mean_ms": 0.02,
+          "median_ms": 0.02,
+          "p95_ms": 0.025,
+          "max_ms": 0.025,
+          "min_ms": 0.02
+        },
+        "vba-chains": {
+          "n": 5,
+          "mean_ms": 0.23,
+          "median_ms": 0.23,
+          "p95_ms": 0.245,
+          "max_ms": 0.245,
+          "min_ms": 0.225
+        },
+        "ooxml-links": {
+          "n": 5,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.003
+        },
+        "word-fields": {
+          "n": 5,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.001
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 328.788,
+          "scanner_ms": {
+            "yara-x": 0.551,
+            "office": 3.476,
+            "pdf": 0.003,
+            "custom": 0.006,
+            "yara-x-engine": 0.368,
+            "pdf-chains": 0.022,
+            "vba-chains": 0.236,
+            "ooxml-links": 0.003,
+            "word-fields": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 309.961,
+          "scanner_ms": {
+            "yara-x": 0.628,
+            "office": 2.162,
+            "pdf": 0.002,
+            "custom": 0.003,
+            "yara-x-engine": 0.303,
+            "pdf-chains": 0.02,
+            "vba-chains": 0.229,
+            "ooxml-links": 0.003,
+            "word-fields": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 323.114,
+          "scanner_ms": {
+            "yara-x": 0.38,
+            "office": 2.94,
+            "pdf": 0.003,
+            "custom": 0.005,
+            "yara-x-engine": 0.366,
+            "pdf-chains": 0.023,
+            "vba-chains": 0.232,
+            "ooxml-links": 0.003,
+            "word-fields": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 311.761,
+          "scanner_ms": {
+            "yara-x": 0.406,
+            "office": 3.794,
+            "pdf": 0.003,
+            "custom": 0.006,
+            "yara-x-engine": 0.428,
+            "pdf-chains": 0.025,
+            "vba-chains": 0.245,
+            "ooxml-links": 0.003,
+            "word-fields": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 335.634,
+          "scanner_ms": {
+            "yara-x": 0.405,
+            "office": 2.375,
+            "pdf": 0.003,
+            "custom": 0.004,
+            "yara-x-engine": 0.297,
+            "pdf-chains": 0.02,
+            "vba-chains": 0.225,
+            "ooxml-links": 0.003,
+            "word-fields": 0.001
+          }
+        }
+      ]
+    }
+  ],
+  "assessment": {
+    "outcome": "PASS",
+    "defects": [],
+    "checks": [
+      {
+        "engine": "reference",
+        "prediction": "verdict SUSPICIOUS",
+        "held": true,
+        "observed": "SUSPICIOUS"
+      },
+      {
+        "engine": "reference",
+        "prediction": "finding yara-x:OLE_Office_VBA_Macros:MEDIUM",
+        "held": true,
+        "observed": "present"
+      },
+      {
+        "engine": "reference",
+        "prediction": "finding office:OFFICE_VBA_UNPARSED:LOW",
+        "held": true,
+        "observed": "present"
+      },
+      {
+        "engine": "reference",
+        "prediction": "pdf not applicable",
+        "held": true,
+        "observed": "not_applicable"
+      },
+      {
+        "engine": "reference",
+        "prediction": "custom not applicable",
+        "held": true,
+        "observed": "not_applicable"
+      },
+      {
+        "engine": "reference",
+        "prediction": "deterministic across trials",
+        "held": true,
+        "observed": "True"
+      },
+      {
+        "engine": "reference",
+        "prediction": "strict isolation complete in every trial",
+        "held": true,
+        "observed": "complete"
+      },
+      {
+        "engine": "reference",
+        "prediction": "slowest trial below 30000 ms",
+        "held": true,
+        "observed": "389.844 ms"
+      },
+      {
+        "engine": "unified",
+        "prediction": "verdict SUSPICIOUS",
+        "held": true,
+        "observed": "SUSPICIOUS"
+      },
+      {
+        "engine": "unified",
+        "prediction": "finding yara-x:OLE_Office_VBA_Macros:MEDIUM",
+        "held": true,
+        "observed": "present"
+      },
+      {
+        "engine": "unified",
+        "prediction": "finding office:OFFICE_VBA_UNPARSED:LOW",
+        "held": true,
+        "observed": "present"
+      },
+      {
+        "engine": "unified",
+        "prediction": "pdf not applicable",
+        "held": true,
+        "observed": "not_applicable"
+      },
+      {
+        "engine": "unified",
+        "prediction": "custom not applicable",
+        "held": true,
+        "observed": "not_applicable"
+      },
+      {
+        "engine": "unified",
+        "prediction": "pdf-chains not applicable",
+        "held": true,
+        "observed": "not_applicable"
+      },
+      {
+        "engine": "unified",
+        "prediction": "vba-chains not applicable",
+        "held": true,
+        "observed": "not_applicable"
+      },
+      {
+        "engine": "unified",
+        "prediction": "ooxml-links not applicable",
+        "held": true,
+        "observed": "not_applicable"
+      },
+      {
+        "engine": "unified",
+        "prediction": "word-fields not applicable",
+        "held": true,
+        "observed": "not_applicable"
+      },
+      {
+        "engine": "unified",
+        "prediction": "deterministic across trials",
+        "held": true,
+        "observed": "True"
+      },
+      {
+        "engine": "unified",
+        "prediction": "strict isolation complete in every trial",
+        "held": true,
+        "observed": "complete"
+      },
+      {
+        "engine": "unified",
+        "prediction": "slowest trial below 30000 ms",
+        "held": true,
+        "observed": "335.634 ms"
+      }
+    ],
+    "verdicts": {
+      "reference": "SUSPICIOUS",
+      "unified": "SUSPICIOUS"
+    },
+    "failed_scanners": {
+      "reference": [],
+      "unified": []
+    },
+    "objective_held": {}
+  }
+}

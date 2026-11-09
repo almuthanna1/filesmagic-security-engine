@@ -1,0 +1,6 @@
+# VBoxManage showvminfo FilesMagic-securityLAB --machinereadable: powered off, before vs after storageattach IDE 0-0 (2026-11-09)
+# <= before, => after; every other line identical
+=> "IDE-0-0"="C:\\tmp\\fm-single-15126e8\\fm-eval-15126e8.iso"
+=> "IDE-ImageUUID-0-0"="fad8c1fb-1606-41ae-a2e7-a6325d598dc4"
+<= "IDE-0-0"="C:\\tmp\\fm-final3\\fm-eval-eda2a08.iso"
+<= "IDE-ImageUUID-0-0"="c6e049a1-65f5-4909-87ec-d029d7340543"

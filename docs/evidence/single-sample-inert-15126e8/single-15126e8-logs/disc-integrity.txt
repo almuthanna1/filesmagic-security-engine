@@ -1,0 +1,23 @@
+utc 2026-11-09T18:39:38Z
+BRANCH.txt: OK
+COMMIT.txt: OK
+filesmagic.bundle: OK
+install_from_iso.sh: OK
+MANIFEST.txt: OK
+README.txt: OK
+source-15126e8.tar: OK
+sha256sum -c exit 0
+COMMIT.txt 15126e8d25b8c3f433fa331bc546a7dff9443e97
+BRANCH.txt research/offline-single-sample
+bundle heads:
+15126e8d25b8c3f433fa331bc546a7dff9443e97 refs/heads/research/offline-single-sample
+MANIFEST.txt:
+commit 15126e8d25b8c3f433fa331bc546a7dff9443e97
+tree 0d1730c6aea260d03d55c1712e74365d777655d1
+parents 2d586f651a68a9f45b061c2e8cbb8dd136be645a
+committed 2026-11-09T12:17:57-06:00
+subject Add the offline single-sample evaluation tool and pre-register the Emotet sample
+branch research/offline-single-sample
+requirements.txt blob 5089f11d0ab103614d999bd51fa9bfe0a1b3e76e
+whole disc /dev/sr0: 619883ac710484a52bfac59b6f38ab5acd2cf1362147a0118c351b80411a9987
+EICAR material: none
