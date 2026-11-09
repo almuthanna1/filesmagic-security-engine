@@ -1,0 +1,47 @@
+{
+  "sample_id": "m5-emotet-e50c941c",
+  "sample_sha256": "e50c941c576a54fb30415ca63016572e9104d7be02cf3a1f220e72e6aec6a1ff",
+  "ground_truth": "MALICIOUS",
+  "preregistration": "docs/malware-eval-e50c941c-preregistration.md",
+  "note": "Machine-readable copy of the pre-registration, Section 3 (P1-P8) and Section 4. Fixed before any scan; never edited after.",
+  "require_complete": true,
+  "max_wall_ms": 30000,
+  "objective": {
+    "all_of": ["office:OFFICE_MACRO_AUTOEXEC:MEDIUM"],
+    "any_of": ["office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM", "vba-chains:ENGINE_VBA_AUTOEXEC_REACHES_CAPABILITY:HIGH"]
+  },
+  "engines": {
+    "reference": {
+      "verdict": "MALICIOUS",
+      "fallback_verdict": "SUSPICIOUS",
+      "rules": [
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "office:OFFICE_MACRO_SUSPICIOUS_KEYWORDS:LOW",
+        "office:OFFICE_MACRO_OBFUSCATION:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC_EXECUTION:HIGH",
+        "yara-x:OLE_Office_VBA_Macros:MEDIUM"
+      ],
+      "not_applicable": ["pdf", "custom"]
+    },
+    "unified": {
+      "verdict": "MALICIOUS",
+      "fallback_verdict": "SUSPICIOUS",
+      "rules": [
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "office:OFFICE_MACRO_SUSPICIOUS_KEYWORDS:LOW",
+        "office:OFFICE_MACRO_OBFUSCATION:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC_EXECUTION:HIGH",
+        "yara-x:OLE_Office_VBA_Macros:MEDIUM",
+        "vba-chains:ENGINE_CORRELATION:INFO"
+      ],
+      "alternatives": [
+        ["vba-chains:ENGINE_VBA_CALL_PATH_UNDETERMINED:INFO", "vba-chains:ENGINE_VBA_AUTOEXEC_REACHES_CAPABILITY:HIGH"]
+      ],
+      "not_applicable": ["pdf", "custom", "ooxml-links", "word-fields"]
+    }
+  }
+}

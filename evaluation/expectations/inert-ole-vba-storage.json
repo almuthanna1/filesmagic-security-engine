@@ -1,0 +1,14 @@
+{
+  "sample_id": "inert-ole-vba-storage",
+  "sample_sha256": "b4c5685d54402cb880a4c7f72b2988cac446915f07d4b4d6157401d6279cfb0b",
+  "ground_truth": "SECURITY_TEST",
+  "note": "Inert legacy OLE .doc with an empty VBA storage and no code (single_sample.inert_fixtures): the Emotet sample's OLE and VBA path.",
+  "require_complete": true,
+  "max_wall_ms": 30000,
+  "engines": {
+    "reference": {"verdict": "SUSPICIOUS", "rules": ["yara-x:OLE_Office_VBA_Macros:MEDIUM", "office:OFFICE_VBA_UNPARSED:LOW"],
+                  "not_applicable": ["pdf", "custom"]},
+    "unified": {"verdict": "SUSPICIOUS", "rules": ["yara-x:OLE_Office_VBA_Macros:MEDIUM", "office:OFFICE_VBA_UNPARSED:LOW"],
+                "not_applicable": ["pdf", "custom", "pdf-chains", "vba-chains", "ooxml-links", "word-fields"]}
+  }
+}

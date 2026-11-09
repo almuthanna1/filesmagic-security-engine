@@ -1,0 +1,12 @@
+{
+  "sample_id": "inert-benign-docx",
+  "sample_sha256": "996c1deeec6d64f42d43ddfa2c958d9a9ac6e5124a4ebf1f29ddbb54789e9f42",
+  "ground_truth": "BENIGN",
+  "note": "evaluation/benign_corpus/files/docx-01-word-plain.docx, unchanged.",
+  "require_complete": true,
+  "max_wall_ms": 30000,
+  "engines": {
+    "reference": {"verdict": "SAFE", "rules": [], "not_applicable": ["pdf"]},
+    "unified": {"verdict": "SAFE", "rules": [], "not_applicable": ["pdf", "pdf-chains", "vba-chains"]}
+  }
+}

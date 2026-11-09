@@ -1,0 +1,12 @@
+{
+  "sample_id": "inert-truncated-docx",
+  "sample_sha256": "03d51cfdbaf4dbcf40da9d05e2cf2039933bad2bc6f7a2905d87284a09bc781f",
+  "ground_truth": "SECURITY_TEST",
+  "note": "The first half of docx-01-word-plain.docx: must fail closed (UNABLE_TO_SCAN) in both engines.",
+  "require_complete": false,
+  "max_wall_ms": 30000,
+  "engines": {
+    "reference": {"verdict": "UNABLE_TO_SCAN", "rules": [], "not_applicable": ["pdf"]},
+    "unified": {"verdict": "UNABLE_TO_SCAN", "rules": [], "not_applicable": ["pdf", "pdf-chains"]}
+  }
+}
