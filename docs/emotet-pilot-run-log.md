@@ -164,7 +164,8 @@ container format will be recorded from the scanners' output, not assumed.
 | 2026-11-10 16:19:00Z | disc verified in the guest (whole disc = ISO); archive extracted **directly from the disc** into the `noexec` tmpfs (never copied to the VM disk); disc unmounted | VM `noexec` tmpfs | document **`e50c941c…a6a1ff`, 160,779 B: match** | assistant |
 | 2026-11-10 16:19:18–16:19:27Z | static scan, 5 trials × 2 engines (**both MALICIOUS**, PASS) | VM | sample unchanged after the scan | assistant |
 | 2026-11-10 16:20:46Z | export sanitized metadata (`copyfrom`); ACPI power off; `restorecurrent` "Pre-sample baseline" (session disk discarded; tmpfs gone with power-off) | VM → `docs/evidence/single-sample-emotet-e50c941c-47fb891/` | export hashes verified | assistant |
-| | delete host archive, ISO, staging copy and metadata JSON | `C:\fm-samples\` | — | **researcher** (assistant's sandbox refuses deletion there) |
+| 2026-11-10 | delete host archive, ISO (+ `.sha256`), staging copy and metadata JSON | `C:\fm-samples\` | — | **researcher** (assistant's sandbox refuses deletion there) |
+| 2026-11-10 | **verify cleanup**: `C:\fm-samples\` holds only the benign 7-Zip tarball; no file named `*e50c941c*`/`fm-sample*` and no file of the archive's (87,183 B) or document's (160,779 B) size in every location the archive or its exports touched (`C:\fm-samples`, the session scratchpad, `C:\tmp\fm-aes-test-iso`, `C:\tmp\fm-emotet-export`, `C:\tmp` to depth 2, Downloads, the VM folder, the research worktree outside `docs/evidence`); the document was never present on the host (only inside the VM tmpfs, gone at power-off and discarded with the baseline restore). The VM's media registry still lists the deleted ISO path (inaccessible; not attached to the drive or any snapshot). **Custody closed.** | host | — | assistant |
 
 ## 4a. Result (2026-11-10)
 
