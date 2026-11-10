@@ -64,6 +64,24 @@ sudo mount -t tmpfs -o noexec,nosuid,nodev,mode=0700,size=64m tmpfs ~/fm-eval/sa
 sudo umount ~/fm-eval/samples/malicious
 ```
 
+### 2b. AES extractor (2026-11-09, assistant-verified on the host)
+
+| Item | Result |
+|---|---|
+| File | `C:\fm-samples\7z2606-linux-x64.tar.xz`, 1,575,552 bytes, 7-Zip **26.06** (2026-11-06), downloaded by the researcher |
+| SHA-256 | `2b539cf067b2ad48e1baa5093dbaa8818b73542d1222a0ffde9dc5f2922ea62e` |
+| Source | **Matches the official release byte for byte**: 7-zip.org's download page links its releases to `github.com/ip7z/7zip`; release `26.06` (published 2026-11-07T11:45:33Z by `ip7z`) lists this asset at the same size with digest `sha256:2b539cf0…a62e`. The file's Zone.Identifier records `HostUrl=https://chatgpt.com/` (the channel it came through), so provenance rests on the hash match, not on the download path. |
+| Contents | 7zz, 7zzs, readme, History, License, MANUAL/; no absolute or `..` paths, no links |
+| **Binary to use: `7zzs`** (static) | `0b58a64e71ebdf53751cd954cad1cc552c6a11ef51336bee6acafbdc54c28c1f`, 3,759,224 bytes; ELF64 x86-64 EXEC, **no PT_INTERP, no PT_DYNAMIC** (statically linked, so it does not depend on the VM's libraries). `7zz` (`f94066e9…83b5`) is the dynamically linked build and is not used. |
+| Benign AES test archive | `fm-aes-test.zip`, built by [`evaluation/vm/aes_test_zip.py`](../evaluation/vm/aes_test_zip.py) (independent of 7-Zip; password `infected`), **byte-identical on rebuild**: SHA-256 `732390512af7908b57c080c6c6e2b52e741d7b2aeb1b6a584a15e4d4b4a17697`, 531 bytes. Entries: `aes-test/ae1-stored.txt` (WinZip AE-1, AES-256, stored) `a69a6d76…088d`; `aes-test/ae2-deflate.txt` (AE-2, AES-256, deflate) `c26c0988…8332`. Plain text only. |
+| Host decode check (same 7-Zip 26.06 release, Windows build) | lists both entries as `AES-256 Store` / `AES-256 Deflate`; extraction exit 0 and **both entry hashes match**; wrong password → exit 2. The archive is a valid WinZip-AES file. |
+| **In-VM check with `7zzs`** | **pending** — the host cannot run Linux binaries (no WSL/Docker). Done as the first step of the session, before the sample archive is touched (§5). |
+
+**Host note.** `C:\fm-samples\` also holds a full Windows 7-Zip installation (`7z.exe`, `7z.dll`,
+`7zFM.exe`, `Uninstall.exe`, …), from the hash-verified official `7z2606-x64.exe`. It was used here
+only to decode the benign test archive. It must **never** be used on the sample archive (the sample
+is never decrypted on the host), and it should be uninstalled before the archive is downloaded.
+
 ## 3. Independent label basis (metadata only; no sample handled)
 
 Automated lookups are blocked to non-interactive clients (VirtualTotal HTTP 429; MalwareBazaar
@@ -105,14 +123,13 @@ the file**):
 | 4 | Approval specifics (§1) recorded | **open — researcher** |
 | 5 | Label basis (§3) completed | **open — researcher** (MalwareBazaar + VirusTotal counts) |
 | 6 | `noexec` sample mount validated | **open — researcher** runs the one `sudo mount` (command in §2a) |
-| 7 | Offline **AES** extractor in the VM | **open** — see below |
+| 7 | Offline **AES** extractor in the VM | **verified on the host** (§2b): official 7-Zip 26.06, static `7zzs` pinned `0b58a64e…8c1f`; the in-VM decode of `fm-aes-test.zip` is the session's first step |
 
 **Extractor (7).** MalwareBazaar archives use **AES** (password "infected" by default; confirm on the
-sample's own page). The VM has only `unzip` (no AES) and no `7z`/`pyzipper`, so an AES-capable
-extractor must be brought in on the sample medium: a **hash-pinned static `7zz`** from the official
-7-Zip release (`7z<version>-linux-x64.tar.xz`, 7-zip.org), run from an exec-allowed dir
-(`~/fm-eval/bin/`), extracting into the `noexec` sample mount. The researcher downloads it on the
-host, records its SHA-256, and it is packaged on the sample ISO.
+sample's own page). The VM has only `unzip` (no AES), so the sample ISO carries the pinned `7zzs`
+and `fm-aes-test.zip`. In the VM: copy `7zzs` to `~/fm-eval/bin/` (exec-allowed), check its
+SHA-256, extract `fm-aes-test.zip` into the `noexec` mount and check both entry hashes (§2b), and
+**stop if any of these fail** before the sample archive is touched.
 
 Only when 4–7 hold does the session proceed: download the encrypted archive (host) → build the
 sample ISO (encrypted archive + manifest + `SHA256SUMS` + pinned `7zz`) → attach, mount, copy in →
