@@ -24,6 +24,13 @@ written approvals; they are **not** filled in by the assistant.
 
 Handling procedure §12 should carry the countersigned record; this table is a convenience copy.
 
+**Researcher's decision (2026-11-10).** The researcher states that **Dr. Haque has authorized the
+research**, performed on the personal laptop in the isolated `FilesMagic-securityLAB` VM, and
+directs that the unverified NIU IT security and IRB determinations **not be treated as blockers**.
+The supervisor's written approval details and any NIU IT / IRB determinations were **not supplied**
+and are not recorded as obtained; the table above stays blank until they are. The experiment
+proceeds on the researcher's decision under the supervisor's authorization.
+
 ## 2. Environment checks (2026-11-09, assistant-verified)
 
 | Item | Result | OK? |
