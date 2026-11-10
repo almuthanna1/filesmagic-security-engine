@@ -5,7 +5,7 @@ import CompareView from "@/components/CompareView";
 import FileDropzone from "@/components/FileDropzone";
 import LabNav from "@/components/LabNav";
 import ScanResultView from "@/components/ScanResultView";
-import { ApiError, ENGINE_LABELS, engineHealth, scanFile, type Engine, type HealthResult, type ScanResult } from "@/lib/api";
+import { ApiError, ENGINE_LABELS, scanFile, watchEngineHealth, type Engine, type HealthResult, type ScanResult } from "@/lib/api";
 import { addRecords, toRecord } from "@/lib/history";
 import styles from "./page.module.css";
 
@@ -23,6 +23,7 @@ export default function SecurityLabPage() {
   const [mode, setMode] = useState<Mode>("reference");
   const [health, setHealth] = useState<HealthResult | undefined>(undefined);
   const [waking, setWaking] = useState<string | null>(null);
+  const [healthRun, setHealthRun] = useState(0);
   const [scanning, setScanning] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -30,10 +31,17 @@ export default function SecurityLabPage() {
   const resultHeading = useRef<HTMLHeadingElement>(null);
   const unifiedAvailable = !!health && !("error" in health) && health.engines.includes("unified");
 
-  useEffect(() => {
-    engineHealth((attempt, attempts) => setWaking(`The engine may be waking up; retrying (attempt ${attempt} of ${attempts})…`))
-      .then(setHealth);
-  }, []);
+  // Re-checks in the background after a failure; a later success enables both engines in place.
+  useEffect(
+    () => watchEngineHealth(setHealth, (attempt, attempts) => setWaking(`The engine may be waking up; retrying (attempt ${attempt} of ${attempts})…`)),
+    [healthRun],
+  );
+
+  function retryConnection() {
+    setHealth(undefined);
+    setWaking(null);
+    setHealthRun(run => run + 1);
+  }
 
   // Move focus to the result so keyboard and screen-reader users land on it.
   useEffect(() => {
@@ -116,11 +124,14 @@ export default function SecurityLabPage() {
               </label>
             );
           })}
-          <p className={styles.status}>
+          <p className={styles.status} role="status">
             {health === undefined ? (waking ?? "Checking which engines this API accepts…") :
-              "error" in health ? `Could not read the API's engine list: ${health.error} Only the Original Engine is offered.` :
+              "error" in health ? `Could not read the API's engine list: ${health.error} Only the Original Engine is offered; checking again automatically. ` :
                 unifiedAvailable ? `This API accepts both engines (commit ${health.commit.slice(0, 12)}).` :
                   "This API runs the Original Engine only (the custom engine is research-only and not enabled here)."}
+            {health !== undefined && "error" in health && (
+              <button type="button" className={styles.linkButton} onClick={retryConnection}>Retry connection</button>
+            )}
           </p>
         </fieldset>
 

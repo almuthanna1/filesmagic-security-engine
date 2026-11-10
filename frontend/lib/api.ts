@@ -151,15 +151,38 @@ export type HealthResult = EngineHealth | { error: string };
 // fails at once.
 export const HEALTH_RETRY_DELAYS_MS = [2000, 4000, 8000, 16000];
 
-// Which engines this API accepts (GET /health). On failure, the reason; the page then offers the
-// original engine only.
+// The browser reads the engine list through the Lab's own route (app/api/engines), not the API's
+// /health directly: browser privacy/ad-block filters can block third-party requests to */health*
+// paths (observed on staging: every attempt failed in the browser while the API answered 200).
+export const ENGINES_ROUTE = "/api/engines";
+
+const wait = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
+
+// Server side of ENGINES_ROUTE: the API's GET /health, passed through. A dropped or timed-out
+// connection becomes 502, so the browser retries it like a cold start.
+export async function relayHealth(
+  base: string | undefined = API_URL,
+  get: (url: string) => Promise<Response> = url => fetch(url, { cache: "no-store", signal: AbortSignal.timeout(20_000) }),
+): Promise<Response> {
+  const headers = { "Cache-Control": "no-store", "Content-Type": "application/json" };
+  if (!base) return new Response(JSON.stringify({ detail: "NEXT_PUBLIC_SECURITY_ENGINE_URL is not set." }), { status: 500, headers });
+  try {
+    const upstream = await get(`${base.replace(/\/+$/, "")}/health`);
+    return new Response(await upstream.text(), { status: upstream.status, headers });
+  } catch {
+    return new Response(JSON.stringify({ detail: "The Security Engine API did not answer." }), { status: 502, headers });
+  }
+}
+
+// Which engines this API accepts (GET /health, via ENGINES_ROUTE). On failure, the reason; the page
+// then offers the original engine only.
 export async function engineHealth(
   onRetry?: (attempt: number, attempts: number) => void,
   get: (url: string) => Promise<Response> = url => fetch(url, { cache: "no-store" }),
-  sleep: (ms: number) => Promise<void> = ms => new Promise(resolve => setTimeout(resolve, ms)),
+  sleep: (ms: number) => Promise<void> = wait,
 ): Promise<HealthResult> {
   if (!API_URL) return { error: "NEXT_PUBLIC_SECURITY_ENGINE_URL is not set." };
-  const url = `${API_URL.replace(/\/+$/, "")}/health`;
+  const url = ENGINES_ROUTE;
   const attempts = HEALTH_RETRY_DELAYS_MS.length + 1;
   let last = "";
   for (let attempt = 1; attempt <= attempts; attempt++) {
@@ -187,6 +210,32 @@ export async function engineHealth(
     if (response.status < 500) return { error: `the API's /health answered ${last}.` };
   }
   return { error: `the API did not answer after ${attempts} attempts over about 30 s (last: ${last}).` };
+}
+
+// After a failed check, check again in the background so the page recovers by itself (a cold start
+// longer than the retry window, a transient outage) without a reload.
+export const RECHECK_DELAY_MS = 60_000;
+export const AUTO_RECHECKS = 10; // ponytail: about 15 minutes of re-checks, then only the Retry button
+
+// Reports every check through onResult; stops at the first success, after AUTO_RECHECKS failed
+// re-checks, or when the returned stop() is called (a manual retry starts a new watch).
+export function watchEngineHealth(
+  onResult: (health: HealthResult) => void,
+  onRetry?: (attempt: number, attempts: number) => void,
+  check: (onRetry?: (attempt: number, attempts: number) => void) => Promise<HealthResult> = engineHealth,
+  sleep: (ms: number) => Promise<void> = wait,
+): () => void {
+  let stopped = false;
+  void (async () => {
+    for (let recheck = 0; !stopped; recheck++) {
+      const health = await check(onRetry);
+      if (stopped) return;
+      onResult(health);
+      if (!("error" in health) || recheck >= AUTO_RECHECKS) return;
+      await sleep(RECHECK_DELAY_MS);
+    }
+  })();
+  return () => { stopped = true; };
 }
 
 // 1. Hash the file in the browser. 2. Ask the Lab (server-side, no login) for a
