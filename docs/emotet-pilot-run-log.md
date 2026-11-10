@@ -59,7 +59,8 @@ The **noexec sample mount** is a session-time one-command step the researcher ru
 login (it is a volatile tmpfs, not captured in the powered-off snapshot):
 
 ```
-sudo mount -t tmpfs -o noexec,nosuid,nodev,mode=0700,size=64m tmpfs ~/fm-eval/samples/malicious
+sudo mount -t tmpfs -o noexec,nosuid,nodev,mode=0700,uid=$(id -u),gid=$(id -g),size=64m tmpfs ~/fm-eval/samples/malicious
+# (uid/gid needed: without them the root-owned 0700 mount is not writable by the user)
 # validate: a file copied in cannot be executed (Permission denied); unmount with
 sudo umount ~/fm-eval/samples/malicious
 ```
@@ -75,7 +76,7 @@ sudo umount ~/fm-eval/samples/malicious
 | **Binary to use: `7zzs`** (static) | `0b58a64e71ebdf53751cd954cad1cc552c6a11ef51336bee6acafbdc54c28c1f`, 3,759,224 bytes; ELF64 x86-64 EXEC, **no PT_INTERP, no PT_DYNAMIC** (statically linked, so it does not depend on the VM's libraries). `7zz` (`f94066e9…83b5`) is the dynamically linked build and is not used. |
 | Benign AES test archive | `fm-aes-test.zip`, built by [`evaluation/vm/aes_test_zip.py`](../evaluation/vm/aes_test_zip.py) (independent of 7-Zip; password `infected`), **byte-identical on rebuild**: SHA-256 `732390512af7908b57c080c6c6e2b52e741d7b2aeb1b6a584a15e4d4b4a17697`, 531 bytes. Entries: `aes-test/ae1-stored.txt` (WinZip AE-1, AES-256, stored) `a69a6d76…088d`; `aes-test/ae2-deflate.txt` (AE-2, AES-256, deflate) `c26c0988…8332`. Plain text only. |
 | Host decode check (same 7-Zip 26.06 release, Windows build) | lists both entries as `AES-256 Store` / `AES-256 Deflate`; extraction exit 0 and **both entry hashes match**; wrong password → exit 2. The archive is a valid WinZip-AES file. |
-| **In-VM check with `7zzs`** | **pending** — the host cannot run Linux binaries (no WSL/Docker). Done as the first step of the session, before the sample archive is touched (§5). |
+| **In-VM check with `7zzs`** | **PASS (2026-11-10 04:27Z)**, from the baseline, reverted after ([evidence](evidence/aes-extractor-7zzs-2606/README.md)): `7zzs` hash matches the pin in the guest; both entries decrypted and **match their SHA-256**; wrong password → exit 2 (but **leaves 0-byte placeholders**, so the session trusts the exit code and the document hash, not file existence); a file in the `noexec` mount cannot execute; `guest_checks.sh` all PASS. |
 
 **Host note.** `C:\fm-samples\` also holds a full Windows 7-Zip installation (`7z.exe`, `7z.dll`,
 `7zFM.exe`, `Uninstall.exe`, …), from the hash-verified official `7z2606-x64.exe`. It was used here
@@ -122,14 +123,14 @@ the file**):
 | 3 | Containment applied + revalidated + baseline snapshot | **done** (§2a) |
 | 4 | Approval specifics (§1) recorded | **open — researcher** |
 | 5 | Label basis (§3) completed | **open — researcher** (MalwareBazaar + VirusTotal counts) |
-| 6 | `noexec` sample mount validated | **open — researcher** runs the one `sudo mount` (command in §2a) |
-| 7 | Offline **AES** extractor in the VM | **verified on the host** (§2b): official 7-Zip 26.06, static `7zzs` pinned `0b58a64e…8c1f`; the in-VM decode of `fm-aes-test.zip` is the session's first step |
+| 6 | `noexec` sample mount validated | **done** (2026-11-10, [evidence](evidence/aes-extractor-7zzs-2606/README.md)): options `noexec,nosuid,nodev`, exec refused; the researcher re-runs the one `sudo mount` (§2a) at the session's start |
+| 7 | Offline **AES** extractor in the VM | **done** (§2b): official 7-Zip 26.06, static `7zzs` pinned `0b58a64e…8c1f`, decrypts the benign AES-256 test archive in the VM |
 
 **Extractor (7).** MalwareBazaar archives use **AES** (password "infected" by default; confirm on the
 sample's own page). The VM has only `unzip` (no AES), so the sample ISO carries the pinned `7zzs`
-and `fm-aes-test.zip`. In the VM: copy `7zzs` to `~/fm-eval/bin/` (exec-allowed), check its
-SHA-256, extract `fm-aes-test.zip` into the `noexec` mount and check both entry hashes (§2b), and
-**stop if any of these fail** before the sample archive is touched.
+(the tested combination). In the VM: copy `7zzs` to `~/fm-eval/bin/` (exec-allowed) and check its
+SHA-256 — **stop if it differs**. The format and the mount were validated on 2026-11-10 (§2b), so
+the session does not repeat the test archive.
 
 Only when 4–7 hold does the session proceed: download the encrypted archive (host) → build the
 sample ISO (encrypted archive + manifest + `SHA256SUMS` + pinned `7zz`) → attach, mount, copy in →

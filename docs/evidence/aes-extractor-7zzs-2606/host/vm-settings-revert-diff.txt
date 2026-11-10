@@ -1,0 +1,7 @@
+# vm-before.txt (<=) vs vm-after-revert.txt (=>)
+=> VMStateChangeTime="2026-11-10T04:28:38.044000000"
+=> "SATA-0-0"="C:\\Users\\almut\\VirtualBox VMs\\FilesMagic-securityLAB\\Snapshots\\{c9f070ad-e2e7-4914-abbc-b8044696ba61}.vdi"
+=> "SATA-ImageUUID-0-0"="c9f070ad-e2e7-4914-abbc-b8044696ba61"
+<= VMStateChangeTime="2026-11-09T22:40:06.000000000"
+<= "SATA-0-0"="C:\\Users\\almut\\VirtualBox VMs\\FilesMagic-securityLAB\\Snapshots/{31d2bd03-54d0-4963-9e66-b84083669666}.vdi"
+<= "SATA-ImageUUID-0-0"="31d2bd03-54d0-4963-9e66-b84083669666"

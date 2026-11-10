@@ -1,0 +1,7 @@
+# vm-before.txt (<=) vs vm-attached.txt (=>)
+=> "IDE-0-0"="C:\\tmp\\fm-aes-test-iso\\fm-aes-test.iso"
+=> "IDE-ImageUUID-0-0"="37a2f040-7ab9-44a5-bbcf-04bc598e8bf3"
+=> "IDE-tempeject-0-0"="off"
+=> "IDE-nonrotational-0-0"="off"
+=> "IDE-discard-0-0"="off"
+<= "IDE-0-0"="emptydrive"

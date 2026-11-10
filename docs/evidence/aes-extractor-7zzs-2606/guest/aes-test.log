@@ -1,0 +1,118 @@
+2026-11-10T04:27:52Z
+almuthanna-shihab
+7.0.0-38-generic
+disc mounted at: /media/almuthanna-shihab/FM_AES_TEST
+
+== disc integrity
+7zzs: OK
+fm-aes-test.zip: OK
+PASS SHA256SUMS on the disc
+whole disc: a4e6b1c62eb818b050eb55d5caaf3f4b1567785dc8a2f4177c6712a85e7b0082  (host ISO a4e6b1c62eb818b050eb55d5caaf3f4b1567785dc8a2f4177c6712a85e7b0082)
+total 3682
+dr-xr-xr-x  2 almuthanna-shihab almuthanna-shihab     220 Nov  9 22:20 .
+drwxr-x---+ 3 root              root                 4096 Nov  9 22:25 ..
+-r--r--r--  1 almuthanna-shihab almuthanna-shihab 3759224 Nov  6 02:52 7zzs
+-r--r--r--  1 almuthanna-shihab almuthanna-shihab     531 Nov  9 22:20 fm-aes-test.zip
+-r--r--r--  1 almuthanna-shihab almuthanna-shihab     153 Nov  9 22:20 SHA256SUMS
+
+== noexec sample mount
+tmpfs  tmpfs  rw,nosuid,nodev,noexec,relatime,size=65536k,mode=700,uid=1000,gid=1000,inode64
+almuthanna-shihab:almuthanna-shihab 700 /home/almuthanna-shihab/fm-eval/samples/malicious
+PASS mount option noexec
+PASS mount option nosuid
+PASS mount option nodev
+PASS sample mount is tmpfs
+
+== install pinned 7zzs
+PASS 7zzs SHA-256
+
+7-Zip (z) 26.06 (x64) : Copyright (c) 1999-2026 Igor Pavlov : 2026-11-06
+ 64-bit locale=en_US.UTF-8 Threads:4 OPEN_MAX:4096, ASM
+Path = /media/almuthanna-shihab/FM_AES_TEST/fm-aes-test.zip
+Path = aes-test/ae1-stored.txt
+Encrypted = +
+Method = AES-256 Store
+Path = aes-test/ae2-deflate.txt
+Encrypted = +
+Method = AES-256 Deflate
+
+== wrong password must be rejected
+
+7-Zip (z) 26.06 (x64) : Copyright (c) 1999-2026 Igor Pavlov : 2026-11-06
+ 64-bit locale=en_US.UTF-8 Threads:4 OPEN_MAX:4096, ASM
+
+Scanning the drive for archives:
+1 file, 531 bytes (1 KiB)
+
+Extracting archive: /media/almuthanna-shihab/FM_AES_TEST/fm-aes-test.zip
+--
+Path = /media/almuthanna-shihab/FM_AES_TEST/fm-aes-test.zip
+Type = zip
+Physical Size = 531
+
+ERROR: Wrong password : aes-test/ae1-stored.txt
+ERROR: Wrong password : aes-test/ae2-deflate.txt
+
+Sub items Errors: 2
+
+Archives with Errors: 1
+
+Sub items Errors: 2
+PASS wrong password exit code
+left in aes-wrong:
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  /home/almuthanna-shihab/fm-eval/samples/malicious/aes-wrong/aes-test/ae2-deflate.txt
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  /home/almuthanna-shihab/fm-eval/samples/malicious/aes-wrong/aes-test/ae1-stored.txt
+
+== correct password
+
+7-Zip (z) 26.06 (x64) : Copyright (c) 1999-2026 Igor Pavlov : 2026-11-06
+ 64-bit locale=en_US.UTF-8 Threads:4 OPEN_MAX:4096, ASM
+
+Scanning the drive for archives:
+1 file, 531 bytes (1 KiB)
+
+Extracting archive: /media/almuthanna-shihab/FM_AES_TEST/fm-aes-test.zip
+--
+Path = /media/almuthanna-shihab/FM_AES_TEST/fm-aes-test.zip
+Type = zip
+Physical Size = 531
+
+Everything is Ok
+
+Files: 2
+Size:       1553
+Compressed: 531
+PASS extraction exit code
+aes-test/ae1-stored.txt: OK
+aes-test/ae2-deflate.txt: OK
+PASS both extracted files match
+drwxrwxr-x almuthanna-shihab 60 /home/almuthanna-shihab/fm-eval/samples/malicious/aes-ok
+drwxrwxr-x almuthanna-shihab 80 /home/almuthanna-shihab/fm-eval/samples/malicious/aes-ok/aes-test
+-rw-rw-r-- almuthanna-shihab 1480 /home/almuthanna-shihab/fm-eval/samples/malicious/aes-ok/aes-test/ae2-deflate.txt
+-rw-rw-r-- almuthanna-shihab 73 /home/almuthanna-shihab/fm-eval/samples/malicious/aes-ok/aes-test/ae1-stored.txt
+
+== a file in the sample mount cannot execute
+/bin/bash: line 35: /home/almuthanna-shihab/fm-eval/samples/malicious/exec-probe: Permission denied
+PASS exec from sample mount refused
+
+== isolation checks
+date_utc 2026-11-10T04:27:52Z  kernel 7.0.0-38-generic
+PASS  interfaces: lo (only lo expected)
+PASS  routes: IPv4 0, IPv6 0 non-local routes (0 expected)
+PASS  IPv4 unreachable: route lookup to 192.0.2.1 fails
+PASS  IPv6 unreachable: route lookup to 2001:db8::1 fails
+PASS  shared folders: 0 shared or network file systems mounted (0 expected)
+INFO  optical medium mounted: 1 (unmount it before scanning)
+PASS  interpreter: /opt/filesmagic/python/cpython-3.11.18-linux-x86_64-gnu/bin/python3.11 owned by root:root
+PASS  interpreter tree: SUMMARY 0 problem(s); 7773 files and directories, 1053 symlinks resolved
+PASS  venv interpreter: /opt/filesmagic/venv/bin/python -> /opt/filesmagic/python/cpython-3.11.18-linux-x86_64-gnu/bin/python3.11
+PASS  AppArmor profile file: /etc/apparmor.d/filesmagic-eval-python sha256 6a94078413be722c955cea9f63c8eefe9e3bd0c4f7530d381424fce81681aa20
+PASS  AppArmor confinement: evaluation interpreter runs as 'filesmagic-eval-python (enforce)'
+INFO  system python3 runs as 'unconfined' (unconfined expected; it is not used for scanning)
+PASS  userns restriction: kernel.apparmor_restrict_unprivileged_userns=1 (1: unchanged)
+RESULT all controls present
+guest_checks exit 0
+
+== result
+ALL CHECKS PASS
+2026-11-10T04:27:58Z
