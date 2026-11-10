@@ -8,6 +8,13 @@ Scope: a separate staging Security Engine (Render) and Security Lab (Vercel) for
 synthetic files only**. The live Security Lab, the live Render Security Engine, the FilesMagic
 website and the FilesMagic conversion backend are not touched. Nothing is merged into `main`.
 
+> **Update 2026-11-10: admin login removed.** The Lab's admin password gate was removed in
+> `95a2a58` (2026-10-28) so staging can be tested without a password. `LAB_ADMIN_PASSWORD_HASH`
+> and `LAB_SESSION_SECRET` are no longer read by any code. They were deleted from the Vercel staging
+> project on 2026-11-10, and the steps that created them are removed below. Scans still need a
+> short-lived, single-use, file-bound token signed with `LAB_SCAN_TOKEN_PRIVATE_KEY`. The login
+> acceptance tests A2-A4 are kept as retired rows for the record.
+
 ## 1. Target architecture
 
 ```
@@ -15,7 +22,7 @@ Admin browser (isolated VM)
    │ HTTPS
    ▼
 Vercel project  filesmagic-security-lab-staging   (NEW, CLI-deployed, not Git-connected)
-   │ /api/session, /api/scan-token  (LAB_* secrets, Production env of the staging project)
+   │ /api/scan-token  (LAB_SCAN_TOKEN_PRIVATE_KEY, Production env of the staging project)
    │ browser uploads directly to ▼
 Render workspace  "FilesMagic Research"  (NEW Hobby workspace, own private network)
    └─ web service  filesmagic-security-engine-staging  (Docker, region Virginia, branch
@@ -141,8 +148,6 @@ npx vercel@latest link --project filesmagic-security-lab-staging
 #    Secret values are typed/pasted at the prompt from your password manager; never on the
 #    command line (shell history) or in files in the repository.
 npx vercel@latest env add NEXT_PUBLIC_SECURITY_ENGINE_URL production   # https://filesmagic-security-engine-staging.onrender.com
-npx vercel@latest env add LAB_ADMIN_PASSWORD_HASH production --sensitive
-npx vercel@latest env add LAB_SESSION_SECRET production --sensitive
 npx vercel@latest env add LAB_SCAN_TOKEN_PRIVATE_KEY production --sensitive
 
 # 4. Deploy (remote build on Vercel; NEXT_PUBLIC_ value is inlined at build time)
@@ -165,12 +170,10 @@ Checks after deploying:
 
 ## 4. Authentication configuration
 
-Staging gets its **own** keys and password; nothing is shared with any other environment.
+Staging gets its **own** keys; nothing is shared with any other environment.
 
 | Variable | Where | What |
 |----------|-------|------|
-| `LAB_ADMIN_PASSWORD_HASH` | Vercel staging (sensitive) | `scrypt$<salt>$<hash>` of a long random password (≥ 20 characters, from a password manager) |
-| `LAB_SESSION_SECRET` | Vercel staging (sensitive) | 32 random bytes, base64url |
 | `LAB_SCAN_TOKEN_PRIVATE_KEY` | Vercel staging (sensitive) | Ed25519 private key, PKCS#8 DER, base64 |
 | `SECURITY_ENGINE_TOKEN_PUBLIC_KEY` | Render staging | matching Ed25519 public key, SPKI DER, base64 (not secret, but must match) |
 | `SECURITY_ENGINE_CORS_ORIGINS` | Render staging | `https://filesmagic-security-lab-staging.vercel.app` |
@@ -184,12 +187,7 @@ password manager, then into the dashboards; clear the terminal afterwards.
 ```bash
 node -e "const c=require('crypto');const k=c.generateKeyPairSync('ed25519');
 console.log('LAB_SCAN_TOKEN_PRIVATE_KEY='+k.privateKey.export({format:'der',type:'pkcs8'}).toString('base64'));
-console.log('SECURITY_ENGINE_TOKEN_PUBLIC_KEY='+k.publicKey.export({format:'der',type:'spki'}).toString('base64'));
-console.log('LAB_SESSION_SECRET='+c.randomBytes(32).toString('base64url'))"
-# Password hash: the password is read from a hidden prompt, not the command line
-node -e "const c=require('crypto'),r=require('readline').createInterface({input:process.stdin,output:process.stdout});
-r.stdoutMuted=true;r._writeToOutput=()=>{};process.stdout.write('Password: ');r.question('',p=>{const s=c.randomBytes(16);
-console.log('\nLAB_ADMIN_PASSWORD_HASH=scrypt$'+s.toString('base64')+'$'+c.scryptSync(p,s,32).toString('base64'));r.close()})"
+console.log('SECURITY_ENGINE_TOKEN_PUBLIC_KEY='+k.publicKey.export({format:'der',type:'spki'}).toString('base64'))"
 ```
 
 ### 4.2 Verifying the key pair without revealing the private key
@@ -205,13 +203,12 @@ const derived=c.createPublicKey(c.createPrivateKey({key:Buffer.from(priv.trim(),
 console.log('derived from private:',fp(derived));console.log('public key value:   ',fp(Buffer.from(pub.trim(),'base64')));r.close()})})"
 ```
 
-End-to-end confirmation happens in acceptance test A3 (a real login + scan); a token signed by
-any other key is rejected (A5).
+End-to-end confirmation happens in acceptance test A6 (a real scan through the Lab); a token
+signed by any other key is rejected (A5).
 
 ### 4.3 Handling rules
 
-- Private key, session secret and password: only in the password manager and Vercel staging
-  (sensitive variables). Never in the repository, chat, screenshots, logs or CI.
+- Private key: only in the password manager and Vercel staging (sensitive variable). Never in the repository, chat, screenshots, logs or CI.
 - Claude does not need to see any of these values; the plan works if you enter them yourself.
 - Rotation: generate a new pair, update both sides, redeploy both; old tokens die within 120 s.
 
@@ -238,9 +235,9 @@ inert). `ENGINE` = `https://filesmagic-security-engine-staging.onrender.com`,
 | # | Test | Steps | Expected |
 |---|------|-------|----------|
 | A1 | Health | Open `ENGINE/health` | `auth_configured: true`, `scanners_ready: 3` |
-| A2 | Login required | Open `LAB/evaluation`, try a scan | Login form; no record created |
-| A3 | Admin login | Wrong password, then correct one | "Incorrect password"; then login succeeds; cookie is HttpOnly, Secure, SameSite=Strict (DevTools → Application) |
-| A4 | Login throttling | 6 wrong passwords | 6th → "Too many failed attempts" (per function instance) |
+| A2 | Login required | Retired | Admin login removed in `95a2a58`; not applicable |
+| A3 | Admin login | Retired | Admin login removed in `95a2a58`; not applicable |
+| A4 | Login throttling | Retired | Admin login removed in `95a2a58`; the token route keeps a per-instance throttle (12 tokens / 15 min per client) |
 | A5 | Unauthorized uploads | DevTools console on `LAB`: `fetch(ENGINE+'/scan',{method:'POST',body:'x'})` and with `Authorization:'Bearer abc.def'` | 401 both; Render log `scan rejected` without the payload |
 | A6 | Benign DOCX | Scan on `/` and `/evaluation` (expected Benign) | SAFE, `complete: true`, duration shown, request ID shown, outcome "Correct / SAFE" |
 | A7 | Benign PDF | Same | SAFE |
@@ -254,13 +251,13 @@ inert). `ENGINE` = `https://filesmagic-security-engine-staging.onrender.com`,
 | A15 | Token expiry | Snippet part 3 (waits 150 s) | 401 "expired or not valid" |
 | A16 | Size limit | Scan an 11 MB zero-filled file | Blocked in the browser with the 10 MB message; recorded as inconclusive |
 | A17 | Exports | On `/evaluation`: Export CSV and JSON; also scan a benign file renamed `=cmd.txt` first | Files contain only metadata (no file bytes); CSV cell for `=cmd.txt` starts with `'=`; columns include `request_id`, `outcome`, `isolation` |
-| A18 | Storage | DevTools → Application | Only `fm-evaluation-records-v1` (plus the test-files key); no file contents; session cookie not readable from JS |
+| A18 | Storage | DevTools → Application | Only `fm-evaluation-records-v1` (plus the test-files key); no file contents |
 | A19 | Live system untouched | Open the live Lab and live engine `/health` | Unchanged (live engine still answers without `auth_configured`) |
 
 Worker crash handling (a real segfault) cannot be triggered on staging without test-only code;
 it is covered by CI (`test_native_crash_fails_closed`, passed on Linux).
 
-Token test snippet (paste in DevTools console on `LAB` while logged in):
+Token test snippet (paste in DevTools console on `LAB`):
 
 ```js
 const ENGINE = "https://filesmagic-security-engine-staging.onrender.com";
@@ -275,14 +272,14 @@ const t3 = await token(a); await new Promise(r => setTimeout(r, 150000)); consol
 
 ## 7. Deployment sequence (each numbered step needs approval)
 
-1. You: generate keys and password hash (§4.1), store them, verify the pair (§4.2).
+1. You: generate the key pair (§4.1), store it, verify the pair (§4.2).
 2. You (or Claude via your logged-in browser, if you prefer): create the Render Hobby workspace
    and connect GitHub to this repository only.
 3. Create the Render staging service (§2.2) with the §2.3 variables, `REQUIRE_ISOLATION` unset;
    manual deploy of `90453e4`; check A1.
 4. `npx vercel login` (you), then create and deploy the Vercel staging project (§3.2); check the
    Git connection is off and the live project is unchanged.
-5. Run A1-A9, A11-A19; then the strict-mode test A10 and preserve its evidence.
+5. Run A1, A5-A9, A11-A19 (A2-A4 retired); then the strict-mode test A10 and preserve its evidence.
 6. Record all results (exports + Render log excerpts) in the readiness report.
 
 ## 8. Rollback and teardown
@@ -304,7 +301,7 @@ Staging shares nothing with the live systems, so rollback never touches them.
 | Linking the CLI to the **live** Vercel project by mistake | Use `--project filesmagic-security-lab-staging`; check the project name before deploying; verify live project deployments afterwards |
 | Vercel CLI connects the Git repo | Decline the prompt; verify Settings → Git; `vercel git disconnect` |
 | Secrets in shell history or files | Hidden prompts (§4.1-4.2); `vercel env add` prompts; no `.env` files in the repo |
-| Staging URLs are public | App-level admin login on the Lab; engine requires signed tokens; benign files only |
+| Staging URLs are public | No login since `95a2a58`: anyone with the URL can request a scan token. The engine accepts only short-lived, single-use, file-bound signed tokens; the token route's throttle is per instance and best-effort, not a security boundary; benign files only |
 | 512 MB memory pressure | `WORKER_MEMORY_MB=256`, one scan at a time, watch metrics, Standard if needed |
 | Render/Vercel account compromise affects both live and staging | Separate Render workspace limits the network blast radius only; use strong account security (2FA) |
 | Hobby limits (one project, two environments per Render Hobby workspace; Vercel Hobby non-commercial) | Staging needs one service; confirm terms fit academic use |
