@@ -100,20 +100,65 @@ anti-bot). Independent corroboration already on file:
 - Documented E2 (epoch 2) behaviour: Document_Open VBA → WMI process creation → PowerShell downloader
   (family background, not a per-file vendor verdict).
 
-To meet the plan's label basis (family attribution **and** ≥5 vendor detections or a published
-analysis), the researcher supplies, from authenticated access (numbers/labels only, **never upload
-the file**):
+### 3a. MalwareBazaar record (authenticated API `get_info`, 2026-11-10 04:43Z)
 
-| Source | Detections / total | Family labels | Date read |
+Read from `C:\fm-samples\e50c941c-info.json` (17,974 bytes, SHA-256 `0a7761c2…1b15`; host only, not
+committed: it carries IOCs). Only labels and verdicts are reproduced; URLs, hosts and the malware
+configuration are withheld.
+
+| Field | MalwareBazaar | Pre-registration (§1) | Match |
 |---|---|---|---|
-| MalwareBazaar vendor intelligence | | | |
-| VirusTotal hash lookup | | | |
+| SHA-256 | `e50c941c…a6a1ff` | same | **yes** |
+| SHA-1 / MD5 | `59721461…e6b9` / `0992c8eb…d664` | same (Triage) | **yes** |
+| Size | **160,779 bytes** | "about 157 KB" (exact count unknown) | yes (160,779 B = 157.0 KiB); now exact |
+| Format | MIME `application/msword`; OLE analysis (`oleid`, `olevba`) present; tag `doc`; DocGuard "Legacy Word File with Macro"; submitted name ends `._doc` | legacy OLE2 `.doc`, macro | **yes** |
+| `file_type` label | **`docx`** | `.doc` | **discrepancy (naming only)**, see below |
+| Family | signature **`Heodo`** (= Emotet); tags `emotet`, `epoch2`, `Heodo`, `doc`; comment "Emotet epoch2 doc" | Emotet (Heodo), E2 | **yes** |
+| First seen | 2021-01-13 07:00:42 UTC, reporter `Cryptolaemus1` | Triage first analysed 2021-01-13 06:57 UTC | yes |
+| Archive password | `archive_pw` null → the API's documented default `infected` | — | — |
+
+**Vendor intelligence (MalwareBazaar):**
+
+| Vendor | Verdict / label |
+|---|---|
+| ReversingLabs | MALICIOUS, `Document-Word.Trojan.Heuristic`, **16 / 44 scanners** (36.36 %) |
+| ANY.RUN | Malicious activity; tags macros, macros-on-open, emotet-doc, emotet |
+| CERT-PL MWDB | emotet |
+| YOROI YOMI | Emotet, score 1.00 |
+| InQuest | MALICIOUS |
+| DocGuard | Malicious, alert level 9.0 |
+| vxCube | malware, maliciousness 100 |
+| Triage | score 10, tag macro, 14 behavioural signatures, no family field |
+| Spamhaus HBL | suspicious |
+| ClamAV (MalwareBazaar `intelligence`) | 3 signatures, including `Doc.Dropper.EmotetRed1220-9816007-0` |
+
+### 3b. VirusTotal
+
+**Unavailable**: not read (HTTP 429 to an automated client; no researcher lookup supplied). Recorded
+as unavailable, not estimated.
+
+### 3c. Label decision (pre-registered rule, plan §3)
+
+`MALICIOUS` requires a MalwareBazaar listing with a family attribution **and** ≥5 vendor detections
+or a published analysis. **Met**: family `Heodo`/Emotet; ≥5 independent vendor detections (ReversingLabs
+16 scanners, ANY.RUN, CERT-PL, YOROI, InQuest, DocGuard, vxCube, ClamAV); and four public Triage
+analyses (score 10). The label `MALICIOUS` and the pre-registered predictions are **unchanged**.
+Disagreements: Spamhaus HBL says only "suspicious"; Triage and ANY.RUN name no family; ReversingLabs'
+match rate is 36 %.
+
+**Discrepancy: `.docx` name.** MalwareBazaar's `file_type` is `docx`, so the archive entry is named
+`<sha256>.docx`, while every content indicator says legacy OLE2 Word (MIME, OLE analysis, DocGuard,
+the `doc` tag, the `._doc` submission name). The scan does not depend on the name: the worker
+receives only the bytes (`worker.run(data, cmd)`), and the file is renamed `m5-emotet-e50c941c.bin`
+on extraction (§2a run command). Identity rests on the SHA-256 checked before scanning. The actual
+container format will be recorded from the scanners' output, not assumed.
 
 ## 4. Custody log (one row per movement; filled during the session)
 
 | Time (UTC) | Action | Location | SHA-256 (encrypted archive / document) | By |
 |---|---|---|---|---|
-| | download encrypted ZIP | `C:\fm-samples\` | | |
+| 2026-11-10 04:43:06 | download encrypted ZIP (MalwareBazaar API `get_file`, researcher's Auth-Key, PowerShell `Invoke-WebRequest`); never opened or decrypted on Windows | `C:\fm-samples\e50c941c.zip` (not synced, BitLocker) | archive `f6c9a7cc614166d5d12798b00d9636939faf566ec66fbb656800de3720c90fbb`, 87,183 B | researcher |
+| 2026-11-10 | verify archive without decrypting: 1 entry `e50c941c…a6a1ff.docx`, AES-128 (AE-2, deflate), 160,779 B uncompressed, CRC `67269544`; Defender on, no detection | host | archive hash re-computed: match | assistant |
 | | build sample ISO | `C:\fm-samples\` | | |
 | | attach ISO, copy archive into VM | VM tmpfs | | |
 | | extract + verify document hash | VM `noexec` mount | `e50c941c…a6a1ff` | |
@@ -129,7 +174,7 @@ the file**):
 | 2 | Guest Control credential recreated | **done** |
 | 3 | Containment applied + revalidated + baseline snapshot | **done** (§2a) |
 | 4 | Approval specifics (§1) recorded | **open — researcher** |
-| 5 | Label basis (§3) completed | **open — researcher** (MalwareBazaar + VirusTotal counts) |
+| 5 | Label basis (§3) completed | **done** (§3c): MalwareBazaar family + ≥5 vendors + Triage; VirusTotal unavailable |
 | 6 | `noexec` sample mount validated | **done** (2026-11-10, [evidence](evidence/aes-extractor-7zzs-2606/README.md)): options `noexec,nosuid,nodev`, exec refused; the researcher re-runs the one `sudo mount` (§2a) at the session's start |
 | 7 | Offline **AES** extractor in the VM | **done** (§2b): official 7-Zip 26.06, static `7zzs` pinned `0b58a64e…8c1f`, decrypts the benign AES-256 test archive in the VM |
 
