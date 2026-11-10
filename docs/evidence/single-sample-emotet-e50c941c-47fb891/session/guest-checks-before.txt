@@ -1,0 +1,15 @@
+date_utc 2026-11-10T16:18:57Z  kernel 7.0.0-38-generic
+PASS  interfaces: lo (only lo expected)
+PASS  routes: IPv4 0, IPv6 0 non-local routes (0 expected)
+PASS  IPv4 unreachable: route lookup to 192.0.2.1 fails
+PASS  IPv6 unreachable: route lookup to 2001:db8::1 fails
+PASS  shared folders: 0 shared or network file systems mounted (0 expected)
+INFO  optical medium mounted: 1 (unmount it before scanning)
+PASS  interpreter: /opt/filesmagic/python/cpython-3.11.18-linux-x86_64-gnu/bin/python3.11 owned by root:root
+PASS  interpreter tree: SUMMARY 0 problem(s); 7773 files and directories, 1053 symlinks resolved
+PASS  venv interpreter: /opt/filesmagic/venv/bin/python -> /opt/filesmagic/python/cpython-3.11.18-linux-x86_64-gnu/bin/python3.11
+PASS  AppArmor profile file: /etc/apparmor.d/filesmagic-eval-python sha256 6a94078413be722c955cea9f63c8eefe9e3bd0c4f7530d381424fce81681aa20
+PASS  AppArmor confinement: evaluation interpreter runs as 'filesmagic-eval-python (enforce)'
+INFO  system python3 runs as 'unconfined' (unconfined expected; it is not used for scanning)
+PASS  userns restriction: kernel.apparmor_restrict_unprivileged_userns=1 (1: unchanged)
+RESULT all controls present

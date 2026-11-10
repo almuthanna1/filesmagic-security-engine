@@ -159,12 +159,19 @@ container format will be recorded from the scanners' output, not assumed.
 |---|---|---|---|---|
 | 2026-11-10 04:43:06 | download encrypted ZIP (MalwareBazaar API `get_file`, researcher's Auth-Key, PowerShell `Invoke-WebRequest`); never opened or decrypted on Windows | `C:\fm-samples\e50c941c.zip` (not synced, BitLocker) | archive `f6c9a7cc614166d5d12798b00d9636939faf566ec66fbb656800de3720c90fbb`, 87,183 B | researcher |
 | 2026-11-10 | verify archive without decrypting: 1 entry `e50c941c…a6a1ff.docx`, AES-128 (AE-2, deflate), 160,779 B uncompressed, CRC `67269544`; Defender on, no detection | host | archive hash re-computed: match | assistant |
-| | build sample ISO | `C:\fm-samples\` | | |
-| | attach ISO, copy archive into VM | VM tmpfs | | |
-| | extract + verify document hash | VM `noexec` mount | `e50c941c…a6a1ff` | |
-| | scan (5 trials × 2 engines) | VM | — | |
-| | power off + revert "Pre-sample baseline" | VM | — | |
-| | delete host archive + ISO | `C:\fm-samples\` | — | |
+| 2026-11-10 ~04:48 | build sample ISO (encrypted archive + pinned `7zzs` + AES-128 benign test + `SHA256SUMS`; builder refuses any other file and any unencrypted entry) | `C:\fm-samples\fm-sample-e50c941c.iso` | ISO `1c6036699666838955af8476f69cd89b36fddbf2ff3d329d6126de1a5ce8ac9b`; archive inside `f6c9a7cc…0fbb` | assistant |
+| 2026-11-10 | attach ISO (VM off at baseline; only `IDE-0-0` changed); boot | VM | — | assistant |
+| 2026-11-10 16:19:00Z | disc verified in the guest (whole disc = ISO); archive extracted **directly from the disc** into the `noexec` tmpfs (never copied to the VM disk); disc unmounted | VM `noexec` tmpfs | document **`e50c941c…a6a1ff`, 160,779 B: match** | assistant |
+| 2026-11-10 16:19:18–16:19:27Z | static scan, 5 trials × 2 engines (**both MALICIOUS**, PASS) | VM | sample unchanged after the scan | assistant |
+| 2026-11-10 16:20:46Z | export sanitized metadata (`copyfrom`); ACPI power off; `restorecurrent` "Pre-sample baseline" (session disk discarded; tmpfs gone with power-off) | VM → `docs/evidence/single-sample-emotet-e50c941c-47fb891/` | export hashes verified | assistant |
+| | delete host archive, ISO, staging copy and metadata JSON | `C:\fm-samples\` | — | **researcher** (assistant's sandbox refuses deletion there) |
+
+## 4a. Result (2026-11-10)
+
+**Both engines: MALICIOUS** (5/5 trials each, deterministic, every applicable scanner completed,
+strict isolation complete, 3 routine AppArmor denials, none on the sample). Pre-registered outcome
+**PASS**; 28/30 predictions held — `OFFICE_MACRO_OBFUSCATION` (P1) was predicted but absent in
+both engines. Details: [evidence README](evidence/single-sample-emotet-e50c941c-47fb891/README.md).
 
 ## 5. Status of the prerequisites
 

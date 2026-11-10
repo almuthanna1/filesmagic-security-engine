@@ -1,0 +1,62 @@
+2026-11-10T16:19:17Z
+== static scan: 5 trials x reference + unified, strict isolation, confined interpreter
+reference MALICIOUS
+unified   MALICIOUS
+completed · PASS: /home/almuthanna-shihab/fm-eval/results/single-m5-emotet-e50c941c-47fb891/report.html
+single_sample exit 0
+2026-11-10T16:19:27Z
+== after the scan
+PASS sample unchanged
+m5-emotet-e50c941c.bin
+new process names since phase A:
+kworker/0:1-events
+kworker/1:0-events
+kworker/2:1-events
+kworker/3:4-mm_percpu_wq
+kworker/u16:1-netns
+kworker/u17:4-flush-8:0
+kworker/u18:1-events_power_efficient
+kworker/u18:2-flush-8:0
+kworker/u19:1-events_unbound
+kworker/u19:4-flush-8:0
+kworker/u20:0-events_power_efficient
+4419 bash
+FAIL office/wine process present
+AppArmor denials since scan start: 0
+guest_checks after: exit 0
+PASS  interfaces: lo (only lo expected)
+PASS  routes: IPv4 0, IPv6 0 non-local routes (0 expected)
+PASS  IPv4 unreachable: route lookup to 192.0.2.1 fails
+PASS  IPv6 unreachable: route lookup to 2001:db8::1 fails
+PASS  shared folders: 0 shared or network file systems mounted (0 expected)
+PASS  interpreter: /opt/filesmagic/python/cpython-3.11.18-linux-x86_64-gnu/bin/python3.11 owned by root:root
+PASS  interpreter tree: SUMMARY 0 problem(s); 7773 files and directories, 1053 symlinks resolved
+PASS  venv interpreter: /opt/filesmagic/venv/bin/python -> /opt/filesmagic/python/cpython-3.11.18-linux-x86_64-gnu/bin/python3.11
+PASS  AppArmor profile file: /etc/apparmor.d/filesmagic-eval-python sha256 6a94078413be722c955cea9f63c8eefe9e3bd0c4f7530d381424fce81681aa20
+PASS  AppArmor confinement: evaluation interpreter runs as 'filesmagic-eval-python (enforce)'
+PASS  userns restriction: kernel.apparmor_restrict_unprivileged_userns=1 (1: unchanged)
+RESULT all controls present
+== outputs (metadata only)
+total 52
+drwxrwxr-x  2 almuthanna-shihab almuthanna-shihab  4096 Nov 10 10:19 .
+drwxrwxr-x 41 almuthanna-shihab almuthanna-shihab  4096 Nov 10 10:19 ..
+-rw-rw-r--  1 almuthanna-shihab almuthanna-shihab  9325 Nov 10 10:19 report.html
+-rw-rw-r--  1 almuthanna-shihab almuthanna-shihab 21348 Nov 10 10:19 results.json
+-rw-rw-r--  1 almuthanna-shihab almuthanna-shihab    46 Nov 10 10:19 run_status.json
+-rw-rw-r--  1 almuthanna-shihab almuthanna-shihab   239 Nov 10 10:19 SHA256SUMS
+run_status.json: OK
+results.json: OK
+report.html: OK
+URL/IP-like strings in outputs: 0
+{
+  "status": "completed",
+  "problems": []
+}
+
+8ab933c96c1c6fc220c8a823f491acf4d93c35cf13c8641f225a08ab9da6e1f0  phaseA.log
+4090dbfa77d2f343fba8ecabe8d8f14cce24db80e3ef61ab80ff46405433da1b  guest-checks-before.txt
+69ae07ee5f0adb49c66cad6f331177ed04feb91ef59f28877db6897946007302  procs-before.txt
+efefb30c0cf7ea5280707ad231a0769f9d45ddfb1c9ca7eca0bb1bb1d842fd91  procs-after.txt
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  apparmor-denials.txt
+7ed6e03dd7fdad06e340bb82ccb97155b6be5cf60ad9ff644e65f857c1dbd0fa  guest-checks-after.txt
+2026-11-10T16:19:34Z

@@ -1,0 +1,15 @@
+== 1. office/wine processes, by executable name (not command line)
+pid 4419 now: gone
+phaseB.log shows the pattern was in its own shell args: 0 (log copy has no script text; expected 0)
+name matches above (none expected); grep exit 1 (1 = none)
+not installed: soffice
+not installed: libreoffice
+not installed: wine
+not installed: oosplash
+== 2. can this user read the kernel log?
+uid=1000(almuthanna-shihab) gid=1000(almuthanna-shihab) groups=1000(almuthanna-shihab),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),100(users),114(lpadmin),123(lxd)
+journalctl -k exit 0
+Nov 10 10:19:18 almuthanna-shihab-VirtualBox kernel: audit: type=1400 audit(1794327558.463:164): apparmor="DENIED" operation="exec" class="file" profile="filesmagic-eval-python" name="/usr/bin/uname" pid=4430 comm="python" requested_mask="x" denied_mask="x" fsuid=1000 ouid=0
+Nov 10 10:19:18 almuthanna-shihab-VirtualBox kernel: audit: type=1400 audit(1794327558.463:165): apparmor="DENIED" operation="exec" class="file" profile="filesmagic-eval-python" name="/usr/bin/uname" pid=4430 comm="python" requested_mask="x" denied_mask="x" fsuid=1000 ouid=0
+since phase A start (2026-11-10 16:18:57 UTC):
+0

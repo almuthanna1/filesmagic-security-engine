@@ -1,0 +1,7 @@
+# vm-before.txt (<=) vs vm-attached.txt (=>)
+=> "IDE-0-0"="C:\\fm-samples\\fm-sample-e50c941c.iso"
+=> "IDE-ImageUUID-0-0"="81957c58-7a8d-47dc-a2d9-bf81074e1707"
+=> "IDE-tempeject-0-0"="off"
+=> "IDE-nonrotational-0-0"="off"
+=> "IDE-discard-0-0"="off"
+<= "IDE-0-0"="emptydrive"

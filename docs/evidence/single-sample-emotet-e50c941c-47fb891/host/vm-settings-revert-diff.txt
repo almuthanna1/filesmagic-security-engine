@@ -1,0 +1,18 @@
+# vm-before.txt (<=) vs vm-after-revert.txt (=>)
+=> VMStateChangeTime="2026-11-10T16:20:46.817000000"
+=> "SATA-0-0"="C:\\Users\\almut\\VirtualBox VMs\\FilesMagic-securityLAB\\Snapshots\\{8be28504-5f12-4fc2-8a1c-4e309aa677aa}.vdi"
+=> "SATA-ImageUUID-0-0"="8be28504-5f12-4fc2-8a1c-4e309aa677aa"
+=> SessionName="GUI/Qt"
+=> VideoMode="1280,800,0"@0,0 0
+=> VRDEActiveConnection="off"
+=> VRDEClients==0
+=> GuestOSType="Linux26_64"
+=> GuestAdditionsRunLevel=1
+=> GuestAdditionsVersion="7.2.20 r175154"
+=> GuestAdditionsFacility_VirtualBox Base Driver=50,1794327385275
+=> GuestAdditionsFacility_VirtualBox System Service=100,1794327641748
+=> GuestAdditionsFacility_Seamless Mode=0,1794327645228
+=> GuestAdditionsFacility_Graphics Mode=0,1794327645228
+<= VMStateChangeTime="2026-11-09T22:40:06.000000000"
+<= "SATA-0-0"="C:\\Users\\almut\\VirtualBox VMs\\FilesMagic-securityLAB\\Snapshots/{c9f070ad-e2e7-4914-abbc-b8044696ba61}.vdi"
+<= "SATA-ImageUUID-0-0"="c9f070ad-e2e7-4914-abbc-b8044696ba61"
