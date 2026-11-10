@@ -3,7 +3,8 @@
   "git": {
     "deploymentEnabled": {
       "security/malware-research-hardening": false,
-      "feature/custom-unified-engine-nov18": false
+      "feature/custom-unified-engine-nov18": false,
+      "research/offline-single-sample": false
     }
   }
 }
