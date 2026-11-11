@@ -15,12 +15,15 @@ application:
 3. Each embedded stream is decoded under pypdf's stream limits (app.scanners.pdf.PDF_LIMITS, which
    the caller applies), at most MAX_FILES of them and MAX_FILE_BYTES decoded in all, and its
    declared /Params /Size, if any, must match.
-4. A stream is verified only as an OpenDocument package without code or automatically loaded
-   content (odf_without_code): what it is, from its bytes, never from its name or MIME type.
-   Every name of its file specification must end in that type's extension and hold no control or
-   formatting characters (x.exe<NUL>.odt), since a reader saves it under that name and the
-   system opens it by extension. This is the LibreOffice "hybrid PDF" (the editable document
-   kept inside its PDF export).
+4. A stream is verified only as one of two things, from its bytes, never from its name, MIME type
+   or /AFRelationship. Every name of its file specification must hold no control or formatting
+   characters (x.exe<NUL>.odt) and fit the type, since a reader saves it under that name and the
+   system opens it by extension:
+   - an OpenDocument package without code or automatically loaded content (odf_without_code),
+     named with that type's extension: the LibreOffice "hybrid PDF" (the editable document kept
+     inside its PDF export);
+   - a C2PA manifest store (Content Credentials) without active content (app.engine.c2pa), named
+     without any extension or with .c2pa: what ChatGPT, Adobe and other C2PA producers attach.
 
 5. With no attachment at all, the raw /EmbeddedFile tokens (what the reference YARA-X rule matches)
    are explained only if each one starts the name /EmbeddedFiles and, object by object, they are
@@ -29,8 +32,9 @@ application:
 
 Anything else (another type, an orphan stream, a parse problem) is "not verified" with the reason:
 a verdict about what the attachment is not, never that it is safe. Not examined: the contents of
-the raster pictures beyond their signature, and anything outside the attachments (fonts, images,
-3D or media streams of the PDF itself), which the attachment findings do not cover either.
+the raster pictures beyond their signature (ODF) or structure (C2PA), C2PA signatures, and anything
+outside the attachments (fonts, images, 3D or media streams of the PDF itself), which the
+attachment findings do not cover either.
 """
 
 import io
@@ -42,6 +46,7 @@ from dataclasses import dataclass
 import defusedxml.ElementTree as SafeET
 from pypdf.generic import ArrayObject, DictionaryObject, IndirectObject, StreamObject
 
+from app.engine import c2pa
 from app.scanners.office import unsafe_member_name
 from app.scanners.pdf import MAX_DEPTH, MAX_OBJECTS, clean, text_of
 
@@ -197,6 +202,18 @@ def inspect_stream(stream, names: list[str], budget: list[int], decoded: list[in
     size = _resolve(params.get("/Size")) if isinstance(params, DictionaryObject) else None
     if size is not None and size != len(data):
         return Attachment(label, reason=f"declares {size} bytes but holds {len(data)}")
+    if data[4:8] == b"jumb":  # a JUMBF superbox: what C2PA embeds (C2PA 2.2, Annex A.4)
+        budget[0] -= len(data)
+        try:
+            if budget[0] < 0:
+                raise c2pa.NotVerified("too large to read")
+            what = c2pa.verify(data)
+        except c2pa.NotVerified as e:
+            return Attachment(label, reason=f"a JUMBF (C2PA) box: {clean(e, 200)}")
+        if not names or any(not _plain_name(n) or not (n.lower().endswith(".c2pa") or "." not in n) for n in names):
+            return Attachment(label, reason="a C2PA manifest store under a name with another extension or control "
+                                            "characters")
+        return Attachment(label, verified=what)
     kind, why, links = odf_without_code(data, budget)
     if not kind:
         return Attachment(label, reason=why)

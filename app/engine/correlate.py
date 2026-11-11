@@ -48,10 +48,12 @@ its own precondition; if it does not hold, the reference finding stands (fail cl
         is an attached template on such a path, referenced only by w:attachedTemplate. Still LOW:
         the template is not inspected and can carry macros; only an author-chosen server is ruled out.
       ENGINE_PDF_ATTACHMENTS_VERIFIED (INFO) for PDF_EMBEDDED_FILE and PDF_Embedded_File: every
-        attachment in every object of the file is an OpenDocument package without code, embedded
-        objects or automatically loaded content, under its type's extension (passive hyperlinks are
-        allowed and counted), and no action runs a script, launches a file or opens an embedded
-        document (app.engine.pdf_attachments).
+        attachment in every object of the file is, from its bytes, an OpenDocument package without
+        code, embedded objects or automatically loaded content, under its type's extension (passive
+        hyperlinks are allowed and counted), or a C2PA manifest store (Content Credentials) holding
+        only data and pictures without script, active markup or external references, under a name
+        without another extension (its signature is not validated); and no action runs a script,
+        launches a file or opens an embedded document (app.engine.pdf_attachments, app.engine.c2pa).
       ENGINE_PDF_NO_ATTACHMENTS (INFO) for PDF_Embedded_File (YARA-X) only: a complete reading of
         every object of the file finds no file specification with /EF and no embedded file stream,
         and every byte sequence the signature matches is the key /EmbeddedFiles of an empty name tree
@@ -214,11 +216,14 @@ def attachment_findings(result: pdf_chains.PdfChains) -> list[Finding]:
     accounts = [ACCOUNTS.format(*r) for r in ATTACHMENT_REFERENCE]
     if all(a.verified for a in result.files) and not actions:
         return [finding("ENGINE_PDF_ATTACHMENTS_VERIFIED", Severity.INFO,
-                        "Every attachment was read and is an OpenDocument file without macros, scripts, embedded "
-                        "objects or automatically loaded external content, saved under its type's extension; it may "
-                        "hold hyperlinks, which open only on a click. No action in this PDF runs a script, launches "
-                        "a file or opens an embedded document. This shows what the attachments do not contain, not "
-                        f"that they are harmless. Evidence: {listing(items)}.", evidence=items + accounts)]
+                        "Every attachment was read and verified from its bytes: an OpenDocument file without macros, "
+                        "scripts, embedded objects or automatically loaded external content, saved under its type's "
+                        "extension (it may hold hyperlinks, which open only on a click), or a C2PA manifest store "
+                        "(Content Credentials) holding only data and pictures without script, active markup or "
+                        "external references, whose signature was not validated. No action in this PDF runs a "
+                        "script, launches a file or opens an embedded document. This shows what the attachments do "
+                        f"not contain, not that they are harmless or authentic. Evidence: {listing(items)}.",
+                        evidence=items + accounts)]
     why = [f"actions that could use an attachment: {listing(actions)}"] if actions else []
     return [finding("ENGINE_PDF_ATTACHMENTS_UNVERIFIED", Severity.LOW,
                     "The PDF carries attachments that could not be verified as content without code. "

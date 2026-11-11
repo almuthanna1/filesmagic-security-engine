@@ -43,7 +43,11 @@ MANIFEST = Path(__file__).with_name("pdf_accuracy.json")
 CORPUS = ROOT / "evaluation" / "benign_corpus"
 VERDICTS = ["SAFE", "SUSPICIOUS", "MALICIOUS", "UNABLE_TO_SCAN"]
 RANK = {v: i for i, v in enumerate(VERDICTS[:3])}
-REQUIRED = {"no-attachment": "SAFE", "attachment": "SUSPICIOUS", "ambiguous": "SUSPICIOUS", "dangerous": "MALICIOUS"}
+REQUIRED = {"no-attachment": "SAFE", "attachment": "SUSPICIOUS", "ambiguous": "SUSPICIOUS", "dangerous": "MALICIOUS",
+            # evaluation.c2pa_accuracy (docs/c2pa-accuracy-preregistration.md)
+            "c2pa-active": "SUSPICIOUS", "c2pa-deceptive": "SUSPICIOUS", "c2pa-malformed": "SUSPICIOUS"}
+AT_LEAST = {"attachment", "ambiguous", "c2pa-active", "c2pa-deceptive", "c2pa-malformed"}  # MALICIOUS is correct too
+BENIGN = {"benign", "c2pa-benign"}  # c2pa-benign: a manifest of known provenance, or built without active content
 EMPTY = "/Names << /EmbeddedFiles << /Names [] >> >>"
 SVG = b'<svg xmlns="http://www.w3.org/2000/svg"><script>/* inert */</script></svg>'
 
@@ -192,10 +196,11 @@ def wilson(k: int, n: int) -> list[float] | None:
 def outcome(cls: str, verdict: str) -> str:
     if verdict == "UNABLE_TO_SCAN":
         return "incomplete"
-    if cls == "benign":
+    if cls in BENIGN:
         return {"SAFE": "correct", "SUSPICIOUS": "unexpected warning", "MALICIOUS": "false positive"}[verdict]
-    need = REQUIRED[cls]
-    if RANK[verdict] == RANK[need] or (cls in ("attachment", "ambiguous") and verdict == "MALICIOUS"):
+    if (need := REQUIRED.get(cls)) is None:  # attack strings: outcomes predicted per string (P8), reported as found
+        return "reported"
+    if RANK[verdict] == RANK[need] or (cls in AT_LEAST and verdict == "MALICIOUS"):
         return "correct"
     return "missed (false negative)" if RANK[verdict] < RANK[need] else "unexpected warning"
 
@@ -217,7 +222,7 @@ def summarise(rows: list[dict]) -> dict:
             for r in group:
                 matrix.setdefault(r["cls"], Counter())[r[t][e]["verdict"]] += 1
             by[tag]["confusion"][split] = {c: {v: m[v] for v in VERDICTS} for c, m in matrix.items()}
-            benign = [r for r in group if r["cls"] == "benign"]
+            benign = [r for r in group if r["cls"] in BENIGN]
             n = len(benign)
             fp = sum(r[t][e]["verdict"] == "MALICIOUS" for r in benign)
             warn = sum(r[t][e]["verdict"] in ("SUSPICIOUS", "MALICIOUS") for r in benign)
@@ -261,8 +266,8 @@ def summarise(rows: list[dict]) -> dict:
             "outcomes": outcomes, "timing": timing}
 
 
-def markdown(s: dict, env: dict) -> str:
-    out = [f"# PDF accuracy study: results\n\nbefore `{env['before']['commit'][:7]}`, after `{env['after']['commit'][:7]}`"
+def markdown(s: dict, env: dict, title: str = "PDF accuracy study") -> str:
+    out = [f"# {title}: results\n\nbefore `{env['before']['commit'][:7]}`, after `{env['after']['commit'][:7]}`"
            f"{' (uncommitted changes)' if env['after']['dirty'] else ''}; {env['trials']} trial(s) per scan; "
            f"{env['platform']}, Python {env['python']}.\n",
            "Samples: " + ", ".join(f"{k} {v}" for k, v in sorted(s["samples"].items())) + ".\n"]
