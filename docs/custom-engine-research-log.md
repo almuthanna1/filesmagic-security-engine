@@ -686,3 +686,8 @@ before the change and before any held-out scan); change `c24c52c`; evidence in
   agreement; removed reference findings are now kept verbatim in the correlation evidence.
 - Result: 4 dev false warnings removed (D2, S01-S03); 0 other changes in 130 samples; no HIGH lost;
   held-out (59): 0 changes, unified false positives 0/59, but no held-out document had the structure.
+- Staging (user-approved, staging only): `9882cbf` live on `srv-dbelc2jrjlhs7382nv5g` as
+  `dep-dbps71gn74is738thlo0` (2026-11-11T01:23Z; rollback `dep-dbpll8rl550s73dnav5g` = `2d586f6`).
+  The three APA variants, 24 regression scans and 4 HTTP failure checks matched the local results;
+  strict isolation complete throughout. Record:
+  [`evidence/pdf-accuracy-c24c52c/staging-9882cbf.md`](evidence/pdf-accuracy-c24c52c/staging-9882cbf.md).
