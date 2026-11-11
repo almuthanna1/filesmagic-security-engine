@@ -667,3 +667,22 @@ Poster draft: [`docs/poster/poster-draft.md`](poster/poster-draft.md).
   benchmark. And render every figure before trusting it: two of my captions were wrong.
 - Nov 6: profiling before optimising. The plan listed compiled-rule reuse and `fast_scan` as
   latency ideas; measurement showed YARA-X is < 2% of a scan. The real cost is process start-up.
+- Nov 10: a byte signature can match a *key* as well as the thing it names: `/EmbeddedFile` is a
+  prefix of `/EmbeddedFiles`, so an emptied name tree reads as an attachment. A correction may lower
+  it only by explaining every match, not by finding nothing else; and a held-out set that never
+  contains the case confirms "no regression", not "improvement".
+
+## 21. PDF attachment accuracy (Nov 10, branch `feature/unified-pdf-accuracy`)
+
+Pre-registered in [`pdf-accuracy-preregistration.md`](pdf-accuracy-preregistration.md) (`a8be874`,
+before the change and before any held-out scan); change `c24c52c`; evidence in
+[`evidence/pdf-accuracy-c24c52c`](evidence/pdf-accuracy-c24c52c/README.md).
+
+- Root cause (metadata-removed report): YARA-X `PDF_Embedded_File` matched the key of an empty
+  `/EmbeddedFiles` name tree; nothing in the unified engine accounted for it. The original report's
+  warning is a genuine, unverifiable C2PA manifest (with an embedded SVG) and stays.
+- Change: `ENGINE_PDF_NO_ATTACHMENTS` (INFO) lowers that one YARA-X match when a complete reading
+  finds no attachment and explains every match as an empty tree's key, with the PDF scanner in
+  agreement; removed reference findings are now kept verbatim in the correlation evidence.
+- Result: 4 dev false warnings removed (D2, S01-S03); 0 other changes in 130 samples; no HIGH lost;
+  held-out (59): 0 changes, unified false positives 0/59, but no held-out document had the structure.

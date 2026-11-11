@@ -1,0 +1,4876 @@
+{
+ "environment": {
+  "platform": "Windows-11-10.0.26300-SP0",
+  "python": "3.14.3",
+  "trials": 3,
+  "before": {
+   "commit": "2d586f651a68a9f45b061c2e8cbb8dd136be645a",
+   "dirty": false
+  },
+  "after": {
+   "commit": "c24c52c0c5dfe2f93b9a8b7440830c02e910c6a0",
+   "dirty": true
+  }
+ },
+ "samples": {
+  "dev/benign": 3,
+  "heldout/benign": 59,
+  "regression/benign": 29,
+  "dev/no-attachment": 4,
+  "dev/attachment": 5,
+  "dev/ambiguous": 5,
+  "dev/dangerous": 3,
+  "regression/case": 22
+ },
+ "by_run": {
+  "before/reference": {
+   "confusion": {
+    "dev": {
+     "benign": {
+      "SAFE": 1,
+      "SUSPICIOUS": 2,
+      "MALICIOUS": 0,
+      "UNABLE_TO_SCAN": 0
+     },
+     "no-attachment": {
+      "SAFE": 1,
+      "SUSPICIOUS": 3,
+      "MALICIOUS": 0,
+      "UNABLE_TO_SCAN": 0
+     },
+     "attachment": {
+      "SAFE": 0,
+      "SUSPICIOUS": 5,
+      "MALICIOUS": 0,
+      "UNABLE_TO_SCAN": 0
+     },
+     "ambiguous": {
+      "SAFE": 0,
+      "SUSPICIOUS": 5,
+      "MALICIOUS": 0,
+      "UNABLE_TO_SCAN": 0
+     },
+     "dangerous": {
+      "SAFE": 0,
+      "SUSPICIOUS": 0,
+      "MALICIOUS": 3,
+      "UNABLE_TO_SCAN": 0
+     }
+    },
+    "heldout": {
+     "benign": {
+      "SAFE": 56,
+      "SUSPICIOUS": 0,
+      "MALICIOUS": 3,
+      "UNABLE_TO_SCAN": 0
+     }
+    },
+    "regression": {
+     "benign": {
+      "SAFE": 25,
+      "SUSPICIOUS": 4,
+      "MALICIOUS": 0,
+      "UNABLE_TO_SCAN": 0
+     }
+    }
+   },
+   "rates": {
+    "dev": {
+     "benign_n": 3,
+     "false_positive": [
+      0,
+      [
+       0.0,
+       0.5615
+      ]
+     ],
+     "any_warning": [
+      2,
+      [
+       0.2077,
+       0.9385
+      ]
+     ]
+    },
+    "heldout": {
+     "benign_n": 59,
+     "false_positive": [
+      3,
+      [
+       0.0174,
+       0.1392
+      ]
+     ],
+     "any_warning": [
+      3,
+      [
+       0.0174,
+       0.1392
+      ]
+     ]
+    },
+    "regression": {
+     "benign_n": 29,
+     "false_positive": [
+      0,
+      [
+       0.0,
+       0.117
+      ]
+     ],
+     "any_warning": [
+      4,
+      [
+       0.055,
+       0.3056
+      ]
+     ]
+    }
+   },
+   "rule_contributions": {
+    "dev": {
+     "pdf:PDF_EMBEDDED_FILE:LOW": {
+      "documents": 1,
+      "sole_non_info_finding": 0
+     },
+     "yara-x:PDF_Embedded_File:LOW": {
+      "documents": 2,
+      "sole_non_info_finding": 1
+     }
+    },
+    "heldout": {
+     "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM": {
+      "documents": 3,
+      "sole_non_info_finding": 0
+     },
+     "pdf:PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD:HIGH": {
+      "documents": 3,
+      "sole_non_info_finding": 0
+     },
+     "pdf:PDF_EMBEDDED_FILE:LOW": {
+      "documents": 3,
+      "sole_non_info_finding": 0
+     },
+     "pdf:PDF_JAVASCRIPT:MEDIUM": {
+      "documents": 3,
+      "sole_non_info_finding": 0
+     },
+     "pdf:PDF_XFA_FORM:LOW": {
+      "documents": 3,
+      "sole_non_info_finding": 0
+     },
+     "yara-x:PDF_Embedded_File:LOW": {
+      "documents": 3,
+      "sole_non_info_finding": 0
+     }
+    },
+    "regression": {
+     "office:OFFICE_EXTERNAL_AUTOLOAD:MEDIUM": {
+      "documents": 1,
+      "sole_non_info_finding": 1
+     },
+     "office:OFFICE_EXTERNAL_NETWORK_PATH:MEDIUM": {
+      "documents": 2,
+      "sole_non_info_finding": 2
+     },
+     "pdf:PDF_EMBEDDED_FILE:LOW": {
+      "documents": 1,
+      "sole_non_info_finding": 0
+     },
+     "yara-x:PDF_Embedded_File:LOW": {
+      "documents": 1,
+      "sole_non_info_finding": 0
+     }
+    }
+   }
+  },
+  "before/unified": {
+   "confusion": {
+    "dev": {
+     "benign": {
+      "SAFE": 1,
+      "SUSPICIOUS": 2,
+      "MALICIOUS": 0,
+      "UNABLE_TO_SCAN": 0
+     },
+     "no-attachment": {
+      "SAFE": 1,
+      "SUSPICIOUS": 3,
+      "MALICIOUS": 0,
+      "UNABLE_TO_SCAN": 0
+     },
+     "attachment": {
+      "SAFE": 0,
+      "SUSPICIOUS": 5,
+      "MALICIOUS": 0,
+      "UNABLE_TO_SCAN": 0
+     },
+     "ambiguous": {
+      "SAFE": 0,
+      "SUSPICIOUS": 5,
+      "MALICIOUS": 0,
+      "UNABLE_TO_SCAN": 0
+     },
+     "dangerous": {
+      "SAFE": 0,
+      "SUSPICIOUS": 0,
+      "MALICIOUS": 3,
+      "UNABLE_TO_SCAN": 0
+     }
+    },
+    "heldout": {
+     "benign": {
+      "SAFE": 56,
+      "SUSPICIOUS": 3,
+      "MALICIOUS": 0,
+      "UNABLE_TO_SCAN": 0
+     }
+    },
+    "regression": {
+     "benign": {
+      "SAFE": 28,
+      "SUSPICIOUS": 1,
+      "MALICIOUS": 0,
+      "UNABLE_TO_SCAN": 0
+     }
+    }
+   },
+   "rates": {
+    "dev": {
+     "benign_n": 3,
+     "false_positive": [
+      0,
+      [
+       0.0,
+       0.5615
+      ]
+     ],
+     "any_warning": [
+      2,
+      [
+       0.2077,
+       0.9385
+      ]
+     ]
+    },
+    "heldout": {
+     "benign_n": 59,
+     "false_positive": [
+      0,
+      [
+       0.0,
+       0.0611
+      ]
+     ],
+     "any_warning": [
+      3,
+      [
+       0.0174,
+       0.1392
+      ]
+     ]
+    },
+    "regression": {
+     "benign_n": 29,
+     "false_positive": [
+      0,
+      [
+       0.0,
+       0.117
+      ]
+     ],
+     "any_warning": [
+      1,
+      [
+       0.0061,
+       0.1718
+      ]
+     ]
+    }
+   },
+   "rule_contributions": {
+    "dev": {
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW": {
+      "documents": 1,
+      "sole_non_info_finding": 1
+     },
+     "yara-x:PDF_Embedded_File:LOW": {
+      "documents": 1,
+      "sole_non_info_finding": 1
+     }
+    },
+    "heldout": {
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM": {
+      "documents": 3,
+      "sole_non_info_finding": 0
+     },
+     "pdf:PDF_EMBEDDED_FILE:LOW": {
+      "documents": 3,
+      "sole_non_info_finding": 0
+     },
+     "pdf:PDF_JAVASCRIPT:MEDIUM": {
+      "documents": 3,
+      "sole_non_info_finding": 0
+     },
+     "pdf:PDF_XFA_FORM:LOW": {
+      "documents": 3,
+      "sole_non_info_finding": 0
+     },
+     "yara-x:PDF_Embedded_File:LOW": {
+      "documents": 3,
+      "sole_non_info_finding": 0
+     }
+    },
+    "regression": {
+     "ooxml-links:ENGINE_OFFICE_LOCAL_TEMPLATE:LOW": {
+      "documents": 1,
+      "sole_non_info_finding": 1
+     }
+    }
+   }
+  },
+  "after/reference": {
+   "confusion": {
+    "dev": {
+     "benign": {
+      "SAFE": 1,
+      "SUSPICIOUS": 2,
+      "MALICIOUS": 0,
+      "UNABLE_TO_SCAN": 0
+     },
+     "no-attachment": {
+      "SAFE": 1,
+      "SUSPICIOUS": 3,
+      "MALICIOUS": 0,
+      "UNABLE_TO_SCAN": 0
+     },
+     "attachment": {
+      "SAFE": 0,
+      "SUSPICIOUS": 5,
+      "MALICIOUS": 0,
+      "UNABLE_TO_SCAN": 0
+     },
+     "ambiguous": {
+      "SAFE": 0,
+      "SUSPICIOUS": 5,
+      "MALICIOUS": 0,
+      "UNABLE_TO_SCAN": 0
+     },
+     "dangerous": {
+      "SAFE": 0,
+      "SUSPICIOUS": 0,
+      "MALICIOUS": 3,
+      "UNABLE_TO_SCAN": 0
+     }
+    },
+    "heldout": {
+     "benign": {
+      "SAFE": 56,
+      "SUSPICIOUS": 0,
+      "MALICIOUS": 3,
+      "UNABLE_TO_SCAN": 0
+     }
+    },
+    "regression": {
+     "benign": {
+      "SAFE": 25,
+      "SUSPICIOUS": 4,
+      "MALICIOUS": 0,
+      "UNABLE_TO_SCAN": 0
+     }
+    }
+   },
+   "rates": {
+    "dev": {
+     "benign_n": 3,
+     "false_positive": [
+      0,
+      [
+       0.0,
+       0.5615
+      ]
+     ],
+     "any_warning": [
+      2,
+      [
+       0.2077,
+       0.9385
+      ]
+     ]
+    },
+    "heldout": {
+     "benign_n": 59,
+     "false_positive": [
+      3,
+      [
+       0.0174,
+       0.1392
+      ]
+     ],
+     "any_warning": [
+      3,
+      [
+       0.0174,
+       0.1392
+      ]
+     ]
+    },
+    "regression": {
+     "benign_n": 29,
+     "false_positive": [
+      0,
+      [
+       0.0,
+       0.117
+      ]
+     ],
+     "any_warning": [
+      4,
+      [
+       0.055,
+       0.3056
+      ]
+     ]
+    }
+   },
+   "rule_contributions": {
+    "dev": {
+     "pdf:PDF_EMBEDDED_FILE:LOW": {
+      "documents": 1,
+      "sole_non_info_finding": 0
+     },
+     "yara-x:PDF_Embedded_File:LOW": {
+      "documents": 2,
+      "sole_non_info_finding": 1
+     }
+    },
+    "heldout": {
+     "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM": {
+      "documents": 3,
+      "sole_non_info_finding": 0
+     },
+     "pdf:PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD:HIGH": {
+      "documents": 3,
+      "sole_non_info_finding": 0
+     },
+     "pdf:PDF_EMBEDDED_FILE:LOW": {
+      "documents": 3,
+      "sole_non_info_finding": 0
+     },
+     "pdf:PDF_JAVASCRIPT:MEDIUM": {
+      "documents": 3,
+      "sole_non_info_finding": 0
+     },
+     "pdf:PDF_XFA_FORM:LOW": {
+      "documents": 3,
+      "sole_non_info_finding": 0
+     },
+     "yara-x:PDF_Embedded_File:LOW": {
+      "documents": 3,
+      "sole_non_info_finding": 0
+     }
+    },
+    "regression": {
+     "office:OFFICE_EXTERNAL_AUTOLOAD:MEDIUM": {
+      "documents": 1,
+      "sole_non_info_finding": 1
+     },
+     "office:OFFICE_EXTERNAL_NETWORK_PATH:MEDIUM": {
+      "documents": 2,
+      "sole_non_info_finding": 2
+     },
+     "pdf:PDF_EMBEDDED_FILE:LOW": {
+      "documents": 1,
+      "sole_non_info_finding": 0
+     },
+     "yara-x:PDF_Embedded_File:LOW": {
+      "documents": 1,
+      "sole_non_info_finding": 0
+     }
+    }
+   }
+  },
+  "after/unified": {
+   "confusion": {
+    "dev": {
+     "benign": {
+      "SAFE": 2,
+      "SUSPICIOUS": 1,
+      "MALICIOUS": 0,
+      "UNABLE_TO_SCAN": 0
+     },
+     "no-attachment": {
+      "SAFE": 4,
+      "SUSPICIOUS": 0,
+      "MALICIOUS": 0,
+      "UNABLE_TO_SCAN": 0
+     },
+     "attachment": {
+      "SAFE": 0,
+      "SUSPICIOUS": 5,
+      "MALICIOUS": 0,
+      "UNABLE_TO_SCAN": 0
+     },
+     "ambiguous": {
+      "SAFE": 0,
+      "SUSPICIOUS": 5,
+      "MALICIOUS": 0,
+      "UNABLE_TO_SCAN": 0
+     },
+     "dangerous": {
+      "SAFE": 0,
+      "SUSPICIOUS": 0,
+      "MALICIOUS": 3,
+      "UNABLE_TO_SCAN": 0
+     }
+    },
+    "heldout": {
+     "benign": {
+      "SAFE": 56,
+      "SUSPICIOUS": 3,
+      "MALICIOUS": 0,
+      "UNABLE_TO_SCAN": 0
+     }
+    },
+    "regression": {
+     "benign": {
+      "SAFE": 28,
+      "SUSPICIOUS": 1,
+      "MALICIOUS": 0,
+      "UNABLE_TO_SCAN": 0
+     }
+    }
+   },
+   "rates": {
+    "dev": {
+     "benign_n": 3,
+     "false_positive": [
+      0,
+      [
+       0.0,
+       0.5615
+      ]
+     ],
+     "any_warning": [
+      1,
+      [
+       0.0615,
+       0.7923
+      ]
+     ]
+    },
+    "heldout": {
+     "benign_n": 59,
+     "false_positive": [
+      0,
+      [
+       0.0,
+       0.0611
+      ]
+     ],
+     "any_warning": [
+      3,
+      [
+       0.0174,
+       0.1392
+      ]
+     ]
+    },
+    "regression": {
+     "benign_n": 29,
+     "false_positive": [
+      0,
+      [
+       0.0,
+       0.117
+      ]
+     ],
+     "any_warning": [
+      1,
+      [
+       0.0061,
+       0.1718
+      ]
+     ]
+    }
+   },
+   "rule_contributions": {
+    "dev": {
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW": {
+      "documents": 1,
+      "sole_non_info_finding": 1
+     }
+    },
+    "heldout": {
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM": {
+      "documents": 3,
+      "sole_non_info_finding": 0
+     },
+     "pdf:PDF_EMBEDDED_FILE:LOW": {
+      "documents": 3,
+      "sole_non_info_finding": 0
+     },
+     "pdf:PDF_JAVASCRIPT:MEDIUM": {
+      "documents": 3,
+      "sole_non_info_finding": 0
+     },
+     "pdf:PDF_XFA_FORM:LOW": {
+      "documents": 3,
+      "sole_non_info_finding": 0
+     },
+     "yara-x:PDF_Embedded_File:LOW": {
+      "documents": 3,
+      "sole_non_info_finding": 0
+     }
+    },
+    "regression": {
+     "ooxml-links:ENGINE_OFFICE_LOCAL_TEMPLATE:LOW": {
+      "documents": 1,
+      "sole_non_info_finding": 1
+     }
+    }
+   }
+  }
+ },
+ "changes": [
+  {
+   "id": "D2",
+   "split": "dev",
+   "class": "benign",
+   "engine": "unified",
+   "before": "SUSPICIOUS",
+   "after": "SAFE",
+   "removed": [
+    "yara-x:PDF_Embedded_File:LOW"
+   ],
+   "added": []
+  },
+  {
+   "id": "S01-empty-tree",
+   "split": "dev",
+   "class": "no-attachment",
+   "engine": "unified",
+   "before": "SUSPICIOUS",
+   "after": "SAFE",
+   "removed": [
+    "yara-x:PDF_Embedded_File:LOW"
+   ],
+   "added": []
+  },
+  {
+   "id": "S02-empty-dict-af-null",
+   "split": "dev",
+   "class": "no-attachment",
+   "engine": "unified",
+   "before": "SUSPICIOUS",
+   "after": "SAFE",
+   "removed": [
+    "yara-x:PDF_Embedded_File:LOW"
+   ],
+   "added": []
+  },
+  {
+   "id": "S03-empty-tree-indirect",
+   "split": "dev",
+   "class": "no-attachment",
+   "engine": "unified",
+   "before": "SUSPICIOUS",
+   "after": "SAFE",
+   "removed": [
+    "yara-x:PDF_Embedded_File:LOW"
+   ],
+   "added": []
+  },
+  {
+   "id": "S17-empty-tree-auto-launch",
+   "split": "dev",
+   "class": "dangerous",
+   "engine": "unified",
+   "before": "MALICIOUS",
+   "after": "MALICIOUS",
+   "removed": [
+    "yara-x:PDF_Embedded_File:LOW"
+   ],
+   "added": []
+  }
+ ],
+ "lost_high_or_critical": [],
+ "nondeterministic": [],
+ "outcomes": {
+  "before/reference": [
+   {
+    "id": "D1",
+    "split": "dev",
+    "class": "benign",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "D2",
+    "split": "dev",
+    "class": "benign",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "D3",
+    "split": "dev",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L01",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L02",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L03",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L04",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L05",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L06",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L07",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L08",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L09",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L10",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L11",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L12",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L13",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L14",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L15",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L16",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L17",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L18",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L19",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L20",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L21",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L22",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L23",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L24",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L25",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L26",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L27",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L28",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L29",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L30",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L31",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L32",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L33",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L34",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L35",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L36",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L37",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L38",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L39",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L40",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L41",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L42",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L43",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L44",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L45",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L46",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L47",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L48",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L49",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L50",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L51",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L52",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L53",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L54",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L55",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "independent/f1040.pdf",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "MALICIOUS",
+    "outcome": "false positive",
+    "rules": [
+     "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD:HIGH",
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "pdf:PDF_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_XFA_FORM:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "independent/fw4.pdf",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "MALICIOUS",
+    "outcome": "false positive",
+    "rules": [
+     "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD:HIGH",
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "pdf:PDF_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_XFA_FORM:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "independent/fw9.pdf",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "MALICIOUS",
+    "outcome": "false positive",
+    "rules": [
+     "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD:HIGH",
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "pdf:PDF_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_XFA_FORM:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "independent/NST-EST2023-POP.xlsx",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/docx-01-word-plain.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/docx-02-word-rich.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/docx-03-word-embedded-excel.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/docx-04-word-linked-picture.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "office:OFFICE_EXTERNAL_NETWORK_PATH:MEDIUM"
+    ]
+   },
+   {
+    "id": "files/docx-05-word-custom-template.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "office:OFFICE_EXTERNAL_AUTOLOAD:MEDIUM"
+    ]
+   },
+   {
+    "id": "files/docx-06-word-content-controls.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/docx-07-libreoffice.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-01-word-export.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-02-excel-export.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-03-powerpoint-export.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-04-libreoffice-tagged.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-05-libreoffice-pdfa.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-06-word-export-pdfa.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-07-libreoffice-hybrid.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "files/pdf-08-edge-print.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-01-ppt-plain.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-02-ppt-pictures-notes.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-03-ppt-chart-table.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-04-ppt-hyperlinks-actions.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-05-ppt-transitions-animations.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-06-ppt-embedded-excel.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-07-libreoffice-roundtrip.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/xlsx-01-excel-formulas.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/xlsx-02-excel-chart-formatting.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/xlsx-03-excel-hyperlinks-validation.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/xlsx-04-excel-external-workbook-link.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "office:OFFICE_EXTERNAL_NETWORK_PATH:MEDIUM"
+    ]
+   },
+   {
+    "id": "files/xlsx-05-excel-table-pivot.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/xlsx-06-excel-picture-notes.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/xlsx-07-libreoffice.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "S01-empty-tree",
+    "split": "dev",
+    "class": "no-attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S02-empty-dict-af-null",
+    "split": "dev",
+    "class": "no-attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S03-empty-tree-indirect",
+    "split": "dev",
+    "class": "no-attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S04-empty-tree-object-stream",
+    "split": "dev",
+    "class": "no-attachment",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "S05-text-attachment",
+    "split": "dev",
+    "class": "attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S06-mz-bytes-text-name",
+    "split": "dev",
+    "class": "attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S07-c2pa-manifest-with-svg-script",
+    "split": "dev",
+    "class": "attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "yara-x:PDF_Embedded_File:LOW",
+     "yara-x:SVG_Script_Content:MEDIUM"
+    ]
+   },
+   {
+    "id": "S08-orphan-attachment-empty-tree",
+    "split": "dev",
+    "class": "attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S09-file-attachment-annotation",
+    "split": "dev",
+    "class": "attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S10-dangling-tree-entry",
+    "split": "dev",
+    "class": "ambiguous",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S11-incremental-update-removes-attachment",
+    "split": "dev",
+    "class": "ambiguous",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S12-broken-xref",
+    "split": "dev",
+    "class": "ambiguous",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S13-marker-in-page-text",
+    "split": "dev",
+    "class": "ambiguous",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S14-marker-after-eof",
+    "split": "dev",
+    "class": "ambiguous",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S15-auto-js-exports-attachment",
+    "split": "dev",
+    "class": "dangerous",
+    "verdict": "MALICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD:HIGH",
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "pdf:PDF_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_JAVASCRIPT_EXPLOIT_API:HIGH",
+     "yara-x:PDF_Embedded_File:LOW",
+     "yara-x:PDF_JavaScript_With_Automatic_Action:MEDIUM"
+    ]
+   },
+   {
+    "id": "S16-auto-launch-embedded-exe",
+    "split": "dev",
+    "class": "dangerous",
+    "verdict": "MALICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf:PDF_EMBEDDED_EXECUTABLE:HIGH",
+     "pdf:PDF_LAUNCH_ACTION:HIGH",
+     "yara-x:PDF_Embedded_File:LOW",
+     "yara-x:PDF_Launch_Action:HIGH"
+    ]
+   },
+   {
+    "id": "S17-empty-tree-auto-launch",
+    "split": "dev",
+    "class": "dangerous",
+    "verdict": "MALICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf:PDF_LAUNCH_ACTION:HIGH",
+     "yara-x:PDF_Embedded_File:LOW",
+     "yara-x:PDF_Launch_Action:HIGH"
+    ]
+   }
+  ],
+  "before/unified": [
+   {
+    "id": "D1",
+    "split": "dev",
+    "class": "benign",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ]
+   },
+   {
+    "id": "D2",
+    "split": "dev",
+    "class": "benign",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "D3",
+    "split": "dev",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L01",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L02",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L03",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L04",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L05",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L06",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L07",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L08",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L09",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L10",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L11",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L12",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L13",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L14",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L15",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L16",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L17",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L18",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L19",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L20",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L21",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L22",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L23",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L24",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L25",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L26",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L27",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L28",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L29",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L30",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L31",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L32",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L33",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L34",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L35",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L36",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L37",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L38",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L39",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L40",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L41",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L42",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L43",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L44",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L45",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L46",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L47",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L48",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L49",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L50",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L51",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L52",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L53",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L54",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L55",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "independent/f1040.pdf",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "pdf:PDF_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_XFA_FORM:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "independent/fw4.pdf",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "pdf:PDF_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_XFA_FORM:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "independent/fw9.pdf",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "pdf:PDF_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_XFA_FORM:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "independent/NST-EST2023-POP.xlsx",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/docx-01-word-plain.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/docx-02-word-rich.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/docx-03-word-embedded-excel.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/docx-04-word-linked-picture.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/docx-05-word-custom-template.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "ooxml-links:ENGINE_OFFICE_LOCAL_TEMPLATE:LOW"
+    ]
+   },
+   {
+    "id": "files/docx-06-word-content-controls.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/docx-07-libreoffice.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-01-word-export.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-02-excel-export.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-03-powerpoint-export.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-04-libreoffice-tagged.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-05-libreoffice-pdfa.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-06-word-export-pdfa.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-07-libreoffice-hybrid.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-08-edge-print.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-01-ppt-plain.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-02-ppt-pictures-notes.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-03-ppt-chart-table.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-04-ppt-hyperlinks-actions.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-05-ppt-transitions-animations.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-06-ppt-embedded-excel.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-07-libreoffice-roundtrip.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/xlsx-01-excel-formulas.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/xlsx-02-excel-chart-formatting.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/xlsx-03-excel-hyperlinks-validation.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/xlsx-04-excel-external-workbook-link.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/xlsx-05-excel-table-pivot.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/xlsx-06-excel-picture-notes.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/xlsx-07-libreoffice.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "S01-empty-tree",
+    "split": "dev",
+    "class": "no-attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S02-empty-dict-af-null",
+    "split": "dev",
+    "class": "no-attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S03-empty-tree-indirect",
+    "split": "dev",
+    "class": "no-attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S04-empty-tree-object-stream",
+    "split": "dev",
+    "class": "no-attachment",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "S05-text-attachment",
+    "split": "dev",
+    "class": "attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ]
+   },
+   {
+    "id": "S06-mz-bytes-text-name",
+    "split": "dev",
+    "class": "attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ]
+   },
+   {
+    "id": "S07-c2pa-manifest-with-svg-script",
+    "split": "dev",
+    "class": "attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "yara-x:SVG_Script_Content:MEDIUM"
+    ]
+   },
+   {
+    "id": "S08-orphan-attachment-empty-tree",
+    "split": "dev",
+    "class": "attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ]
+   },
+   {
+    "id": "S09-file-attachment-annotation",
+    "split": "dev",
+    "class": "attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ]
+   },
+   {
+    "id": "S10-dangling-tree-entry",
+    "split": "dev",
+    "class": "ambiguous",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S11-incremental-update-removes-attachment",
+    "split": "dev",
+    "class": "ambiguous",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S12-broken-xref",
+    "split": "dev",
+    "class": "ambiguous",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S13-marker-in-page-text",
+    "split": "dev",
+    "class": "ambiguous",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S14-marker-after-eof",
+    "split": "dev",
+    "class": "ambiguous",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S15-auto-js-exports-attachment",
+    "split": "dev",
+    "class": "dangerous",
+    "verdict": "MALICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT:HIGH",
+     "pdf:PDF_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_JAVASCRIPT_EXPLOIT_API:HIGH",
+     "yara-x-engine:ENGINE_PDF_JavaScript_With_Automatic_Trigger:MEDIUM"
+    ]
+   },
+   {
+    "id": "S16-auto-launch-embedded-exe",
+    "split": "dev",
+    "class": "dangerous",
+    "verdict": "MALICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT:HIGH",
+     "pdf:PDF_EMBEDDED_EXECUTABLE:HIGH",
+     "pdf:PDF_LAUNCH_ACTION:HIGH",
+     "yara-x:PDF_Launch_Action:HIGH"
+    ]
+   },
+   {
+    "id": "S17-empty-tree-auto-launch",
+    "split": "dev",
+    "class": "dangerous",
+    "verdict": "MALICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_LAUNCH:HIGH",
+     "pdf:PDF_LAUNCH_ACTION:HIGH",
+     "yara-x:PDF_Embedded_File:LOW",
+     "yara-x:PDF_Launch_Action:HIGH"
+    ]
+   }
+  ],
+  "after/reference": [
+   {
+    "id": "D1",
+    "split": "dev",
+    "class": "benign",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "D2",
+    "split": "dev",
+    "class": "benign",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "D3",
+    "split": "dev",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L01",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L02",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L03",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L04",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L05",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L06",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L07",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L08",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L09",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L10",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L11",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L12",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L13",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L14",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L15",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L16",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L17",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L18",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L19",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L20",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L21",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L22",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L23",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L24",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L25",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L26",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L27",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L28",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L29",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L30",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L31",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L32",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L33",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L34",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L35",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L36",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L37",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L38",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L39",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L40",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L41",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L42",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L43",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L44",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L45",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L46",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L47",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L48",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L49",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L50",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L51",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L52",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L53",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L54",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L55",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "independent/f1040.pdf",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "MALICIOUS",
+    "outcome": "false positive",
+    "rules": [
+     "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD:HIGH",
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "pdf:PDF_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_XFA_FORM:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "independent/fw4.pdf",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "MALICIOUS",
+    "outcome": "false positive",
+    "rules": [
+     "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD:HIGH",
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "pdf:PDF_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_XFA_FORM:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "independent/fw9.pdf",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "MALICIOUS",
+    "outcome": "false positive",
+    "rules": [
+     "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD:HIGH",
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "pdf:PDF_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_XFA_FORM:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "independent/NST-EST2023-POP.xlsx",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/docx-01-word-plain.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/docx-02-word-rich.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/docx-03-word-embedded-excel.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/docx-04-word-linked-picture.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "office:OFFICE_EXTERNAL_NETWORK_PATH:MEDIUM"
+    ]
+   },
+   {
+    "id": "files/docx-05-word-custom-template.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "office:OFFICE_EXTERNAL_AUTOLOAD:MEDIUM"
+    ]
+   },
+   {
+    "id": "files/docx-06-word-content-controls.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/docx-07-libreoffice.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-01-word-export.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-02-excel-export.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-03-powerpoint-export.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-04-libreoffice-tagged.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-05-libreoffice-pdfa.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-06-word-export-pdfa.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-07-libreoffice-hybrid.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "files/pdf-08-edge-print.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-01-ppt-plain.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-02-ppt-pictures-notes.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-03-ppt-chart-table.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-04-ppt-hyperlinks-actions.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-05-ppt-transitions-animations.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-06-ppt-embedded-excel.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-07-libreoffice-roundtrip.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/xlsx-01-excel-formulas.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/xlsx-02-excel-chart-formatting.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/xlsx-03-excel-hyperlinks-validation.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/xlsx-04-excel-external-workbook-link.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "office:OFFICE_EXTERNAL_NETWORK_PATH:MEDIUM"
+    ]
+   },
+   {
+    "id": "files/xlsx-05-excel-table-pivot.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/xlsx-06-excel-picture-notes.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/xlsx-07-libreoffice.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "S01-empty-tree",
+    "split": "dev",
+    "class": "no-attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S02-empty-dict-af-null",
+    "split": "dev",
+    "class": "no-attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S03-empty-tree-indirect",
+    "split": "dev",
+    "class": "no-attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S04-empty-tree-object-stream",
+    "split": "dev",
+    "class": "no-attachment",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "S05-text-attachment",
+    "split": "dev",
+    "class": "attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S06-mz-bytes-text-name",
+    "split": "dev",
+    "class": "attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S07-c2pa-manifest-with-svg-script",
+    "split": "dev",
+    "class": "attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "yara-x:PDF_Embedded_File:LOW",
+     "yara-x:SVG_Script_Content:MEDIUM"
+    ]
+   },
+   {
+    "id": "S08-orphan-attachment-empty-tree",
+    "split": "dev",
+    "class": "attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S09-file-attachment-annotation",
+    "split": "dev",
+    "class": "attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S10-dangling-tree-entry",
+    "split": "dev",
+    "class": "ambiguous",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S11-incremental-update-removes-attachment",
+    "split": "dev",
+    "class": "ambiguous",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S12-broken-xref",
+    "split": "dev",
+    "class": "ambiguous",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S13-marker-in-page-text",
+    "split": "dev",
+    "class": "ambiguous",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S14-marker-after-eof",
+    "split": "dev",
+    "class": "ambiguous",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S15-auto-js-exports-attachment",
+    "split": "dev",
+    "class": "dangerous",
+    "verdict": "MALICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD:HIGH",
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "pdf:PDF_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_JAVASCRIPT_EXPLOIT_API:HIGH",
+     "yara-x:PDF_Embedded_File:LOW",
+     "yara-x:PDF_JavaScript_With_Automatic_Action:MEDIUM"
+    ]
+   },
+   {
+    "id": "S16-auto-launch-embedded-exe",
+    "split": "dev",
+    "class": "dangerous",
+    "verdict": "MALICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf:PDF_EMBEDDED_EXECUTABLE:HIGH",
+     "pdf:PDF_LAUNCH_ACTION:HIGH",
+     "yara-x:PDF_Embedded_File:LOW",
+     "yara-x:PDF_Launch_Action:HIGH"
+    ]
+   },
+   {
+    "id": "S17-empty-tree-auto-launch",
+    "split": "dev",
+    "class": "dangerous",
+    "verdict": "MALICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf:PDF_LAUNCH_ACTION:HIGH",
+     "yara-x:PDF_Embedded_File:LOW",
+     "yara-x:PDF_Launch_Action:HIGH"
+    ]
+   }
+  ],
+  "after/unified": [
+   {
+    "id": "D1",
+    "split": "dev",
+    "class": "benign",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ]
+   },
+   {
+    "id": "D2",
+    "split": "dev",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "D3",
+    "split": "dev",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L01",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L02",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L03",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L04",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L05",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L06",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L07",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L08",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L09",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L10",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L11",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L12",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L13",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L14",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L15",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L16",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L17",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L18",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L19",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L20",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L21",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L22",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L23",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L24",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L25",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L26",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L27",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L28",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L29",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L30",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L31",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L32",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L33",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L34",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L35",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L36",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L37",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L38",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L39",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L40",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L41",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L42",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L43",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L44",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L45",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L46",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L47",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L48",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L49",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L50",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L51",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L52",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L53",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L54",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "L55",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "independent/f1040.pdf",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "pdf:PDF_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_XFA_FORM:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "independent/fw4.pdf",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "pdf:PDF_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_XFA_FORM:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "independent/fw9.pdf",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "pdf:PDF_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_XFA_FORM:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "independent/NST-EST2023-POP.xlsx",
+    "split": "heldout",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/docx-01-word-plain.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/docx-02-word-rich.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/docx-03-word-embedded-excel.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/docx-04-word-linked-picture.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/docx-05-word-custom-template.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SUSPICIOUS",
+    "outcome": "unexpected warning",
+    "rules": [
+     "ooxml-links:ENGINE_OFFICE_LOCAL_TEMPLATE:LOW"
+    ]
+   },
+   {
+    "id": "files/docx-06-word-content-controls.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/docx-07-libreoffice.docx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-01-word-export.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-02-excel-export.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-03-powerpoint-export.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-04-libreoffice-tagged.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-05-libreoffice-pdfa.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-06-word-export-pdfa.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-07-libreoffice-hybrid.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pdf-08-edge-print.pdf",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-01-ppt-plain.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-02-ppt-pictures-notes.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-03-ppt-chart-table.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-04-ppt-hyperlinks-actions.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-05-ppt-transitions-animations.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-06-ppt-embedded-excel.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/pptx-07-libreoffice-roundtrip.pptx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/xlsx-01-excel-formulas.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/xlsx-02-excel-chart-formatting.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/xlsx-03-excel-hyperlinks-validation.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/xlsx-04-excel-external-workbook-link.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/xlsx-05-excel-table-pivot.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/xlsx-06-excel-picture-notes.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "files/xlsx-07-libreoffice.xlsx",
+    "split": "regression",
+    "class": "benign",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "S01-empty-tree",
+    "split": "dev",
+    "class": "no-attachment",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "S02-empty-dict-af-null",
+    "split": "dev",
+    "class": "no-attachment",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "S03-empty-tree-indirect",
+    "split": "dev",
+    "class": "no-attachment",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "S04-empty-tree-object-stream",
+    "split": "dev",
+    "class": "no-attachment",
+    "verdict": "SAFE",
+    "outcome": "correct",
+    "rules": []
+   },
+   {
+    "id": "S05-text-attachment",
+    "split": "dev",
+    "class": "attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ]
+   },
+   {
+    "id": "S06-mz-bytes-text-name",
+    "split": "dev",
+    "class": "attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ]
+   },
+   {
+    "id": "S07-c2pa-manifest-with-svg-script",
+    "split": "dev",
+    "class": "attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "yara-x:SVG_Script_Content:MEDIUM"
+    ]
+   },
+   {
+    "id": "S08-orphan-attachment-empty-tree",
+    "split": "dev",
+    "class": "attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ]
+   },
+   {
+    "id": "S09-file-attachment-annotation",
+    "split": "dev",
+    "class": "attachment",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ]
+   },
+   {
+    "id": "S10-dangling-tree-entry",
+    "split": "dev",
+    "class": "ambiguous",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S11-incremental-update-removes-attachment",
+    "split": "dev",
+    "class": "ambiguous",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S12-broken-xref",
+    "split": "dev",
+    "class": "ambiguous",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S13-marker-in-page-text",
+    "split": "dev",
+    "class": "ambiguous",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S14-marker-after-eof",
+    "split": "dev",
+    "class": "ambiguous",
+    "verdict": "SUSPICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   {
+    "id": "S15-auto-js-exports-attachment",
+    "split": "dev",
+    "class": "dangerous",
+    "verdict": "MALICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT:HIGH",
+     "pdf:PDF_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_JAVASCRIPT_EXPLOIT_API:HIGH",
+     "yara-x-engine:ENGINE_PDF_JavaScript_With_Automatic_Trigger:MEDIUM"
+    ]
+   },
+   {
+    "id": "S16-auto-launch-embedded-exe",
+    "split": "dev",
+    "class": "dangerous",
+    "verdict": "MALICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT:HIGH",
+     "pdf:PDF_EMBEDDED_EXECUTABLE:HIGH",
+     "pdf:PDF_LAUNCH_ACTION:HIGH",
+     "yara-x:PDF_Launch_Action:HIGH"
+    ]
+   },
+   {
+    "id": "S17-empty-tree-auto-launch",
+    "split": "dev",
+    "class": "dangerous",
+    "verdict": "MALICIOUS",
+    "outcome": "correct",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_LAUNCH:HIGH",
+     "pdf:PDF_LAUNCH_ACTION:HIGH",
+     "yara-x:PDF_Launch_Action:HIGH"
+    ]
+   }
+  ]
+ },
+ "timing": {
+  "before/reference": {
+   "wall_all": {
+    "n": 390,
+    "mean_ms": 632.94,
+    "median_ms": 595.08,
+    "p95_ms": 825.62,
+    "max_ms": 906.7,
+    "min_ms": 558.23
+   },
+   "wall_pdf": {
+    "n": 177,
+    "mean_ms": 664.73,
+    "median_ms": 644.06,
+    "p95_ms": 876.51,
+    "max_ms": 906.7,
+    "min_ms": 558.23
+   },
+   "scanners": {
+    "custom (completed)": {
+     "n": 390,
+     "mean_ms": 19.88,
+     "median_ms": 3.01,
+     "p95_ms": 131.459,
+     "max_ms": 268.74,
+     "min_ms": 0.077
+    },
+    "office (completed)": {
+     "n": 189,
+     "mean_ms": 2.75,
+     "median_ms": 2.5,
+     "p95_ms": 4.504,
+     "max_ms": 5.311,
+     "min_ms": 0.616
+    },
+    "office (not_applicable)": {
+     "n": 201,
+     "mean_ms": 0.0,
+     "median_ms": 0.0,
+     "p95_ms": 0.006,
+     "max_ms": 0.008,
+     "min_ms": 0.002
+    },
+    "pdf (completed)": {
+     "n": 201,
+     "mean_ms": 4.11,
+     "median_ms": 1.53,
+     "p95_ms": 16.999,
+     "max_ms": 44.956,
+     "min_ms": 0.418
+    },
+    "pdf (not_applicable)": {
+     "n": 189,
+     "mean_ms": 0.0,
+     "median_ms": 0.0,
+     "p95_ms": 0.005,
+     "max_ms": 0.027,
+     "min_ms": 0.003
+    },
+    "yara-x (completed)": {
+     "n": 390,
+     "mean_ms": 0.79,
+     "median_ms": 0.44,
+     "p95_ms": 2.849,
+     "max_ms": 4.498,
+     "min_ms": 0.297
+    }
+   }
+  },
+  "before/unified": {
+   "wall_all": {
+    "n": 390,
+    "mean_ms": 679.89,
+    "median_ms": 642.27,
+    "p95_ms": 927.26,
+    "max_ms": 1162.2,
+    "min_ms": 586.24
+   },
+   "wall_pdf": {
+    "n": 177,
+    "mean_ms": 722.7,
+    "median_ms": 684.34,
+    "p95_ms": 962.06,
+    "max_ms": 1162.2,
+    "min_ms": 586.24
+   },
+   "scanners": {
+    "custom (completed)": {
+     "n": 390,
+     "mean_ms": 20.21,
+     "median_ms": 3.06,
+     "p95_ms": 134.32,
+     "max_ms": 276.408,
+     "min_ms": 0.078
+    },
+    "office (completed)": {
+     "n": 189,
+     "mean_ms": 2.85,
+     "median_ms": 2.68,
+     "p95_ms": 4.656,
+     "max_ms": 5.421,
+     "min_ms": 0.636
+    },
+    "office (not_applicable)": {
+     "n": 201,
+     "mean_ms": 0.0,
+     "median_ms": 0.0,
+     "p95_ms": 0.006,
+     "max_ms": 0.078,
+     "min_ms": 0.002
+    },
+    "ooxml-links (completed)": {
+     "n": 189,
+     "mean_ms": 3.26,
+     "median_ms": 2.08,
+     "p95_ms": 12.196,
+     "max_ms": 18.923,
+     "min_ms": 0.401
+    },
+    "ooxml-links (not_applicable)": {
+     "n": 201,
+     "mean_ms": 0.0,
+     "median_ms": 0.0,
+     "p95_ms": 0.005,
+     "max_ms": 0.191,
+     "min_ms": 0.001
+    },
+    "pdf (completed)": {
+     "n": 201,
+     "mean_ms": 4.23,
+     "median_ms": 1.61,
+     "p95_ms": 15.9,
+     "max_ms": 46.67,
+     "min_ms": 0.427
+    },
+    "pdf (not_applicable)": {
+     "n": 189,
+     "mean_ms": 0.0,
+     "median_ms": 0.0,
+     "p95_ms": 0.005,
+     "max_ms": 0.016,
+     "min_ms": 0.003
+    },
+    "pdf-chains (completed)": {
+     "n": 201,
+     "mean_ms": 20.35,
+     "median_ms": 5.88,
+     "p95_ms": 81.332,
+     "max_ms": 115.181,
+     "min_ms": 0.317
+    },
+    "pdf-chains (not_applicable)": {
+     "n": 189,
+     "mean_ms": 0.01,
+     "median_ms": 0.01,
+     "p95_ms": 0.01,
+     "max_ms": 0.014,
+     "min_ms": 0.003
+    },
+    "vba-chains (completed)": {
+     "n": 3,
+     "mean_ms": 0.15,
+     "median_ms": 0.15,
+     "p95_ms": 0.154,
+     "max_ms": 0.154,
+     "min_ms": 0.141
+    },
+    "vba-chains (not_applicable)": {
+     "n": 387,
+     "mean_ms": 0.11,
+     "median_ms": 0.01,
+     "p95_ms": 0.453,
+     "max_ms": 0.771,
+     "min_ms": 0.002
+    },
+    "word-fields (completed)": {
+     "n": 63,
+     "mean_ms": 1.62,
+     "median_ms": 0.52,
+     "p95_ms": 5.27,
+     "max_ms": 5.796,
+     "min_ms": 0.319
+    },
+    "word-fields (not_applicable)": {
+     "n": 327,
+     "mean_ms": 0.73,
+     "median_ms": 0.0,
+     "p95_ms": 3.058,
+     "max_ms": 7.283,
+     "min_ms": 0.001
+    },
+    "yara-x (completed)": {
+     "n": 390,
+     "mean_ms": 0.79,
+     "median_ms": 0.43,
+     "p95_ms": 2.925,
+     "max_ms": 4.482,
+     "min_ms": 0.279
+    },
+    "yara-x-engine (completed)": {
+     "n": 390,
+     "mean_ms": 0.48,
+     "median_ms": 0.39,
+     "p95_ms": 1.008,
+     "max_ms": 1.801,
+     "min_ms": 0.267
+    }
+   }
+  },
+  "after/reference": {
+   "wall_all": {
+    "n": 390,
+    "mean_ms": 581.19,
+    "median_ms": 563.67,
+    "p95_ms": 695.53,
+    "max_ms": 837.18,
+    "min_ms": 543.21
+   },
+   "wall_pdf": {
+    "n": 177,
+    "mean_ms": 601.99,
+    "median_ms": 570.69,
+    "p95_ms": 764.31,
+    "max_ms": 837.18,
+    "min_ms": 543.21
+   },
+   "scanners": {
+    "custom (completed)": {
+     "n": 390,
+     "mean_ms": 18.7,
+     "median_ms": 3.01,
+     "p95_ms": 125.199,
+     "max_ms": 254.461,
+     "min_ms": 0.076
+    },
+    "office (completed)": {
+     "n": 189,
+     "mean_ms": 2.6,
+     "median_ms": 2.53,
+     "p95_ms": 4.207,
+     "max_ms": 4.675,
+     "min_ms": 0.621
+    },
+    "office (not_applicable)": {
+     "n": 201,
+     "mean_ms": 0.0,
+     "median_ms": 0.0,
+     "p95_ms": 0.005,
+     "max_ms": 0.007,
+     "min_ms": 0.002
+    },
+    "pdf (completed)": {
+     "n": 201,
+     "mean_ms": 3.78,
+     "median_ms": 1.56,
+     "p95_ms": 14.679,
+     "max_ms": 40.864,
+     "min_ms": 0.436
+    },
+    "pdf (not_applicable)": {
+     "n": 189,
+     "mean_ms": 0.0,
+     "median_ms": 0.0,
+     "p95_ms": 0.005,
+     "max_ms": 0.082,
+     "min_ms": 0.003
+    },
+    "yara-x (completed)": {
+     "n": 390,
+     "mean_ms": 0.74,
+     "median_ms": 0.42,
+     "p95_ms": 2.482,
+     "max_ms": 4.045,
+     "min_ms": 0.297
+    }
+   }
+  },
+  "after/unified": {
+   "wall_all": {
+    "n": 390,
+    "mean_ms": 625.24,
+    "median_ms": 600.0,
+    "p95_ms": 790.16,
+    "max_ms": 967.77,
+    "min_ms": 573.89
+   },
+   "wall_pdf": {
+    "n": 177,
+    "mean_ms": 654.36,
+    "median_ms": 613.84,
+    "p95_ms": 854.49,
+    "max_ms": 967.77,
+    "min_ms": 574.77
+   },
+   "scanners": {
+    "custom (completed)": {
+     "n": 390,
+     "mean_ms": 18.7,
+     "median_ms": 2.93,
+     "p95_ms": 124.384,
+     "max_ms": 255.656,
+     "min_ms": 0.075
+    },
+    "office (completed)": {
+     "n": 189,
+     "mean_ms": 2.73,
+     "median_ms": 2.67,
+     "p95_ms": 4.332,
+     "max_ms": 5.415,
+     "min_ms": 0.659
+    },
+    "office (not_applicable)": {
+     "n": 201,
+     "mean_ms": 0.0,
+     "median_ms": 0.0,
+     "p95_ms": 0.004,
+     "max_ms": 0.005,
+     "min_ms": 0.002
+    },
+    "ooxml-links (completed)": {
+     "n": 189,
+     "mean_ms": 3.04,
+     "median_ms": 2.06,
+     "p95_ms": 11.287,
+     "max_ms": 18.719,
+     "min_ms": 0.39
+    },
+    "ooxml-links (not_applicable)": {
+     "n": 201,
+     "mean_ms": 0.0,
+     "median_ms": 0.0,
+     "p95_ms": 0.007,
+     "max_ms": 0.009,
+     "min_ms": 0.001
+    },
+    "pdf (completed)": {
+     "n": 201,
+     "mean_ms": 3.81,
+     "median_ms": 1.53,
+     "p95_ms": 15.202,
+     "max_ms": 42.063,
+     "min_ms": 0.43
+    },
+    "pdf (not_applicable)": {
+     "n": 189,
+     "mean_ms": 0.0,
+     "median_ms": 0.0,
+     "p95_ms": 0.005,
+     "max_ms": 0.009,
+     "min_ms": 0.003
+    },
+    "pdf-chains (completed)": {
+     "n": 201,
+     "mean_ms": 19.02,
+     "median_ms": 6.28,
+     "p95_ms": 75.689,
+     "max_ms": 106.784,
+     "min_ms": 0.328
+    },
+    "pdf-chains (not_applicable)": {
+     "n": 189,
+     "mean_ms": 0.01,
+     "median_ms": 0.0,
+     "p95_ms": 0.009,
+     "max_ms": 0.021,
+     "min_ms": 0.003
+    },
+    "vba-chains (completed)": {
+     "n": 3,
+     "mean_ms": 0.15,
+     "median_ms": 0.14,
+     "p95_ms": 0.161,
+     "max_ms": 0.161,
+     "min_ms": 0.143
+    },
+    "vba-chains (not_applicable)": {
+     "n": 387,
+     "mean_ms": 0.11,
+     "median_ms": 0.01,
+     "p95_ms": 0.4,
+     "max_ms": 0.57,
+     "min_ms": 0.002
+    },
+    "word-fields (completed)": {
+     "n": 63,
+     "mean_ms": 1.6,
+     "median_ms": 0.5,
+     "p95_ms": 5.282,
+     "max_ms": 5.67,
+     "min_ms": 0.332
+    },
+    "word-fields (not_applicable)": {
+     "n": 327,
+     "mean_ms": 0.66,
+     "median_ms": 0.0,
+     "p95_ms": 2.568,
+     "max_ms": 6.166,
+     "min_ms": 0.001
+    },
+    "yara-x (completed)": {
+     "n": 390,
+     "mean_ms": 0.73,
+     "median_ms": 0.42,
+     "p95_ms": 2.559,
+     "max_ms": 4.038,
+     "min_ms": 0.29
+    },
+    "yara-x-engine (completed)": {
+     "n": 390,
+     "mean_ms": 0.48,
+     "median_ms": 0.36,
+     "p95_ms": 1.15,
+     "max_ms": 1.865,
+     "min_ms": 0.271
+    }
+   }
+  }
+ }
+}
