@@ -1,0 +1,4264 @@
+{
+ "health": {
+  "status": "ok",
+  "service": "filesmagic-security-engine",
+  "scanners_registered": 4,
+  "scanners_ready": 4,
+  "auth_configured": true,
+  "engines": [
+   "reference",
+   "unified"
+  ],
+  "default_engine": "reference",
+  "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f"
+ },
+ "started_utc": "2026-11-11T19:48:27Z",
+ "timestamp_utc": "2026-11-11T21:06:23Z",
+ "client_network_errors": [],
+ "rows": [
+  {
+   "case": "limits-06.pdf",
+   "group": "resource",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 7254.9,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 7154.9,
+    "scanner_ms": {
+     "yara-x": 0.561,
+     "office": 0.004,
+     "pdf": 1.759,
+     "custom": 86.762,
+     "yara-x-engine": 0.586,
+     "pdf-chains": 805.867,
+     "vba-chains": 0.009,
+     "ooxml-links": 0.008,
+     "word-fields": 0.003
+    },
+    "sha256": "8b932272a73777077398d1aa9429efd2ee2dcbdf2e9ad57e2b44638603be1cf7",
+    "sent_sha256": "8b932272a73777077398d1aa9429efd2ee2dcbdf2e9ad57e2b44638603be1cf7",
+    "bytes": 17805,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "Content Credentials 000: not verified: a JUMBF (C2PA) box: c2pa.test: more than 100000 CBOR or JSON items in the manifest stores of this file",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ]
+   },
+   "problems": []
+  },
+  {
+   "case": "limits-19.pdf",
+   "group": "resource",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 15697.0,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SAFE",
+    "rules": [],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 15479.5,
+    "scanner_ms": {
+     "yara-x": 0.461,
+     "office": 0.002,
+     "pdf": 2.811,
+     "custom": 2.382,
+     "yara-x-engine": 0.54,
+     "pdf-chains": 9096.936,
+     "vba-chains": 0.009,
+     "ooxml-links": 0.008,
+     "word-fields": 0.004
+    },
+    "sha256": "46edc49e535f4ba98631033c8e9e57c0817972456ea1c538e9a5de2136793815",
+    "sent_sha256": "46edc49e535f4ba98631033c8e9e57c0817972456ea1c538e9a5de2136793815",
+    "bytes": 38569,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_VERIFIED",
+      "severity": "INFO",
+      "evidence": [
+       "Content Credentials 000: a C2PA manifest store (Content Credentials) whose signature was not validated (99986 bytes): 1 manifest(s), no script, active markup or external reference; data in CBOR or JSON and 0 picture(s); assertions c2pa.actions.v2, c2pa.hash.data, c2pa.test",
+       "Content Credentials 001: a C2PA manifest store (Content Credentials) whose signature was not validated (79382 bytes): 1 manifest(s), no script, active markup or external reference; data in CBOR or JSON and 0 picture(s); assertions c2pa.actions.v2, c2pa.hash.data, c2pa.test",
+       "Content Credentials 002: a C2PA manifest store (Content Credentials) whose signature was not validated (800986 bytes): 1 manifest(s), no script, active markup or external reference; data in CBOR or JSON and 0 picture(s); assertions c2pa.actions.v2, c2pa.hash.data, c2pa.test"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SAFE",
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "rules": []
+   },
+   "problems": []
+  },
+  {
+   "case": "limits-01.pdf",
+   "group": "resource",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6513.8,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SAFE",
+    "rules": [],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6425.0,
+    "scanner_ms": {
+     "yara-x": 0.436,
+     "office": 0.003,
+     "pdf": 1.748,
+     "custom": 0.238,
+     "yara-x-engine": 0.378,
+     "pdf-chains": 92.605,
+     "vba-chains": 0.006,
+     "ooxml-links": 0.005,
+     "word-fields": 0.002
+    },
+    "sha256": "2a16cb6a2492a76eb9e55b147481011d5bf46c45fd48974fa5e6ca4f0bee4b1d",
+    "sent_sha256": "2a16cb6a2492a76eb9e55b147481011d5bf46c45fd48974fa5e6ca4f0bee4b1d",
+    "bytes": 1594,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_VERIFIED",
+      "severity": "INFO",
+      "evidence": [
+       "Content Credentials 000: a C2PA manifest store (Content Credentials) whose signature was not validated (80822 bytes): 1 manifest(s), no script, active markup or external reference; data in CBOR or JSON and 0 picture(s); assertions c2pa.actions.v2, c2pa.hash.data, c2pa.test",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SAFE",
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "rules": []
+   },
+   "problems": []
+  },
+  {
+   "case": "limits-02.pdf",
+   "group": "resource",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 7316.6,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 7207.8,
+    "scanner_ms": {
+     "yara-x": 0.462,
+     "office": 0.004,
+     "pdf": 1.65,
+     "custom": 1.766,
+     "yara-x-engine": 0.433,
+     "pdf-chains": 301.556,
+     "vba-chains": 0.01,
+     "ooxml-links": 0.008,
+     "word-fields": 0.004
+    },
+    "sha256": "2c537a968e1f79c7ddfdebcda15d531d89ab492873df9c3cf10861f428eb1587",
+    "sent_sha256": "2c537a968e1f79c7ddfdebcda15d531d89ab492873df9c3cf10861f428eb1587",
+    "bytes": 25928,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "Content Credentials 000: not verified: a JUMBF (C2PA) box: more than 10000 boxes in the manifest stores of this file",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ]
+   },
+   "problems": []
+  },
+  {
+   "case": "limits-03.pdf",
+   "group": "resource",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 7368.7,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 7107.6,
+    "scanner_ms": {
+     "yara-x": 0.669,
+     "office": 0.005,
+     "pdf": 200.762,
+     "custom": 9.807,
+     "yara-x-engine": 0.618,
+     "pdf-chains": 399.27,
+     "vba-chains": 0.013,
+     "ooxml-links": 0.01,
+     "word-fields": 0.005
+    },
+    "sha256": "9492300c0176cdeb0a9b9c27686f203f44d20d31eb102492f402137e6a70f9b6",
+    "sent_sha256": "9492300c0176cdeb0a9b9c27686f203f44d20d31eb102492f402137e6a70f9b6",
+    "bytes": 109269,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "Content Credentials 000: a C2PA manifest store (Content Credentials) whose signature was not validated (80822 bytes): 1 manifest(s), no script, active markup or external reference; data in CBOR or JSON and 0 picture(s); assertions c2pa.actions.v2, c2pa.hash.data, c2pa.test",
+       "Content Credentials 001: not verified: a JUMBF (C2PA) box: more than 10000 boxes in the manifest stores of this file",
+       "Content Credentials 002: not verified: a JUMBF (C2PA) box: more than 10000 boxes in the manifest stores of this file"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   "problems": []
+  },
+  {
+   "case": "limits-04.pdf",
+   "group": "resource",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 7122.6,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SAFE",
+    "rules": [],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 7024.2,
+    "scanner_ms": {
+     "yara-x": 0.55,
+     "office": 0.004,
+     "pdf": 87.541,
+     "custom": 0.314,
+     "yara-x-engine": 0.659,
+     "pdf-chains": 401.874,
+     "vba-chains": 0.01,
+     "ooxml-links": 0.007,
+     "word-fields": 0.004
+    },
+    "sha256": "955208a3041fb937135d8007bc0957e1efd40c83cfa40927d8601e5b4929b703",
+    "sent_sha256": "955208a3041fb937135d8007bc0957e1efd40c83cfa40927d8601e5b4929b703",
+    "bytes": 1573,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_VERIFIED",
+      "severity": "INFO",
+      "evidence": [
+       "Content Credentials 000: a C2PA manifest store (Content Credentials) whose signature was not validated (100886 bytes): 1 manifest(s), no script, active markup or external reference; data in CBOR or JSON and 0 picture(s); assertions c2pa.actions.v2, c2pa.hash.data, c2pa.test",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SAFE",
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "rules": []
+   },
+   "problems": []
+  },
+  {
+   "case": "limits-05.pdf",
+   "group": "resource",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 8647.2,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 8180.2,
+    "scanner_ms": {
+     "yara-x": 0.62,
+     "office": 0.004,
+     "pdf": 196.874,
+     "custom": 95.608,
+     "yara-x-engine": 0.664,
+     "pdf-chains": 909.36,
+     "vba-chains": 0.011,
+     "ooxml-links": 0.009,
+     "word-fields": 0.004
+    },
+    "sha256": "da8b781ea4043768bcef6a0d66b888b134a9a39ddc6c761118d4976aa5023717",
+    "sent_sha256": "da8b781ea4043768bcef6a0d66b888b134a9a39ddc6c761118d4976aa5023717",
+    "bytes": 107169,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "Content Credentials 000: a C2PA manifest store (Content Credentials) whose signature was not validated (100886 bytes): 1 manifest(s), no script, active markup or external reference; data in CBOR or JSON and 0 picture(s); assertions c2pa.actions.v2, c2pa.hash.data, c2pa.test",
+       "Content Credentials 001: not verified: a JUMBF (C2PA) box: c2pa.test: more than 100000 CBOR or JSON items in the manifest stores of this file",
+       "Content Credentials 002: not verified: a JUMBF (C2PA) box: c2pa.actions.v2: more than 100000 CBOR or JSON items in the manifest stores of this file"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   "problems": []
+  },
+  {
+   "case": "limits-07.pdf",
+   "group": "resource",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6842.3,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SAFE",
+    "rules": [],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6636.4,
+    "scanner_ms": {
+     "yara-x": 0.831,
+     "office": 0.007,
+     "pdf": 1.821,
+     "custom": 0.229,
+     "yara-x-engine": 0.428,
+     "pdf-chains": 1.85,
+     "vba-chains": 0.006,
+     "ooxml-links": 0.005,
+     "word-fields": 0.002
+    },
+    "sha256": "ec014c441d1ca24188fd5a0a03a1ee784bc0754be2d07a382dbdcf32556ea033",
+    "sent_sha256": "ec014c441d1ca24188fd5a0a03a1ee784bc0754be2d07a382dbdcf32556ea033",
+    "bytes": 1355,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_VERIFIED",
+      "severity": "INFO",
+      "evidence": [
+       "Content Credentials 000: a C2PA manifest store (Content Credentials) whose signature was not validated (1045 bytes): 1 manifest(s), no script, active markup or external reference; data in CBOR or JSON and 0 picture(s); assertions c2pa.actions.v2, c2pa.hash.data, c2pa.test",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SAFE",
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "rules": []
+   },
+   "problems": []
+  },
+  {
+   "case": "limits-08.pdf",
+   "group": "resource",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 7151.4,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6760.0,
+    "scanner_ms": {
+     "yara-x": 0.572,
+     "office": 0.003,
+     "pdf": 89.341,
+     "custom": 1.68,
+     "yara-x-engine": 0.902,
+     "pdf-chains": 299.723,
+     "vba-chains": 0.009,
+     "ooxml-links": 0.007,
+     "word-fields": 0.003
+    },
+    "sha256": "fe8f6116869cca9645266614a9bc025934b765942fa2ada824a7d86c1245ec6f",
+    "sent_sha256": "fe8f6116869cca9645266614a9bc025934b765942fa2ada824a7d86c1245ec6f",
+    "bytes": 17814,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "Content Credentials 000: not verified: a JUMBF (C2PA) box: c2pa.test: more than 1048576 bytes of JSON in the manifest stores of this file",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ]
+   },
+   "problems": []
+  },
+  {
+   "case": "limits-09.pdf",
+   "group": "resource",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 7220.6,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SAFE",
+    "rules": [],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6944.7,
+    "scanner_ms": {
+     "yara-x": 0.466,
+     "office": 0.003,
+     "pdf": 1.398,
+     "custom": 0.274,
+     "yara-x-engine": 0.438,
+     "pdf-chains": 396.378,
+     "vba-chains": 0.009,
+     "ooxml-links": 0.007,
+     "word-fields": 0.003
+    },
+    "sha256": "b5e98e71f9bfe72277a5ddabc01c921149b48fd3c2e13e090faa8cab3a2820cc",
+    "sent_sha256": "b5e98e71f9bfe72277a5ddabc01c921149b48fd3c2e13e090faa8cab3a2820cc",
+    "bytes": 2493,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_VERIFIED",
+      "severity": "INFO",
+      "evidence": [
+       "Content Credentials 000: a C2PA manifest store (Content Credentials) whose signature was not validated (1047562 bytes): 1 manifest(s), no script, active markup or external reference; data in CBOR or JSON and 0 picture(s); assertions c2pa.actions.v2, c2pa.hash.data, c2pa.test",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SAFE",
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "rules": []
+   },
+   "problems": []
+  },
+  {
+   "case": "limits-10.pdf",
+   "group": "resource",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 7512.6,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 7097.4,
+    "scanner_ms": {
+     "yara-x": 0.817,
+     "office": 0.007,
+     "pdf": 88.093,
+     "custom": 2.536,
+     "yara-x-engine": 0.746,
+     "pdf-chains": 797.569,
+     "vba-chains": 0.01,
+     "ooxml-links": 0.008,
+     "word-fields": 0.004
+    },
+    "sha256": "f9a6cdfe73b408de288ca53c68ca97cecef33c3fe45616f47aec4dc00f859667",
+    "sent_sha256": "f9a6cdfe73b408de288ca53c68ca97cecef33c3fe45616f47aec4dc00f859667",
+    "bytes": 32248,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "Content Credentials 000: a C2PA manifest store (Content Credentials) whose signature was not validated (1047562 bytes): 1 manifest(s), no script, active markup or external reference; data in CBOR or JSON and 0 picture(s); assertions c2pa.actions.v2, c2pa.hash.data, c2pa.test",
+       "Content Credentials 001: not verified: a JUMBF (C2PA) box: more than 1048576 characters of text in the manifest stores of this file",
+       "Content Credentials 002: not verified: a JUMBF (C2PA) box: more than 1048576 characters of text in the manifest stores of this file"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ]
+   },
+   "problems": []
+  },
+  {
+   "case": "limits-11.pdf",
+   "group": "resource",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 7847.0,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SAFE",
+    "rules": [],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 7369.6,
+    "scanner_ms": {
+     "yara-x": 0.462,
+     "office": 0.002,
+     "pdf": 1.577,
+     "custom": 0.515,
+     "yara-x-engine": 0.41,
+     "pdf-chains": 1101.372,
+     "vba-chains": 0.01,
+     "ooxml-links": 0.008,
+     "word-fields": 0.004
+    },
+    "sha256": "2c288bfe056226881a7f50102920b78696c305e764ff81baa02300078216afb0",
+    "sent_sha256": "2c288bfe056226881a7f50102920b78696c305e764ff81baa02300078216afb0",
+    "bytes": 5528,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_VERIFIED",
+      "severity": "INFO",
+      "evidence": [
+       "Content Credentials 000: a C2PA manifest store (Content Credentials) whose signature was not validated (1160945 bytes): 1 manifest(s), no script, active markup or external reference; data in CBOR or JSON and 1 picture(s): c2pa.thumbnail.claim static SVG; assertions c2pa.actions.v2, c2pa.hash.data, \u2026",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SAFE",
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "rules": []
+   },
+   "problems": []
+  },
+  {
+   "case": "limits-12.pdf",
+   "group": "resource",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 7797.2,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 7595.0,
+    "scanner_ms": {
+     "yara-x": 0.57,
+     "office": 0.004,
+     "pdf": 100.337,
+     "custom": 93.994,
+     "yara-x-engine": 0.708,
+     "pdf-chains": 1110.717,
+     "vba-chains": 0.008,
+     "ooxml-links": 0.008,
+     "word-fields": 0.003
+    },
+    "sha256": "3d8dbe7e7a1f61cb8e994cef027459bc787a07f51aa95e35a8f8e2d5c911ba60",
+    "sent_sha256": "3d8dbe7e7a1f61cb8e994cef027459bc787a07f51aa95e35a8f8e2d5c911ba60",
+    "bytes": 114119,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "Content Credentials 000: a C2PA manifest store (Content Credentials) whose signature was not validated (411020 bytes): 1 manifest(s), no script, active markup or external reference; data in CBOR or JSON and 1 picture(s): c2pa.thumbnail.claim static SVG; assertions c2pa.actions.v2, c2pa.hash.data, c\u2026",
+       "Content Credentials 001: not verified: a JUMBF (C2PA) box: c2pa.thumbnail.claim: markup with more than 10000 elements in the manifest stores of this file",
+       "Content Credentials 002: not verified: a JUMBF (C2PA) box: c2pa.thumbnail.claim: markup with more than 10000 elements in the manifest stores of this file"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ]
+   },
+   "problems": []
+  },
+  {
+   "case": "limits-13.pdf",
+   "group": "resource",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 10558.7,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SAFE",
+    "rules": [],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 10397.9,
+    "scanner_ms": {
+     "yara-x": 0.567,
+     "office": 0.005,
+     "pdf": 1.966,
+     "custom": 1.357,
+     "yara-x-engine": 0.401,
+     "pdf-chains": 4207.021,
+     "vba-chains": 0.009,
+     "ooxml-links": 0.007,
+     "word-fields": 0.004
+    },
+    "sha256": "69494880e3765af6842539d61e342b5dcb9d9a119e7c884fcacb5c214ee35b6d",
+    "sent_sha256": "69494880e3765af6842539d61e342b5dcb9d9a119e7c884fcacb5c214ee35b6d",
+    "bytes": 17893,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_VERIFIED",
+      "severity": "INFO",
+      "evidence": [
+       "Content Credentials 000: a C2PA manifest store (Content Credentials) whose signature was not validated (16774273 bytes): 1 manifest(s), no script, active markup or external reference; data in CBOR or JSON and 1 picture(s): c2pa.thumbnail.claim JPEG; assertions c2pa.actions.v2, c2pa.hash.data, c2pa.\u2026",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SAFE",
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "rules": []
+   },
+   "problems": []
+  },
+  {
+   "case": "limits-14.pdf",
+   "group": "resource",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 11332.9,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SAFE",
+    "rules": [],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 11201.8,
+    "scanner_ms": {
+     "yara-x": 0.52,
+     "office": 0.005,
+     "pdf": 1.778,
+     "custom": 1.244,
+     "yara-x-engine": 0.495,
+     "pdf-chains": 5098.047,
+     "vba-chains": 0.009,
+     "ooxml-links": 0.008,
+     "word-fields": 0.003
+    },
+    "sha256": "0ef9f3b0ec851e68dede9214f03ef109b81605ab2f633b89bceba6e4deb28684",
+    "sent_sha256": "0ef9f3b0ec851e68dede9214f03ef109b81605ab2f633b89bceba6e4deb28684",
+    "bytes": 17900,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_VERIFIED",
+      "severity": "INFO",
+      "evidence": [
+       "Content Credentials 000: a C2PA manifest store (Content Credentials) whose signature was not validated (16774273 bytes): 1 manifest(s), no script, active markup or external reference; data in CBOR or JSON and 1 picture(s): c2pa.thumbnail.claim JPEG; assertions c2pa.actions.v2, c2pa.hash.data, c2pa.\u2026",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SAFE",
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "rules": []
+   },
+   "problems": []
+  },
+  {
+   "case": "limits-15.pdf",
+   "group": "resource",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 7852.0,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 7702.0,
+    "scanner_ms": {
+     "yara-x": 0.611,
+     "office": 0.005,
+     "pdf": 1.618,
+     "custom": 1.172,
+     "yara-x-engine": 0.428,
+     "pdf-chains": 898.844,
+     "vba-chains": 0.01,
+     "ooxml-links": 0.008,
+     "word-fields": 0.003
+    },
+    "sha256": "2a0ee3ab575a4a66df14e2b87a5f0decbd6d0968e1103ebd4eb1cd88c46db064",
+    "sent_sha256": "2a0ee3ab575a4a66df14e2b87a5f0decbd6d0968e1103ebd4eb1cd88c46db064",
+    "bytes": 17908,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "Content Credentials 000: not verified: a JUMBF (C2PA) box: c2pa.thumbnail.claim: JPEG with more than 100000 markers and chunks in the pictures of this file",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ]
+   },
+   "problems": []
+  },
+  {
+   "case": "limits-16.pdf",
+   "group": "resource",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 14985.8,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SAFE",
+    "rules": [],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 14830.1,
+    "scanner_ms": {
+     "yara-x": 86.515,
+     "office": 0.008,
+     "pdf": 1.762,
+     "custom": 2.038,
+     "yara-x-engine": 0.575,
+     "pdf-chains": 7806.417,
+     "vba-chains": 0.011,
+     "ooxml-links": 0.008,
+     "word-fields": 0.003
+    },
+    "sha256": "740c8791058e08789fb42e7949d8f4be5bb809769997b6e2c2fff5bea37568a8",
+    "sent_sha256": "740c8791058e08789fb42e7949d8f4be5bb809769997b6e2c2fff5bea37568a8",
+    "bytes": 34157,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_VERIFIED",
+      "severity": "INFO",
+      "evidence": [
+       "Content Credentials 000: a C2PA manifest store (Content Credentials) whose signature was not validated (16774273 bytes): 1 manifest(s), no script, active markup or external reference; data in CBOR or JSON and 1 picture(s): c2pa.thumbnail.claim JPEG; assertions c2pa.actions.v2, c2pa.hash.data, c2pa.\u2026",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SAFE",
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "rules": []
+   },
+   "problems": []
+  },
+  {
+   "case": "limits-17.pdf",
+   "group": "resource",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 8494.0,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 8381.4,
+    "scanner_ms": {
+     "yara-x": 0.471,
+     "office": 0.003,
+     "pdf": 1.445,
+     "custom": 2.091,
+     "yara-x-engine": 0.432,
+     "pdf-chains": 1193.638,
+     "vba-chains": 0.011,
+     "ooxml-links": 0.007,
+     "word-fields": 0.004
+    },
+    "sha256": "c958af1302e37457ed7e1e81be5f0dc63209c0e639272419b0203ec4bdb3130d",
+    "sent_sha256": "c958af1302e37457ed7e1e81be5f0dc63209c0e639272419b0203ec4bdb3130d",
+    "bytes": 34183,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "Content Credentials 000: not verified: a JUMBF (C2PA) box: c2pa.thumbnail.claim: PNG with more than 100000 markers and chunks in the pictures of this file",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ]
+   },
+   "problems": []
+  },
+  {
+   "case": "limits-18.pdf",
+   "group": "resource",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 10585.6,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SAFE",
+    "rules": [],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 10450.6,
+    "scanner_ms": {
+     "yara-x": 0.45,
+     "office": 0.005,
+     "pdf": 87.958,
+     "custom": 1.599,
+     "yara-x-engine": 3.316,
+     "pdf-chains": 4203.062,
+     "vba-chains": 0.01,
+     "ooxml-links": 0.008,
+     "word-fields": 0.004
+    },
+    "sha256": "c2b0ee9453758e4c956496fcdd01645e1e3b63aa3a4cbfa5ba9990c7bf28ae2b",
+    "sent_sha256": "c2b0ee9453758e4c956496fcdd01645e1e3b63aa3a4cbfa5ba9990c7bf28ae2b",
+    "bytes": 17906,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_VERIFIED",
+      "severity": "INFO",
+      "evidence": [
+       "Content Credentials 000: a C2PA manifest store (Content Credentials) whose signature was not validated (16774188 bytes): 1 manifest(s), no script, active markup or external reference; data in CBOR or JSON and 1 picture(s): c2pa.thumbnail.claim PNG; assertions c2pa.actions.v2, c2pa.hash.data, c2pa.t\u2026",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SAFE",
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "rules": []
+   },
+   "problems": []
+  },
+  {
+   "case": "C01-cbor-only",
+   "group": "c2pa",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6185.3,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SAFE",
+    "rules": [],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6041.7,
+    "scanner_ms": {
+     "yara-x": 0.743,
+     "office": 0.007,
+     "pdf": 1.634,
+     "custom": 0.319,
+     "yara-x-engine": 0.429,
+     "pdf-chains": 2.197,
+     "vba-chains": 0.007,
+     "ooxml-links": 0.004,
+     "word-fields": 0.002
+    },
+    "sha256": "8f07b01caf2f27c6677709471e89531929d83cad25a0de4b224f18a0f0d4d693",
+    "sent_sha256": "8f07b01caf2f27c6677709471e89531929d83cad25a0de4b224f18a0f0d4d693",
+    "bytes": 1813,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_VERIFIED",
+      "severity": "INFO",
+      "evidence": [
+       "Content Credentials: a C2PA manifest store (Content Credentials) whose signature was not validated (930 bytes): 1 manifest(s), no script, active markup or external reference; data in CBOR or JSON and 0 picture(s); assertions c2pa.actions.v2, c2pa.hash.data",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SAFE",
+    "rules": [],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "C04-static-svg-icon",
+   "group": "c2pa",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6434.3,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SAFE",
+    "rules": [],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6350.0,
+    "scanner_ms": {
+     "yara-x": 0.516,
+     "office": 0.004,
+     "pdf": 1.508,
+     "custom": 0.269,
+     "yara-x-engine": 0.413,
+     "pdf-chains": 89.481,
+     "vba-chains": 0.008,
+     "ooxml-links": 0.007,
+     "word-fields": 0.003
+    },
+    "sha256": "e830bb860a8f384788f523e86fcde868aba578eae3b4d4e892b887e6779f301d",
+    "sent_sha256": "e830bb860a8f384788f523e86fcde868aba578eae3b4d4e892b887e6779f301d",
+    "bytes": 2032,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_VERIFIED",
+      "severity": "INFO",
+      "evidence": [
+       "Content Credentials: a C2PA manifest store (Content Credentials) whose signature was not validated (1148 bytes): 1 manifest(s), no script, active markup or external reference; data in CBOR or JSON and 1 picture(s): c2pa.icon static SVG; assertions c2pa.actions.v2, c2pa.hash.data, c2pa.icon",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SAFE",
+    "rules": [],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "C09-with-verified-odt",
+   "group": "c2pa",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6701.0,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SAFE",
+    "rules": [],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6572.2,
+    "scanner_ms": {
+     "yara-x": 0.618,
+     "office": 0.004,
+     "pdf": 2.315,
+     "custom": 0.506,
+     "yara-x-engine": 0.65,
+     "pdf-chains": 91.355,
+     "vba-chains": 0.01,
+     "ooxml-links": 0.008,
+     "word-fields": 0.005
+    },
+    "sha256": "bef32a899b7d73d29a2e1b8f33537b2bca620a863e14596e9a3706dd75e3033e",
+    "sent_sha256": "bef32a899b7d73d29a2e1b8f33537b2bca620a863e14596e9a3706dd75e3033e",
+    "bytes": 2414,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_VERIFIED",
+      "severity": "INFO",
+      "evidence": [
+       "Content Credentials: a C2PA manifest store (Content Credentials) whose signature was not validated (930 bytes): 1 manifest(s), no script, active markup or external reference; data in CBOR or JSON and 0 picture(s); assertions c2pa.actions.v2, c2pa.hash.data",
+       "plan.odt: OpenDocument .odt without macros, scripts, embedded objects or automatically loaded external content (336 bytes; 0 passive hyperlink(s), followed only on a click)",
+       "accounts for pdf:PDF_EMBEDDED_FILE"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SAFE",
+    "rules": [],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "C10-svg-script",
+   "group": "c2pa",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6549.9,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "yara-x:SVG_Script_Content:MEDIUM"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6395.3,
+    "scanner_ms": {
+     "yara-x": 0.602,
+     "office": 0.002,
+     "pdf": 1.539,
+     "custom": 0.283,
+     "yara-x-engine": 0.6,
+     "pdf-chains": 1.748,
+     "vba-chains": 0.003,
+     "ooxml-links": 0.003,
+     "word-fields": 0.002
+    },
+    "sha256": "687edf80842030bcac483fc0ad843db44e23fa9a2c816f2b3d0fd1c8c63296fc",
+    "sent_sha256": "687edf80842030bcac483fc0ad843db44e23fa9a2c816f2b3d0fd1c8c63296fc",
+    "bytes": 1962,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "Content Credentials: not verified: a JUMBF (C2PA) box: c2pa.icon: markup with element 'script', which is not a static shape",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "yara-x:SVG_Script_Content:MEDIUM"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "C11-svg-onload",
+   "group": "c2pa",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6593.7,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "yara-x:SVG_Script_Content:MEDIUM"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6503.7,
+    "scanner_ms": {
+     "yara-x": 0.574,
+     "office": 0.004,
+     "pdf": 1.717,
+     "custom": 0.299,
+     "yara-x-engine": 0.456,
+     "pdf-chains": 1.754,
+     "vba-chains": 0.005,
+     "ooxml-links": 0.005,
+     "word-fields": 0.002
+    },
+    "sha256": "f46a2bda381ae4b61d99057528d7817b3d6e3abfe72f841ab47af2db8c37d4eb",
+    "sent_sha256": "f46a2bda381ae4b61d99057528d7817b3d6e3abfe72f841ab47af2db8c37d4eb",
+    "bytes": 1966,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "Content Credentials: not verified: a JUMBF (C2PA) box: c2pa.icon: markup with attribute 'onload', not a geometry or presentation attribute",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "yara-x:SVG_Script_Content:MEDIUM"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "C19-svg-set-href",
+   "group": "c2pa",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6694.5,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "yara-x:SVG_Script_Content:MEDIUM"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6590.6,
+    "scanner_ms": {
+     "yara-x": 0.642,
+     "office": 0.005,
+     "pdf": 2.07,
+     "custom": 85.694,
+     "yara-x-engine": 0.699,
+     "pdf-chains": 2.185,
+     "vba-chains": 0.008,
+     "ooxml-links": 0.006,
+     "word-fields": 0.003
+    },
+    "sha256": "f92099b0c482b4659a24fe0a00a552b6478d043d871ee969a8044ddd626fd6d5",
+    "sent_sha256": "f92099b0c482b4659a24fe0a00a552b6478d043d871ee969a8044ddd626fd6d5",
+    "bytes": 2008,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "Content Credentials: not verified: a JUMBF (C2PA) box: c2pa.icon: markup with element 'a', which is not a static shape",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "yara-x:SVG_Script_Content:MEDIUM"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "C21-html-in-data-box",
+   "group": "c2pa",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 7084.4,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6986.5,
+    "scanner_ms": {
+     "yara-x": 0.766,
+     "office": 0.006,
+     "pdf": 2.063,
+     "custom": 0.354,
+     "yara-x-engine": 0.474,
+     "pdf-chains": 1.827,
+     "vba-chains": 0.005,
+     "ooxml-links": 0.005,
+     "word-fields": 0.002
+    },
+    "sha256": "e500497f077963a772cbeadf20938f0d3d9de44589a02928ca2e4ec8004b2180",
+    "sent_sha256": "e500497f077963a772cbeadf20938f0d3d9de44589a02928ca2e4ec8004b2180",
+    "bytes": 1940,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "Content Credentials: not verified: a JUMBF (C2PA) box: c2pa.icon: markup that could not be read as XML (DTDForbidden)",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "C14-svg-external-image",
+   "group": "c2pa",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6786.5,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6705.8,
+    "scanner_ms": {
+     "yara-x": 0.72,
+     "office": 0.006,
+     "pdf": 6.39,
+     "custom": 3.425,
+     "yara-x-engine": 0.782,
+     "pdf-chains": 3.328,
+     "vba-chains": 0.007,
+     "ooxml-links": 0.008,
+     "word-fields": 0.004
+    },
+    "sha256": "d1a3bc151bd0408f7ead0da403b3870a0823a89680ea8faa986779915f34278c",
+    "sent_sha256": "d1a3bc151bd0408f7ead0da403b3870a0823a89680ea8faa986779915f34278c",
+    "bytes": 2000,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "Content Credentials: not verified: a JUMBF (C2PA) box: c2pa.icon: markup with element 'image', which is not a static shape",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "C35-external-reference",
+   "group": "c2pa",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6458.0,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6271.0,
+    "scanner_ms": {
+     "yara-x": 0.47,
+     "office": 0.004,
+     "pdf": 86.902,
+     "custom": 0.415,
+     "yara-x-engine": 0.899,
+     "pdf-chains": 1.673,
+     "vba-chains": 0.01,
+     "ooxml-links": 0.006,
+     "word-fields": 0.003
+    },
+    "sha256": "dbc6f07f65219345fb121b6cd46676d35e60a4780a90d6ba1f83e0ac729d1023",
+    "sent_sha256": "dbc6f07f65219345fb121b6cd46676d35e60a4780a90d6ba1f83e0ac729d1023",
+    "bytes": 1930,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "Content Credentials: not verified: a JUMBF (C2PA) box: c2pa.thumbnail.claim.jpeg: a file description that is malformed or points to an external file",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "C50-truncated",
+   "group": "c2pa",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6397.3,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6257.6,
+    "scanner_ms": {
+     "yara-x": 0.55,
+     "office": 0.004,
+     "pdf": 1.704,
+     "custom": 0.282,
+     "yara-x-engine": 0.417,
+     "pdf-chains": 1.669,
+     "vba-chains": 0.005,
+     "ooxml-links": 0.006,
+     "word-fields": 0.002
+    },
+    "sha256": "1f8ae627d56106815f2f829a6eb86149c08ea029d46f7bcc1dae2c56a17e8973",
+    "sent_sha256": "1f8ae627d56106815f2f829a6eb86149c08ea029d46f7bcc1dae2c56a17e8973",
+    "bytes": 1803,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "Content Credentials: not verified: a JUMBF (C2PA) box: box b'jumb' at byte 0 declares 930 bytes, outside its parent",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "C53-nesting-too-deep",
+   "group": "c2pa",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6380.2,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6251.7,
+    "scanner_ms": {
+     "yara-x": 0.486,
+     "office": 0.003,
+     "pdf": 1.447,
+     "custom": 0.283,
+     "yara-x-engine": 0.386,
+     "pdf-chains": 1.414,
+     "vba-chains": 0.006,
+     "ooxml-links": 0.004,
+     "word-fields": 0.002
+    },
+    "sha256": "984b67c1df7112e3fec2a70546bd9c5752c7d9647f274e766de5508f94c9e14c",
+    "sent_sha256": "984b67c1df7112e3fec2a70546bd9c5752c7d9647f274e766de5508f94c9e14c",
+    "bytes": 2238,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "Content Credentials: not verified: a JUMBF (C2PA) box: superboxes nested more than 8 deep",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "C54-too-many-boxes",
+   "group": "c2pa",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6416.8,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6281.0,
+    "scanner_ms": {
+     "yara-x": 0.531,
+     "office": 0.005,
+     "pdf": 88.273,
+     "custom": 4.303,
+     "yara-x-engine": 0.586,
+     "pdf-chains": 7.518,
+     "vba-chains": 0.006,
+     "ooxml-links": 0.005,
+     "word-fields": 0.002
+    },
+    "sha256": "44bb10df963b3a1a0d30c812843a9e6561dabf30c65b1e4c16971efc633c7f2d",
+    "sent_sha256": "44bb10df963b3a1a0d30c812843a9e6561dabf30c65b1e4c16971efc633c7f2d",
+    "bytes": 80932,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "Content Credentials: not verified: a JUMBF (C2PA) box: more than 10000 boxes in the manifest stores of this file",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "C30-mz-declared-jpeg",
+   "group": "c2pa",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6495.1,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6391.5,
+    "scanner_ms": {
+     "yara-x": 0.521,
+     "office": 0.006,
+     "pdf": 1.838,
+     "custom": 0.311,
+     "yara-x-engine": 0.519,
+     "pdf-chains": 1.745,
+     "vba-chains": 0.007,
+     "ooxml-links": 0.005,
+     "word-fields": 0.002
+    },
+    "sha256": "699240a314b9a904bb585ba8b323494a1402b160dc0146d562f251425d7bad19",
+    "sent_sha256": "699240a314b9a904bb585ba8b323494a1402b160dc0146d562f251425d7bad19",
+    "bytes": 1910,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "Content Credentials: not verified: a JUMBF (C2PA) box: c2pa.thumbnail.claim.jpeg: embedded data that is not a JPEG, PNG or SVG picture (it starts 4d5a9000)",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "C36-mz-as-c2pa-manifest",
+   "group": "c2pa",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6465.1,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6277.5,
+    "scanner_ms": {
+     "yara-x": 0.711,
+     "office": 0.007,
+     "pdf": 5.226,
+     "custom": 0.264,
+     "yara-x-engine": 2.941,
+     "pdf-chains": 78.131,
+     "vba-chains": 0.009,
+     "ooxml-links": 0.009,
+     "word-fields": 0.004
+    },
+    "sha256": "e5a26a5d56fdbb836019ec6e43873c837756622cda07b5620fa4e4dbe866e948",
+    "sent_sha256": "e5a26a5d56fdbb836019ec6e43873c837756622cda07b5620fa4e4dbe866e948",
+    "bytes": 889,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "Content Credentials: not verified: not an OpenDocument package (no mimetype member at the start)",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "C37-store-named-html",
+   "group": "c2pa",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6265.9,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6137.8,
+    "scanner_ms": {
+     "yara-x": 0.478,
+     "office": 0.004,
+     "pdf": 1.675,
+     "custom": 0.361,
+     "yara-x-engine": 0.43,
+     "pdf-chains": 2.103,
+     "vba-chains": 0.006,
+     "ooxml-links": 0.005,
+     "word-fields": 0.003
+    },
+    "sha256": "0d0a64c2e691c10a411fe210fa7884723c456cbf2d0745c0348e1fd6f9b1f43f",
+    "sent_sha256": "0d0a64c2e691c10a411fe210fa7884723c456cbf2d0745c0348e1fd6f9b1f43f",
+    "bytes": 1828,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "Content Credentials.html: not verified: a C2PA manifest store under a name with another extension or control characters",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "C70-auto-js-exports-manifest",
+   "group": "c2pa",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6485.6,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "MALICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT:HIGH",
+     "pdf:PDF_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_JAVASCRIPT_EXPLOIT_API:HIGH",
+     "yara-x-engine:ENGINE_PDF_JavaScript_With_Automatic_Trigger:MEDIUM"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6350.6,
+    "scanner_ms": {
+     "yara-x": 0.542,
+     "office": 0.004,
+     "pdf": 1.624,
+     "custom": 0.293,
+     "yara-x-engine": 0.444,
+     "pdf-chains": 1.714,
+     "vba-chains": 0.005,
+     "ooxml-links": 0.004,
+     "word-fields": 0.002
+    },
+    "sha256": "018b01054ee490488048feac160cc58f514ef26afc6a66e5135435b0b93a159e",
+    "sent_sha256": "018b01054ee490488048feac160cc58f514ef26afc6a66e5135435b0b93a159e",
+    "bytes": 1975,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_JavaScript_With_Automatic_Trigger",
+      "severity": "MEDIUM",
+      "evidence": []
+     },
+     {
+      "rule": "ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT",
+      "severity": "HIGH",
+      "evidence": [
+       "catalog /OpenAction: JavaScript (object 7 0) (exports 'Content Credentials')"
+      ]
+     },
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "Content Credentials: a C2PA manifest store (Content Credentials) whose signature was not validated (930 bytes): 1 manifest(s), no script, active markup or external reference; data in CBOR or JSON and 0 picture(s); assertions c2pa.actions.v2, c2pa.hash.data",
+       "actions that could use an attachment: catalog /OpenAction: JavaScript (object 7 0)",
+       "accounts for pdf:PDF_EMBEDDED_FILE"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "MALICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT:HIGH",
+     "pdf:PDF_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_JAVASCRIPT_EXPLOIT_API:HIGH",
+     "yara-x-engine:ENGINE_PDF_JavaScript_With_Automatic_Trigger:MEDIUM"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "C71-auto-launch-manifest",
+   "group": "c2pa",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6512.6,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "MALICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT:HIGH",
+     "pdf:PDF_LAUNCH_ACTION:HIGH",
+     "yara-x:PDF_Launch_Action:HIGH"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6365.2,
+    "scanner_ms": {
+     "yara-x": 0.818,
+     "office": 0.006,
+     "pdf": 4.628,
+     "custom": 0.373,
+     "yara-x-engine": 0.753,
+     "pdf-chains": 3.32,
+     "vba-chains": 0.008,
+     "ooxml-links": 0.007,
+     "word-fields": 0.004
+    },
+    "sha256": "95d1808b48d1fc1f0cd56ddc1e93bf931e2564c72ec622424a22b1b26081267a",
+    "sent_sha256": "95d1808b48d1fc1f0cd56ddc1e93bf931e2564c72ec622424a22b1b26081267a",
+    "bytes": 1850,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT",
+      "severity": "HIGH",
+      "evidence": [
+       "catalog /OpenAction: Launch (direct in catalog) (launchs 'Content Credentials')"
+      ]
+     },
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "Content Credentials: a C2PA manifest store (Content Credentials) whose signature was not validated (930 bytes): 1 manifest(s), no script, active markup or external reference; data in CBOR or JSON and 0 picture(s); assertions c2pa.actions.v2, c2pa.hash.data",
+       "actions that could use an attachment: catalog /OpenAction: Launch (direct in catalog)",
+       "accounts for pdf:PDF_EMBEDDED_FILE"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "MALICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT:HIGH",
+     "pdf:PDF_LAUNCH_ACTION:HIGH",
+     "yara-x:PDF_Launch_Action:HIGH"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "C24-user-link-javascript",
+   "group": "c2pa",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6470.4,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "pdf:PDF_JAVASCRIPT:MEDIUM"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6268.9,
+    "scanner_ms": {
+     "yara-x": 0.464,
+     "office": 0.004,
+     "pdf": 1.596,
+     "custom": 0.285,
+     "yara-x-engine": 0.393,
+     "pdf-chains": 1.695,
+     "vba-chains": 0.004,
+     "ooxml-links": 0.004,
+     "word-fields": 0.002
+    },
+    "sha256": "b64014f962db0364020293cd590a115972c2cb3be0c90865cd153d0357dc0c6d",
+    "sent_sha256": "b64014f962db0364020293cd590a115972c2cb3be0c90865cd153d0357dc0c6d",
+    "bytes": 1961,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_USER_TRIGGERED_SCRIPT",
+      "severity": "INFO",
+      "evidence": [
+       "object 7 0 /A: JavaScript (direct in object 7 0)"
+      ]
+     },
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "Content Credentials: a C2PA manifest store (Content Credentials) whose signature was not validated (930 bytes): 1 manifest(s), no script, active markup or external reference; data in CBOR or JSON and 0 picture(s); assertions c2pa.actions.v2, c2pa.hash.data",
+       "actions that could use an attachment: object 7 0 /A: JavaScript (direct in object 7 0)",
+       "accounts for pdf:PDF_EMBEDDED_FILE"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "pdf:PDF_JAVASCRIPT:MEDIUM"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "files/pdf-07-libreoffice-hybrid.pdf",
+   "group": "regression",
+   "engine": "reference",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 5940.9,
+    "cors_allowed": true,
+    "engine": "reference",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed"
+    },
+    "complete": true,
+    "duration_ms": 5810.3,
+    "scanner_ms": {
+     "yara-x": 0.563,
+     "office": 0.004,
+     "pdf": 2.544,
+     "custom": 3.4
+    },
+    "sha256": "92e878c85710fa49e4609589ba9a81fe1cd67f0f3ac093735f5f69e435e6b0d6",
+    "sent_sha256": "92e878c85710fa49e4609589ba9a81fe1cd67f0f3ac093735f5f69e435e6b0d6",
+    "bytes": 50630,
+    "isolation_missing": [],
+    "engine_pdf": []
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "files/pdf-07-libreoffice-hybrid.pdf",
+   "group": "regression",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6561.6,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SAFE",
+    "rules": [],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6375.8,
+    "scanner_ms": {
+     "yara-x": 0.93,
+     "office": 0.007,
+     "pdf": 3.034,
+     "custom": 3.388,
+     "yara-x-engine": 0.48,
+     "pdf-chains": 96.479,
+     "vba-chains": 0.008,
+     "ooxml-links": 0.006,
+     "word-fields": 0.003
+    },
+    "sha256": "92e878c85710fa49e4609589ba9a81fe1cd67f0f3ac093735f5f69e435e6b0d6",
+    "sent_sha256": "92e878c85710fa49e4609589ba9a81fe1cd67f0f3ac093735f5f69e435e6b0d6",
+    "bytes": 50630,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_VERIFIED",
+      "severity": "INFO",
+      "evidence": [
+       "Original.odt: OpenDocument .odt without macros, scripts, embedded objects or automatically loaded external content (15236 bytes; 1 passive hyperlink(s), followed only on a click)",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SAFE",
+    "rules": [],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "1-pdf-clean",
+   "group": "regression",
+   "engine": "reference",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6146.1,
+    "cors_allowed": true,
+    "engine": "reference",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SAFE",
+    "rules": [],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed"
+    },
+    "complete": true,
+    "duration_ms": 5955.5,
+    "scanner_ms": {
+     "yara-x": 0.426,
+     "office": 0.004,
+     "pdf": 0.891,
+     "custom": 0.149
+    },
+    "sha256": "d5784991fd896bc6b3c21c3c384d9a376a3b4b6009b83a25e0c5d8f77939011b",
+    "sent_sha256": "d5784991fd896bc6b3c21c3c384d9a376a3b4b6009b83a25e0c5d8f77939011b",
+    "bytes": 465,
+    "isolation_missing": [],
+    "engine_pdf": []
+   },
+   "expected": {
+    "verdict": "SAFE",
+    "rules": [],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "1-pdf-clean",
+   "group": "regression",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6467.0,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SAFE",
+    "rules": [],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6273.2,
+    "scanner_ms": {
+     "yara-x": 0.413,
+     "office": 0.004,
+     "pdf": 1.227,
+     "custom": 0.115,
+     "yara-x-engine": 0.638,
+     "pdf-chains": 0.737,
+     "vba-chains": 0.004,
+     "ooxml-links": 0.005,
+     "word-fields": 0.003
+    },
+    "sha256": "d5784991fd896bc6b3c21c3c384d9a376a3b4b6009b83a25e0c5d8f77939011b",
+    "sent_sha256": "d5784991fd896bc6b3c21c3c384d9a376a3b4b6009b83a25e0c5d8f77939011b",
+    "bytes": 465,
+    "isolation_missing": [],
+    "engine_pdf": []
+   },
+   "expected": {
+    "verdict": "SAFE",
+    "rules": [],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "S01-empty-tree",
+   "group": "regression",
+   "engine": "reference",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6110.3,
+    "cors_allowed": true,
+    "engine": "reference",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed"
+    },
+    "complete": true,
+    "duration_ms": 5985.4,
+    "scanner_ms": {
+     "yara-x": 0.734,
+     "office": 0.007,
+     "pdf": 1.024,
+     "custom": 0.119
+    },
+    "sha256": "4c4a1d67c650263970660b93ceafa889e283c913145f02e61a14a952cd64ac87",
+    "sent_sha256": "4c4a1d67c650263970660b93ceafa889e283c913145f02e61a14a952cd64ac87",
+    "bytes": 508,
+    "isolation_missing": [],
+    "engine_pdf": []
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "S01-empty-tree",
+   "group": "regression",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6649.8,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SAFE",
+    "rules": [],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6424.0,
+    "scanner_ms": {
+     "yara-x": 0.419,
+     "office": 0.003,
+     "pdf": 87.738,
+     "custom": 0.185,
+     "yara-x-engine": 0.874,
+     "pdf-chains": 1.072,
+     "vba-chains": 0.006,
+     "ooxml-links": 0.004,
+     "word-fields": 0.002
+    },
+    "sha256": "4c4a1d67c650263970660b93ceafa889e283c913145f02e61a14a952cd64ac87",
+    "sent_sha256": "4c4a1d67c650263970660b93ceafa889e283c913145f02e61a14a952cd64ac87",
+    "bytes": 508,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_NO_ATTACHMENTS",
+      "severity": "INFO",
+      "evidence": [
+       "byte 64: the key /EmbeddedFiles of object 1 0, an empty name tree (no /Kids, no names)",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SAFE",
+    "rules": [],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "S06-mz-bytes-text-name",
+   "group": "regression",
+   "engine": "reference",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6699.5,
+    "cors_allowed": true,
+    "engine": "reference",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed"
+    },
+    "complete": true,
+    "duration_ms": 6538.3,
+    "scanner_ms": {
+     "yara-x": 0.678,
+     "office": 0.006,
+     "pdf": 1.709,
+     "custom": 0.226
+    },
+    "sha256": "527643ac2a4353ea3abef0fa54f0dbd604b7d460a66d040625ecd270d5eae450",
+    "sent_sha256": "527643ac2a4353ea3abef0fa54f0dbd604b7d460a66d040625ecd270d5eae450",
+    "bytes": 747,
+    "isolation_missing": [],
+    "engine_pdf": []
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "yara-x:PDF_Embedded_File:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "S06-mz-bytes-text-name",
+   "group": "regression",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6754.9,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6519.1,
+    "scanner_ms": {
+     "yara-x": 0.469,
+     "office": 0.003,
+     "pdf": 2.323,
+     "custom": 0.286,
+     "yara-x-engine": 0.521,
+     "pdf-chains": 1.798,
+     "vba-chains": 0.004,
+     "ooxml-links": 0.004,
+     "word-fields": 0.002
+    },
+    "sha256": "527643ac2a4353ea3abef0fa54f0dbd604b7d460a66d040625ecd270d5eae450",
+    "sent_sha256": "527643ac2a4353ea3abef0fa54f0dbd604b7d460a66d040625ecd270d5eae450",
+    "bytes": 747,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "report.txt: not verified: not an OpenDocument package (no mimetype member at the start)",
+       "accounts for pdf:PDF_EMBEDDED_FILE",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "S11-incremental-update-removes-attachment",
+   "group": "regression",
+   "engine": "reference",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6368.5,
+    "cors_allowed": true,
+    "engine": "reference",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed"
+    },
+    "complete": true,
+    "duration_ms": 6140.5,
+    "scanner_ms": {
+     "yara-x": 0.42,
+     "office": 0.003,
+     "pdf": 1.214,
+     "custom": 0.291
+    },
+    "sha256": "abde94ebb715f8fd63e71422863e0907376c6544a369c30b8927a73f35929bb0",
+    "sent_sha256": "abde94ebb715f8fd63e71422863e0907376c6544a369c30b8927a73f35929bb0",
+    "bytes": 1008,
+    "isolation_missing": [],
+    "engine_pdf": []
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "S11-incremental-update-removes-attachment",
+   "group": "regression",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6294.8,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6188.5,
+    "scanner_ms": {
+     "yara-x": 0.846,
+     "office": 0.008,
+     "pdf": 1.19,
+     "custom": 0.206,
+     "yara-x-engine": 0.472,
+     "pdf-chains": 0.815,
+     "vba-chains": 0.006,
+     "ooxml-links": 0.005,
+     "word-fields": 0.002
+    },
+    "sha256": "abde94ebb715f8fd63e71422863e0907376c6544a369c30b8927a73f35929bb0",
+    "sent_sha256": "abde94ebb715f8fd63e71422863e0907376c6544a369c30b8927a73f35929bb0",
+    "bytes": 1008,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_INCOMPLETE",
+      "severity": "INFO",
+      "evidence": []
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "S12-broken-xref",
+   "group": "regression",
+   "engine": "reference",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6166.6,
+    "cors_allowed": true,
+    "engine": "reference",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed"
+    },
+    "complete": true,
+    "duration_ms": 5986.9,
+    "scanner_ms": {
+     "yara-x": 0.52,
+     "office": 0.005,
+     "pdf": 1.357,
+     "custom": 0.117
+    },
+    "sha256": "872829f3863947a4a7607a2ace6bcb29cbab575d5cc61485092dce0e85263df0",
+    "sent_sha256": "872829f3863947a4a7607a2ace6bcb29cbab575d5cc61485092dce0e85263df0",
+    "bytes": 506,
+    "isolation_missing": [],
+    "engine_pdf": []
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "S12-broken-xref",
+   "group": "regression",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6594.7,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6434.0,
+    "scanner_ms": {
+     "yara-x": 0.58,
+     "office": 0.005,
+     "pdf": 1.408,
+     "custom": 0.132,
+     "yara-x-engine": 0.425,
+     "pdf-chains": 0.961,
+     "vba-chains": 0.005,
+     "ooxml-links": 0.006,
+     "word-fields": 0.002
+    },
+    "sha256": "872829f3863947a4a7607a2ace6bcb29cbab575d5cc61485092dce0e85263df0",
+    "sent_sha256": "872829f3863947a4a7607a2ace6bcb29cbab575d5cc61485092dce0e85263df0",
+    "bytes": 506,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_CHAINS_REPAIRED",
+      "severity": "INFO",
+      "evidence": []
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "S13-marker-in-page-text",
+   "group": "regression",
+   "engine": "reference",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6585.0,
+    "cors_allowed": true,
+    "engine": "reference",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed"
+    },
+    "complete": true,
+    "duration_ms": 6397.7,
+    "scanner_ms": {
+     "yara-x": 0.464,
+     "office": 0.004,
+     "pdf": 1.105,
+     "custom": 0.122
+    },
+    "sha256": "ef69d78a7d802dd8d7564aec75790e1154d98f4d0a4d60b78d951359afa58492",
+    "sent_sha256": "ef69d78a7d802dd8d7564aec75790e1154d98f4d0a4d60b78d951359afa58492",
+    "bytes": 512,
+    "isolation_missing": [],
+    "engine_pdf": []
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "S13-marker-in-page-text",
+   "group": "regression",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6515.8,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6365.9,
+    "scanner_ms": {
+     "yara-x": 0.451,
+     "office": 0.003,
+     "pdf": 0.97,
+     "custom": 0.116,
+     "yara-x-engine": 0.386,
+     "pdf-chains": 0.757,
+     "vba-chains": 0.004,
+     "ooxml-links": 0.003,
+     "word-fields": 0.002
+    },
+    "sha256": "ef69d78a7d802dd8d7564aec75790e1154d98f4d0a4d60b78d951359afa58492",
+    "sent_sha256": "ef69d78a7d802dd8d7564aec75790e1154d98f4d0a4d60b78d951359afa58492",
+    "bytes": 512,
+    "isolation_missing": [],
+    "engine_pdf": []
+   },
+   "expected": {
+    "verdict": "SUSPICIOUS",
+    "rules": [
+     "yara-x:PDF_Embedded_File:LOW"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "corrupt-truncated-pdf",
+   "group": "regression",
+   "engine": "reference",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6160.3,
+    "cors_allowed": true,
+    "engine": "reference",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "UNABLE_TO_SCAN",
+    "rules": [],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "failed",
+     "custom": "failed"
+    },
+    "complete": false,
+    "duration_ms": 5994.6,
+    "scanner_ms": {
+     "yara-x": 0.379,
+     "office": 0.004,
+     "pdf": 0.376,
+     "custom": 0.042
+    },
+    "sha256": "e4fdd11ecceb8ed95ebcc10b9d0086afb42e91e583dc1249ddd9e0e38f8526d7",
+    "sent_sha256": "e4fdd11ecceb8ed95ebcc10b9d0086afb42e91e583dc1249ddd9e0e38f8526d7",
+    "bytes": 62,
+    "isolation_missing": [],
+    "engine_pdf": []
+   },
+   "expected": {
+    "verdict": "UNABLE_TO_SCAN"
+   },
+   "problems": []
+  },
+  {
+   "case": "corrupt-truncated-pdf",
+   "group": "regression",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6583.1,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "UNABLE_TO_SCAN",
+    "rules": [],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "failed",
+     "custom": "failed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "failed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": false,
+    "duration_ms": 6474.3,
+    "scanner_ms": {
+     "yara-x": 0.59,
+     "office": 0.005,
+     "pdf": 0.509,
+     "custom": 0.065,
+     "yara-x-engine": 0.594,
+     "pdf-chains": 0.263,
+     "vba-chains": 0.007,
+     "ooxml-links": 0.007,
+     "word-fields": 0.004
+    },
+    "sha256": "e4fdd11ecceb8ed95ebcc10b9d0086afb42e91e583dc1249ddd9e0e38f8526d7",
+    "sent_sha256": "e4fdd11ecceb8ed95ebcc10b9d0086afb42e91e583dc1249ddd9e0e38f8526d7",
+    "bytes": 62,
+    "isolation_missing": [],
+    "engine_pdf": []
+   },
+   "expected": {
+    "verdict": "UNABLE_TO_SCAN"
+   },
+   "problems": []
+  },
+  {
+   "case": "S15-auto-js-exports-attachment",
+   "group": "regression",
+   "engine": "reference",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6558.6,
+    "cors_allowed": true,
+    "engine": "reference",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "MALICIOUS",
+    "rules": [
+     "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD:HIGH",
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "pdf:PDF_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_JAVASCRIPT_EXPLOIT_API:HIGH",
+     "yara-x:PDF_Embedded_File:LOW",
+     "yara-x:PDF_JavaScript_With_Automatic_Action:MEDIUM"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed"
+    },
+    "complete": true,
+    "duration_ms": 6220.9,
+    "scanner_ms": {
+     "yara-x": 0.533,
+     "office": 0.004,
+     "pdf": 1.82,
+     "custom": 0.197
+    },
+    "sha256": "3b4ef46747031441005d0e44021c9f0a44d240e7b6c60b4d10f8a5ac1358af1c",
+    "sent_sha256": "3b4ef46747031441005d0e44021c9f0a44d240e7b6c60b4d10f8a5ac1358af1c",
+    "bytes": 903,
+    "isolation_missing": [],
+    "engine_pdf": []
+   },
+   "expected": {
+    "verdict": "MALICIOUS",
+    "rules": [
+     "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD:HIGH",
+     "pdf:PDF_EMBEDDED_FILE:LOW",
+     "pdf:PDF_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_JAVASCRIPT_EXPLOIT_API:HIGH",
+     "yara-x:PDF_Embedded_File:LOW",
+     "yara-x:PDF_JavaScript_With_Automatic_Action:MEDIUM"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "S15-auto-js-exports-attachment",
+   "group": "regression",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6193.0,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "MALICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT:HIGH",
+     "pdf:PDF_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_JAVASCRIPT_EXPLOIT_API:HIGH",
+     "yara-x-engine:ENGINE_PDF_JavaScript_With_Automatic_Trigger:MEDIUM"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 5999.1,
+    "scanner_ms": {
+     "yara-x": 0.473,
+     "office": 0.003,
+     "pdf": 1.426,
+     "custom": 0.181,
+     "yara-x-engine": 0.459,
+     "pdf-chains": 87.149,
+     "vba-chains": 0.009,
+     "ooxml-links": 0.007,
+     "word-fields": 0.003
+    },
+    "sha256": "3b4ef46747031441005d0e44021c9f0a44d240e7b6c60b4d10f8a5ac1358af1c",
+    "sent_sha256": "3b4ef46747031441005d0e44021c9f0a44d240e7b6c60b4d10f8a5ac1358af1c",
+    "bytes": 903,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_JavaScript_With_Automatic_Trigger",
+      "severity": "MEDIUM",
+      "evidence": []
+     },
+     {
+      "rule": "ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT",
+      "severity": "HIGH",
+      "evidence": [
+       "catalog /OpenAction: JavaScript (object 7 0) (exports 'f')"
+      ]
+     },
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "notes.txt: not verified: not an OpenDocument package (no mimetype member at the start)",
+       "actions that could use an attachment: catalog /OpenAction: JavaScript (object 7 0)",
+       "accounts for pdf:PDF_EMBEDDED_FILE"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "MALICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT:HIGH",
+     "pdf:PDF_JAVASCRIPT:MEDIUM",
+     "pdf:PDF_JAVASCRIPT_EXPLOIT_API:HIGH",
+     "yara-x-engine:ENGINE_PDF_JavaScript_With_Automatic_Trigger:MEDIUM"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "S16-auto-launch-embedded-exe",
+   "group": "regression",
+   "engine": "reference",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 5932.4,
+    "cors_allowed": true,
+    "engine": "reference",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "MALICIOUS",
+    "rules": [
+     "pdf:PDF_EMBEDDED_EXECUTABLE:HIGH",
+     "pdf:PDF_LAUNCH_ACTION:HIGH",
+     "yara-x:PDF_Embedded_File:LOW",
+     "yara-x:PDF_Launch_Action:HIGH"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed"
+    },
+    "complete": true,
+    "duration_ms": 5829.4,
+    "scanner_ms": {
+     "yara-x": 0.752,
+     "office": 0.008,
+     "pdf": 1.548,
+     "custom": 0.192
+    },
+    "sha256": "a02ed8af1d99e6feefc153ba405a68dbc18da42faf1e0d8a1e91cd87305fec99",
+    "sent_sha256": "a02ed8af1d99e6feefc153ba405a68dbc18da42faf1e0d8a1e91cd87305fec99",
+    "bytes": 842,
+    "isolation_missing": [],
+    "engine_pdf": []
+   },
+   "expected": {
+    "verdict": "MALICIOUS",
+    "rules": [
+     "pdf:PDF_EMBEDDED_EXECUTABLE:HIGH",
+     "pdf:PDF_LAUNCH_ACTION:HIGH",
+     "yara-x:PDF_Embedded_File:LOW",
+     "yara-x:PDF_Launch_Action:HIGH"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "S16-auto-launch-embedded-exe",
+   "group": "regression",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6167.0,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "MALICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT:HIGH",
+     "pdf:PDF_EMBEDDED_EXECUTABLE:HIGH",
+     "pdf:PDF_LAUNCH_ACTION:HIGH",
+     "yara-x:PDF_Launch_Action:HIGH"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6030.1,
+    "scanner_ms": {
+     "yara-x": 0.441,
+     "office": 0.004,
+     "pdf": 1.466,
+     "custom": 0.181,
+     "yara-x-engine": 0.401,
+     "pdf-chains": 87.794,
+     "vba-chains": 0.008,
+     "ooxml-links": 0.007,
+     "word-fields": 0.004
+    },
+    "sha256": "a02ed8af1d99e6feefc153ba405a68dbc18da42faf1e0d8a1e91cd87305fec99",
+    "sent_sha256": "a02ed8af1d99e6feefc153ba405a68dbc18da42faf1e0d8a1e91cd87305fec99",
+    "bytes": 842,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT",
+      "severity": "HIGH",
+      "evidence": [
+       "catalog /OpenAction: Launch (object 7 0) (launchs 'invoice.exe')"
+      ]
+     },
+     {
+      "rule": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+      "severity": "LOW",
+      "evidence": [
+       "invoice.exe: not verified: not an OpenDocument package (no mimetype member at the start)",
+       "actions that could use an attachment: catalog /OpenAction: Launch (object 7 0)",
+       "accounts for pdf:PDF_EMBEDDED_FILE"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "MALICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT:HIGH",
+     "pdf:PDF_EMBEDDED_EXECUTABLE:HIGH",
+     "pdf:PDF_LAUNCH_ACTION:HIGH",
+     "yara-x:PDF_Launch_Action:HIGH"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "S17-empty-tree-auto-launch",
+   "group": "regression",
+   "engine": "reference",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 5890.4,
+    "cors_allowed": true,
+    "engine": "reference",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "MALICIOUS",
+    "rules": [
+     "pdf:PDF_LAUNCH_ACTION:HIGH",
+     "yara-x:PDF_Embedded_File:LOW",
+     "yara-x:PDF_Launch_Action:HIGH"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed"
+    },
+    "complete": true,
+    "duration_ms": 5736.0,
+    "scanner_ms": {
+     "yara-x": 0.469,
+     "office": 0.004,
+     "pdf": 1.138,
+     "custom": 0.13
+    },
+    "sha256": "31cdff5b0d4b01c2f12f190478464f13a9e956096b3133fe26bbb794ba85f90f",
+    "sent_sha256": "31cdff5b0d4b01c2f12f190478464f13a9e956096b3133fe26bbb794ba85f90f",
+    "bytes": 579,
+    "isolation_missing": [],
+    "engine_pdf": []
+   },
+   "expected": {
+    "verdict": "MALICIOUS",
+    "rules": [
+     "pdf:PDF_LAUNCH_ACTION:HIGH",
+     "yara-x:PDF_Embedded_File:LOW",
+     "yara-x:PDF_Launch_Action:HIGH"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "S17-empty-tree-auto-launch",
+   "group": "regression",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6315.8,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "MALICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_LAUNCH:HIGH",
+     "pdf:PDF_LAUNCH_ACTION:HIGH",
+     "yara-x:PDF_Launch_Action:HIGH"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6158.6,
+    "scanner_ms": {
+     "yara-x": 0.608,
+     "office": 0.004,
+     "pdf": 85.813,
+     "custom": 0.17,
+     "yara-x-engine": 0.872,
+     "pdf-chains": 1.421,
+     "vba-chains": 0.007,
+     "ooxml-links": 0.005,
+     "word-fields": 0.003
+    },
+    "sha256": "31cdff5b0d4b01c2f12f190478464f13a9e956096b3133fe26bbb794ba85f90f",
+    "sent_sha256": "31cdff5b0d4b01c2f12f190478464f13a9e956096b3133fe26bbb794ba85f90f",
+    "bytes": 579,
+    "isolation_missing": [],
+    "engine_pdf": [
+     {
+      "rule": "ENGINE_PDF_AUTO_CHAIN_LAUNCH",
+      "severity": "HIGH",
+      "evidence": [
+       "catalog /OpenAction: Launch (direct in catalog) (target 'cmd.exe')"
+      ]
+     },
+     {
+      "rule": "ENGINE_PDF_NO_ATTACHMENTS",
+      "severity": "INFO",
+      "evidence": [
+       "byte 135: the key /EmbeddedFiles of object 1 0, an empty name tree (no /Kids, no names)",
+       "accounts for yara-x:PDF_Embedded_File"
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "verdict": "MALICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_LAUNCH:HIGH",
+     "pdf:PDF_LAUNCH_ACTION:HIGH",
+     "yara-x:PDF_Launch_Action:HIGH"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "c7b-docx-ddeauto-cmd",
+   "group": "regression",
+   "engine": "reference",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6108.3,
+    "cors_allowed": true,
+    "engine": "reference",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "MALICIOUS",
+    "rules": [
+     "office:OFFICE_DDEAUTO_FIELD:HIGH"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "completed",
+     "pdf": "not_applicable",
+     "custom": "completed"
+    },
+    "complete": true,
+    "duration_ms": 5984.5,
+    "scanner_ms": {
+     "yara-x": 0.468,
+     "office": 3.485,
+     "pdf": 0.004,
+     "custom": 0.876
+    },
+    "sha256": "9d5d3fb66b99fd26d339151da6e53d90919ce796ecb590b73925cb5c014f493b",
+    "sent_sha256": "9d5d3fb66b99fd26d339151da6e53d90919ce796ecb590b73925cb5c014f493b",
+    "bytes": 1664,
+    "isolation_missing": [],
+    "engine_pdf": []
+   },
+   "expected": {
+    "verdict": "MALICIOUS",
+    "rules": [
+     "office:OFFICE_DDEAUTO_FIELD:HIGH"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "completed",
+     "pdf": "not_applicable",
+     "custom": "completed"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "c7b-docx-ddeauto-cmd",
+   "group": "regression",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6286.8,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "e2eb2c70a61a0b2855b36a07282bb35d4da7b08f",
+    "verdict": "MALICIOUS",
+    "rules": [
+     "office:OFFICE_DDEAUTO_FIELD:HIGH",
+     "word-fields:ENGINE_WORD_DDEAUTO_PROGRAM:HIGH"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "completed",
+     "pdf": "not_applicable",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "not_applicable",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "completed",
+     "word-fields": "completed"
+    },
+    "complete": true,
+    "duration_ms": 6127.8,
+    "scanner_ms": {
+     "yara-x": 0.4,
+     "office": 3.035,
+     "pdf": 0.004,
+     "custom": 0.76,
+     "yara-x-engine": 0.392,
+     "pdf-chains": 0.031,
+     "vba-chains": 0.095,
+     "ooxml-links": 0.754,
+     "word-fields": 0.707
+    },
+    "sha256": "9d5d3fb66b99fd26d339151da6e53d90919ce796ecb590b73925cb5c014f493b",
+    "sent_sha256": "9d5d3fb66b99fd26d339151da6e53d90919ce796ecb590b73925cb5c014f493b",
+    "bytes": 1664,
+    "isolation_missing": [],
+    "engine_pdf": []
+   },
+   "expected": {
+    "verdict": "MALICIOUS",
+    "rules": [
+     "office:OFFICE_DDEAUTO_FIELD:HIGH",
+     "word-fields:ENGINE_WORD_DDEAUTO_PROGRAM:HIGH"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "completed",
+     "pdf": "not_applicable",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "not_applicable",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "completed",
+     "word-fields": "completed"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "oversized-token",
+   "engine": "-",
+   "result": {
+    "http": 413,
+    "detail": "File is too large. The maximum upload size is 10 MB."
+   },
+   "problems": [],
+   "group": "failure",
+   "expected": {}
+  },
+  {
+   "case": "oversized-upload",
+   "engine": "reference",
+   "result": {
+    "http": 413
+   },
+   "problems": [],
+   "group": "failure",
+   "expected": {}
+  },
+  {
+   "case": "unknown-engine",
+   "engine": "fastest",
+   "result": {
+    "http": 400
+   },
+   "problems": [],
+   "group": "failure",
+   "expected": {}
+  },
+  {
+   "case": "bad-token",
+   "engine": "unified",
+   "result": {
+    "http": 401
+   },
+   "problems": [],
+   "group": "failure",
+   "expected": {}
+  }
+ ]
+}

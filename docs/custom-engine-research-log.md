@@ -716,4 +716,10 @@ change and before any held-out scan); change `c873706` + `e2eb2c7`; evidence in
   active, deceptive and malformed manifests; held-out any-warning 27/31 -> 4/31, false positives
   0/31. Remaining: CH29-CH31 (Truepic thumbnails with 2 extraneous bytes, not valid baseline JPEG)
   and CD03 (a pre-existing MALICIOUS on a c2pa-rs control, from reference JavaScript rules).
-- Not deployed; staging stays on `9882cbf` until approved.
+- Deployed to Render staging only, after approval (2026-11-11 19:42 UTC, `dep-dbqc9tegekts7383m380`;
+  rollback target `9882cbf`, `dep-dbps71gn74is738thlo0`). D1 in the Lab: original SUSPICIOUS, unified
+  SAFE with the unvalidated-signature caveat; D2, D3 unchanged; 65 of 65 HTTP checks matched local
+  (19 limit cases, 18 C2PA cases, 24 regression scans, 4 failure checks); the old 2 GB case completes
+  under the 256 MB worker limit; slowest scan 15.5 s (30 s timeout). Evidence:
+  [`evidence/c2pa-accuracy-e2eb2c7/staging-e2eb2c7.md`](evidence/c2pa-accuracy-e2eb2c7/staging-e2eb2c7.md).
+  Production not changed.

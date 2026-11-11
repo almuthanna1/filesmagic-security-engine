@@ -11,7 +11,9 @@ build on staging. Harnesses: `evaluation/c2pa_accuracy.py`, `evaluation/c2pa_lim
     python -B -m evaluation.c2pa_limits            # worst cases, from a checkout
 
 Files: `summary.md` / `summary.json` (sample IDs, rule IDs, counts and timings only) and the worst
-cases at the limits, `limits-c873706.md` (1 trial) and `limits-e2eb2c7.md` (3 trials). The per-sample
+cases at the limits, `limits-c873706.md` (1 trial) and `limits-e2eb2c7.md` (3 trials), with peak
+memory: `limits-mem-c873706.md` (1 trial) and `limits-mem-e2eb2c7.md` (3 trials). Staging deployment
+and its tests: `staging-e2eb2c7.md`, `staging-e2eb2c7.json`. The per-sample
 findings (`results.json`, SHA-256 `97fc47b5...29991`) stay local: they quote private documents.
 Windows 11, Python 3.14.3; each tree scanned by its own worker subprocess; 3 trials per scan, all
 deterministic; both trees clean (`dirty: false`). Run 2026-11-11 17:21-17:52 UTC. Linux CI passed on
@@ -170,4 +172,5 @@ All 18 cases: `limits-*.md`.
   not other producers' PDF structures.
 - Genuine malicious C2PA files: none is known publicly, and none was sought; the malicious and
   deceptive controls are constructed.
-- Linux timings: latency was measured on Windows; Linux CI ran the tests only.
+- Linux timings: latency was measured on Windows; Linux CI ran the tests only. Staging (Linux, free
+  instance) timings and the limit cases under the worker's 256 MB memory limit: `staging-e2eb2c7.md`.
