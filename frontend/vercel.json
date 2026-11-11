@@ -6,7 +6,8 @@
       "feature/custom-unified-engine-nov18": false,
       "fix/lab-engine-connection": false,
       "research/offline-single-sample": false,
-      "feature/unified-pdf-accuracy": false
+      "feature/unified-pdf-accuracy": false,
+      "feature/unified-c2pa-accuracy": false
     }
   }
 }
