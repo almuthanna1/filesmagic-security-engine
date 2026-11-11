@@ -691,3 +691,29 @@ before the change and before any held-out scan); change `c24c52c`; evidence in
   The three APA variants, 24 regression scans and 4 HTTP failure checks matched the local results;
   strict isolation complete throughout. Record:
   [`evidence/pdf-accuracy-c24c52c/staging-9882cbf.md`](evidence/pdf-accuracy-c24c52c/staging-9882cbf.md).
+
+## 22. C2PA Content Credentials accuracy (Nov 10-11, branch `feature/unified-c2pa-accuracy`)
+
+Pre-registered in [`c2pa-accuracy-preregistration.md`](c2pa-accuracy-preregistration.md) with the
+public corpus [`evaluation/c2pa_corpus.json`](../evaluation/c2pa_corpus.json) (`c467c97`, before the
+change and before any held-out scan); change `c873706` + `e2eb2c7`; evidence in
+[`evidence/c2pa-accuracy-e2eb2c7`](evidence/c2pa-accuracy-e2eb2c7/README.md).
+
+- Problem: every C2PA manifest store attached to a PDF (what ChatGPT, Adobe and other producers
+  embed as "Content Credentials") was an unverifiable attachment, so the original APA report (D1)
+  stayed SUSPICIOUS.
+- Change: `app/engine/c2pa.py` reads the JUMBF store from its bytes under fixed limits (boxes,
+  nesting, CBOR/JSON items, text, SVG elements, JPEG markers and PNG chunks, all per PDF; nothing
+  decompressed) and verifies it only if every item is CBOR or JSON data, salt, padding, or a JPEG,
+  PNG or static SVG picture without markup, and its name has no other extension. Its signature is
+  not validated, and the evidence says so. The PDF-level conditions are unchanged: a complete
+  attachment list and no action that runs a script, launches a file or opens an embedded document.
+- The worst-case measurement at `c873706` found work the per-store limits did not cap (5.5 s for one
+  17 KB PDF); `e2eb2c7` made the limits per PDF (worst case 525 ms), before any held-out result.
+- Result: 57 SUSPICIOUS -> SAFE in the unified engine (D1; held-out CH01 and CH02, the only other
+  real C2PA PDFs; 26 derived and 9 synthetic stores; 19 attack strings that are plain text); 0
+  reference, control or regression changes; no HIGH lost; 0 false negatives on 38 constructed
+  active, deceptive and malformed manifests; held-out any-warning 27/31 -> 4/31, false positives
+  0/31. Remaining: CH29-CH31 (Truepic thumbnails with 2 extraneous bytes, not valid baseline JPEG)
+  and CD03 (a pre-existing MALICIOUS on a c2pa-rs control, from reference JavaScript rules).
+- Not deployed; staging stays on `9882cbf` until approved.
