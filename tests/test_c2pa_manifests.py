@@ -2,6 +2,8 @@
 active content, read completely under fixed limits (docs/c2pa-accuracy-preregistration.md). Inert
 fixtures: scripts are comments, "executables" four bytes and a word."""
 
+from collections import Counter
+
 import pytest
 
 from app import engine, worker
@@ -10,7 +12,7 @@ from app.engine.correlate import ACCOUNTS
 from app.models import Severity
 from app.scanners import SCANNERS
 from evaluation.c2pa_accuracy import (
-    ICON, NS, assertion, box, c2, c2pa_pdf, cbor, embedded, jpeg, png, store, superbox, synthetic,
+    ICON, NS, SPEC, assertion, box, c2, c2pa_pdf, cbor, embedded, jpeg, png, store, stream, superbox, synthetic,
 )
 from evaluation.cases import verdicts
 from evaluation.pdf_accuracy import outcome
@@ -131,7 +133,7 @@ def test_well_formed_cbor_is_data(payload):
     (b"\x7f\x62on\x65load=\xff", "text with markup"),  # split across chunks: checked as a consumer joins them
     (b"\x7f\x42ab\xff", "malformed indefinite-length"),  # a byte-string chunk in a text string
     (b"\x5b" + b"\xff" * 8, "longer than its box"), (b"\x9b" + b"\xff" * 8, "cut off"),  # 2**64 - 1 items, read one by one
-    (b"\x81" * 70 + b"\x00", "nesting deeper than 64"), (cbor(list(range(100_001))), "more than 100000 CBOR items"),
+    (b"\x81" * 70 + b"\x00", "nesting deeper than 64"), (cbor(list(range(100_001))), "more than 100000 CBOR or JSON items"),
     (cbor("x" * ((1 << 20) + 1)), "characters of text"),
 ], ids=lambda v: v if isinstance(v, str) else f"{len(v)} bytes")  # test IDs go into an environment variable
 def test_cbor_outside_the_limits_or_rules_is_not_verified(payload, why):
@@ -154,14 +156,45 @@ def test_the_name_must_not_open_it_as_something_else(name, verified):
     assert (VERIFIED in rules(scan(out.getvalue())[1])) is verified
 
 
+J = jpeg()  # SOI ... SOS, one byte of image data (3f), EOI
+
+
 @pytest.mark.parametrize("picture, why", [
     (jpeg(), ""), (png(), ""), (jpeg()[:-2], "cut off"), (jpeg(after=b"x"), "after its end"),
     (png()[:-1], "cut off"), (png(after=b"x"), "after IEND"), (png(bad_crc=True), "CRC"),
     (b"\xff\xd8\xff\xd9", "without image data"),
-])
+    (J[:-2] + b"\xff" * 100_000 + J[-2:], ""),  # fill bytes before EOI: one marker
+    (J[:-3] + b"\x3f" + b"\xff\x00\xff\xd3" * 50_000 + J[-2:], ""),  # stuffing and RSTn inside the image data
+    (J[:-3] + b"\x3f\xff\x00\xff", "cut off inside its image data"),
+    (J[:2] + b"\xff\xfe\x00\x02" * 100_000 + J[2:], "more than 100000 markers and chunks"),
+], ids=lambda v: v if isinstance(v, str) else f"{len(v)} bytes")
 def test_pictures_are_checked_by_structure(picture, why):
-    problem = c2pa.jpeg_problem(picture) if picture.startswith(b"\xff\xd8") else c2pa.png_problem(picture)
+    check = c2pa.jpeg_problem if picture.startswith(b"\xff\xd8") else c2pa.png_problem
+    problem = check(picture, Counter())
     assert (why in problem and problem) if why else problem == ""
+
+
+@pytest.mark.parametrize("data, why", [
+    (store(superbox(c2(b"cbor"), "c2pa.test", *[box(b"free", b"")] * 20_000)), "more than 10000 boxes"),
+    (raw_cbor(b"\x7f" + b"\x60" * 100_001 + b"\xff"), "more than 100000 CBOR or JSON items"),  # string chunks count
+    (store(superbox(c2(b"json"), "c2pa.test", box(b"json", b"[" + b"0," * 100_000 + b"0]"))),
+     "more than 100000 CBOR or JSON items"),
+    (store(superbox(c2(b"json"), "c2pa.test", box(b"json", b'"' + b"x" * (1 << 20) + b'"'))), "bytes of JSON"),
+], ids=["boxes", "string chunks", "JSON values", "JSON bytes"])
+def test_work_is_counted_as_it_is_done(data, why):
+    with pytest.raises(c2pa.NotVerified, match=why):
+        c2pa.verify(data)
+
+
+def test_the_limits_are_for_all_the_stores_of_one_pdf():
+    """Each store alone is within MAX_BOXES; two in one PDF are not, so the second is not verified."""
+    half = store(superbox(c2(b"cbor"), "c2pa.test", box(b"cbor", b"\x00"), *[box(b"free", b"")] * 6_000))
+    c2pa.verify(half)
+    second = "Content Credentials 2"
+    data = c2pa_pdf(half, more=[(second, 7)], objects={7: SPEC.format(n=second, s=8), 8: stream(half)})
+    [unverified] = [f for f in scan(data)[1].findings if f.rule_id == UNVERIFIED]
+    assert any(e.startswith(f"{second}: not verified: ") and "more than 10000 boxes in the manifest stores of this file"
+               in e for e in unverified.evidence), unverified.evidence
 
 
 def test_an_svg_value_that_escapes_or_names_another_scheme_is_not_static():

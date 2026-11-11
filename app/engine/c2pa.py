@@ -17,10 +17,14 @@ that can neither run nor load anything (docs/c2pa-accuracy-preregistration.md, s
     character other than tab and line breaks, no markup a renderer could act on.
   - Pictures: no HTML or SVG markup in their bytes (a polyglot).
 
-Limits: MAX_BOXES boxes, MAX_NESTING superboxes deep, MAX_ITEMS CBOR items MAX_CBOR_NESTING deep,
-MAX_TEXT characters of text, MAX_ELEMENTS SVG elements. Nothing is decompressed, every check is
-linear in the bytes, so the work is bounded by these counts and the bytes (the caller bounds
-those), and the verdict never depends on the machine's speed.
+Limits, for all the manifest stores of one PDF together (verify's `spent`), since a PDF can carry
+up to MAX_FILES attachments: MAX_BOXES boxes, MAX_ITEMS CBOR and JSON items (string chunks
+included), MAX_TEXT characters of text and MAX_TEXT bytes of JSON, MAX_ELEMENTS SVG elements,
+MAX_PARTS JPEG markers and PNG chunks; and per store, MAX_NESTING superboxes and MAX_CBOR_NESTING
+CBOR items deep. Nothing is decompressed; boxes are counted as they are read; runs of fill bytes,
+stuffed entropy-coded data and pictures are searched by regular expression, not byte by byte. So
+the work is bounded by these counts and the bytes (the caller bounds those), and the verdict never
+depends on the machine's speed.
 
 Never examined: signatures, certificates, the hash binding, trust lists, what the claims assert.
 "Verified" means no active content was found in a structure read completely; not that the
@@ -33,6 +37,8 @@ import re
 import struct
 import unicodedata
 import zlib
+from collections import Counter
+from itertools import islice
 
 import defusedxml.ElementTree as SafeET
 
@@ -44,6 +50,9 @@ MEDIA = {"image/jpeg": "JPEG", "image/png": "PNG", "image/svg+xml": "SVG"}
 MAX_BOXES, MAX_NESTING = 10_000, 8
 MAX_ITEMS, MAX_CBOR_NESTING = 100_000, 64
 MAX_TEXT, MAX_ELEMENTS = 1 << 20, 10_000
+MAX_PARTS = 100_000
+FILL = re.compile(rb"\xff+")  # fill bytes before a JPEG marker code (ITU-T T.81 B.1.1.2)
+MARKER = re.compile(rb"\xff(?![\x00\xd0-\xd7])")  # ends entropy-coded data: not stuffing, not RSTn
 SVG = "{http://www.w3.org/2000/svg}"
 SVG_ELEMENTS = {"svg", "g", "defs", "title", "desc", "path", "rect", "circle", "ellipse", "line", "polyline", "polygon",
                 "linearGradient", "radialGradient", "stop", "clipPath", "mask"}
@@ -89,10 +98,11 @@ def boxes(data: bytes, start: int, end: int):
         i += n
 
 
-def verify(data: bytes) -> str:
-    """What the manifest store holds, if it is one without active content; raises NotVerified."""
+def verify(data: bytes, spent: Counter | None = None) -> str:
+    """What the manifest store holds, if it is one without active content; raises NotVerified.
+    `spent`: the work counted on the other stores of the same PDF, which the limits include."""
     try:
-        return _Store(data).read()
+        return _Store(data, Counter() if spent is None else spent).read()
     except NotVerified:
         raise
     except Exception as e:  # malformed UTF-8, numbers, XML or anything else: not verified
@@ -100,12 +110,17 @@ def verify(data: bytes) -> str:
 
 
 class _Store:
-    def __init__(self, data: bytes):
-        self.data, self.boxes, self.items, self.chars = data, 0, 0, 0
+    def __init__(self, data: bytes, spent: Counter):
+        self.data, self.spent = data, spent
         self.manifests, self.assertions, self.pictures = 0, [], []
 
+    def count(self, what: str, n: int, limit: int, where: str) -> None:
+        self.spent[what] += n
+        if self.spent[what] > limit:
+            raise NotVerified(f"{where}more than {limit} {what} in the manifest stores of this file")
+
     def read(self) -> str:
-        top = list(boxes(self.data, 0, len(self.data)))
+        top = list(islice(boxes(self.data, 0, len(self.data)), 2))
         if len(top) != 1 or top[0][0] != b"jumb":
             raise NotVerified("not one JUMBF superbox from the first byte to the last")
         self.superbox(*top[0][1:], depth=1, parent="")
@@ -119,10 +134,8 @@ class _Store:
     def superbox(self, start: int, end: int, depth: int, parent: str) -> None:
         if depth > MAX_NESTING:
             raise NotVerified(f"superboxes nested more than {MAX_NESTING} deep")
-        children = list(boxes(self.data, start, end))
-        self.boxes += len(children)
-        if self.boxes > MAX_BOXES:
-            raise NotVerified(f"more than {MAX_BOXES} boxes")
+        children = list(islice(boxes(self.data, start, end), MAX_BOXES + 1 - self.spent["boxes"]))
+        self.count("boxes", len(children), MAX_BOXES, "")
         if not children or children[0][0] != b"jumd":
             raise NotVerified(f"in {clean(parent or 'the store', 60)}: a superbox without its description box first")
         uuid, label = self.description(*children[0][1:])
@@ -170,7 +183,7 @@ class _Store:
         if i > len(d):
             raise NotVerified(f"{clean(label, 60)}: the description box is cut off")
         if toggles & 0x10:  # private box: C2PA uses it only for salt (c2sh, 16 or 32 bytes; C2PA 2.2, 8.4.2.3)
-            private = list(boxes(self.data, s + i, e))
+            private = list(islice(boxes(self.data, s + i, e), 2))
             if len(private) != 1 or private[0][0] != b"c2sh" or private[0][2] - private[0][1] not in (16, 32):
                 raise NotVerified(f"{clean(label, 60)}: a private description box that is not a c2sh salt")
             i = len(d)
@@ -179,9 +192,7 @@ class _Store:
         return d[:16], label
 
     def text(self, value: str, where: str) -> None:
-        self.chars += len(value)
-        if self.chars > MAX_TEXT:
-            raise NotVerified(f"more than {MAX_TEXT} characters of text")
+        self.count("characters of text", len(value), MAX_TEXT, "")
         if not (rest := value.translate(WHITESPACE)).isprintable() and any(
                 unicodedata.category(c) in ("Cc", "Cf") for c in rest):
             raise NotVerified(f"{where}: text with a control or formatting character")
@@ -206,9 +217,9 @@ class _Store:
 
     def item(self, i: int, end: int, depth: int, where: str) -> int:
         """Checks the well-formed CBOR data item at data[i:end]; returns the offset after it."""
-        self.items += 1
-        if self.items > MAX_ITEMS or depth > MAX_CBOR_NESTING:
-            raise NotVerified(f"{where}: more than {MAX_ITEMS} CBOR items or nesting deeper than {MAX_CBOR_NESTING}")
+        self.count("CBOR or JSON items", 1, MAX_ITEMS, f"{where}: ")
+        if depth > MAX_CBOR_NESTING:
+            raise NotVerified(f"{where}: CBOR nesting deeper than {MAX_CBOR_NESTING}")
         major, info, arg, i = self.head(i, end, where)
         if major in (0, 1):
             return i
@@ -216,6 +227,7 @@ class _Store:
             chunks = [(i, arg)] if arg is not None else []
             i += arg or 0
             while arg is None:
+                self.count("CBOR or JSON items", 1, MAX_ITEMS, f"{where}: ")  # each chunk, and the break
                 m, _, n, i = self.head(i, end, where)
                 if m == 7 and n is None:
                     break
@@ -257,9 +269,11 @@ class _Store:
         def constant(name):
             raise NotVerified(f"{where}: JSON {name}")
 
+        self.count("bytes of JSON", e - s, MAX_TEXT, f"{where}: ")  # parsed whole: bounded before parsing
         todo = [json.loads(self.data[s:e].decode("utf-8"), object_pairs_hook=pairs, parse_constant=constant)]
         while todo:  # every string and key, as a consumer would show it
             value = todo.pop()
+            self.count("CBOR or JSON items", 1, MAX_ITEMS, f"{where}: ")
             if isinstance(value, str):
                 self.text(value, where)
             elif isinstance(value, dict):
@@ -277,9 +291,9 @@ class _Store:
         for value in parts[:-1]:
             self.text(value.decode("utf-8"), where)
         if body.startswith(b"\xff\xd8\xff"):
-            found, why = "JPEG", jpeg_problem(body)
+            found, why = "JPEG", jpeg_problem(body, self.spent)
         elif body.startswith(PNG):
-            found, why = "PNG", png_problem(body)
+            found, why = "PNG", png_problem(body, self.spent)
         elif body.lstrip()[:1] == b"<" or body.startswith((b"\xef\xbb\xbf", b"\xff\xfe", b"\xfe\xff")):
             found, why = "SVG", self.svg_problem(body, where)
         else:
@@ -308,8 +322,9 @@ class _Store:
                     continue
                 count += 1
                 tag = el.tag if isinstance(el.tag, str) else ""
-                if count > MAX_ELEMENTS:
-                    return f"with more than {MAX_ELEMENTS} elements"
+                self.spent["SVG elements"] += 1
+                if self.spent["SVG elements"] > MAX_ELEMENTS:
+                    return f"with more than {MAX_ELEMENTS} elements in the manifest stores of this file"
                 if not tag.startswith(SVG) or tag[len(SVG):] not in SVG_ELEMENTS or (count == 1 and tag != SVG + "svg"):
                     return f"with element {clean(tag.rsplit('}', 1)[-1] or el.tag, 40)!r}, which is not a static shape"
                 for key, value in el.attrib.items():
@@ -327,17 +342,25 @@ class _Store:
         return "" if count else "without elements"
 
 
-def jpeg_problem(b: bytes) -> str:
+def next_part(spent: Counter) -> str:
+    """"" while the pictures of this file have at most MAX_PARTS JPEG markers and PNG chunks."""
+    spent["JPEG markers and PNG chunks"] += 1
+    return (f"with more than {MAX_PARTS} markers and chunks in the pictures of this file"
+            if spent["JPEG markers and PNG chunks"] > MAX_PARTS else "")
+
+
+def jpeg_problem(b: bytes, spent: Counter) -> str:
     """"" if `b` is one JPEG from SOI to EOI: every segment inside, entropy-coded data stuffed, nothing after."""
     i, scans = 2, 0
     while True:
+        if why := next_part(spent):
+            return why
         if i + 2 > len(b) or b[i] != 0xFF:
             return "without a marker where one must be (cut off or malformed)"
-        m = b[i + 1]
-        if m == 0xFF:  # fill byte
-            i += 1
-            continue
-        i += 2
+        k = FILL.match(b, i).end()  # past any fill bytes: the marker code
+        if k == len(b):
+            return "without a marker where one must be (cut off or malformed)"
+        m, i = b[k], k + 1
         if m == 0xD9:
             if not scans:
                 return "without image data"
@@ -352,21 +375,18 @@ def jpeg_problem(b: bytes) -> str:
         i += n
         if m == 0xDA:  # start of scan: entropy-coded data up to the next marker other than RSTn
             scans += 1
-            while True:
-                j = b.find(b"\xff", i)
-                if j < 0 or j + 1 == len(b):
-                    return "cut off inside its image data"
-                if b[j + 1] == 0x00 or 0xD0 <= b[j + 1] <= 0xD7:
-                    i = j + 2
-                    continue
-                i = j
-                break
+            j = MARKER.search(b, i)
+            if j is None or j.start() + 1 == len(b):
+                return "cut off inside its image data"
+            i = j.start()
 
 
-def png_problem(b: bytes) -> str:
+def png_problem(b: bytes, spent: Counter) -> str:
     """"" if `b` is one PNG: chunks with valid CRC-32, IHDR first, IEND last, nothing after."""
     i, first = len(PNG), True
     while i + 12 <= len(b):
+        if why := next_part(spent):
+            return why
         n, kind = struct.unpack_from(">I4s", b, i)
         if n > 0x7FFFFFFF or i + 12 + n > len(b) or not kind.isalpha():
             return "with a malformed chunk"

@@ -41,6 +41,7 @@ import io
 import re
 import unicodedata
 import zipfile
+from collections import Counter
 from dataclasses import dataclass
 
 import defusedxml.ElementTree as SafeET
@@ -192,7 +193,7 @@ def _plain_name(name: str) -> bool:
     return not any(unicodedata.category(c) in ("Cc", "Cf") for c in name)
 
 
-def inspect_stream(stream, names: list[str], budget: list[int], decoded: list[int]) -> Attachment:
+def inspect_stream(stream, names: list[str], budget: list[int], decoded: list[int], spent: Counter) -> Attachment:
     label = clean(names[0] if names else "(unnamed)", 60)
     if not isinstance(stream, StreamObject):
         return Attachment(label, reason="its /EF entry is not a stream")
@@ -207,7 +208,7 @@ def inspect_stream(stream, names: list[str], budget: list[int], decoded: list[in
         try:
             if budget[0] < 0:
                 raise c2pa.NotVerified("too large to read")
-            what = c2pa.verify(data)
+            what = c2pa.verify(data, spent)  # its limits are for all the stores of this PDF
         except c2pa.NotVerified as e:
             return Attachment(label, reason=f"a JUMBF (C2PA) box: {clean(e, 200)}")
         if not names or any(not _plain_name(n) or not (n.lower().endswith(".c2pa") or "." not in n) for n in names):
@@ -271,7 +272,7 @@ def inspect(reader, data: bytes) -> tuple[list[Attachment], str, list[str]]:
                 if "/EmbeddedFiles" in node and _empty_tree(node.get("/EmbeddedFiles")):
                     empty[(num, gen)] = empty.get((num, gen), 0) + 1
                 todo.extend((v, depth + 1) for v in node.values() if not isinstance(v, IndirectObject))
-    found, used, budget, decoded = [], set(), [MAX_PACKAGE], [0]
+    found, used, budget, decoded, spent = [], set(), [MAX_PACKAGE], [0], Counter()
     for spec in specs:
         names = [text_of(_resolve(spec[k]), 1000) for k in NAME_KEYS if k in spec]
         ef = _resolve(spec["/EF"])
@@ -283,7 +284,7 @@ def inspect(reader, data: bytes) -> tuple[list[Attachment], str, list[str]]:
                 return [], f"more than {MAX_FILES} embedded files or {MAX_FILE_BYTES // 2**20} MB of them to decode", []
             if isinstance(ref, IndirectObject):
                 used.add((ref.idnum, ref.generation))
-            found.append(inspect_stream(_resolve(ref), names, budget, decoded))
+            found.append(inspect_stream(_resolve(ref), names, budget, decoded, spent))
     if decoded[0] > MAX_FILE_BYTES:
         return [], f"more than {MAX_FILE_BYTES // 2**20} MB of embedded files to decode", []
     found += [Attachment(f"object {n} {g}", reason="an embedded file stream no file specification names")
