@@ -23,13 +23,18 @@ export default function ExternalTestSection() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    try {
-      const data = JSON.parse(window.localStorage.getItem(SAVE_KEY) || "{}");
-      if (data && typeof data === "object" && !Array.isArray(data)) {
-        setObserved(data as Observations);
-      }
-    } catch { /* Browser storage is optional. */ }
-    setLoaded(true);
+    let active = true;
+    queueMicrotask(() => {
+      if (!active) return;
+      try {
+        const data = JSON.parse(window.localStorage.getItem(SAVE_KEY) || "{}");
+        if (data && typeof data === "object" && !Array.isArray(data)) {
+          setObserved(data as Observations);
+        }
+      } catch { /* Browser storage is optional. */ }
+      setLoaded(true);
+    });
+    return () => { active = false; };
   }, []);
 
   function record(id: string, value: Observation) {
