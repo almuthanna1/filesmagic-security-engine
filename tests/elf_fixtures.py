@@ -11,7 +11,7 @@ import struct
 
 BASE = 0x400000
 TEXT_VADDR = 0x401000
-# An inert stand-in for a family signature, matched by rule ELF_Inert_Marker_Pipeline in elf.yar.
+# An inert stand-in for a family signature, matched only by the test-only rule tests/rules/elf_marker.yar.
 INERT_MARKER = b"FILESMAGIC-INERT-ELF-MALWARE-MARKER-v1"
 # UPX's own benign decompression-stub banner (present in UPX-packed files). Inert: not malware.
 UPX_BANNER = b"$Info: This file is packed with the UPX executable packer http://upx.sf.net $"

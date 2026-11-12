@@ -34,8 +34,9 @@ way to raise a defensible MALICIOUS verdict on strong static evidence, and no st
      but the `UPX!` header magic is absent. Malware does this to block `upx -d`, but so do commercial
      protectors, and a banner embedded as data looks the same. A modified packer header alone is
      therefore never MALICIOUS, whatever structural anomalies accompany it.
-   - `ELF_Inert_Marker_Pipeline` (HIGH, `test-marker`) — matches only the test fixtures' inert
-     marker; it validates the end-to-end path that a validated family signature will use.
+   No production rule is HIGH. The path a validated signature will use is exercised by a test-only
+   rule (`tests/rules/elf_marker.yar`, an inert marker) that no production scanner loads: `tests/`
+   is outside the rule directories and outside the production image, and tests enforce both.
    No rule for a real malware family ships yet: none has been validated against genuine samples.
    A test (`test_only_validated_rules_can_be_high`) fails if any other rule is given HIGH without
    being listed as validated in `correlate.ELF_SIGNATURE_RULES`.
@@ -54,7 +55,8 @@ way to raise a defensible MALICIOUS verdict on strong static evidence, and no st
 | Ordinary ELF; stripped; W^X; no sections; entry outside code | SUSPICIOUS | SUSPICIOUS | SUSPICIOUS |
 | Modified UPX header (alone, or with every structural anomaly) | SUSPICIOUS | SUSPICIOUS | SUSPICIOUS (`ELF_UPX_Tampered_Header` MEDIUM added) |
 | Normally UPX-packed (`UPX!` present) | SUSPICIOUS | SUSPICIOUS | SUSPICIOUS |
-| Validated signature (inert marker fixture) | SUSPICIOUS | SUSPICIOUS | MALICIOUS |
+| Inert marker fixture, production rules | SUSPICIOUS | SUSPICIOUS | SUSPICIOUS (same findings as the file without it) |
+| Inert marker fixture with the test-only rule loaded and listed as validated (tests only) | - | - | MALICIOUS |
 | Malformed or truncated ELF | SUSPICIOUS | SUSPICIOUS | SUSPICIOUS (`elf-structure` failed, never SAFE) |
 | Real system binaries (Linux CI) | SUSPICIOUS | SUSPICIOUS | SUSPICIOUS |
 | The real sample `7f14bb23…` | SUSPICIOUS | SUSPICIOUS | SUSPICIOUS (expected; not rescanned, see below) |
@@ -65,7 +67,7 @@ way to raise a defensible MALICIOUS verdict on strong static evidence, and no st
   syscalls → at most SUSPICIOUS (INFO/LOW). Unknown executables stay **SUSPICIOUS**, never SAFE.
 - A modified packer header → SUSPICIOUS (MEDIUM), alone or with structural anomalies.
 - **MALICIOUS requires a validated malicious signature** that the parser corroborates as a real
-  ELF. Today only the inert pipeline marker qualifies, so no real file becomes MALICIOUS through
+  ELF. Today no production rule qualifies, so no file becomes MALICIOUS through
   this module until a family signature is validated in the offline VM.
 - A malformed ELF fails closed (failed scan + SUSPICIOUS via `Native_Executable`), never SAFE.
 

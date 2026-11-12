@@ -1,5 +1,6 @@
 // Linux ELF signatures for the custom engine (compiled by EngineSignatures, app.engine, scanner
-// name "yara-x-engine"). HIGH is reserved for validated malicious evidence. Evasion-shaped
+// name "yara-x-engine"). HIGH is reserved for validated malicious evidence; no rule here is HIGH
+// yet, because none has been validated against genuine samples. Evasion-shaped
 // packing (ELF_UPX_Tampered_Header) is MEDIUM: legitimate software also modifies packer headers
 // to protect itself, so it is suspicious, not proof, and never makes a file MALICIOUS by itself.
 // Entropy, "it is an ELF", ordinary libraries and ordinary syscalls are NOT here; a bare native
@@ -24,16 +25,4 @@ rule ELF_UPX_Tampered_Header
         $magic = "UPX!"
     condition:
         uint32(0) == 0x464C457F and ($banner or $stub) and not $magic
-}
-
-rule ELF_Inert_Marker_Pipeline
-{
-    meta:
-        description = "Inert research marker that validates the ELF detection pipeline end to end (YARA HIGH + structural corroboration -> MALICIOUS). Matches only the test fixtures' marker (tests/elf_fixtures.py), never real files; carried in the engine rules so the same compiler and scanner exercise the correlation path as for production rules."
-        category = "test-marker"
-        severity = "HIGH"
-    strings:
-        $m = "FILESMAGIC-INERT-ELF-MALWARE-MARKER-v1"
-    condition:
-        uint32(0) == 0x464C457F and $m
 }

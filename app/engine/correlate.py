@@ -98,7 +98,9 @@ ATTACHMENT_REFERENCE = [("pdf", "PDF_EMBEDDED_FILE"), SIGNATURE_ATTACHMENT]
 ELF_STRUCTURE = "elf-structure"
 # Validated malicious evidence (HIGH). ELF_UPX_Tampered_Header is not here: a modified packer
 # header alone is MEDIUM and changes nothing in correlation (Native_Executable stands beside it).
-ELF_SIGNATURE_RULES = {"ELF_Inert_Marker_Pipeline"}
+# Empty until a signature is validated against genuine samples in the offline VM: no production
+# rule may make an ELF MALICIOUS yet. Tests exercise the path with a test-only rule and a patched set.
+ELF_SIGNATURE_RULES: set[str] = set()
 ELF_SUSPICIOUS_RULES = {"ELF_UPX_Tampered_Header"}
 ELF_STRUCTURAL_RULES = {"ENGINE_ELF_WRITABLE_EXECUTABLE_SEGMENT", "ENGINE_ELF_ENTRY_OUTSIDE_CODE",
                         "ENGINE_ELF_NO_SECTION_HEADERS", "ENGINE_ELF_STRIPPED"}

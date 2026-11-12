@@ -8,10 +8,15 @@ MALICIOUS once the parser confirmed a genuine ELF, replacing the generic Native_
 Unknown executables stay SUSPICIOUS; a malformed ELF fails closed (never SAFE).
 """
 
+import shutil
+import sys
+from pathlib import Path
+
 import pytest
 
 from app import engine, worker
 from app.engine import elf
+from app.scanners import yarax
 from app.engine.elf_scan import ElfScanner
 from app.models import Severity
 from app.scanners import SCANNERS as REFERENCE
@@ -25,6 +30,29 @@ def scan(data: bytes):
 
 def rules(report) -> dict[str, str]:
     return {f.rule_id: f.severity.value for f in report.findings}
+
+
+correlate_module = sys.modules["app.engine.correlate"]  # the name app.engine.correlate is the function
+MARKER_RULE = "ELF_Inert_Marker_Pipeline"
+TEST_RULES = Path(__file__).parent / "rules"
+
+
+def with_test_rules(tmp_path):
+    """The unified scanners with the test-only rules compiled beside the production engine rules."""
+    for f in [*engine.RULES_DIR.glob("*.yar"), *TEST_RULES.glob("*.yar")]:
+        shutil.copy(f, tmp_path / f.name)
+    signatures = engine.EngineSignatures(tmp_path)
+    assert signatures.ready, signatures.error
+    return [signatures if isinstance(s, engine.EngineSignatures) else s for s in engine.SCANNERS]
+
+
+@pytest.fixture
+def validated_scan(tmp_path, monkeypatch):
+    """A scan as it will be once a signature is validated: the test-only marker rule loaded and
+    listed as validated. Nothing outside this fixture does either."""
+    scanners = with_test_rules(tmp_path)
+    monkeypatch.setattr(correlate_module, "ELF_SIGNATURE_RULES", {MARKER_RULE})
+    return lambda data: engine.correlate(worker.analyse(scanners, data))
 
 
 # ---- parser ----
@@ -114,22 +142,51 @@ def test_tampered_upx_alone_is_suspicious_never_malicious(kwargs):
     assert any("kept as suspicious only" in e for e in note.evidence)
 
 
-def test_validated_evidence_with_tampered_upx_is_malicious():
+def test_validated_evidence_with_tampered_upx_is_malicious(validated_scan):
     # MALICIOUS comes from the validated signature; the audit trail keeps the replaced finding.
-    _, uni = scan(build_elf(marker=True, sections=False, extra=UPX_BANNER))
+    uni = validated_scan(build_elf(marker=True, sections=False, extra=UPX_BANNER))
     assert verdicts(uni)["aggregate"] == "MALICIOUS"
-    assert rules(uni).get("ELF_Inert_Marker_Pipeline") == "HIGH" and rules(uni).get("ELF_UPX_Tampered_Header") == "MEDIUM"
+    assert rules(uni).get(MARKER_RULE) == "HIGH" and rules(uni).get("ELF_UPX_Tampered_Header") == "MEDIUM"
     assert "Native_Executable" not in rules(uni)
     note = next(f for f in uni.findings if f.rule_id == "ENGINE_CORRELATION")
     assert any(e.startswith("raw yara-x:Native_Executable MEDIUM") for e in note.evidence)
 
 
 def test_only_validated_rules_can_be_high():
-    from app.engine import RULES_DIR
-    from app.engine.correlate import ELF_SIGNATURE_RULES
-    text = (RULES_DIR / "elf.yar").read_text(encoding="utf-8")
+    text = (engine.RULES_DIR / "elf.yar").read_text(encoding="utf-8")
     high = {block.split()[0] for block in text.split("\nrule ")[1:] if 'severity = "HIGH"' in block}
-    assert high == ELF_SIGNATURE_RULES
+    assert high == correlate_module.ELF_SIGNATURE_RULES == set()  # nothing validated yet
+
+
+# ---- test-only signatures cannot affect production verdicts ----
+
+def test_no_test_signature_is_production_loadable():
+    app_dir = Path(engine.__file__).resolve().parents[1]
+    for f in app_dir.rglob("*"):
+        if f.is_file() and f.suffix in (".yar", ".py"):
+            text = f.read_text(encoding="utf-8")
+            assert INERT_MARKER.decode() not in text and MARKER_RULE not in text and "test-marker" not in text, f
+    # The production scanners compile only app/rules and app/engine/rules; tests/ is outside both.
+    loaded = {Path(yarax.RULES_DIR).resolve(), Path(engine.RULES_DIR).resolve()}
+    assert loaded == {app_dir / "rules", app_dir / "engine" / "rules"}
+    assert not any(TEST_RULES.resolve().is_relative_to(d) for d in loaded)
+    # The production image holds app/ and requirements.txt only (allow-list), so tests/rules is not in it.
+    ignore = (app_dir.parent / ".dockerignore").read_text(encoding="utf-8").split("\n")
+    assert [line for line in ignore if line.startswith(("*", "!"))][:3] == ["*", "!app/", "!requirements.txt"]
+
+
+def test_marker_does_not_change_a_production_verdict():
+    for with_marker, without in zip(scan(build_elf(marker=True)), scan(build_elf())):
+        assert verdicts(with_marker)["aggregate"] == verdicts(without)["aggregate"] == "SUSPICIOUS"
+        assert rules(with_marker) == rules(without) and MARKER_RULE not in rules(with_marker)
+
+
+def test_a_loaded_test_rule_is_still_not_validated_evidence(tmp_path):
+    # Even with the test rule compiled in, correlation does not treat it as validated: the original
+    # finding stands and nothing is replaced.
+    report = engine.correlate(worker.analyse(with_test_rules(tmp_path), build_elf(marker=True)))
+    assert rules(report).get("Native_Executable") == "MEDIUM"
+    assert not any("specific malicious ELF indicator" in e for f in report.findings for e in f.evidence)
 
 
 def test_legitimate_upx_is_not_flagged():
@@ -139,10 +196,10 @@ def test_legitimate_upx_is_not_flagged():
     assert "ELF_UPX_Tampered_Header" not in rules(uni)
 
 
-def test_marker_pipeline_validates_correlation():
-    _, uni = scan(build_elf(marker=True))
+def test_marker_pipeline_validates_correlation(validated_scan):
+    uni = validated_scan(build_elf(marker=True))
     assert verdicts(uni)["aggregate"] == "MALICIOUS"
-    assert rules(uni).get("ELF_Inert_Marker_Pipeline") == "HIGH"
+    assert rules(uni).get(MARKER_RULE) == "HIGH"
     assert INERT_MARKER.decode() not in "".join(f.description for f in uni.findings)  # marker text not echoed
 
 
