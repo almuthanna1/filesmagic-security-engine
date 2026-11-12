@@ -16,11 +16,16 @@ export default function TestFilesPage() {
   const [observed, setObserved] = useState<Observations>({});
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
-    try {
-      const data = JSON.parse(window.localStorage.getItem(SAVE_KEY) || "{}");
-      if (data && typeof data === "object") setObserved(data as Observations);
-    } catch { /* local storage can be blocked, so the list still works */ }
-    setLoaded(true);
+    let active = true;
+    queueMicrotask(() => {
+      if (!active) return;
+      try {
+        const data = JSON.parse(window.localStorage.getItem(SAVE_KEY) || "{}");
+        if (data && typeof data === "object") setObserved(data as Observations);
+      } catch { /* local storage can be blocked, so the list still works */ }
+      setLoaded(true);
+    });
+    return () => { active = false; };
   }, []);
 
   function record(id: string, value: Observation) {
