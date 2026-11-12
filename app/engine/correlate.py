@@ -93,6 +93,18 @@ NETWORK_PATH = ("office", "OFFICE_EXTERNAL_NETWORK_PATH")
 DATA_ELEMENTS = {"image": {"blip", "imagedata"}, "externallinkpath": {"externalBook", "absoluteUrl", "relativeUrl"}}
 SIGNATURE_ATTACHMENT = ("yara-x", "PDF_Embedded_File")
 ATTACHMENT_REFERENCE = [("pdf", "PDF_EMBEDDED_FILE"), SIGNATURE_ATTACHMENT]
+# ELF: specific malicious indicators (engine YARA rules in app/engine/rules/elf.yar) vs. the
+# reference generic executable finding and the bounded parser's structural indicators.
+ELF_STRUCTURE = "elf-structure"
+# Validated malicious evidence (HIGH). ELF_UPX_Tampered_Header is not here: a modified packer
+# header alone is MEDIUM and changes nothing in correlation (Native_Executable stands beside it).
+# Empty until a signature is validated against genuine samples in the offline VM: no production
+# rule may make an ELF MALICIOUS yet. Tests exercise the path with a test-only rule and a patched set.
+ELF_SIGNATURE_RULES: set[str] = set()
+ELF_SUSPICIOUS_RULES = {"ELF_UPX_Tampered_Header"}
+ELF_STRUCTURAL_RULES = {"ENGINE_ELF_WRITABLE_EXECUTABLE_SEGMENT", "ENGINE_ELF_ENTRY_OUTSIDE_CODE",
+                        "ENGINE_ELF_NO_SECTION_HEADERS", "ENGINE_ELF_STRIPPED"}
+NATIVE_EXECUTABLE = ("yara-x", "Native_Executable")
 NO_ATTACHMENTS = (NAME, "ENGINE_PDF_NO_ATTACHMENTS")
 # ENGINE_PDF_NO_ATTACHMENTS also needs the PDF scanner to agree: completed, no attachment, no repair.
 PDF_DISAGREES = {("pdf", "PDF_EMBEDDED_FILE"), ("pdf", "PDF_EMBEDDED_EXECUTABLE"), ("pdf", "PDF_STRUCTURE_REPAIRED")}
@@ -414,6 +426,28 @@ def correlate(report: WorkerReport) -> WorkerReport:
                 "no element shows the object in the document"
                 if "ENGINE_OFFICE_EMBEDDED_OBJECT_NOT_DISPLAYED" in engine else
                 "its display could not be determined"))
+
+    # ELF: a specific malicious indicator from the engine's YARA rules is strong, validated
+    # evidence; the generic Native_Executable it replaces is not. The bounded parser must have
+    # confirmed a genuine ELF (elf-structure completed) for the specific finding to be the reason
+    # for MALICIOUS, and the structural indicators (each INFO/LOW, never escalating alone) are
+    # listed as corroboration. The HIGH is never suppressed: if the parser did not complete, the
+    # finding and Native_Executable both stand and the gap is recorded.
+    if elf_hits := sorted(r for s, r in rules if s == SIGNATURES and r in ELF_SIGNATURE_RULES):
+        elf_ok = status.get(ELF_STRUCTURE) == "completed"
+        corrob = sorted(r for s, r in rules if s == ELF_STRUCTURE and r in ELF_STRUCTURAL_RULES)
+        if elf_ok and NATIVE_EXECUTABLE in rules:
+            drop[NATIVE_EXECUTABLE] = SIGNATURES
+        note(SIGNATURES, f"{', '.join(elf_hits)}: specific malicious ELF indicator"
+             + ("; Native_Executable (generic executable) replaced" if elf_ok and NATIVE_EXECUTABLE in rules else "")
+             + (f"; structural corroboration from the parser: {', '.join(corrob)}" if corrob else
+                "; the parser reported no corroborating structural anomaly")
+             + ("" if elf_ok else "; the ELF parser did not complete, so the structure is unconfirmed (finding kept)"))
+
+    if weak := sorted(r for s, r in rules if s == SIGNATURES and r in ELF_SUSPICIOUS_RULES):
+        note(SIGNATURES, f"{', '.join(weak)} kept as suspicious only: a modified packer header is not validated "
+                         "malicious evidence, so it does not replace Native_Executable or raise the verdict")
+
     if not notes:
         return report
     findings = [f for f in report.findings if (f.scanner, f.rule_id) not in drop]

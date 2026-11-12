@@ -9,6 +9,7 @@ docs/custom-engine-research-log.md.
 from pathlib import Path
 
 from app.engine.correlate import SIGNATURES, LinkScanner, PdfChainScanner, VbaChainScanner, correlate
+from app.engine.elf_scan import ElfScanner
 from app.engine.word_fields import FieldScanner
 from app.scanners import SCANNERS as REFERENCE_SCANNERS
 from app.scanners.yarax import YaraXScanner
@@ -26,6 +27,7 @@ class EngineSignatures(YaraXScanner):
         super().__init__(rules_dir)
 
 
-SCANNERS = [*REFERENCE_SCANNERS, EngineSignatures(), PdfChainScanner(), VbaChainScanner(), LinkScanner(), FieldScanner()]
+SCANNERS = [*REFERENCE_SCANNERS, EngineSignatures(), PdfChainScanner(), VbaChainScanner(), LinkScanner(),
+            FieldScanner(), ElfScanner()]
 
 __all__ = ["SCANNERS", "correlate"]
