@@ -1,0 +1,40 @@
+{
+ "environment": {
+  "platform": "Windows-11-10.0.26300-SP0",
+  "trials": 3,
+  "commit": "eab1f20f986c38a70ea9bb229208152e719eb63b",
+  "dirty": false,
+  "before": {
+   "python": "3.12.0",
+   "packages": {
+    "pypdf": "6.19.0",
+    "yara-x": "1.21.0",
+    "oletools": "0.60.2",
+    "cryptography": "50.0.2"
+   }
+  },
+  "after": {
+   "python": "3.12.0",
+   "packages": {
+    "pypdf": "7.0.1",
+    "yara-x": "1.21.0",
+    "oletools": "0.60.2",
+    "cryptography": "50.0.2"
+   }
+  }
+ },
+ "samples": 252,
+ "comparisons": 504,
+ "changed": 0,
+ "changes": [],
+ "total_min_wall_ms": {
+  "before": {
+   "reference": 119840.33,
+   "unified": 126377.29
+  },
+  "after": {
+   "reference": 117464.58,
+   "unified": 123862.06
+  }
+ }
+}
