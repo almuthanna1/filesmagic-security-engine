@@ -28,7 +28,8 @@ client = TestClient(main.app)
 CASE = {c["id"]: c["data"] for c in cases()}
 FROZEN = Path(__file__).resolve().parent.parent / "docs/evidence/custom-engine-fp-fixes"
 REFERENCE_SCANNERS = ["yara-x", "office", "pdf", "custom"]
-UNIFIED_SCANNERS = REFERENCE_SCANNERS + ["yara-x-engine", "pdf-chains", "vba-chains", "ooxml-links", "word-fields"]
+UNIFIED_SCANNERS = REFERENCE_SCANNERS + ["yara-x-engine", "pdf-chains", "vba-chains", "ooxml-links", "word-fields",
+                                         "elf-structure"]
 CORRUPT_PDF = b"%PDF-1.7\n1 0 obj\n<< /Length 10 >>\nstream\nno end marker follows"
 
 
@@ -96,6 +97,7 @@ def test_every_frozen_case_reproduces_through_the_api(research, engine_name, cas
     status = {s["name"]: s["status"] for s in body["scanners"]}
     if engine_name == "unified":
         status.pop("word-fields")  # C7, added after the frozen run; its status: tests/test_word_fields.py
+        status.pop("elf-structure")  # ELF detection, added after the frozen run; status: tests/test_elf.py
     assert status == frozen["status"]
     # The hash of the bytes sent, not the frozen one: DEFLATE output (the Office fixtures are ZIPs)
     # depends on the zlib build, so the same fixture can have different bytes on another platform.
