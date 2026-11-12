@@ -1,0 +1,54 @@
+# FilesMagic Proprietary License
+
+Copyright (c) 2025-2026 FilesMagic. All rights reserved.
+
+The FilesMagic software, including but not limited to its source code, conversion engine, backend services, frontend applications, APIs, algorithms, configuration files, documentation, and associated materials (collectively, the "Software"), is proprietary and confidential.
+
+## 1. Ownership
+
+All rights, title, and interest in and to the Software are owned by FilesMagic and its respective copyright holder(s).
+
+No ownership rights are transferred by access to, possession of, or use of the Software.
+
+## 2. Restrictions
+
+Unless expressly authorized in writing by FilesMagic, you may not:
+
+* Copy, reproduce, distribute, publish, or publicly display the Software.
+* Modify, adapt, translate, or create derivative works based on the Software.
+* Sell, sublicense, rent, lease, transfer, or otherwise commercially exploit the Software.
+* Use the Software, source code, or conversion engine to create or operate a competing product or service.
+* Reverse engineer, decompile, disassemble, or otherwise attempt to derive proprietary components of the Software, except where such restriction is prohibited by applicable law.
+* Remove, alter, or obscure copyright notices, proprietary notices, trademarks, or other ownership notices.
+* Use any portion of the Software to train, develop, improve, or evaluate machine learning or artificial intelligence systems without prior written authorization.
+* Provide the Software or access to its source code to any third party without prior written authorization.
+
+## 3. Authorized Contributors
+
+Employees, contractors, developers, and other contributors who have been expressly authorized by FilesMagic may access and modify the Software solely for authorized FilesMagic development purposes.
+
+Such access does not grant any independent license, ownership interest, redistribution right, or right to use the Software outside the scope of the authorized work.
+
+## 4. Third-Party Software
+
+The Software may incorporate or interact with third-party software, libraries, frameworks, and other components that are governed by their respective licenses.
+
+Nothing in this license changes, replaces, or restricts rights granted under applicable third-party licenses.
+
+## 5. No Public License Grant
+
+Publication, distribution, or availability of the Software or its source code does not constitute an open-source license or grant permission to use, copy, modify, distribute, sublicense, or commercially exploit the Software.
+
+Any rights not expressly granted in writing are reserved.
+
+## 6. Disclaimer of Warranty
+
+THE SOFTWARE IS PROVIDED "AS IS" AND WITHOUT WARRANTIES OF ANY KIND, WHETHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT.
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, FILESMAGIC AND ITS COPYRIGHT HOLDERS SHALL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR OTHER DAMAGES ARISING FROM OR RELATED TO THE SOFTWARE OR ITS USE.
+
+## 7. Permission Requests
+
+Any permission to use, license, distribute, integrate, or otherwise access the Software beyond expressly authorized FilesMagic development must be obtained through prior written authorization from FilesMagic.
+
+**All rights reserved.**
