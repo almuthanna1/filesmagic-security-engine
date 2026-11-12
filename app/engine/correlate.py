@@ -96,7 +96,10 @@ ATTACHMENT_REFERENCE = [("pdf", "PDF_EMBEDDED_FILE"), SIGNATURE_ATTACHMENT]
 # ELF: specific malicious indicators (engine YARA rules in app/engine/rules/elf.yar) vs. the
 # reference generic executable finding and the bounded parser's structural indicators.
 ELF_STRUCTURE = "elf-structure"
-ELF_SIGNATURE_RULES = {"ELF_UPX_Tampered_Header", "ELF_Inert_Marker_Pipeline"}
+# Validated malicious evidence (HIGH). ELF_UPX_Tampered_Header is not here: a modified packer
+# header alone is MEDIUM and changes nothing in correlation (Native_Executable stands beside it).
+ELF_SIGNATURE_RULES = {"ELF_Inert_Marker_Pipeline"}
+ELF_SUSPICIOUS_RULES = {"ELF_UPX_Tampered_Header"}
 ELF_STRUCTURAL_RULES = {"ENGINE_ELF_WRITABLE_EXECUTABLE_SEGMENT", "ENGINE_ELF_ENTRY_OUTSIDE_CODE",
                         "ENGINE_ELF_NO_SECTION_HEADERS", "ENGINE_ELF_STRIPPED"}
 NATIVE_EXECUTABLE = ("yara-x", "Native_Executable")
@@ -438,6 +441,10 @@ def correlate(report: WorkerReport) -> WorkerReport:
              + (f"; structural corroboration from the parser: {', '.join(corrob)}" if corrob else
                 "; the parser reported no corroborating structural anomaly")
              + ("" if elf_ok else "; the ELF parser did not complete, so the structure is unconfirmed (finding kept)"))
+
+    if weak := sorted(r for s, r in rules if s == SIGNATURES and r in ELF_SUSPICIOUS_RULES):
+        note(SIGNATURES, f"{', '.join(weak)} kept as suspicious only: a modified packer header is not validated "
+                         "malicious evidence, so it does not replace Native_Executable or raise the verdict")
 
     if not notes:
         return report

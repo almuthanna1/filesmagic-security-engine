@@ -101,15 +101,35 @@ def test_structural_indicators_do_not_escalate(kwargs):
     assert not any(f.severity in (Severity.HIGH, Severity.CRITICAL) for f in uni.findings)
 
 
-def test_tampered_upx_is_malicious_unified_only():
-    ref, uni = scan(build_elf(sections=False, extra=UPX_BANNER))
+@pytest.mark.parametrize("kwargs", [dict(sections=False), dict(), dict(wx=True, stripped=True, entry=0x409999)])
+def test_tampered_upx_alone_is_suspicious_never_malicious(kwargs):
+    # A modified UPX header, even with every structural anomaly, is not validated malicious evidence.
+    ref, uni = scan(build_elf(extra=UPX_BANNER, **kwargs))
     assert verdicts(ref)["aggregate"] == "SUSPICIOUS"           # reference engine unchanged
+    assert verdicts(uni)["aggregate"] == "SUSPICIOUS"
+    assert rules(uni).get("ELF_UPX_Tampered_Header") == "MEDIUM"
+    assert not any(f.severity in (Severity.HIGH, Severity.CRITICAL) for f in uni.findings)
+    assert rules(uni).get("Native_Executable") == "MEDIUM"      # the original finding stands
+    note = next(f for f in uni.findings if f.rule_id == "ENGINE_CORRELATION")
+    assert any("kept as suspicious only" in e for e in note.evidence)
+
+
+def test_validated_evidence_with_tampered_upx_is_malicious():
+    # MALICIOUS comes from the validated signature; the audit trail keeps the replaced finding.
+    _, uni = scan(build_elf(marker=True, sections=False, extra=UPX_BANNER))
     assert verdicts(uni)["aggregate"] == "MALICIOUS"
-    assert rules(uni).get("ELF_UPX_Tampered_Header") == "HIGH"
-    # The generic executable finding is replaced and kept in the audit trail.
+    assert rules(uni).get("ELF_Inert_Marker_Pipeline") == "HIGH" and rules(uni).get("ELF_UPX_Tampered_Header") == "MEDIUM"
     assert "Native_Executable" not in rules(uni)
     note = next(f for f in uni.findings if f.rule_id == "ENGINE_CORRELATION")
-    assert any("Native_Executable" in e for e in note.evidence)
+    assert any(e.startswith("raw yara-x:Native_Executable MEDIUM") for e in note.evidence)
+
+
+def test_only_validated_rules_can_be_high():
+    from app.engine import RULES_DIR
+    from app.engine.correlate import ELF_SIGNATURE_RULES
+    text = (RULES_DIR / "elf.yar").read_text(encoding="utf-8")
+    high = {block.split()[0] for block in text.split("\nrule ")[1:] if 'severity = "HIGH"' in block}
+    assert high == ELF_SIGNATURE_RULES
 
 
 def test_legitimate_upx_is_not_flagged():

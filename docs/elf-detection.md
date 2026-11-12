@@ -28,34 +28,53 @@ way to raise a defensible MALICIOUS verdict on strong static evidence, and no st
    A non-ELF returns "not handled"; an unparseable ELF raises, so the worker records a failed scan
    and the file can never come back SAFE on this scanner. `Native_Executable` still marks it SUSPICIOUS.
 
-3. **Signatures — `app/engine/rules/elf.yar`** (engine YARA-X, `yara-x-engine`). HIGH only for a
-   specific, documented malicious construction, never a generic trait:
-   - `ELF_UPX_Tampered_Header` (HIGH) — the UPX decompression stub is present but the `UPX!` header
-     magic is absent: a documented way malware blocks `upx -d` and static unpackers while staying
-     self-unpacking. Keyed on UPX's own benign banner strings (no malware bytes on disk).
+3. **Signatures — `app/engine/rules/elf.yar`** (engine YARA-X, `yara-x-engine`). HIGH is reserved
+   for validated malicious evidence:
+   - `ELF_UPX_Tampered_Header` (**MEDIUM**, suspicious only) — the UPX decompression stub is present
+     but the `UPX!` header magic is absent. Malware does this to block `upx -d`, but so do commercial
+     protectors, and a banner embedded as data looks the same. A modified packer header alone is
+     therefore never MALICIOUS, whatever structural anomalies accompany it.
    - `ELF_Inert_Marker_Pipeline` (HIGH, `test-marker`) — matches only the test fixtures' inert
-     marker; it validates the end-to-end correlation path with the same compiler and scanner as a
-     production rule.
+     marker; it validates the end-to-end path that a validated family signature will use.
+   No rule for a real malware family ships yet: none has been validated against genuine samples.
+   A test (`test_only_validated_rules_can_be_high`) fails if any other rule is given HIGH without
+   being listed as validated in `correlate.ELF_SIGNATURE_RULES`.
 
-4. **Correlation — `app/engine/correlate.py`**. When an engine ELF signature fires and the parser
-   confirmed a genuine ELF (`elf-structure` completed), the specific finding replaces the generic
-   `Native_Executable` (kept in the `ENGINE_CORRELATION` audit trail), and the structural indicators
-   are listed as corroboration. The HIGH is **never suppressed**: if the parser did not complete,
-   the finding and `Native_Executable` both stand and the gap is recorded.
+4. **Correlation — `app/engine/correlate.py`**. When a validated ELF signature (HIGH) fires and the
+   parser confirmed a genuine ELF (`elf-structure` completed), it replaces the generic
+   `Native_Executable`, which is kept as a raw line in the `ENGINE_CORRELATION` audit trail, and the
+   structural indicators are listed as corroboration. A HIGH is never suppressed: if the parser did
+   not complete, both findings stand and the gap is recorded. `ELF_UPX_Tampered_Header` changes
+   nothing: `Native_Executable` stands beside it and the audit note says it is suspicious only.
+
+## Before and after (final)
+
+| Input | Reference | Unified before | Unified after |
+|---|---|---|---|
+| Ordinary ELF; stripped; W^X; no sections; entry outside code | SUSPICIOUS | SUSPICIOUS | SUSPICIOUS |
+| Modified UPX header (alone, or with every structural anomaly) | SUSPICIOUS | SUSPICIOUS | SUSPICIOUS (`ELF_UPX_Tampered_Header` MEDIUM added) |
+| Normally UPX-packed (`UPX!` present) | SUSPICIOUS | SUSPICIOUS | SUSPICIOUS |
+| Validated signature (inert marker fixture) | SUSPICIOUS | SUSPICIOUS | MALICIOUS |
+| Malformed or truncated ELF | SUSPICIOUS | SUSPICIOUS | SUSPICIOUS (`elf-structure` failed, never SAFE) |
+| Real system binaries (Linux CI) | SUSPICIOUS | SUSPICIOUS | SUSPICIOUS |
+| The real sample `7f14bb23…` | SUSPICIOUS | SUSPICIOUS | SUSPICIOUS (expected; not rescanned, see below) |
 
 ## Verdict policy
 
 - Generic executable status, a W^X segment, stripping, missing sections, entropy or ordinary
   syscalls → at most SUSPICIOUS (INFO/LOW). Unknown executables stay **SUSPICIOUS**, never SAFE.
-- **MALICIOUS requires a specific, validated engine signature** (packer-evasion/family) that the
-  parser corroborates as a real ELF.
+- A modified packer header → SUSPICIOUS (MEDIUM), alone or with structural anomalies.
+- **MALICIOUS requires a validated malicious signature** that the parser corroborates as a real
+  ELF. Today only the inert pipeline marker qualifies, so no real file becomes MALICIOUS through
+  this module until a family signature is validated in the offline VM.
 - A malformed ELF fails closed (failed scan + SUSPICIOUS via `Native_Executable`), never SAFE.
 
 ## The 7f14bb23… sample
 
 No public source (VirusTotal-indexed or otherwise) records this hash, so no family attribution or
 detection evidence could be established independently, by hash alone. The sample was **not**
-downloaded or executed. With no reliable malicious evidence, it correctly **remains SUSPICIOUS**;
+downloaded or executed. Its malicious behaviour has not been independently established, so it
+**remains SUSPICIOUS**;
 forcing MALICIOUS is not defensible. Confirming any verdict on the real bytes requires the offline
 research VM (`docs/genuine-malware-evaluation-plan.md`) and is a listed blocker below.
 
@@ -63,9 +82,10 @@ research VM (`docs/genuine-malware-evaluation-plan.md`) and is a listed blocker 
 
 - **Signatures are validated on inert fixtures and benign binaries only**, not against genuine
   malware. Family-specific rules against real samples are authored and validated in the offline VM.
-- `ELF_UPX_Tampered_Header` residual FP: a file that embeds the UPX banner as data without being
-  packed. Mitigated by requiring the `UPX!` magic to be absent (a legitimately packed binary keeps
-  it — covered by `test_legitimate_upx_is_not_flagged`); the real sample space for this is small.
+- `ELF_UPX_Tampered_Header` also matches protected commercial software and a UPX banner embedded
+  as data; that is why it is MEDIUM and cannot raise the verdict.
+- The practical effect on real files today is context, not new MALICIOUS verdicts: genuine ELF
+  malware without a validated signature stays SUSPICIOUS (blocked, not called SAFE).
 - Dynamic/needed-library reading is section-based; a file with no section headers yields no library
   list (itself a weak indicator), never a crash.
 - Structural indicators are intentionally weak; they explain and corroborate, they do not convict.
@@ -78,8 +98,8 @@ Worst bounded case (8000 sections) ~6 ms median / ~12 ms max; an over-limit head
 
 ## Tests
 
-- `tests/test_elf.py` (27 cases): parser indicators and bounds, scanner severities, end-to-end
-  verdicts, `Native_Executable` replacement, no-false-positive on legitimate UPX, fail-closed on
+- `tests/test_elf.py`: parser indicators and bounds, scanner severities, end-to-end
+  verdicts, a modified UPX header never MALICIOUS, only validated rules HIGH, `Native_Executable` replacement, fail-closed on
   malformed, reference engine unchanged.
 - `tests/test_elf_linux.py` (CI, Linux): real system binaries from `/bin`, `/usr/bin`,
   `/usr/lib`/`/lib` must not be MALICIOUS and must parse; fails rather than skips in CI if too few

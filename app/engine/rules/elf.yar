@@ -1,6 +1,7 @@
-// Linux ELF malware signatures for the custom engine (compiled by EngineSignatures,
-// app.engine, scanner name "yara-x-engine"). These are HIGH only when the pattern is a
-// documented, specific indicator of malicious construction, never a generic executable trait.
+// Linux ELF signatures for the custom engine (compiled by EngineSignatures, app.engine, scanner
+// name "yara-x-engine"). HIGH is reserved for validated malicious evidence. Evasion-shaped
+// packing (ELF_UPX_Tampered_Header) is MEDIUM: legitimate software also modifies packer headers
+// to protect itself, so it is suspicious, not proof, and never makes a file MALICIOUS by itself.
 // Entropy, "it is an ELF", ordinary libraries and ordinary syscalls are NOT here; a bare native
 // executable is left to the reference rule Native_Executable (MEDIUM -> SUSPICIOUS). Correlation
 // (app.engine.correlate) only lets a match here stand as MALICIOUS when the bounded ELF parser
@@ -14,9 +15,9 @@
 rule ELF_UPX_Tampered_Header
 {
     meta:
-        description = "ELF carries the UPX decompression stub but its 'UPX!' header magic is absent: a documented way malware blocks 'upx -d' and signature tools while staying self-unpacking. FP risk: a file embedding the UPX banner as data without being packed (covered by tests)."
+        description = "ELF carries the UPX decompression stub but its 'UPX!' header magic is absent: a documented way malware blocks 'upx -d' and signature tools while staying self-unpacking. Commercial protectors and a banner embedded as data look the same, so this is suspicious, not proof of malice."
         category = "packer-evasion"
-        severity = "HIGH"
+        severity = "MEDIUM"
     strings:
         $banner = "This file is packed with the UPX executable packer"
         $stub = "PROT_EXEC|PROT_WRITE failed"   // UPX runtime loader message
