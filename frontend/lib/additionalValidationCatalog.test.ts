@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { VALIDATION_FILES, VALIDATION_GROUPS, directDownloadUrl, pinnedSourceUrl, hostedValidationCandidate } from "./additionalValidationCatalog.ts";
+import { VALIDATION_FILES, VALIDATION_GROUPS, directDownloadUrl, pinnedSourceUrl, hostedValidationCandidate, matchesPinnedValidationHash } from "./additionalValidationCatalog.ts";
 
 test("the supplemental catalog has 32 distinct, categorized files", () => {
   assert.equal(VALIDATION_FILES.length, 32);
@@ -34,10 +34,24 @@ test("spaces in PDF corpus filenames are URL-encoded and official AV controls re
   }
 });
 
-test("known malformed PDFs and encrypted files are designated for local isolated testing", () => {
+test("qpdf encrypted and malformed fixtures use pinned hashes in hosted regression tests", () => {
   const risky = ["bad-data.pdf", "bad-xref.pdf", "bad-direct-root.pdf", "append-xref-loop.pdf", "V4-aes.pdf"];
-  for (const name of risky) {
-    assert.equal(VALIDATION_FILES.find(f => f.filename === name)?.handling, "offline-only");
+  const hashes = [
+    "919998d65cecd40f1c33cf56853a517acc0e18f438fcc098f4c17a086c875057",
+    "5895dfedf978f600b12e29643617dbb111869b60526d957878e349571e1467d1",
+    "0d7549c02c38717627deb10d1155c1b513d35036208e77d687597c77d04dc3b4",
+    "7c67daccc433f574fbaf815d0d376cc79f40f95082ef1b231af436e9f7d27091",
+    "1d8a812844b8d8c7ba085a627eb3b7ab52aa651c6143ca07315084220a113240",
+  ];
+  for (const [i, name] of risky.entries()) {
+    const file = VALIDATION_FILES.find(f => f.filename === name);
+    assert.ok(file);
+    assert.equal(file.handling, "hosted-regression", name);
+    assert.equal(file.expectedSha256, hashes[i], name);
+    assert.equal(hostedValidationCandidate(name)?.id, file.id);
+    assert.equal(matchesPinnedValidationHash(file, hashes[i]), true);
+    assert.equal(matchesPinnedValidationHash(file, "0".repeat(64)), false);
+    assert.equal(matchesPinnedValidationHash(file, "not a sha256"), false);
   }
 });
 
@@ -46,9 +60,14 @@ test("inline hosted scanner accepts only unique allowed external benign-candidat
   assert.equal(hostedValidationCandidate("SampleDoc.docx")?.id, "validation-01");
   assert.equal(hostedValidationCandidate("sampledoc.DOCX")?.id, "validation-01");
   assert.equal(hostedValidationCandidate("SampleShow.pptx")?.filename, "SampleShow.pptx");
+  assert.equal(hostedValidationCandidate("V4-aes.pdf")?.handling, "hosted-regression");
+  assert.equal(hostedValidationCandidate("bad-xref.pdf")?.handling, "hosted-regression");
   for (const file of VALIDATION_FILES.filter(f => f.handling === "offline-only")) {
     assert.equal(hostedValidationCandidate(file.filename), null, file.filename);
   }
   assert.equal(hostedValidationCandidate("unlisted.exe"), null);
+  assert.equal(hostedValidationCandidate("harmless-clean.docm"), null);
+  assert.equal(hostedValidationCandidate("eicar.com.txt"), null);
+  assert.equal(hostedValidationCandidate("eicar.com.zip"), null);
   assert.equal(hostedValidationCandidate("../SampleDoc.docx"), null);
 });

@@ -2,7 +2,7 @@
 // Repository fixtures do not automatically establish that files are benign or malware.
 // "PASS"/"FAIL" in veraPDF means PDF/A specification conformance only.
 export type ValidationGroup = "Apache POI Office files" | "veraPDF PDF conformance" | "qpdf PDF parser cases" | "oletools Office controls" | "EICAR harmless AV controls";
-export type ValidationHandling = "reviewed-benign-candidate" | "offline-only";
+export type ValidationHandling = "reviewed-benign-candidate" | "hosted-regression" | "offline-only";
 export type ValidationFile = {
   id: string;
   group: ValidationGroup;
@@ -12,6 +12,8 @@ export type ValidationFile = {
   filename: string;
   purpose: string;
   handling: ValidationHandling;
+  // Required for hosted malformed/encrypted regression fixtures. A filename is not provenance.
+  expectedSha256?: string;
   downloadOverride?: string;
   sourceOverride?: string;
 };
@@ -263,7 +265,8 @@ export const VALIDATION_FILES: ValidationFile[] = [
     "path": "qpdf/qtest/qpdf/V4-aes.pdf",
     "filename": "V4-aes.pdf",
     "purpose": "Encrypted PDF. Incomplete analysis should never silently return SAFE.",
-    "handling": "offline-only"
+    "handling": "hosted-regression",
+    "expectedSha256": "1d8a812844b8d8c7ba085a627eb3b7ab52aa651c6143ca07315084220a113240"
   },
   {
     "id": "validation-25",
@@ -273,7 +276,8 @@ export const VALIDATION_FILES: ValidationFile[] = [
     "path": "qpdf/qtest/qpdf/bad-data.pdf",
     "filename": "bad-data.pdf",
     "purpose": "Deliberately damaged PDF data; verify fail-closed parsing.",
-    "handling": "offline-only"
+    "handling": "hosted-regression",
+    "expectedSha256": "919998d65cecd40f1c33cf56853a517acc0e18f438fcc098f4c17a086c875057"
   },
   {
     "id": "validation-26",
@@ -283,7 +287,8 @@ export const VALIDATION_FILES: ValidationFile[] = [
     "path": "qpdf/qtest/qpdf/bad-xref.pdf",
     "filename": "bad-xref.pdf",
     "purpose": "Damaged cross-reference data; test parser error handling.",
-    "handling": "offline-only"
+    "handling": "hosted-regression",
+    "expectedSha256": "5895dfedf978f600b12e29643617dbb111869b60526d957878e349571e1467d1"
   },
   {
     "id": "validation-27",
@@ -293,7 +298,8 @@ export const VALIDATION_FILES: ValidationFile[] = [
     "path": "qpdf/qtest/qpdf/bad-direct-root.pdf",
     "filename": "bad-direct-root.pdf",
     "purpose": "Malformed PDF root dictionary; test parser resilience.",
-    "handling": "offline-only"
+    "handling": "hosted-regression",
+    "expectedSha256": "0d7549c02c38717627deb10d1155c1b513d35036208e77d687597c77d04dc3b4"
   },
   {
     "id": "validation-28",
@@ -303,7 +309,8 @@ export const VALIDATION_FILES: ValidationFile[] = [
     "path": "qpdf/qtest/qpdf/append-xref-loop.pdf",
     "filename": "append-xref-loop.pdf",
     "purpose": "Unusual cross-reference cycle; test resource bounds.",
-    "handling": "offline-only"
+    "handling": "hosted-regression",
+    "expectedSha256": "7c67daccc433f574fbaf815d0d376cc79f40f95082ef1b231af436e9f7d27091"
   },
   {
     "id": "validation-29",
@@ -367,12 +374,19 @@ export function pinnedSourceUrl(file: ValidationFile): string {
 
 
 /**
- * The hosted inline Lab accepts only unique, explicitly reviewed benign-candidate
- * catalog filenames. This is a user-interface safety gate, not a security
- * boundary or proof of provenance; the backend must still validate every file.
+ * The hosted inline Lab accepts unique catalog filenames that are either reviewed
+ * benign candidates or pinned qpdf parser regression fixtures. This UI gate is not
+ * a security boundary; the backend must still validate every file.
  */
 export function hostedValidationCandidate(filename: string): ValidationFile | null {
   const matches = VALIDATION_FILES.filter(f => f.filename.toLowerCase() === filename.toLowerCase());
-  return matches.length === 1 && matches[0].handling === "reviewed-benign-candidate"
+  return matches.length === 1 && matches[0].handling !== "offline-only"
     ? matches[0] : null;
+}
+
+/** Hosted stress-test fixtures must match the bytes from the pinned qpdf commit. */
+export function matchesPinnedValidationHash(file: ValidationFile, actualSha256: string): boolean {
+  return !file.expectedSha256 ||
+    /^[a-f0-9]{64}$/i.test(actualSha256) &&
+    file.expectedSha256.toLowerCase() === actualSha256.toLowerCase();
 }
