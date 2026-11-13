@@ -33,7 +33,7 @@ its own precondition; if it does not hold, the reference finding stands (fail cl
     the P-code Office may run instead cannot be checked for VBA stomping in the isolated worker.
   - Accounting (benign-corpus validation, docs/evidence/benign-corpus): an engine finding may
     carry "accounts for <scanner>:<rule>" lines. It then replaces that reference finding, if both
-    scanners completed (and, for PDF, the structure needed no repair). Only three rules may replace
+    scanners completed (and, for PDF, the structure needed no repair). Only four rules may replace
     a finding of higher severity, each after examining every item behind it, and only up to the
     severity it was validated on (SUPERSEDING): a reference finding rated higher saw something
     this examination does not model, and stands.
@@ -48,16 +48,25 @@ its own precondition; if it does not hold, the reference finding stands (fail cl
         is an attached template on such a path, referenced only by w:attachedTemplate. Still LOW:
         the template is not inspected and can carry macros; only an author-chosen server is ruled out.
       ENGINE_PDF_ATTACHMENTS_VERIFIED (INFO) for PDF_EMBEDDED_FILE and PDF_Embedded_File: every
-        attachment in every object of the file is an OpenDocument package without code, embedded
-        objects or automatically loaded content, under its type's extension (passive hyperlinks are
-        allowed and counted), and no action runs a script, launches a file or opens an embedded
-        document (app.engine.pdf_attachments).
+        attachment in every object of the file is, from its bytes, an OpenDocument package without
+        code, embedded objects or automatically loaded content, under its type's extension (passive
+        hyperlinks are allowed and counted), or a C2PA manifest store (Content Credentials) holding
+        only data and pictures without script, active markup or external references, under a name
+        without another extension (its signature is not validated); and no action runs a script,
+        launches a file or opens an embedded document (app.engine.pdf_attachments, app.engine.c2pa).
+      ENGINE_PDF_NO_ATTACHMENTS (INFO) for PDF_Embedded_File (YARA-X) only: a complete reading of
+        every object of the file finds no file specification with /EF and no embedded file stream,
+        and every byte sequence the signature matches is the key /EmbeddedFiles of an empty name tree
+        (pdf_attachments, point 5), as removing an attachment or metadata often leaves it. The PDF
+        scanner must also have completed with no attachment finding and no repair. Text that only
+        contains the bytes, a non-empty or dangling tree, or an older revision keeps the signature.
     Any other accounting finding only merges a reference finding of the same or lower severity, so
     one piece of evidence is counted once (ENGINE_OFFICE_EXTERNAL_ON_OPEN for AUTOLOAD when every
     relationship behind it is used on open; ENGINE_PDF_ATTACHMENTS_UNVERIFIED, LOW, for the two
     LOW attachment findings). The reference scanner's name stays in the evidence line.
 Every decision is listed in an INFO finding, ENGINE_CORRELATION, under the engine scanner that made
-it, so nothing changes silently.
+it, so nothing changes silently; its evidence ends with every reference finding that scanner
+removed, as it was ("raw <scanner>:<rule> <SEVERITY>: <description>").
 """
 
 import re
@@ -82,7 +91,11 @@ NETWORK_PATH = ("office", "OFFICE_EXTERNAL_NETWORK_PATH")
 # Relationship type -> the only elements that may reference it: they load the target as data. A
 # file: hyperlink can start a program, so a relationship any other element uses is not superseded.
 DATA_ELEMENTS = {"image": {"blip", "imagedata"}, "externallinkpath": {"externalBook", "absoluteUrl", "relativeUrl"}}
-ATTACHMENT_REFERENCE = [("pdf", "PDF_EMBEDDED_FILE"), ("yara-x", "PDF_Embedded_File")]
+SIGNATURE_ATTACHMENT = ("yara-x", "PDF_Embedded_File")
+ATTACHMENT_REFERENCE = [("pdf", "PDF_EMBEDDED_FILE"), SIGNATURE_ATTACHMENT]
+NO_ATTACHMENTS = (NAME, "ENGINE_PDF_NO_ATTACHMENTS")
+# ENGINE_PDF_NO_ATTACHMENTS also needs the PDF scanner to agree: completed, no attachment, no repair.
+PDF_DISAGREES = {("pdf", "PDF_EMBEDDED_FILE"), ("pdf", "PDF_EMBEDDED_EXECUTABLE"), ("pdf", "PDF_STRUCTURE_REPAIRED")}
 # An engine finding names each reference finding it accounts for with this evidence line: all the
 # relationships or attachments behind that finding, re-listed and examined by the engine.
 ACCOUNTS = "accounts for {}:{}"
@@ -92,7 +105,8 @@ ACCOUNTS_LINE = re.compile(r"accounts for ([\w-]+):(\w+)")
 # may only merge a reference finding of the same or lower severity.
 SUPERSEDING = {(LINKS, "ENGINE_OFFICE_LOCAL_FILE_TARGETS"): Severity.MEDIUM,
                (LINKS, "ENGINE_OFFICE_LOCAL_TEMPLATE"): Severity.MEDIUM,
-               (NAME, "ENGINE_PDF_ATTACHMENTS_VERIFIED"): Severity.LOW}
+               (NAME, "ENGINE_PDF_ATTACHMENTS_VERIFIED"): Severity.LOW,
+               NO_ATTACHMENTS: Severity.LOW}
 RANK = {s: i for i, s in enumerate(Severity)}
 REFERENCE_OBJECTS = {("office", r) for r in ("OFFICE_EMBEDDED_OLE", "OFFICE_EMBEDDED_BINARY", "OFFICE_PACKAGE_OBJECT",
                                              "OFFICE_PACKAGE_EXECUTABLE", "OFFICE_EQUATION_EDITOR")}
@@ -188,17 +202,28 @@ def attachment_findings(result: pdf_chains.PdfChains) -> list[Finding]:
                         f"Attachments could not all be read ({clean(result.files_problem, 160)}); the reference "
                         "attachment findings stand.")]
     if not result.files:
-        return []
+        # No marker for the signature to have matched, one not explained, or a repaired reading.
+        if not result.empty_trees or result.repaired:
+            return []
+        return [finding("ENGINE_PDF_NO_ATTACHMENTS", Severity.INFO,
+                        "The PDF carries no attachment: every object of the file was read, and none is a file "
+                        "specification with /EF or an embedded file stream. Each raw /EmbeddedFile byte sequence "
+                        "is the key /EmbeddedFiles of an empty name tree, which names no file. Evidence: "
+                        f"{listing(result.empty_trees)}.",
+                        evidence=result.empty_trees + [ACCOUNTS.format(*SIGNATURE_ATTACHMENT)])]
     items = [f"{a.name}: {a.verified or 'not verified: ' + a.reason}" for a in result.files]
     actions = [chain_text(c) for c in result.chains if any(a.script or a.kind in ("Launch", "GoToE") for a in c.actions)]
     accounts = [ACCOUNTS.format(*r) for r in ATTACHMENT_REFERENCE]
     if all(a.verified for a in result.files) and not actions:
         return [finding("ENGINE_PDF_ATTACHMENTS_VERIFIED", Severity.INFO,
-                        "Every attachment was read and is an OpenDocument file without macros, scripts, embedded "
-                        "objects or automatically loaded external content, saved under its type's extension; it may "
-                        "hold hyperlinks, which open only on a click. No action in this PDF runs a script, launches "
-                        "a file or opens an embedded document. This shows what the attachments do not contain, not "
-                        f"that they are harmless. Evidence: {listing(items)}.", evidence=items + accounts)]
+                        "Every attachment was read and verified from its bytes: an OpenDocument file without macros, "
+                        "scripts, embedded objects or automatically loaded external content, saved under its type's "
+                        "extension (it may hold hyperlinks, which open only on a click), or a C2PA manifest store "
+                        "(Content Credentials) holding only data and pictures without script, active markup or "
+                        "external references, whose signature was not validated. No action in this PDF runs a "
+                        "script, launches a file or opens an embedded document. This shows what the attachments do "
+                        f"not contain, not that they are harmless or authentic. Evidence: {listing(items)}.",
+                        evidence=items + accounts)]
     why = [f"actions that could use an attachment: {listing(actions)}"] if actions else []
     return [finding("ENGINE_PDF_ATTACHMENTS_UNVERIFIED", Severity.LOW,
                     "The PDF carries attachments that could not be verified as content without code. "
@@ -376,16 +401,17 @@ def correlate(report: WorkerReport) -> WorkerReport:
     status = {s.name: s.status for s in report.scanners}
     rules = {(f.scanner, f.rule_id) for f in report.findings}
     chains_ok = status.get(NAME) == "completed" and (NAME, "ENGINE_PDF_CHAINS_REPAIRED") not in rules
-    drop, notes = set(), {}  # notes: engine scanner -> its decisions, reported under that scanner
+    # drop: reference finding -> the engine scanner that replaced it; notes: engine scanner -> its decisions
+    drop, notes = {}, {}
 
     def note(scanner: str, text: str) -> None:
         notes.setdefault(scanner, []).append(text)
 
     if chains_ok and status.get("pdf") == "completed" and (found := rules & STRUCTURAL):
-        drop |= found
+        drop |= dict.fromkeys(found, NAME)
         note(NAME, f"replaced {', '.join(sorted(r for _, r in found))} (PDF scanner) by the action-chain rules")
     if status.get(SIGNATURES) == "completed" and REFERENCE_SIGNATURE in rules:
-        drop.add(REFERENCE_SIGNATURE)
+        drop[REFERENCE_SIGNATURE] = SIGNATURES
         note(SIGNATURES, f"replaced {REFERENCE_SIGNATURE[1]} (YARA-X) by {REFINED_SIGNATURE[1]}, which "
              + ("also matched" if REFINED_SIGNATURE in rules else
                 "did not match: the bytes show every /OpenAction and /AA here is not automatic"))
@@ -401,13 +427,15 @@ def correlate(report: WorkerReport) -> WorkerReport:
         for scanner, rule in accounted(f):
             behind = [r for r in report.findings if (r.scanner, r.rule_id) == (scanner, rule)]
             if (not behind or status.get(scanner) != "completed" or status.get(f.scanner) != "completed"
-                    or (f.scanner == NAME and not chains_ok)):
+                    or (f.scanner == NAME and not chains_ok)
+                    or ((f.scanner, f.rule_id) == NO_ATTACHMENTS and (status.get("pdf") != "completed"
+                                                                      or rules & PDF_DISAGREES))):
                 continue
             highest = max(RANK[r.severity] for r in behind)
             lower, ceiling = highest > RANK[f.severity], SUPERSEDING.get((f.scanner, f.rule_id))
             if lower and (ceiling is None or highest > RANK[ceiling]):
                 continue
-            drop.add((scanner, rule))
+            drop[(scanner, rule)] = f.scanner
             note(f.scanner, f"{'superseded' if lower else 'merged'} {rule} ({scanner}) into {f.rule_id}"
                  + (", which examined every item behind it" if lower else ": the same evidence, counted once"))
 
@@ -443,7 +471,11 @@ def correlate(report: WorkerReport) -> WorkerReport:
     if not notes:
         return report
     findings = [f for f in report.findings if (f.scanner, f.rule_id) not in drop]
+    raw = {}  # every removed reference finding, as it was, under the scanner that removed it (audit trail)
+    for f in report.findings:
+        if owner := drop.get((f.scanner, f.rule_id)):
+            raw.setdefault(owner, []).append(f"raw {f.scanner}:{f.rule_id} {f.severity.value}: {f.description}")
     findings += [finding("ENGINE_CORRELATION", Severity.INFO, "Evidence correlation: " + "; ".join(items) + ".",
-                         scanner=scanner, category="evidence-correlation", evidence=items)
+                         scanner=scanner, category="evidence-correlation", evidence=items + raw.get(scanner, []))
                  for scanner, items in notes.items()]
     return report.model_copy(update={"findings": findings})

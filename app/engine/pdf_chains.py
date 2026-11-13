@@ -75,6 +75,7 @@ class PdfChains:
     repaired: int = 0  # pypdf repair warnings: the structure is a best-effort reading
     files: list = field(default_factory=list)  # pdf_attachments.Attachment, from every object of the file
     files_problem: str = ""  # why `files` may be incomplete ("" if it is complete)
+    empty_trees: list = field(default_factory=list)  # with no files: each raw /EmbeddedFile token, an empty tree's key
 
     def linked(self, chain: Chain) -> list[tuple[Action, str, str]]:
         """(action, attachment, how) for every payload of `chain` that names an attachment."""
@@ -221,7 +222,7 @@ def extract(data: bytes, log: _RepairLog | None = None) -> PdfChains:
     # Repairs while reading attachments make the attachment list incomplete, not the chains.
     result.repaired = log.count
     try:
-        result.files, result.files_problem = pdf_attachments.inspect(reader, data)
+        result.files, result.files_problem, result.empty_trees = pdf_attachments.inspect(reader, data)
     except Exception as e:  # never fails the chain scanner: an incomplete list only blocks supersession
         result.files, result.files_problem = [], f"attachment inspection failed: {type(e).__name__}: {clean(e, 120)}"
     if log.count > result.repaired:

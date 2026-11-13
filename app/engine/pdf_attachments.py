@@ -15,32 +15,44 @@ application:
 3. Each embedded stream is decoded under pypdf's stream limits (app.scanners.pdf.PDF_LIMITS, which
    the caller applies), at most MAX_FILES of them and MAX_FILE_BYTES decoded in all, and its
    declared /Params /Size, if any, must match.
-4. A stream is verified only as an OpenDocument package without code or automatically loaded
-   content (odf_without_code): what it is, from its bytes, never from its name or MIME type.
-   Every name of its file specification must end in that type's extension and hold no control or
-   formatting characters (x.exe<NUL>.odt), since a reader saves it under that name and the
-   system opens it by extension. This is the LibreOffice "hybrid PDF" (the editable document
-   kept inside its PDF export).
+4. A stream is verified only as one of two things, from its bytes, never from its name, MIME type
+   or /AFRelationship. Every name of its file specification must hold no control or formatting
+   characters (x.exe<NUL>.odt) and fit the type, since a reader saves it under that name and the
+   system opens it by extension:
+   - an OpenDocument package without code or automatically loaded content (odf_without_code),
+     named with that type's extension: the LibreOffice "hybrid PDF" (the editable document kept
+     inside its PDF export);
+   - a C2PA manifest store (Content Credentials) without active content (app.engine.c2pa), named
+     without any extension or with .c2pa: what ChatGPT, Adobe and other C2PA producers attach.
+
+5. With no attachment at all, the raw /EmbeddedFile tokens (what the reference YARA-X rule matches)
+   are explained only if each one starts the name /EmbeddedFiles and, object by object, they are
+   exactly the parsed /EmbeddedFiles keys whose value is an empty name tree (no /Kids, no or an
+   empty /Names array). A token in text, a stream, a non-empty or dangling tree is not explained.
 
 Anything else (another type, an orphan stream, a parse problem) is "not verified" with the reason:
 a verdict about what the attachment is not, never that it is safe. Not examined: the contents of
-the raster pictures beyond their signature, and anything outside the attachments (fonts, images,
-3D or media streams of the PDF itself), which the attachment findings do not cover either.
+the raster pictures beyond their signature (ODF) or structure (C2PA), C2PA signatures, and anything
+outside the attachments (fonts, images, 3D or media streams of the PDF itself), which the
+attachment findings do not cover either.
 """
 
 import io
 import re
 import unicodedata
 import zipfile
+from collections import Counter
 from dataclasses import dataclass
 
 import defusedxml.ElementTree as SafeET
 from pypdf.generic import ArrayObject, DictionaryObject, IndirectObject, StreamObject
 
+from app.engine import c2pa
 from app.scanners.office import unsafe_member_name
 from app.scanners.pdf import MAX_DEPTH, MAX_OBJECTS, clean, text_of
 
 TOKEN = b"/EmbeddedFile"
+EMPTY_TREE_KEY = re.compile(rb"/EmbeddedFiles(?=[\s()<>\[\]{}/%])")  # the name ends at a delimiter (7.2.3)
 OBJECT_HEADER = re.compile(rb"(?<![0-9])[0-9]+\s+[0-9]+\s+obj\b")
 ODF_TYPES = {f"application/vnd.oasis.opendocument.{k}": v for k, v in
              (("text", "odt"), ("spreadsheet", "ods"), ("presentation", "odp"), ("graphics", "odg"))}
@@ -181,7 +193,7 @@ def _plain_name(name: str) -> bool:
     return not any(unicodedata.category(c) in ("Cc", "Cf") for c in name)
 
 
-def inspect_stream(stream, names: list[str], budget: list[int], decoded: list[int]) -> Attachment:
+def inspect_stream(stream, names: list[str], budget: list[int], decoded: list[int], spent: Counter) -> Attachment:
     label = clean(names[0] if names else "(unnamed)", 60)
     if not isinstance(stream, StreamObject):
         return Attachment(label, reason="its /EF entry is not a stream")
@@ -191,6 +203,18 @@ def inspect_stream(stream, names: list[str], budget: list[int], decoded: list[in
     size = _resolve(params.get("/Size")) if isinstance(params, DictionaryObject) else None
     if size is not None and size != len(data):
         return Attachment(label, reason=f"declares {size} bytes but holds {len(data)}")
+    if data[4:8] == b"jumb":  # a JUMBF superbox: what C2PA embeds (C2PA 2.2, Annex A.4)
+        budget[0] -= len(data)
+        try:
+            if budget[0] < 0:
+                raise c2pa.NotVerified("too large to read")
+            what = c2pa.verify(data, spent)  # its limits are for all the stores of this PDF
+        except c2pa.NotVerified as e:
+            return Attachment(label, reason=f"a JUMBF (C2PA) box: {clean(e, 200)}")
+        if not names or any(not _plain_name(n) or not (n.lower().endswith(".c2pa") or "." not in n) for n in names):
+            return Attachment(label, reason="a C2PA manifest store under a name with another extension or control "
+                                            "characters")
+        return Attachment(label, verified=what)
     kind, why, links = odf_without_code(data, budget)
     if not kind:
         return Attachment(label, reason=why)
@@ -202,23 +226,35 @@ def inspect_stream(stream, names: list[str], budget: list[int], decoded: list[in
                                       "passive hyperlink(s), followed only on a click)")
 
 
-def inspect(reader, data: bytes) -> tuple[list[Attachment], str]:
-    """Every attachment, and a problem that keeps the list from being complete ("" if none)."""
+def _empty_tree(value) -> bool:
+    node = _resolve(value)
+    if not isinstance(node, DictionaryObject) or "/Kids" in node:
+        return False
+    names = _resolve(node.get("/Names"))
+    return names is None or (isinstance(names, ArrayObject) and not names)
+
+
+def inspect(reader, data: bytes) -> tuple[list[Attachment], str, list[str]]:
+    """Every attachment, a problem that keeps the list from being complete ("" if none), and, if
+    there is no attachment, one evidence line per raw /EmbeddedFile token showing it is an empty name
+    tree's key ([] if any token is not, or there is none)."""
     objects = [(num, gen) for gen, table in reader.xref.items() for num in table] + \
               [(num, 0) for num in reader.xref_objStm]
     if len(objects) > MAX_OBJECTS:
-        return [], f"more than {MAX_OBJECTS} objects"
+        return [], f"more than {MAX_OBJECTS} objects", []
     # An xref offset may point at whitespace before the object number.
-    starts = {off + len(data[off:off + 64]) - len(data[off:off + 64].lstrip())
-              for table in reader.xref.values() for off in table.values()}
+    starts = {off + len(data[off:off + 64]) - len(data[off:off + 64].lstrip()): (num, gen)
+              for gen, table in reader.xref.items() for num, off in table.items()}
     if (outside := next((m.start() for m in OBJECT_HEADER.finditer(data) if m.start() not in starts), None)) is not None:
         return [], f"an object at byte {outside} is not one the cross-reference table points to (an older " \
-                   "revision, or one only a repairing reader would find)"
-    spans = sorted((off, data.find(b"endobj", off)) for off in starts)
+                   "revision, or one only a repairing reader would find)", []
+    spans = sorted((off, data.find(b"endobj", off), key) for off, key in starts.items())
+    tokens: dict[tuple[int, int], list[int]] = {}  # object -> offsets of the raw tokens inside it
     for at in (m.start() for m in re.finditer(re.escape(TOKEN), data)):
-        if not any(start <= at < end for start, end in spans):
-            return [], f"an {TOKEN.decode()} token at byte {at} lies outside every object the parser reads"
-    specs, streams = [], set()
+        if (key := next((k for start, end, k in spans if start <= at < end), None)) is None:
+            return [], f"an {TOKEN.decode()} token at byte {at} lies outside every object the parser reads", []
+        tokens.setdefault(key, []).append(at)
+    specs, streams, empty = [], set(), {}  # empty: object -> its /EmbeddedFiles keys holding an empty tree
     for num, gen in objects:
         obj = reader.get_object(IndirectObject(num, gen, reader))
         if isinstance(obj, StreamObject) and obj.get("/Type") == "/EmbeddedFile":
@@ -227,14 +263,16 @@ def inspect(reader, data: bytes) -> tuple[list[Attachment], str]:
         while todo:
             node, depth = todo.pop()
             if depth > MAX_DEPTH:
-                return [], "an object is nested too deeply"
+                return [], "an object is nested too deeply", []
             if isinstance(node, ArrayObject):
                 todo.extend((v, depth + 1) for v in node if not isinstance(v, IndirectObject))
             elif isinstance(node, DictionaryObject):
                 if "/EF" in node:
                     specs.append(node)
+                if "/EmbeddedFiles" in node and _empty_tree(node.get("/EmbeddedFiles")):
+                    empty[(num, gen)] = empty.get((num, gen), 0) + 1
                 todo.extend((v, depth + 1) for v in node.values() if not isinstance(v, IndirectObject))
-    found, used, budget, decoded = [], set(), [MAX_PACKAGE], [0]
+    found, used, budget, decoded, spent = [], set(), [MAX_PACKAGE], [0], Counter()
     for spec in specs:
         names = [text_of(_resolve(spec[k]), 1000) for k in NAME_KEYS if k in spec]
         ef = _resolve(spec["/EF"])
@@ -243,12 +281,15 @@ def inspect(reader, data: bytes) -> tuple[list[Attachment], str]:
             found.append(Attachment(clean(names[0] if names else "(unnamed)", 60), reason="its /EF entry is empty"))
         for ref in refs:
             if len(found) >= MAX_FILES or decoded[0] > MAX_FILE_BYTES:
-                return [], f"more than {MAX_FILES} embedded files or {MAX_FILE_BYTES // 2**20} MB of them to decode"
+                return [], f"more than {MAX_FILES} embedded files or {MAX_FILE_BYTES // 2**20} MB of them to decode", []
             if isinstance(ref, IndirectObject):
                 used.add((ref.idnum, ref.generation))
-            found.append(inspect_stream(_resolve(ref), names, budget, decoded))
+            found.append(inspect_stream(_resolve(ref), names, budget, decoded, spent))
     if decoded[0] > MAX_FILE_BYTES:
-        return [], f"more than {MAX_FILE_BYTES // 2**20} MB of embedded files to decode"
+        return [], f"more than {MAX_FILE_BYTES // 2**20} MB of embedded files to decode", []
     found += [Attachment(f"object {n} {g}", reason="an embedded file stream no file specification names")
               for n, g in sorted(streams - used)]
-    return found, ""
+    explained = not found and all(len(at) == empty.get(key, 0) and all(EMPTY_TREE_KEY.match(data, a) for a in at)
+                                  for key, at in tokens.items())
+    return found, "", [f"byte {a}: the key /EmbeddedFiles of object {n} {g}, an empty name tree (no /Kids, no names)"
+                       for (n, g), at in sorted(tokens.items()) for a in at] if explained else []
