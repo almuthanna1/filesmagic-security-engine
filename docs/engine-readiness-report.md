@@ -1,6 +1,7 @@
 # FilesMagic custom unified engine: readiness report
 
 > **Post-freeze update (2026-11-13):** [External PDF coverage findings and remediation plan](external-pdf-coverage-findings-2026-11-13.md) document newly observed encrypted and damaged-data qpdf tests. They are **not included** in the November 9 frozen results or readiness decision below.
+> **Supplementary batch audit (2026-11-13):** [32-case external validation audit](external-validation-batch-audit-2026-11-13.md) reviews 30 saved scans, one manual record and one missing case. Findings include an unsupported-format SAFE decision and incomplete/repaired PDF coverage concerns. They do not alter the frozen dataset.
 
 | | |
 |---|---|
