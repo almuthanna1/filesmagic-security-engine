@@ -65,7 +65,9 @@ export function completeValidationReport(
       : file.handling === "hosted-regression" ? "Hosted validation fixture: pinned upstream SHA-256"
       : "Benign candidate; review before testing"}`,
     file.expectedSha256
-      ? `Upstream pinned SHA-256: ${file.expectedSha256}; scanned file SHA-256 ${scan.sha256.toLowerCase() === file.expectedSha256.toLowerCase() ? "MATCHED" : "DID NOT MATCH"} the pinned upstream revision.`
+      ? file.repository === "Official EICAR"
+        ? `EICAR reference SHA-256: ${file.expectedSha256}; scanned file SHA-256 ${scan.sha256.toLowerCase() === file.expectedSha256.toLowerCase() ? "MATCHED" : "DID NOT MATCH"} the known EICAR control fingerprint. The official download is unversioned; current remote bytes were not independently downloaded for this check.`
+        : `Upstream pinned SHA-256: ${file.expectedSha256}; scanned file SHA-256 ${scan.sha256.toLowerCase() === file.expectedSha256.toLowerCase() ? "MATCHED" : "DID NOT MATCH"} the pinned upstream revision.`
       : "Provenance caveat: Matched a local Security Lab history record by filename and, if specified, SHA-256. The upstream source bytes have NOT been independently hash-verified.",
     "",
     "SCAN RESULT (from saved Security Lab history)",
