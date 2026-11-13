@@ -212,7 +212,11 @@ def scan_ole(data: bytes) -> list[Finding] | None:
                                  f"Document contains {len({tuple(e) for e in object_storages})} embedded OLE object(s).",
                                  "OFFICE_EMBEDDED_OLE"))
 
-    if has_vba or top & {"workbook", "book"}:  # workbook: olevba also detects XLM macros
+    # Legacy PowerPoint may contain VBA without an OLE storage named VBA/Macros.
+    # The VBA call-chain scanner already inspects the whole PPT container, so the
+    # reference scanner must also check it rather than silently returning SAFE.
+    # Workbooks are checked even without named VBA storage to detect XLM macros.
+    if has_vba or top & {"workbook", "book", "powerpoint document"}:
         found += vba_findings(data, "document", has_vba_storage=has_vba)
     return found
 
