@@ -145,7 +145,7 @@ export default function QuickValidationScanner({ onFinished }: Props) {
       `Engine health commit: ${failedAttempt.engineCommit}`,
       `Error: ${failedAttempt.message}`,
       "This is an error/preflight record, NOT a completed scan or malware verdict. Check whether the engine failed closed.",
-    ].join("\\n");
+    ].join("\n");
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
