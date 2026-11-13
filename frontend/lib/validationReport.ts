@@ -62,10 +62,10 @@ export function completeValidationReport(
     `Source revision: ${file.revision}`,
     `Purpose: ${file.purpose}`,
     `Lab handling: ${file.handling === "offline-only" ? "Offline VM only"
-      : file.handling === "hosted-regression" ? "Hosted parser stress test: pinned qpdf SHA-256"
+      : file.handling === "hosted-regression" ? "Hosted validation fixture: pinned upstream SHA-256"
       : "Benign candidate; review before testing"}`,
     file.expectedSha256
-      ? `Upstream pinned SHA-256: ${file.expectedSha256}; scanned file SHA-256 ${scan.sha256.toLowerCase() === file.expectedSha256.toLowerCase() ? "MATCHED" : "DID NOT MATCH"} the pinned qpdf revision.`
+      ? `Upstream pinned SHA-256: ${file.expectedSha256}; scanned file SHA-256 ${scan.sha256.toLowerCase() === file.expectedSha256.toLowerCase() ? "MATCHED" : "DID NOT MATCH"} the pinned upstream revision.`
       : "Provenance caveat: Matched a local Security Lab history record by filename and, if specified, SHA-256. The upstream source bytes have NOT been independently hash-verified.",
     "",
     "SCAN RESULT (from saved Security Lab history)",
