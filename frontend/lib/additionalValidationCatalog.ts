@@ -364,3 +364,15 @@ export function pinnedSourceUrl(file: ValidationFile): string {
   if (file.sourceOverride) return file.sourceOverride;
   return `https://github.com/${file.repository}/blob/${file.revision}/${encodeGitHubPath(file.path)}`;
 }
+
+
+/**
+ * The hosted inline Lab accepts only unique, explicitly reviewed benign-candidate
+ * catalog filenames. This is a user-interface safety gate, not a security
+ * boundary or proof of provenance; the backend must still validate every file.
+ */
+export function hostedValidationCandidate(filename: string): ValidationFile | null {
+  const matches = VALIDATION_FILES.filter(f => f.filename.toLowerCase() === filename.toLowerCase());
+  return matches.length === 1 && matches[0].handling === "reviewed-benign-candidate"
+    ? matches[0] : null;
+}

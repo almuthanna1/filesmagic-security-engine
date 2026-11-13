@@ -5,6 +5,7 @@ import { VALIDATION_FILES, VALIDATION_GROUPS, directDownloadUrl, pinnedSourceUrl
 import type { Verdict } from "@/lib/testCatalog";
 import { useHistory } from "@/lib/history";
 import { completeValidationReport, linkedHistory, linkedCandidateCount } from "@/lib/validationReport";
+import QuickValidationScanner from "@/components/QuickValidationScanner";
 import styles from "./AdditionalValidationSection.module.css";
 
 type Observation = { verdict: Verdict | ""; sha256: string; notes: string };
@@ -96,12 +97,14 @@ export default function AdditionalValidationSection() {
       <header className={styles.header}>
         <p className={styles.eyebrow}>External validation / New testing batch</p>
         <h2 id="additional-validation-heading">32 additional source-pinned test files</h2>
-        <p>Download one file at a time and scan it with the Security Lab. When you return to this page, the tracker links the latest matching scan from this browser\u0027s History and the Copy this result button includes the detailed saved scan evidence. No target verdict is assumed.</p>
+        <p>Download a file and drop it into the inline scanner below. Run it, copy the full result and move to the next file without leaving this page. The results tracker updates from the scanner automatically. No target verdict is assumed.</p>
       </header>
 
       <div className={styles.warning}>
         <strong>Review files before testing.</strong> Third-party regression files are not independently malware-screened. Do not open downloaded documents in Office, Acrobat, or other viewers. Use only vetted benign candidates in the public Lab. Files marked <strong>Offline VM only</strong> are for your isolated research environment and must not be uploaded to the hosted Render endpoint. An EICAR file is a harmless AV test string, not a real malware sample; antivirus software may quarantine it.
       </div>
+
+      <QuickValidationScanner onFinished={(id, scan) => change(id, { verdict: scan.verdict, sha256: scan.sha256 })} />
 
       <div className={styles.summary}>
         <div><strong>{VALIDATION_FILES.length}</strong><span>Download links</span></div>
@@ -111,7 +114,7 @@ export default function AdditionalValidationSection() {
         </button>
       </div>
 
-      <p className={styles.instruction}>Scans in the same browser and website origin are linked by filename; if different file hashes share a filename, enter the scan SHA-256 to disambiguate. The source file itself is not cryptographically verified against GitHub. Older history records may not contain individual isolation controls, and raw VBA code is never saved in history. If a PDF opens instead of downloading, use Save As.</p>
+      <p className={styles.instruction}>Use the in-page scanner above to capture the full result automatically. Earlier scans in the same browser and website origin are linked by filename; if different file hashes share a filename, enter the scan SHA-256 to disambiguate. The source file itself is not cryptographically verified against GitHub. Older history records may not contain individual isolation controls, and raw VBA code is never saved in history. If a PDF opens instead of downloading, use Save As.</p>
 
       {VALIDATION_GROUPS.map(group => {
         const files = VALIDATION_FILES.filter(file => file.group === group);
@@ -172,6 +175,9 @@ export default function AdditionalValidationSection() {
                             Download file
                           </a>
                           <a className={styles.source} href={pinnedSourceUrl(file)} target="_blank" rel="noopener noreferrer">View source</a>
+                          {file.handling !== "offline-only" && (
+                            <a className={styles.source} href="#validation-quick-scan">Scan on this page</a>
+                          )}
                           <button type="button" className={styles.copy} disabled={!entry.verdict && !matched} onClick={() => copyResult(file)}>
                             {copiedId === file.id ? "Copied" : matched ? "Copy full scan result" : "Copy manual note"}
                           </button>

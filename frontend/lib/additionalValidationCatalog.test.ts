@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { VALIDATION_FILES, VALIDATION_GROUPS, directDownloadUrl, pinnedSourceUrl } from "./additionalValidationCatalog.ts";
+import { VALIDATION_FILES, VALIDATION_GROUPS, directDownloadUrl, pinnedSourceUrl, hostedValidationCandidate } from "./additionalValidationCatalog.ts";
 
 test("the supplemental catalog has 32 distinct, categorized files", () => {
   assert.equal(VALIDATION_FILES.length, 32);
@@ -39,4 +39,16 @@ test("known malformed PDFs and encrypted files are designated for local isolated
   for (const name of risky) {
     assert.equal(VALIDATION_FILES.find(f => f.filename === name)?.handling, "offline-only");
   }
+});
+
+
+test("inline hosted scanner accepts only unique allowed external benign-candidate cases", () => {
+  assert.equal(hostedValidationCandidate("SampleDoc.docx")?.id, "validation-01");
+  assert.equal(hostedValidationCandidate("sampledoc.DOCX")?.id, "validation-01");
+  assert.equal(hostedValidationCandidate("SampleShow.pptx")?.filename, "SampleShow.pptx");
+  for (const file of VALIDATION_FILES.filter(f => f.handling === "offline-only")) {
+    assert.equal(hostedValidationCandidate(file.filename), null, file.filename);
+  }
+  assert.equal(hostedValidationCandidate("unlisted.exe"), null);
+  assert.equal(hostedValidationCandidate("../SampleDoc.docx"), null);
 });
