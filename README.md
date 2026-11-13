@@ -5,6 +5,8 @@ application. Every uploaded file is meant to pass through this engine *before* i
 reaches the FilesMagic conversion pipeline, so dangerous files can be rejected
 early. Honors capstone project.
 
+**Project history:** [Capstone Development History and Research Journal](docs/capstone-development-history.md) is the living chronology of design decisions, experimental evidence, failed attempts, lessons learned and open research questions. It separates the November 9 frozen study from November 13 external validation and is updated as new phases are completed.
+
 ## Current status
 
 **Research hardening (branch `security/malware-research-hardening`), validated on a separate
