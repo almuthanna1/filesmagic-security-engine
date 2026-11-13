@@ -193,6 +193,41 @@ def test_legacy_doc_macros_use_olevba(monkeypatch):
     assert "OFFICE_MACRO_AUTOEXEC" in rule_ids(scan(doc))
 
 
+def _fake_unencrypted_legacy_ppt(monkeypatch):
+    """A synthetic PPT container; only the encryption probe and VBA parser are stubbed."""
+    class Unencrypted:
+        def is_encrypted(self):
+            return False
+
+    monkeypatch.setattr(office.msoffcrypto, "OfficeFile", lambda _: Unencrypted())
+    return make_ole({"PowerPoint Document": b"synthetic content"})
+
+
+def test_legacy_ppt_macro_without_named_vba_storage_is_suspicious(monkeypatch):
+    """A PPT macro need not appear in an OLE storage literally named VBA/Macros."""
+    ppt = _fake_unencrypted_legacy_ppt(monkeypatch)
+    fake = fake_vba(monkeypatch, results=[])
+    findings = scan(ppt)
+    assert rule_ids(findings) == ["OFFICE_MACROS_PRESENT"]
+    assert findings[0].severity == Severity.LOW
+    assert fake.closed
+
+
+def test_legacy_ppt_without_macros_stays_clean(monkeypatch):
+    ppt = _fake_unencrypted_legacy_ppt(monkeypatch)
+    fake = fake_vba(monkeypatch, macros=False)
+    assert scan(ppt) == []
+    assert fake.closed
+
+
+def test_legacy_ppt_dangerous_autoexec_is_high(monkeypatch):
+    ppt = _fake_unencrypted_legacy_ppt(monkeypatch)
+    fake_vba(monkeypatch, results=[AUTOEXEC, SHELL])
+    findings = scan(ppt)
+    assert "OFFICE_MACRO_AUTOEXEC_EXECUTION" in rule_ids(findings)
+    assert worst(findings) == Severity.HIGH
+
+
 def test_xlm_macrosheet_is_medium():
     findings = scan(make_ooxml({"xl/macrosheets/sheet1.xml": "<xm/>"}, kind="xl"))
     assert rule_ids(findings) == ["OFFICE_XLM_MACROSHEET"]
