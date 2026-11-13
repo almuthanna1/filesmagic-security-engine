@@ -129,6 +129,8 @@ class EntryResult:
 class VbaChains:
     entries: list[EntryResult] = field(default_factory=list)
     problems: list[str] = field(default_factory=list)  # project-wide reasons for undetermined
+    # Raw extracted modules for bounded INFO evidence; never execute them.
+    sources: list[tuple[str, str]] = field(default_factory=list)
 
     @property
     def outcome(self) -> str:
@@ -336,7 +338,7 @@ def search(entry: Procedure, problems: list[str]) -> EntryResult:
 
 def analyse(modules: list[tuple[str, str]], problems: list[str] | None = None) -> VbaChains:
     """modules: (module name, VBA source). `problems`: reasons found while extracting them."""
-    result = VbaChains(problems=list(problems or []))
+    result = VbaChains(problems=list(problems or []), sources=list(modules))
     procedures, shadowed, comment_free = [], set(), []
     for module, source in modules:
         procs, outside, names = parse(module, source, result.problems)
