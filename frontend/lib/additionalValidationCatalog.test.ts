@@ -5,7 +5,7 @@ import { VALIDATION_FILES, VALIDATION_GROUPS, directDownloadUrl, pinnedSourceUrl
 test("the supplemental catalog has 32 distinct, categorized files", () => {
   assert.equal(VALIDATION_FILES.length, 32);
   assert.equal(new Set(VALIDATION_FILES.map(f => f.id)).size, VALIDATION_FILES.length);
-  assert.equal(new Set(VALIDATION_FILES.map(f => f.repository + ":" + f.path)).size, VALIDATION_FILES.length);
+  assert.equal(new Set(VALIDATION_FILES.map(f => f.repository + ":" + (f.path || f.filename))).size, VALIDATION_FILES.length);
   assert.deepEqual(VALIDATION_GROUPS.map(g => VALIDATION_FILES.filter(f => f.group === g).length), [12, 7, 9, 2, 2]);
 });
 
