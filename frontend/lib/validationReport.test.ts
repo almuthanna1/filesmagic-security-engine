@@ -100,3 +100,20 @@ test("copied oletools clean DOCM result reports the true source revision and has
   assert.ok(out.includes("scanned file SHA-256 MATCHED the pinned upstream revision."));
   assert.ok(out.includes("Verdict: SAFE"));
 });
+
+test("EICAR reports distinguish an unversioned control fingerprint from a pinned Git commit", () => {
+  const txt = VALIDATION_FILES.find(f => f.id === "validation-31")!;
+  const zip = VALIDATION_FILES.find(f => f.id === "validation-32")!;
+  for (const file of [txt, zip]) {
+    const report = completeValidationReport(file, {
+      ...scan, filename: file.filename, sha256: file.expectedSha256!,
+      detected_format: file.filename.endsWith(".zip") ? "zip" : "unknown",
+    });
+    assert.ok(report.includes("EICAR reference SHA-256: " + file.expectedSha256));
+    assert.ok(report.includes("scanned file SHA-256 MATCHED the known EICAR control fingerprint."));
+    assert.ok(report.includes("official download is unversioned"));
+    assert.ok(!report.includes("MATCHED the pinned upstream revision"));
+    const mismatch = completeValidationReport(file, { ...scan, filename: file.filename });
+    assert.ok(mismatch.includes("DID NOT MATCH the known EICAR control fingerprint."));
+  }
+});

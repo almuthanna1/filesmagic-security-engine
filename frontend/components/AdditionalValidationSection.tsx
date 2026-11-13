@@ -98,12 +98,12 @@ export default function AdditionalValidationSection() {
     <section className={styles.section} aria-labelledby="additional-validation-heading">
       <header className={styles.header}>
         <p className={styles.eyebrow}>External validation / New testing batch</p>
-        <h2 id="additional-validation-heading">32 additional source-pinned test files</h2>
+        <h2 id="additional-validation-heading">32 additional external validation files</h2>
         <p>Download a file and drop it into the inline scanner below. Run it, copy the full result and move to the next file without leaving this page. The results tracker updates from the scanner automatically. No target verdict is assumed.</p>
       </header>
 
       <div className={styles.warning}>
-        <strong>Review files before testing.</strong> Third-party regression files are not independently malware-screened. Do not open downloaded documents in Office, Acrobat, or other viewers. Use only vetted benign candidates in the public Lab. <strong>Pinned hosted regression fixtures</strong> include encrypted/malformed qpdf files and the oletools clean-control .docm file. Their SHA-256 is verified against the pinned source before upload to Render. A .docm filename does not prove the file is safe. Files still marked <strong>Offline VM only</strong> must not be uploaded to the hosted Render endpoint. An EICAR file is a harmless AV test string, not a real malware sample; antivirus software may quarantine it.
+        <strong>Review files before testing.</strong> Third-party regression files are not independently malware-screened. Do not open downloaded documents in Office, Acrobat, or other viewers. Only approved files should be sent to the hosted Lab. <strong>Hosted regression fixtures</strong> include the pinned qpdf and oletools files plus two inert EICAR controls; all are checked against a recorded SHA-256 before upload to Render. The official EICAR links are unversioned, and antivirus software may block or quarantine those harmless controls. Do not disable antivirus protection to force a test. Any file still marked <strong>Offline VM only</strong> must not be uploaded to the hosted endpoint. Never upload genuine malware to the hosted Lab.
       </div>
 
       <QuickValidationScanner onFinished={(id, scan) => change(id, { verdict: scan.verdict, sha256: scan.sha256 })} />
@@ -116,7 +116,7 @@ export default function AdditionalValidationSection() {
         </button>
       </div>
 
-      <p className={styles.instruction}>Use the in-page scanner above to capture the full result automatically. Earlier scans in the same browser and website origin are linked by filename; if different file hashes share a filename, enter the scan SHA-256 to disambiguate. The source file itself is not cryptographically verified against GitHub. Older history records may not contain individual isolation controls, and raw VBA code is never saved in history. If a PDF opens instead of downloading, use Save As.</p>
+      <p className={styles.instruction}>Use the in-page scanner above to capture the full result automatically. Earlier scans in the same browser and website origin are linked by filename; if different file hashes share a filename, enter the scan SHA-256 to disambiguate. Pinned hosted controls are hash-checked before upload; other benign candidates are linked by reported SHA-256 but not independently checked against upstream bytes. Older history records may not contain individual isolation controls, and raw VBA code is never saved in history. If a PDF opens instead of downloading, use Save As.</p>
 
       {VALIDATION_GROUPS.map(group => {
         const files = VALIDATION_FILES.filter(file => file.group === group);
@@ -195,7 +195,7 @@ export default function AdditionalValidationSection() {
           </section>
         );
       })}
-      <p className={styles.footer}>Source filenames and revisions are pinned where supported. The EICAR official links are unversioned. Record exact SHA-256 values from the Security Engine response for reproducibility. PDF/A conformance failures are not malware labels. Do not combine these exploratory results with the frozen November 9 evaluation without explicitly distinguishing the datasets.</p>
+      <p className={styles.footer}>GitHub source revisions are pinned where supported. EICAR downloads are unversioned and checked against recorded reference hashes. Record the engine-reported SHA-256 for reproducibility. EICAR recognition is not a measure of real-malware detection accuracy. PDF/A conformance failures are not malware labels. Do not combine these exploratory results with the frozen November 9 evaluation without explicitly distinguishing the datasets.</p>
     </section>
   );
 }

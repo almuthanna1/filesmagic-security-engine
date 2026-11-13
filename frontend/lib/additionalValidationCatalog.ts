@@ -340,8 +340,9 @@ export const VALIDATION_FILES: ValidationFile[] = [
     "revision": "Unversioned official test file",
     "path": "",
     "filename": "eicar.com.txt",
-    "purpose": "Harmless 68-byte antivirus test string. The current custom rules may not contain an EICAR signature; SAFE would not by itself establish a malware detection defect.",
-    "handling": "offline-only",
+    "purpose": "Official, inert 68-byte AV control. Tests whether the current engine recognizes the EICAR test signature; SAFE does not establish real-malware accuracy.",
+    "handling": "hosted-regression",
+    "expectedSha256": "275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f",
     "downloadOverride": "https://secure.eicar.org/eicar.com.txt",
     "sourceOverride": "https://www.eicar.org/download-anti-malware-testfile/"
   },
@@ -352,8 +353,9 @@ export const VALIDATION_FILES: ValidationFile[] = [
     "revision": "Unversioned official test file",
     "path": "",
     "filename": "eicar.com.zip",
-    "purpose": "The same inert AV test string wrapped in ZIP. Used to check AV/archive support, which this research engine may not implement.",
-    "handling": "offline-only",
+    "purpose": "Official inert AV control in a single-entry ZIP. Tests whether the engine inspects archived signatures; this may not be supported by the current rules.",
+    "handling": "hosted-regression",
+    "expectedSha256": "2546dcffc5ad854d4ddc64fbf056871cd5a00f2471cb7a5bfd4ac23b6e9eedad",
     "downloadOverride": "https://secure.eicar.org/eicar.com.zip",
     "sourceOverride": "https://www.eicar.org/download-anti-malware-testfile/"
   }
@@ -385,7 +387,7 @@ export function hostedValidationCandidate(filename: string): ValidationFile | nu
     ? matches[0] : null;
 }
 
-/** Hosted regression fixtures must match the bytes of their pinned upstream revision. */
+/** Hosted regression controls must match an exact recorded reference fingerprint. */
 export function matchesPinnedValidationHash(file: ValidationFile, actualSha256: string): boolean {
   return !file.expectedSha256 ||
     /^[a-f0-9]{64}$/i.test(actualSha256) &&

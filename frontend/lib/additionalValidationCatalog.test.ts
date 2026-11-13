@@ -22,15 +22,20 @@ test("every GitHub link is a pinned direct binary download with a matching sourc
   }
 });
 
-test("spaces in PDF corpus filenames are URL-encoded and official AV controls remain offline-only", () => {
+test("spaces in PDF corpus filenames are encoded and official EICAR controls are exact-hash hosted tests", () => {
   const vera = VALIDATION_FILES.find(f => f.repository === "veraPDF/veraPDF-corpus");
   assert.ok(vera);
   assert.ok(directDownloadUrl(vera).includes("6.8%20Embedded%20files"));
   assert.ok(directDownloadUrl(vera).includes("veraPDF%20test%20suite"));
-  for (const file of VALIDATION_FILES.filter(f => f.repository === "Official EICAR")) {
-    assert.equal(file.handling, "offline-only");
+  const controls = VALIDATION_FILES.filter(f => f.repository === "Official EICAR");
+  assert.equal(controls.length, 2);
+  for (const file of controls) {
+    assert.equal(file.handling, "hosted-regression");
+    assert.equal(file.revision, "Unversioned official test file");
     assert.equal(new URL(directDownloadUrl(file)).protocol, "https:");
+    assert.equal(new URL(directDownloadUrl(file)).hostname, "secure.eicar.org");
     assert.equal(new URL(pinnedSourceUrl(file)).hostname, "www.eicar.org");
+    assert.ok(file.expectedSha256 && /^[a-f0-9]{64}$/.test(file.expectedSha256));
   }
 });
 
@@ -68,8 +73,9 @@ test("inline hosted scanner accepts only unique allowed external benign-candidat
   assert.equal(hostedValidationCandidate("unlisted.exe"), null);
   assert.equal(hostedValidationCandidate("harmless-clean.docm")?.id, "validation-30");
   assert.equal(hostedValidationCandidate("unlisted-macro.docm"), null);
-  assert.equal(hostedValidationCandidate("eicar.com.txt"), null);
-  assert.equal(hostedValidationCandidate("eicar.com.zip"), null);
+  assert.equal(hostedValidationCandidate("eicar.com.txt")?.id, "validation-31");
+  assert.equal(hostedValidationCandidate("eicar.com.zip")?.id, "validation-32");
+  assert.equal(hostedValidationCandidate("eicar.com-2.zip"), null);
   assert.equal(hostedValidationCandidate("../SampleDoc.docx"), null);
 });
 
@@ -86,6 +92,28 @@ test("reviewed oletools .docm control is accepted only with the exact pinned ups
   assert.equal(matchesPinnedValidationHash(file, file.expectedSha256!), true);
   assert.equal(matchesPinnedValidationHash(file, "b".repeat(64)), false);
   assert.equal(matchesPinnedValidationHash(file, "not a valid hash"), false);
-  assert.equal(VALIDATION_FILES.find(f => f.id === "validation-31")?.handling, "offline-only");
-  assert.equal(VALIDATION_FILES.find(f => f.id === "validation-32")?.handling, "offline-only");
+  assert.equal(VALIDATION_FILES.find(f => f.id === "validation-31")?.handling, "hosted-regression");
+  assert.equal(VALIDATION_FILES.find(f => f.id === "validation-32")?.handling, "hosted-regression");
+});
+
+
+test("only recognized EICAR test bytes are eligible for hosted control scans", () => {
+  const expected = [
+    ["validation-31", "eicar.com.txt", "275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f"],
+    ["validation-32", "eicar.com.zip", "2546dcffc5ad854d4ddc64fbf056871cd5a00f2471cb7a5bfd4ac23b6e9eedad"],
+  ] as const;
+  for (const [id, name, hash] of expected) {
+    const file = VALIDATION_FILES.find(f => f.id === id);
+    assert.ok(file);
+    assert.equal(file.filename, name);
+    assert.equal(file.repository, "Official EICAR");
+    assert.equal(file.expectedSha256, hash);
+    assert.equal(hostedValidationCandidate(name)?.id, id);
+    assert.equal(matchesPinnedValidationHash(file, hash), true);
+    assert.equal(matchesPinnedValidationHash(file, hash.toUpperCase()), true);
+    assert.equal(matchesPinnedValidationHash(file, "f".repeat(64)), false);
+    assert.equal(matchesPinnedValidationHash(file, ""), false);
+    assert.equal(matchesPinnedValidationHash(file, "not a SHA-256"), false);
+  }
+  assert.equal(hostedValidationCandidate("eicar.com"), null);
 });
