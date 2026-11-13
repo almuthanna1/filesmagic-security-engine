@@ -23,7 +23,7 @@ function report(file: ValidationFile, observation: Observation): string {
     `Source revision: ${file.revision}`,
     `Test purpose: ${file.purpose}`,
     `Testing location: ${file.handling === "offline-only" ? "Offline isolated VM recommended"
-      : file.handling === "hosted-regression" ? "Hosted parser stress test: pinned file hash required"
+      : file.handling === "hosted-regression" ? "Pinned hosted regression fixture: source SHA-256 required"
       : "Independent benign-candidate review required"}`,
     `Observed verdict: ${observation.verdict || "Not tested"}`,
     `Uploaded SHA-256: ${observation.sha256 || "Not recorded"}`,
@@ -103,7 +103,7 @@ export default function AdditionalValidationSection() {
       </header>
 
       <div className={styles.warning}>
-        <strong>Review files before testing.</strong> Third-party regression files are not independently malware-screened. Do not open downloaded documents in Office, Acrobat, or other viewers. Use only vetted benign candidates in the public Lab. Pinned qpdf <strong>Hosted parser stress tests</strong> include encrypted and deliberately malformed PDFs; their SHA-256 is verified against the pinned source before upload to Render. Files still marked <strong>Offline VM only</strong> must not be uploaded to the hosted Render endpoint. An EICAR file is a harmless AV test string, not a real malware sample; antivirus software may quarantine it.
+        <strong>Review files before testing.</strong> Third-party regression files are not independently malware-screened. Do not open downloaded documents in Office, Acrobat, or other viewers. Use only vetted benign candidates in the public Lab. <strong>Pinned hosted regression fixtures</strong> include encrypted/malformed qpdf files and the oletools clean-control .docm file. Their SHA-256 is verified against the pinned source before upload to Render. A .docm filename does not prove the file is safe. Files still marked <strong>Offline VM only</strong> must not be uploaded to the hosted Render endpoint. An EICAR file is a harmless AV test string, not a real malware sample; antivirus software may quarantine it.
       </div>
 
       <QuickValidationScanner onFinished={(id, scan) => change(id, { verdict: scan.verdict, sha256: scan.sha256 })} />
@@ -147,7 +147,7 @@ export default function AdditionalValidationSection() {
                           <small>{file.repository} · {file.revision.slice(0, 10)}</small>
                           <small className={file.handling === "offline-only" ? styles.offline : styles.review}>
                             {file.handling === "offline-only" ? "Offline VM only" :
-                              file.handling === "hosted-regression" ? "Hosted parser stress test · SHA-256 pinned" :
+                              file.handling === "hosted-regression" ? "Pinned hosted fixture · SHA-256 verified" :
                               "Benign candidate: review first"}
                           </small>
                         </td>
