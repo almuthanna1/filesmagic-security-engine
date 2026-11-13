@@ -214,6 +214,60 @@ class PdfChainScanner:
         return None if result is None else chain_findings(result)
 
 
+# Keep source snippets small in API responses and browser-only scan history.
+# The file is never opened or executed, and anything omitted is stated explicitly.
+MAX_VBA_DISPLAY_MODULES = 8
+MAX_VBA_DISPLAY_CHARS = 420
+_UNSAFE_SOURCE_CONTROLS = re.compile(r"[\\x00-\\x08\\x0b\\x0c\\x0e-\\x1f\\x7f-\\x9f]")
+_SIMPLE_MSGBOX = re.compile(r'MsgBox\\s+"((?:[^"]|"")*)"\\s*', re.IGNORECASE)
+_SIMPLE_SUB = re.compile(r"(?:Public\\s+|Private\\s+|Friend\\s+)?Sub\\s+[A-Za-z_]\\w*\\s*(?:\\(\\s*\\))?",
+                         re.IGNORECASE)
+
+
+def _vba_behavior(source: str) -> str:
+    """Describe only the exact three-statement message-box pattern, not arbitrary VBA."""
+    lines = [line.strip() for line in source.splitlines()
+             if line.strip() and not line.lstrip().startswith("'")
+             and not re.match(r"(?i)^\\s*(Attribute\\s+VB_Name|Option\\s+Explicit)\\b", line)]
+    if (len(lines) == 3 and _SIMPLE_SUB.fullmatch(lines[0])
+            and (msg := _SIMPLE_MSGBOX.fullmatch(lines[1]))
+            and lines[2].lower() == "end sub"):
+        literal = msg.group(1).replace('""', '"')
+        return f"When invoked, this procedure displays a message box: {clean(literal, 120)!r}. "
+    return "Source was extracted but no complete behavior explanation is asserted. "
+
+
+def _vba_source_findings(result: vba_chains.VbaChains) -> list[Finding]:
+    found = []
+    for module, source in result.sources[:MAX_VBA_DISPLAY_MODULES]:
+        # Preserve indentation, line breaks and VBA literals. Never put input into HTML.
+        displayed = _UNSAFE_SOURCE_CONTROLS.sub("?", source.replace("\\r\\n", "\\n").replace("\\r", "\\n"))
+        altered = displayed != source.replace("\\r\\n", "\\n").replace("\\r", "\\n")
+        clipped = len(displayed) > MAX_VBA_DISPLAY_CHARS
+        excerpt = displayed[:MAX_VBA_DISPLAY_CHARS] if clipped else displayed
+        module_name = clean(module, 48)
+        shown = "excerpt limited" if clipped or altered else "complete extracted source"
+        description = (
+            f"Extracted VBA module {module_name!r} ({shown}). {_vba_behavior(source)}"
+            "VBA source was not executed. Its compiled P-code was not verified for stomping; "
+            "this INFO evidence does not alter the security verdict."
+        )
+        suffix = "\\n[truncated: source continues]" if clipped else ""
+        found.append(Finding(
+            scanner=VBA, category="office-vba-source", severity=Severity.INFO,
+            description=description, rule_id="ENGINE_VBA_SOURCE",
+            evidence=[f"{module_name}:\\n{excerpt}{suffix}"],
+        ))
+    if len(result.sources) > MAX_VBA_DISPLAY_MODULES:
+        found.append(Finding(
+            scanner=VBA, category="office-vba-source", severity=Severity.INFO,
+            description=f"{len(result.sources) - MAX_VBA_DISPLAY_MODULES} additional VBA modules omitted "
+                        "from the bounded source preview; not a complete source listing.",
+            rule_id="ENGINE_VBA_SOURCE_OMITTED",
+        ))
+    return found
+
+
 def vba_findings(result: vba_chains.VbaChains) -> list[Finding]:
     def make(rule: str, severity: Severity, text: str, items: list[str]) -> Finding:
         return finding(rule, severity, text, scanner=VBA, category="office-macro-chain", evidence=items)
@@ -238,7 +292,7 @@ def vba_findings(result: vba_chains.VbaChains) -> list[Finding]:
                           "No call path leads from the automatically running macro procedures to a dangerous "
                           "operation in the extracted source. The compiled P-code was not checked (VBA stomping). "
                           f"Entries: {listing(entries)}.", entries))
-    return found
+    return found + _vba_source_findings(result)
 
 
 def link_findings(result: ooxml_links.Links) -> list[Finding]:
