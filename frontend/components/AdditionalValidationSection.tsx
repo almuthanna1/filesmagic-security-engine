@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { VALIDATION_FILES, VALIDATION_GROUPS, directDownloadUrl, pinnedSourceUrl, type ValidationFile } from "@/lib/additionalValidationCatalog";
 import type { Verdict } from "@/lib/testCatalog";
+import { useHistory } from "@/lib/history";
+import { completeValidationReport, linkedHistory, linkedCandidateCount } from "@/lib/validationReport";
 import styles from "./AdditionalValidationSection.module.css";
 
 type Observation = { verdict: Verdict | ""; sha256: string; notes: string };
@@ -28,6 +30,7 @@ function report(file: ValidationFile, observation: Observation): string {
 }
 
 export default function AdditionalValidationSection() {
+  const history = useHistory();
   const [observed, setObserved] = useState<Observations>({});
   const [hydrated, setHydrated] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -56,33 +59,44 @@ export default function AdditionalValidationSection() {
 
   async function copyResult(file: ValidationFile) {
     const entry = observed[file.id] || EMPTY;
+    const matched = linkedHistory(file, history, entry.sha256);
     try {
-      await navigator.clipboard.writeText(report(file, entry));
+      await navigator.clipboard.writeText(matched
+        ? completeValidationReport(file, matched, entry.notes)
+        : report(file, entry));
       setCopiedId(file.id);
     } catch {
       setCopiedId(null);
     }
   }
 
+  function associated(file: ValidationFile) {
+    return linkedHistory(file, history, observed[file.id]?.sha256);
+  }
+
   async function copySummary() {
-    const entries = VALIDATION_FILES.filter(file => observed[file.id]?.verdict);
+    const entries = VALIDATION_FILES.filter(file => !!observed[file.id]?.verdict || !!associated(file));
     if (!entries.length) return;
     try {
-      await navigator.clipboard.writeText(entries.map(file => report(file, observed[file.id])).join("\n\n---\n\n"));
+      await navigator.clipboard.writeText(entries.map(file => {
+        const entry = observed[file.id] || EMPTY;
+        const matched = associated(file);
+        return matched ? completeValidationReport(file, matched, entry.notes) : report(file, entry);
+      }).join("\n\n---\n\n"));
       setCopiedId("all");
     } catch {
       setCopiedId(null);
     }
   }
 
-  const count = VALIDATION_FILES.filter(file => !!observed[file.id]?.verdict).length;
+  const count = VALIDATION_FILES.filter(file => !!observed[file.id]?.verdict || !!associated(file)).length;
 
   return (
     <section className={styles.section} aria-labelledby="additional-validation-heading">
       <header className={styles.header}>
         <p className={styles.eyebrow}>External validation / New testing batch</p>
         <h2 id="additional-validation-heading">32 additional source-pinned test files</h2>
-        <p>Download one file at a time, scan it, and record the observed result. Each GitHub download targets a fixed commit rather than a moving branch. No target verdict has been assumed for these external fixtures.</p>
+        <p>Download one file at a time and scan it with the Security Lab. When you return to this page, the tracker links the latest matching scan from this browser\u0027s History and the Copy this result button includes the detailed saved scan evidence. No target verdict is assumed.</p>
       </header>
 
       <div className={styles.warning}>
@@ -97,7 +111,7 @@ export default function AdditionalValidationSection() {
         </button>
       </div>
 
-      <p className={styles.instruction}>These are manually recorded observations, not automatically validated scan results. Copy one result to share it in chat, ideally with the full scanner report, its SHA-256, rule IDs, and the engine commit. If a PDF opens in a browser instead of downloading, use Save As.</p>
+      <p className={styles.instruction}>Scans in the same browser and website origin are linked by filename; if different file hashes share a filename, enter the scan SHA-256 to disambiguate. The source file itself is not cryptographically verified against GitHub. Older history records may not contain individual isolation controls, and raw VBA code is never saved in history. If a PDF opens instead of downloading, use Save As.</p>
 
       {VALIDATION_GROUPS.map(group => {
         const files = VALIDATION_FILES.filter(file => file.group === group);
@@ -105,7 +119,7 @@ export default function AdditionalValidationSection() {
           <section key={group} className={styles.group} aria-label={group}>
             <div className={styles.groupHeader}>
               <h3>{group}</h3>
-              <span>{files.filter(f => observed[f.id]?.verdict).length}/{files.length} recorded</span>
+              <span>{files.filter(f => observed[f.id]?.verdict || associated(f)).length}/{files.length} recorded</span>
             </div>
             <div className={styles.tableWrap}>
               <table className={styles.table}>
@@ -119,6 +133,8 @@ export default function AdditionalValidationSection() {
                 <tbody>
                   {files.map(file => {
                     const entry = observed[file.id] || EMPTY;
+                    const matched = associated(file);
+                    const candidates = linkedCandidateCount(file, history);
                     return (
                       <tr key={file.id}>
                         <td>
@@ -131,18 +147,23 @@ export default function AdditionalValidationSection() {
                         <td className={styles.purpose}>{file.purpose}<small>Evaluation outcome unknown. Do not count a match as malware detection without source-level evidence.</small></td>
                         <td>
                           <label htmlFor={file.id + "-verdict"} className={styles.srOnly}>Observed verdict for {file.filename}</label>
-                          <select id={file.id + "-verdict"} value={entry.verdict} onChange={e => change(file.id, { verdict: e.target.value as Observation["verdict"] })}>
+                          <select id={file.id + "-verdict"} value={matched?.verdict ?? entry.verdict} disabled={!!matched} onChange={e => change(file.id, { verdict: e.target.value as Observation["verdict"] })}>
                             <option value="">Not tested</option>
                             {VERDICTS.map(v => <option key={v} value={v}>{v}</option>)}
                           </select>
-                          {entry.verdict && <small className={styles.recorded}>Recorded, not verified</small>}
+                          {matched
+                            ? <small className={styles.recorded}>From local scan history · {matched.duration_ms} ms</small>
+                            : <small className={styles.recorded}>{candidates > 1
+                              ? "Multiple hashes for this filename. Enter scan SHA-256."
+                              : entry.verdict ? "Manual only; no matching scan saved" : "No linked scan yet"}</small>}
                         </td>
                         <td>
                           <label htmlFor={file.id + "-hash"} className={styles.srOnly}>SHA-256 for {file.filename}</label>
                           <input id={file.id + "-hash"} type="text" value={entry.sha256}
-                            maxLength={64} placeholder="SHA-256 (optional)" spellCheck={false}
+                            maxLength={64} placeholder="SHA-256, if needed to match" spellCheck={false}
                             onChange={e => change(file.id, { sha256: e.target.value.replace(/[^a-fA-F0-9]/g, "").slice(0, 64) })}/>
                           <label htmlFor={file.id + "-notes"} className={styles.srOnly}>Findings / rule IDs for {file.filename}</label>
+                          {matched && <small className={styles.recorded}>Scan SHA-256: {matched.sha256}</small>}
                           <textarea id={file.id + "-notes"} value={entry.notes} maxLength={400} rows={2}
                             placeholder="Rule IDs / observations" onChange={e => change(file.id, { notes: e.target.value })}/>
                         </td>
@@ -151,8 +172,8 @@ export default function AdditionalValidationSection() {
                             Download file
                           </a>
                           <a className={styles.source} href={pinnedSourceUrl(file)} target="_blank" rel="noopener noreferrer">View source</a>
-                          <button type="button" className={styles.copy} disabled={!entry.verdict} onClick={() => copyResult(file)}>
-                            {copiedId === file.id ? "Copied" : "Copy this result"}
+                          <button type="button" className={styles.copy} disabled={!entry.verdict && !matched} onClick={() => copyResult(file)}>
+                            {copiedId === file.id ? "Copied" : matched ? "Copy full scan result" : "Copy manual note"}
                           </button>
                         </td>
                       </tr>
