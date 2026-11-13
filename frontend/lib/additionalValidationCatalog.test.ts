@@ -66,8 +66,26 @@ test("inline hosted scanner accepts only unique allowed external benign-candidat
     assert.equal(hostedValidationCandidate(file.filename), null, file.filename);
   }
   assert.equal(hostedValidationCandidate("unlisted.exe"), null);
-  assert.equal(hostedValidationCandidate("harmless-clean.docm"), null);
+  assert.equal(hostedValidationCandidate("harmless-clean.docm")?.id, "validation-30");
+  assert.equal(hostedValidationCandidate("unlisted-macro.docm"), null);
   assert.equal(hostedValidationCandidate("eicar.com.txt"), null);
   assert.equal(hostedValidationCandidate("eicar.com.zip"), null);
   assert.equal(hostedValidationCandidate("../SampleDoc.docx"), null);
+});
+
+
+test("reviewed oletools .docm control is accepted only with the exact pinned upstream SHA-256", () => {
+  const file = VALIDATION_FILES.find(f => f.id === "validation-30");
+  assert.ok(file);
+  assert.equal(file.filename, "harmless-clean.docm");
+  assert.equal(file.repository, "decalage2/oletools");
+  assert.equal(file.revision, "ec10260989dbc48b9109e3d05d22beee19cf2333");
+  assert.equal(file.handling, "hosted-regression");
+  assert.equal(file.expectedSha256, "4921cf6872f9525a6364ee414b05abaa71784697fd53d1cce1c492c60a2f8f2a");
+  assert.equal(hostedValidationCandidate("HARMLESS-CLEAN.DOCM")?.id, "validation-30");
+  assert.equal(matchesPinnedValidationHash(file, file.expectedSha256!), true);
+  assert.equal(matchesPinnedValidationHash(file, "b".repeat(64)), false);
+  assert.equal(matchesPinnedValidationHash(file, "not a valid hash"), false);
+  assert.equal(VALIDATION_FILES.find(f => f.id === "validation-31")?.handling, "offline-only");
+  assert.equal(VALIDATION_FILES.find(f => f.id === "validation-32")?.handling, "offline-only");
 });

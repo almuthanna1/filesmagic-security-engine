@@ -85,11 +85,10 @@ export default function QuickValidationScanner({ onFinished }: Props) {
     let uploadHash = "";
     let stage: FailedAttempt["stage"] = "preflight";
     try {
-      // Confirm that hosted parser stress tests are the exact bytes from the pinned
-      // qpdf commit before asking Render to analyze them.
+      // Verify exact upstream bytes for vetted hosted regression fixtures before upload.
       uploadHash = await sha256Hex(file);
       if (!matchesPinnedValidationHash(candidate, uploadHash)) {
-        throw new Error("SHA-256 differs from the pinned qpdf fixture. File was not uploaded; download the exact catalog revision.");
+        throw new Error("SHA-256 differs from the pinned source fixture. File was not uploaded; download the exact catalog revision.");
       }
       // Reuse the main Lab's signed-token and strictly isolated backend.
       stage = "engine-request";
@@ -136,7 +135,7 @@ export default function QuickValidationScanner({ onFinished }: Props) {
   async function copyFailureReport() {
     if (!failedAttempt) return;
     const text = [
-      "FilesMagic hosted parser regression: request/error evidence (NO ENGINE VERDICT)",
+      "FilesMagic hosted validation: request/error evidence (NO ENGINE VERDICT)",
       `Case: ${failedAttempt.caseId} | ${failedAttempt.filename}`,
       `Attempted: ${failedAttempt.attemptedAt}`,
       `Stage: ${failedAttempt.stage}`,
@@ -160,7 +159,7 @@ export default function QuickValidationScanner({ onFinished }: Props) {
     : oversized ? `File exceeds the ${formatBytes(MAX_UPLOAD_BYTES)} limit.`
     : !ready ? "Waiting for the unified Security Engine."
     : candidate.handling === "hosted-regression"
-      ? "Hosted parser stress test. The pinned SHA-256 will be checked before upload. Errors and UNABLE_TO_SCAN are important results."
+      ? "Pinned hosted fixture. Its SHA-256 will be checked before upload. Errors and UNABLE_TO_SCAN are important results."
       : "Ready to scan.";
 
   return (
@@ -228,7 +227,7 @@ export default function QuickValidationScanner({ onFinished }: Props) {
               {copied ? "Copied full report" : "Copy full result"}
             </button>
           </div>
-          <p className={styles.disclaimer}>Copies actual scanner results, SHA-256, findings, isolation controls and software versions. For qpdf stress fixtures, the upload is checked against the pinned source SHA-256. Other catalog cases are linked by filename and reported hash only. No original document contents are saved in browser history.</p>
+          <p className={styles.disclaimer}>Copies actual scanner results, SHA-256, findings, isolation controls and software versions. For pinned hosted fixtures, the upload is checked against the upstream SHA-256. Other catalog cases are linked by filename and reported hash only. No original document contents are saved in browser history.</p>
           <details className={styles.details}>
             <summary>View complete scan details</summary>
             <ScanResultView result={result} heading="Complete scan result" />
