@@ -300,3 +300,62 @@ def test_the_reference_macro_verdict_is_qualified_never_lowered(monkeypatch, sou
     assert engine_rule in rules
     assert note in next(f.description for f in unified.findings if f.rule_id == "ENGINE_CORRELATION")
     assert verdicts(unified)["aggregate"] == verdicts(reference)["aggregate"] == "MALICIOUS"
+
+
+# ----------------------------------------------------------------------------- readable VBA evidence
+
+
+def test_extracted_message_box_is_reported_verbatim_without_escalating_verdict():
+    from app.decision import decide
+    from app.engine.correlate import vba_findings
+    from app.models import Severity, Verdict
+
+    src = 'Sub Action_Click()\n  MsgBox "The action button clicked!"\nEnd Sub\n'
+    result = analyse([("Module1.bas", src)])
+    findings = vba_findings(result)
+    extracted = [f for f in findings if f.rule_id == "ENGINE_VBA_SOURCE"]
+    assert len(extracted) == 1
+    assert extracted[0].severity == Severity.INFO
+    assert extracted[0].evidence == [f"Module1.bas:\n{src}"]
+    assert "message box" in extracted[0].description
+    assert "The action button clicked!" in extracted[0].description
+    assert decide(findings, scanners_run=4) == Verdict.SAFE
+
+
+def test_source_preview_does_not_infer_benign_behavior_from_other_statements():
+    from app.engine.correlate import vba_findings
+
+    src = 'Sub Action_Click()\n  MsgBox "Hello"\n  x = 2\nEnd Sub\n'
+    findings = vba_findings(analyse([("Module1", src)]))
+    evidence = next(f for f in findings if f.rule_id == "ENGINE_VBA_SOURCE")
+    assert "no complete behavior explanation is asserted" in evidence.description
+    assert src in evidence.evidence[0]
+
+
+def test_long_macro_preview_is_bounded_and_clearly_marked_incomplete():
+    from app.engine.correlate import vba_findings
+
+    src = "Sub Action_Click()\n" + ("  'comment only\n" * 100) + "End Sub\n"
+    findings = vba_findings(analyse([("Module1", src)]))
+    finding = next(f for f in findings if f.rule_id == "ENGINE_VBA_SOURCE")
+    assert len(finding.evidence[0]) <= 500
+    assert "[truncated: source continues]" in finding.evidence[0]
+    assert "excerpt limited" in finding.description
+
+
+def test_vba_preview_limits_module_count():
+    from app.engine.correlate import vba_findings
+
+    findings = vba_findings(analyse([(f"Module{i}", "Sub Safe()\nEnd Sub\n") for i in range(12)]))
+    assert len([f for f in findings if f.rule_id == "ENGINE_VBA_SOURCE"]) == 8
+    note = next(f for f in findings if f.rule_id == "ENGINE_VBA_SOURCE_OMITTED")
+    assert "4 additional VBA modules" in note.description
+
+
+def test_vba_preview_preserves_literal_html_as_text_only():
+    from app.engine.correlate import vba_findings
+
+    src = 'Sub Action_Click()\n  MsgBox "<script>alert(1)</script>"\nEnd Sub\n'
+    finding = next(f for f in vba_findings(analyse([("Module1", src)]))
+                   if f.rule_id == "ENGINE_VBA_SOURCE")
+    assert "<script>alert(1)</script>" in finding.evidence[0]
