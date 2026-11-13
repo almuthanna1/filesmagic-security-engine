@@ -44,7 +44,7 @@ export default function TestFilesPage() {
       <header className={styles.header}>
         <p className={styles.eyebrow}>FilesMagic Security Lab / Test library</p>
         <h1>Test Files</h1>
-        <p>Test the original 10-file research set, 32 new source-pinned validation downloads, or generated functional fixtures. Observed verdicts are recorded in this browser, not pulled automatically from the scanner.</p>
+        <p>Test the original 10-file research set, 32 source-pinned validation downloads, or generated functional fixtures. For the new validation set, use the inline scanner to run each file and copy its actual findings without opening another scanner tab.</p>
       </header>
       <div className={styles.warning}>
         <strong>Controlled functional tests — not real malware.</strong> The expected “MALICIOUS” label means the scanner should flag an inert high-severity indicator. Do not count these as true-positive malware samples in your capstone dataset. Do not open active-content test files in PDF/Office viewers; download and upload them directly to the scanner. Real malware must never be uploaded to the public Render endpoint.
