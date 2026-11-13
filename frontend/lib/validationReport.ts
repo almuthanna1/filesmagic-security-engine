@@ -1,6 +1,6 @@
 import type { HistoryRecord } from "./history";
 import type { ValidationFile } from "./additionalValidationCatalog";
-import { directDownloadUrl, pinnedSourceUrl } from "./additionalValidationCatalog";
+import { directDownloadUrl, pinnedSourceUrl } from "./additionalValidationCatalog.ts";
 
 /**
  * Match only scans performed by this Lab against a downloaded fixture filename.
