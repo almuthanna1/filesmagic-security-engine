@@ -33,13 +33,18 @@ export default function AdditionalValidationSection() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      const raw = JSON.parse(window.localStorage.getItem(KEY) || "{}");
-      if (raw && typeof raw === "object" && !Array.isArray(raw)) setObserved(raw as Observations);
-    } catch {
-      // Local storage is optional. The download links are still usable.
-    }
-    setHydrated(true);
+    let active = true;
+    queueMicrotask(() => {
+      if (!active) return;
+      try {
+        const raw = JSON.parse(window.localStorage.getItem(KEY) || "{}");
+        if (raw && typeof raw === "object" && !Array.isArray(raw)) setObserved(raw as Observations);
+      } catch {
+        // Local storage is optional. The download links are still usable.
+      }
+      setHydrated(true);
+    });
+    return () => { active = false; };
   }, []);
 
   function change(id: string, patch: Partial<Observation>) {
