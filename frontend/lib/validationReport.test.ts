@@ -80,10 +80,23 @@ test("a copied hosted qpdf report distinguishes pinned source bytes from unverif
     sha256: encrypted.expectedSha256!,
     verdict: "UNABLE_TO_SCAN",
   });
-  assert.ok(matching.includes("Hosted parser stress test: pinned qpdf SHA-256"));
-  assert.ok(matching.includes("scanned file SHA-256 MATCHED the pinned qpdf revision."));
+  assert.ok(matching.includes("Hosted validation fixture: pinned upstream SHA-256"));
+  assert.ok(matching.includes("scanned file SHA-256 MATCHED the pinned upstream revision."));
   assert.ok(matching.includes("Verdict: UNABLE_TO_SCAN"));
 
   const mismatched = completeValidationReport(encrypted, { ...scan, filename: encrypted.filename });
   assert.ok(mismatched.includes("scanned file SHA-256 DID NOT MATCH"));
+});
+
+test("copied oletools clean DOCM result reports the true source revision and hash", () => {
+  const docm = VALIDATION_FILES.find(f => f.id === "validation-30")!;
+  assert.equal(docm.handling, "hosted-regression");
+  const out = completeValidationReport(docm, {
+    ...scan, filename: docm.filename, sha256: docm.expectedSha256!,
+    detected_format: "zip", verdict: "SAFE",
+  });
+  assert.ok(out.includes("Case: validation-30 | harmless-clean.docm"));
+  assert.ok(out.includes("ec10260989dbc48b9109e3d05d22beee19cf2333"));
+  assert.ok(out.includes("scanned file SHA-256 MATCHED the pinned upstream revision."));
+  assert.ok(out.includes("Verdict: SAFE"));
 });
