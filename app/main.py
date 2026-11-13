@@ -39,11 +39,12 @@ MAX_CONCURRENT_SCANS = int(os.environ.get("SECURITY_ENGINE_MAX_CONCURRENT_SCANS"
 run_scan = worker.run
 _active_scans = 0
 
-# Engines /scan can run. "reference" (the four original scanners) is the default and what the
-# FilesMagic pipeline uses. "unified" (the custom engine candidate) is research-only: accepted
-# only when SECURITY_ENGINE_RESEARCH_ENGINES=1, otherwise refused, never replaced by the default.
-DEFAULT_ENGINE = "reference"
+# The production/default API remains on the reference baseline. Research staging may opt
+# into a public unified-only mode without deleting the reference implementation or its data.
+# Misconfiguration fails closed: PUBLIC_UNIFIED_ONLY without RESEARCH_ENGINES offers no scanner.
 RESEARCH_ENGINES = os.environ.get("SECURITY_ENGINE_RESEARCH_ENGINES") == "1"
+PUBLIC_UNIFIED_ONLY = os.environ.get("SECURITY_ENGINE_PUBLIC_UNIFIED_ONLY") == "1"
+DEFAULT_ENGINE = "unified" if PUBLIC_UNIFIED_ONLY else "reference"
 
 
 def engine_scanners(engine: str) -> list[str]:
@@ -52,6 +53,8 @@ def engine_scanners(engine: str) -> list[str]:
 
 
 def available_engines() -> list[str]:
+    if PUBLIC_UNIFIED_ONLY:
+        return ["unified"] if RESEARCH_ENGINES else []
     return ["reference", "unified"] if RESEARCH_ENGINES else ["reference"]
 
 
@@ -190,8 +193,11 @@ async def scan_file(request: Request) -> ScanResult:
     if engine not in worker.ENGINE_ARGS:
         raise HTTPException(status_code=400, detail=f"Unknown engine; use one of: {', '.join(worker.ENGINE_ARGS)}.")
     if engine not in available_engines():
-        raise HTTPException(status_code=403, detail="The unified engine is research-only and is not enabled on "
-                            "this deployment (SECURITY_ENGINE_RESEARCH_ENGINES=1).")
+        raise HTTPException(status_code=403, detail=(
+            "This deployment accepts only the unified engine." if PUBLIC_UNIFIED_ONLY else
+            "The unified engine is research-only and is not enabled on this deployment "
+            "(SECURITY_ENGINE_RESEARCH_ENGINES=1)."
+        ))
     expected = engine_scanners(engine)
     try:
         claims = auth.verify(request.headers.get("authorization", ""))

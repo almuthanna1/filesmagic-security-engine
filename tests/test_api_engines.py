@@ -81,6 +81,30 @@ def test_health_lists_the_engines_this_deployment_accepts(monkeypatch):
     assert health["engines"] == ["reference", "unified"] and health["default_engine"] == "reference"
 
 
+def test_public_research_lab_offers_only_the_unified_engine(research, monkeypatch):
+    # The four reference scanners remain in the unified engine, but are not
+    # separately selectable on the public research API.
+    monkeypatch.setattr(main, "PUBLIC_UNIFIED_ONLY", True)
+    monkeypatch.setattr(main, "DEFAULT_ENGINE", "unified")
+    health = client.get("/health").json()
+    assert health["engines"] == ["unified"] and health["default_engine"] == "unified"
+    data = CASE["1-pdf-clean"]
+    rejected = scan(data, "reference")
+    assert rejected.status_code == 403
+    assert "only the unified engine" in rejected.json()["detail"]
+    default_result = scan(data).json()
+    assert default_result["engine"] == "unified"
+    assert [s["name"] for s in default_result["scanners"]] == UNIFIED_SCANNERS
+
+
+def test_public_unified_mode_fails_closed_if_research_not_enabled(monkeypatch):
+    monkeypatch.setattr(main, "PUBLIC_UNIFIED_ONLY", True)
+    monkeypatch.setattr(main, "DEFAULT_ENGINE", "unified")
+    monkeypatch.setattr(main, "RESEARCH_ENGINES", False)
+    assert client.get("/health").json()["engines"] == []
+    assert scan(CASE["1-pdf-clean"]).status_code == 403
+
+
 # ----------------------------------------------------------------------------- acceptance
 
 

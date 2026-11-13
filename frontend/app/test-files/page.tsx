@@ -91,7 +91,7 @@ export default function TestFilesPage() {
           </div>
         </section>
       ))}
-      <footer className={styles.footer}>Fixture set v1 · The expected verdicts are tied to the current three-layer YARA-X / Office / PDF engine. These checks do not measure detection accuracy, recall, or false-positive rates on an independently labelled dataset.</footer>
+      <footer className={styles.footer}>Fixture set v1 · Expected verdicts exercise the unified nine-component engine using inert indicators. These checks do not measure detection accuracy, recall, or false-positive rates on an independently labelled malware dataset.</footer>
     </main>
   );
 }
