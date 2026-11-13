@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { TEST_CASES, type Verdict } from "@/lib/testCatalog";
 import ExternalTestSection from "@/components/ExternalTestSection";
+import AdditionalValidationSection from "@/components/AdditionalValidationSection";
 import styles from "./page.module.css";
 
 type Observation = Verdict | "";
@@ -43,7 +44,7 @@ export default function TestFilesPage() {
       <header className={styles.header}>
         <p className={styles.eyebrow}>FilesMagic Security Lab / Test library</p>
         <h1>Test Files</h1>
-        <p>Use the 10 independently sourced GitHub research files below, or download the generated functional fixtures further down this page. All scan observations are recorded separately.</p>
+        <p>Test the original 10-file research set, 32 new source-pinned validation downloads, or generated functional fixtures. Observed verdicts are recorded in this browser, not pulled automatically from the scanner.</p>
       </header>
       <div className={styles.warning}>
         <strong>Controlled functional tests — not real malware.</strong> The expected “MALICIOUS” label means the scanner should flag an inert high-severity indicator. Do not count these as true-positive malware samples in your capstone dataset. Do not open active-content test files in PDF/Office viewers; download and upload them directly to the scanner. Real malware must never be uploaded to the public Render endpoint.
@@ -55,6 +56,7 @@ export default function TestFilesPage() {
       </div>
       <p className={styles.help}>Observed verdicts are saved only in this browser (inside the VM). Take a screenshot of this page to share results back in our chat. An unexpected verdict is useful evidence, not an automatic scanner failure.</p>
       <ExternalTestSection />
+      <AdditionalValidationSection />
       <h2 className={styles.syntheticHeading}>Generated functional fixtures</h2>
       {GROUPS.map((group) => (
         <section className={styles.group} key={group} aria-label={group}>
