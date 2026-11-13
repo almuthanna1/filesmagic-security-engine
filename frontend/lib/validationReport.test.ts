@@ -70,3 +70,20 @@ test("reports missing historical isolation flags without pretending they were ve
   assert.ok(r.includes("ENGINE_VBA_SOURCE"));
   assert.ok(!r.includes('MsgBox "private phrase"'));
 });
+
+test("a copied hosted qpdf report distinguishes pinned source bytes from unverified files", () => {
+  const encrypted = VALIDATION_FILES.find(f => f.id === "validation-24")!;
+  assert.equal(encrypted.handling, "hosted-regression");
+  const matching = completeValidationReport(encrypted, {
+    ...scan,
+    filename: encrypted.filename,
+    sha256: encrypted.expectedSha256!,
+    verdict: "UNABLE_TO_SCAN",
+  });
+  assert.ok(matching.includes("Hosted parser stress test: pinned qpdf SHA-256"));
+  assert.ok(matching.includes("scanned file SHA-256 MATCHED the pinned qpdf revision."));
+  assert.ok(matching.includes("Verdict: UNABLE_TO_SCAN"));
+
+  const mismatched = completeValidationReport(encrypted, { ...scan, filename: encrypted.filename });
+  assert.ok(mismatched.includes("scanned file SHA-256 DID NOT MATCH"));
+});
