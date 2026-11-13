@@ -12,7 +12,7 @@ export type ValidationFile = {
   filename: string;
   purpose: string;
   handling: ValidationHandling;
-  // Required for hosted malformed/encrypted regression fixtures. A filename is not provenance.
+  // Exact pinned upstream hash for vetted hosted regression fixtures. A filename alone is not provenance.
   expectedSha256?: string;
   downloadOverride?: string;
   sourceOverride?: string;
@@ -329,8 +329,9 @@ export const VALIDATION_FILES: ValidationFile[] = [
     "revision": "ec10260989dbc48b9109e3d05d22beee19cf2333",
     "path": "tests/test-data/msodde/harmless-clean.docm",
     "filename": "harmless-clean.docm",
-    "purpose": "oletools clean-control macro-enabled Word format; verify behavior, not label alone.",
-    "handling": "offline-only"
+    "purpose": "oletools clean-control .docm container: pinned fixture has no vbaProject.bin ZIP entry. Verify scanner behavior; benign status is not guaranteed.",
+    "handling": "hosted-regression",
+    "expectedSha256": "4921cf6872f9525a6364ee414b05abaa71784697fd53d1cce1c492c60a2f8f2a"
   },
   {
     "id": "validation-31",
@@ -375,7 +376,7 @@ export function pinnedSourceUrl(file: ValidationFile): string {
 
 /**
  * The hosted inline Lab accepts unique catalog filenames that are either reviewed
- * benign candidates or pinned qpdf parser regression fixtures. This UI gate is not
+ * benign candidates or pinned, reviewed regression fixtures. This UI gate is not
  * a security boundary; the backend must still validate every file.
  */
 export function hostedValidationCandidate(filename: string): ValidationFile | null {
@@ -384,7 +385,7 @@ export function hostedValidationCandidate(filename: string): ValidationFile | nu
     ? matches[0] : null;
 }
 
-/** Hosted stress-test fixtures must match the bytes from the pinned qpdf commit. */
+/** Hosted regression fixtures must match the bytes of their pinned upstream revision. */
 export function matchesPinnedValidationHash(file: ValidationFile, actualSha256: string): boolean {
   return !file.expectedSha256 ||
     /^[a-f0-9]{64}$/i.test(actualSha256) &&
