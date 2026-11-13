@@ -260,3 +260,23 @@
   font-family: var(--font-mono);
   white-space: nowrap;
 }
+
+/* Excerpts come directly from parsed file data. React renders them as text, never HTML. */
+.vbaExplanation {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 8px 0;
+}
+.vbaSource {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 300px;
+  overflow: auto;
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin: 10px 0 0;
+  font: 0.82rem/1.6 var(--font-mono);
+}

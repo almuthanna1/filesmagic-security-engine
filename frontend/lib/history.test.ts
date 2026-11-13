@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { csvCell, historyCsv, type HistoryRecord } from "./history.ts";
+import { csvCell, historyCsv, toRecord, type HistoryRecord } from "./history.ts";
 
 test("CSV cells are quoted and cannot start a spreadsheet formula", () => {
   assert.equal(csvCell('a "b"'), '"a ""b"""');
@@ -21,4 +21,23 @@ test("history CSV has one row per record with engine, commit, hash, verdict, fin
   assert.ok(header.startsWith("recorded_at,mode,engine,commit,request_id,filename,sha256"));
   assert.ok(row.includes('"unified","abc"') && row.includes(`"'+x.pdf"`) && row.includes('"SUSPICIOUS"'));
   assert.ok(row.includes('"pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM"') && row.includes('"pdf=0.5"'));
+});
+
+test("VBA code and message literals remain in the live result, not browser history", () => {
+  const result = {
+    request_id: "r1", filename: "sample_with_vba.ppt", sha256: "a".repeat(64), size_bytes: 20,
+    detected_format: "ole2", engine: "unified", verdict: "SAFE", complete: true,
+    duration_ms: 1, message: "no known indicators", versions: { commit: "abc" },
+    scanners: [], isolation_required: true, isolation_missing: [], isolation: {},
+    findings: [{
+      scanner: "vba-chains", category: "office-vba-source", severity: "INFO",
+      rule_id: "ENGINE_VBA_SOURCE", description: 'MsgBox "private phrase"',
+      evidence: ['Sub Action_Click()\\n  MsgBox "private phrase"\\nEnd Sub']
+    }]
+  } as Parameters<typeof toRecord>[0];
+  const recorded = toRecord(result, "single");
+  assert.equal(recorded.findings[0].rule_id, "ENGINE_VBA_SOURCE");
+  assert.deepEqual(recorded.findings[0].evidence, []);
+  assert.ok(!JSON.stringify(recorded).includes("private phrase"));
+  assert.equal(result.findings[0].evidence?.length, 1);
 });

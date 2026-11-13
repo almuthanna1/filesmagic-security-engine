@@ -9,8 +9,10 @@ const GROUPS: { title: string; note: string; match: (f: Finding) => boolean }[] 
     match: (f) => f.rule_id === "ENGINE_CORRELATION" },
   { title: "PDF action chains", note: "Trigger → actions started through /Next, and the embedded files they use.",
     match: (f) => f.scanner === "pdf-chains" && f.rule_id !== "ENGINE_CORRELATION" },
-  { title: "VBA call paths", note: "From an automatically running procedure to a dangerous operation, through demonstrated calls.",
-    match: (f) => f.scanner === "vba-chains" },
+  { title: "Extracted VBA source", note: "Exactly what the parser recovered for short macros; longer modules are clearly marked as excerpts. Code was not executed, and compiled VBA P-code was not verified.",
+    match: (f) => f.rule_id === "ENGINE_VBA_SOURCE" || f.rule_id === "ENGINE_VBA_SOURCE_OMITTED" },
+  { title: "VBA call paths", note: "Detected VBA entry points and any demonstrated paths to dangerous operations.",
+    match: (f) => f.scanner === "vba-chains" && f.rule_id !== "ENGINE_VBA_SOURCE" && f.rule_id !== "ENGINE_VBA_SOURCE_OMITTED" },
   { title: "OOXML relationship evidence", note: "Which loaded part references each relationship, and when Office uses it.",
     match: (f) => f.scanner === "ooxml-links" },
 ];
@@ -30,10 +32,17 @@ export default function EvidenceSections({ findings }: { findings: Finding[] }) 
                 <span className={`${styles.severity} ${styles[`sev${f.severity}`]}`}>{f.severity}</span>{" "}
                 {f.rule_id !== "ENGINE_CORRELATION" && <code className={styles.ruleCell}><Breakable text={f.rule_id ?? ""} /></code>}
               </p>
+              {f.rule_id === "ENGINE_VBA_SOURCE" && <p className={styles.vbaExplanation}>{f.description}</p>}
               {f.evidence?.length ? (
-                <ul className={styles.evidenceList}>
-                  {f.evidence.map((e, j) => <li key={j}>{e}</li>)}
-                </ul>
+                f.rule_id === "ENGINE_VBA_SOURCE" ? (
+                  <div>
+                    {f.evidence.map((e, j) => <pre key={j} className={styles.vbaSource}><code>{e}</code></pre>)}
+                  </div>
+                ) : (
+                  <ul className={styles.evidenceList}>
+                    {f.evidence.map((e, j) => <li key={j}>{e}</li>)}
+                  </ul>
+                )
               ) : (
                 <p>{f.description}</p>
               )}

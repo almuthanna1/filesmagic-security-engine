@@ -42,7 +42,11 @@ export function toRecord(r: ScanResult, mode: HistoryRecord["mode"]): HistoryRec
     verdict: r.verdict,
     complete: r.complete,
     duration_ms: r.duration_ms,
-    findings: r.findings,
+    // Do not persist VBA contents or quoted literals from the uploaded document.
+    // Show source only in the immediate scan view; history stores a presence marker.
+    findings: r.findings.map((f) => f.rule_id === "ENGINE_VBA_SOURCE"
+      ? { ...f, description: "VBA source extracted; source previews are not saved to history.", evidence: [] }
+      : f),
     scanners: r.scanners,
     versions: r.versions,
     isolation_required: r.isolation_required ?? false,
