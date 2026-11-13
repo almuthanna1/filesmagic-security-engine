@@ -25,6 +25,8 @@ export interface HistoryRecord {
   versions: Record<string, string>;
   isolation_required: boolean;
   isolation_missing: string[];
+  // Older browser records do not include the detailed control flags.
+  isolation?: Record<string, boolean>;
   message: string;
 }
 
@@ -51,6 +53,7 @@ export function toRecord(r: ScanResult, mode: HistoryRecord["mode"]): HistoryRec
     versions: r.versions,
     isolation_required: r.isolation_required ?? false,
     isolation_missing: r.isolation_missing ?? [],
+    isolation: { ...r.isolation },
     message: r.message,
   };
 }
