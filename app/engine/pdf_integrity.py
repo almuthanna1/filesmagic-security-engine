@@ -11,7 +11,7 @@ import logging
 from pypdf import PasswordType, PdfReader, apply_configuration
 from pypdf.generic import ArrayObject, IndirectObject, StreamObject
 
-from app.models import CoverageIssue, Finding, Severity
+from app.models import MAX_COVERAGE_ISSUES, CoverageIssue, Finding, Severity
 from app.scanners.base import ScanError
 from app.scanners.pdf import MAX_OBJECTS, PDF_LIMITS, _RepairLog, clean, is_pdf
 
@@ -46,7 +46,7 @@ class PdfIntegrityScanner:
         self.coverage_issues: list[CoverageIssue] = []
 
     def _issue(self, code: str, detail: str) -> None:
-        if len(self.coverage_issues) < 50:
+        if len(self.coverage_issues) < MAX_COVERAGE_ISSUES:
             self.coverage_issues.append(CoverageIssue(code=code, scanner=self.name, detail=detail))
 
     def scan(self, filename: str, data: bytes) -> list[Finding] | None:

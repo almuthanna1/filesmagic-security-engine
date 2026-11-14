@@ -26,6 +26,7 @@ The C1 custom lexer no longer treats encryption alone as an incomplete C1 result
 - Fresh isolated Windows virtual environment installed pinned `requirements-dev.txt`, including `msoffcrypto-tool 6.0.0`.
 - Baseline could not finish through the host's 30-second command window; after the implementation the same full backend suite was run in two partitions: **1,069 passed, 41 skipped** (the skips are Linux-only isolation tests on Windows), 33.9 seconds combined.
 - Pinned qpdf regression test: **2 passed** in 0.48 seconds. New local PDF-integrity tests cover valid/malformed LZW, unsupported filter, encrypted accessible/unavailable content, total decoded-byte limit, and both exact qpdf hashes.
+- Final API-path replay through the real child worker is recorded in [`evidence/pdf-coverage-remediation-2026-11-13/api-worker-results.json`](evidence/pdf-coverage-remediation-2026-11-13/api-worker-results.json): `V4-aes.pdf` was `SAFE`, complete and coverage-complete; `bad-data.pdf` was `UNABLE_TO_SCAN`, complete but coverage-incomplete with `PDF_CONTENT_LZW_DECODE_FAILED`.
 - Existing frozen API expectations, malicious/suspicious precedence, custom PDF tests, and frontend type/tests passed. Frontend: `tsc --noEmit` and 27 Node tests passed.
 
 ## Remaining limitations

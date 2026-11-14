@@ -1,0 +1,27 @@
+{
+  "source_commit": "4eba95899886e851cc41d76886483b347612f2a8",
+  "method": "FastAPI TestClient /scan?engine=unified with app.main.run_scan=app.worker.run; Windows development worker, strict isolation disabled",
+  "results": [
+    {
+      "name": "V4-aes.pdf",
+      "sha256": "1d8a812844b8d8c7ba085a627eb3b7ab52aa651c6143ca07315084220a113240",
+      "verdict": "SAFE",
+      "complete": true,
+      "coverage_complete": true,
+      "coverage_issues": [],
+      "duration_ms": 628.3,
+      "scanners": {"yara-x": {"status": "completed", "duration_ms": 0.31}, "office": {"status": "not_applicable", "duration_ms": 0.003}, "pdf": {"status": "completed", "duration_ms": 6.988}, "custom": {"status": "completed", "duration_ms": 0.811}, "yara-x-engine": {"status": "completed", "duration_ms": 0.371}, "pdf-chains": {"status": "completed", "duration_ms": 6.972}, "pdf-integrity": {"status": "completed", "duration_ms": 4.87}, "vba-chains": {"status": "not_applicable", "duration_ms": 0.006}, "ooxml-links": {"status": "not_applicable", "duration_ms": 0.005}, "word-fields": {"status": "not_applicable", "duration_ms": 0.002}}
+    },
+    {
+      "name": "bad-data.pdf",
+      "sha256": "919998d65cecd40f1c33cf56853a517acc0e18f438fcc098f4c17a086c875057",
+      "verdict": "UNABLE_TO_SCAN",
+      "complete": true,
+      "coverage_complete": false,
+      "coverage_issues": [{"code": "PDF_CONTENT_LZW_DECODE_FAILED", "scanner": "pdf-integrity", "detail": "Page-content decoding failed: PdfStreamError."}],
+      "duration_ms": 582.7,
+      "scanners": {"yara-x": {"status": "completed", "duration_ms": 0.355}, "office": {"status": "not_applicable", "duration_ms": 0.003}, "pdf": {"status": "completed", "duration_ms": 0.567}, "custom": {"status": "completed", "duration_ms": 0.094}, "yara-x-engine": {"status": "completed", "duration_ms": 0.284}, "pdf-chains": {"status": "completed", "duration_ms": 0.475}, "pdf-integrity": {"status": "completed", "duration_ms": 0.402}, "vba-chains": {"status": "not_applicable", "duration_ms": 0.003}, "ooxml-links": {"status": "not_applicable", "duration_ms": 0.002}, "word-fields": {"status": "not_applicable", "duration_ms": 0.001}}
+    }
+  ],
+  "isolation": {"process": true, "audit_hook": true, "network_namespace": false, "network_verified": false, "rlimits": false, "capabilities_dropped": false}
+}

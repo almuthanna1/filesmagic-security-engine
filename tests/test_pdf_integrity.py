@@ -8,6 +8,7 @@ import pytest
 
 from app import worker
 from app.engine.pdf_integrity import PdfIntegrityScanner
+from app.models import MAX_COVERAGE_ISSUES, CoverageIssue
 from tests.custom_fixtures import stream_object
 from tests.pdf_fixtures import encrypted_pdf, make_pdf
 
@@ -88,6 +89,25 @@ def test_any_failed_applicable_scanner_makes_coverage_incomplete():
     assert not result.coverage_complete
     assert {(issue.scanner, issue.code) for issue in result.coverage_issues} == {
         ("required-check", "SCANNER_ANALYSIS_FAILED")}
+
+
+def test_worker_bounds_combined_scanner_coverage_issues():
+    class ReportingScanner:
+        name = "reporting"
+        coverage_issues = [CoverageIssue(code=f"EXISTING_{n}", scanner="reporting", detail="x")
+                           for n in range(MAX_COVERAGE_ISSUES)]
+
+        def scan(self, filename, data):
+            return []
+
+    class FailingScanner:
+        name = "failing"
+
+        def scan(self, filename, data):
+            raise RuntimeError("inert test failure")
+
+    result = worker.analyse([ReportingScanner(), FailingScanner()], b"inert")
+    assert len(result.coverage_issues) == MAX_COVERAGE_ISSUES and not result.coverage_complete
 
 
 @pytest.mark.skipif(os.environ.get("FILES_MAGIC_EXTERNAL_PDF") != "1", reason="pinned qpdf fixtures are opt-in")

@@ -6,6 +6,9 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 
+MAX_COVERAGE_ISSUES = 50
+
+
 class Verdict(str, Enum):
     SAFE = "SAFE"
     SUSPICIOUS = "SUSPICIOUS"
@@ -94,7 +97,7 @@ class WorkerReport(BaseModel):
     scanners: list[ScannerStatus] = Field(max_length=20)
     findings: list[Finding] = Field(max_length=500)
     coverage_complete: bool = True
-    coverage_issues: list[CoverageIssue] = Field(default_factory=list, max_length=50)
+    coverage_issues: list[CoverageIssue] = Field(default_factory=list, max_length=MAX_COVERAGE_ISSUES)
     isolation: dict[str, bool] = Field(default_factory=dict, max_length=16)
     # Code locations only (file:line:function), for unexpected failures; logged, never returned.
     traces: dict[str, Annotated[str, Field(max_length=1000, pattern=r"^[A-Za-z0-9_.:<> -]*$")]] = Field(default_factory=dict, max_length=20)
@@ -115,7 +118,7 @@ class ScanResult(BaseModel):
     scanners: list[ScannerStatus] = Field(default_factory=list)
     complete: bool = Field(default=False, description="Every applicable scanner completed its analysis.")
     coverage_complete: bool = Field(default=False, description="Every required document region was analysed.")
-    coverage_issues: list[CoverageIssue] = Field(default_factory=list, max_length=50)
+    coverage_issues: list[CoverageIssue] = Field(default_factory=list, max_length=MAX_COVERAGE_ISSUES)
     duration_ms: float = 0
     versions: dict[str, str] = Field(default_factory=dict)
     isolation_required: bool = Field(default=False, description="Configured: SECURITY_ENGINE_REQUIRE_ISOLATION=1, "

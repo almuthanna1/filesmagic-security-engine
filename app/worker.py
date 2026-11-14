@@ -43,7 +43,7 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
-from app.models import CoverageIssue, NetworkDiagnostics, ScannerStatus, WorkerReport
+from app.models import MAX_COVERAGE_ISSUES, CoverageIssue, NetworkDiagnostics, ScannerStatus, WorkerReport
 from app.scanners.base import ScanError
 
 APP_ROOT = Path(__file__).resolve().parent.parent
@@ -235,12 +235,13 @@ def analyse(scanners, data: bytes, isolation: dict[str, bool] | None = None) -> 
             code = "PDF_INTEGRITY_ANALYSIS_FAILED" if scanner.name == "pdf-integrity" else "SCANNER_ANALYSIS_FAILED"
             detail = ("Page-content integrity analysis did not complete." if scanner.name == "pdf-integrity"
                       else "A required scanner did not complete its analysis.")
-            coverage_issues.append(CoverageIssue(code=code, scanner=scanner.name, detail=detail))
+            if len(coverage_issues) < MAX_COVERAGE_ISSUES:
+                coverage_issues.append(CoverageIssue(code=code, scanner=scanner.name, detail=detail))
             continue
         status = "not_applicable" if result is None else "completed"
         statuses.append(ScannerStatus(name=scanner.name, status=status, duration_ms=_ms(start)))
         findings += result or []
-        coverage_issues += getattr(scanner, "coverage_issues", [])
+        coverage_issues.extend(getattr(scanner, "coverage_issues", [])[:MAX_COVERAGE_ISSUES - len(coverage_issues)])
     return WorkerReport(scanners=statuses, findings=findings, coverage_complete=not coverage_issues,
                         coverage_issues=coverage_issues, isolation=isolation or {}, traces=traces)
 

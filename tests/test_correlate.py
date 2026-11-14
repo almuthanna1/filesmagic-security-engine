@@ -4,7 +4,7 @@ import pytest
 
 from app import engine, worker
 from app.decision import decide
-from app.models import Finding, ScannerStatus, Severity, Verdict, WorkerReport
+from app.models import MAX_COVERAGE_ISSUES, CoverageIssue, Finding, ScannerStatus, Severity, Verdict, WorkerReport
 from evaluation.cases import CLICK_LINK_JS, cases, verdicts
 from tests.pdf_fixtures import make_pdf
 
@@ -76,6 +76,23 @@ def test_custom_c1_coverage_limit_blocks_an_otherwise_safe_unified_result():
     assert {(issue.scanner, issue.code) for issue in correlated.coverage_issues} == {
         ("custom", "CUSTOM_PDF_C1_COVERAGE_INCOMPLETE")}
     assert decide(correlated.findings, scanners_run=1, coverage_complete=correlated.coverage_complete) == Verdict.UNABLE_TO_SCAN
+
+
+def test_coverage_issues_remain_bounded_when_correlation_adds_more():
+    report = WorkerReport(
+        scanners=[ScannerStatus(name="custom", status="completed"), ScannerStatus(name="pdf-chains", status="completed")],
+        findings=[
+            Finding(scanner="custom", category="pdf-coverage", severity=Severity.INFO, description="x",
+                    rule_id="CUSTOM_PDF_COVERAGE_LIMITED"),
+            Finding(scanner="pdf-chains", category="pdf-action-chain", severity=Severity.INFO, description="x",
+                    rule_id="ENGINE_PDF_CHAINS_REPAIRED"),
+        ],
+        coverage_issues=[CoverageIssue(code=f"EXISTING_{n}", scanner="pdf-integrity", detail="x")
+                         for n in range(MAX_COVERAGE_ISSUES)],
+    )
+    correlated = engine.correlate(report)
+    assert len(correlated.coverage_issues) == MAX_COVERAGE_ISSUES
+    assert not correlated.coverage_complete
 
 
 def reference_report(chain_status: str, chain_findings: list[Finding] = ()) -> WorkerReport:
