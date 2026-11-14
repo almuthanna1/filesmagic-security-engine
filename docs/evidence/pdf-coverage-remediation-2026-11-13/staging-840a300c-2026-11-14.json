@@ -1,0 +1,267 @@
+{
+  "schema": "hosted-scan-history-transcription-v1",
+  "evidence_status": "user-supplied pasted scan-history records; not raw hosted API response",
+  "data_cutoff_utc": "2026-11-14T03:21:49.299Z",
+  "scope": "Standalone benign-only research staging; unified engine; production FilesMagic not involved",
+  "repository": "almuthanna1/filesmagic-security-engine",
+  "branch": "feature/custom-unified-engine-nov18",
+  "deployed_engine_commit": "840a300c1edf4682cbd4ba7ecc7f183ba281983e",
+  "backend": {
+    "platform": "Render",
+    "workspace": "FilesMagic Research",
+    "service_name": "filesmagic-security-engine-staging",
+    "service_id": "srv-dbelc2jrjlhs7382nv5g",
+    "deploy_id": "dep-dbrsv0ei0phs73benb70",
+    "status": "live"
+  },
+  "frontend": {
+    "platform": "Vercel",
+    "project_name": "filesmagic-security-lab-staging",
+    "deployment_id": "dpl_62M8ScJXQmMSdWqxZZWawMgG5TRU",
+    "status": "READY"
+  },
+  "upstream_source_revision": "4eba95899886e851cc41d76886483b347612f2a8",
+  "coverage_field_limitation": "The copied saved-history records contain verdict, complete, findings, scanner statuses and isolation flags but do not explicitly print coverage_complete or coverage_issues. The null values mean not exported, NOT false. Separate Windows API-worker evidence directly includes those fields, and hosted verdict/finding align with the new coverage contract.",
+  "strict_isolation_interpretation": "net_loopback_only=false coexists with net_fallback_tunnel_inert=true and network_verified=true; no missing required controls were reported. This is a worker-reported check, not an external independent sandbox probe.",
+  "limitations": [
+    "Two selected benign/parser-stress qpdf fixtures only; no real malware used",
+    "No repeated hosted trials or matched environmental benchmarks; do not claim statistically meaningful latency differences",
+    "No direct evidence for the actual production FilesMagic converter or conversion eligibility",
+    "No universal PDF validity, full content coverage, or malware accuracy claim"
+  ],
+  "cases": [
+    {
+      "case_id": "validation-24",
+      "filename": "V4-aes.pdf",
+      "purpose": "Encrypted PDF; incomplete required analysis must not silently yield SAFE",
+      "sha256": "1d8a812844b8d8c7ba085a627eb3b7ab52aa651c6143ca07315084220a113240",
+      "file_size_bytes": 16474,
+      "detected_format": "pdf",
+      "source_url": "https://github.com/qpdf/qpdf/blob/4eba95899886e851cc41d76886483b347612f2a8/qpdf/qtest/qpdf/V4-aes.pdf",
+      "direct_download_url": "https://raw.githubusercontent.com/qpdf/qpdf/4eba95899886e851cc41d76886483b347612f2a8/qpdf/qtest/qpdf/V4-aes.pdf",
+      "sha256_reported_matched_pinned_source": true,
+      "baseline": {
+        "request_id": "9db6839ce4584ccb",
+        "recorded_at_utc": "2026-11-13T17:46:05.368Z",
+        "verdict": "SAFE",
+        "complete": true,
+        "applicable_scanners_completed": 5,
+        "failed_scanners": 0,
+        "total_duration_ms": 7264,
+        "observed_finding_rule_ids": [
+          "PDF_ENCRYPTED_PERMISSIONS_ONLY",
+          "CUSTOM_PDF_COVERAGE_LIMITED"
+        ]
+      },
+      "hosted": {
+        "recorded_at_utc": "2026-11-14T03:21:09.705Z",
+        "request_id": "91d02883c3d8406f",
+        "engine": "unified",
+        "verdict": "SAFE",
+        "message": "Analysed by 6 of 10 scanners (4 not applicable to this file type). No known indicators were found; this is not a guarantee that the file is harmless.",
+        "complete": true,
+        "total_duration_ms": 7289.8,
+        "scanner_counts": {
+          "completed": 6,
+          "not_applicable": 4,
+          "failed": 0
+        },
+        "scanners": {
+          "yara-x": {
+            "status": "completed",
+            "duration_ms": 0.579
+          },
+          "office": {
+            "status": "not_applicable",
+            "duration_ms": 0.005
+          },
+          "pdf": {
+            "status": "completed",
+            "duration_ms": 101.561
+          },
+          "custom": {
+            "status": "completed",
+            "duration_ms": 1.462
+          },
+          "yara-x-engine": {
+            "status": "completed",
+            "duration_ms": 85.148
+          },
+          "pdf-chains": {
+            "status": "completed",
+            "duration_ms": 105.718
+          },
+          "pdf-integrity": {
+            "status": "completed",
+            "duration_ms": 99.11
+          },
+          "vba-chains": {
+            "status": "not_applicable",
+            "duration_ms": 0.011
+          },
+          "ooxml-links": {
+            "status": "not_applicable",
+            "duration_ms": 0.008
+          },
+          "word-fields": {
+            "status": "not_applicable",
+            "duration_ms": 0.003
+          }
+        },
+        "findings": [
+          {
+            "rule_id": "PDF_ENCRYPTED_PERMISSIONS_ONLY",
+            "severity": "INFO",
+            "scanner": "pdf",
+            "category": "pdf-encrypted",
+            "description": "PDF is encrypted with an empty user password (permission restrictions only); contents were inspected."
+          }
+        ],
+        "isolation": {
+          "strict_isolation_required": true,
+          "missing_required_controls": "none reported",
+          "audit_hook": true,
+          "capabilities_dropped": true,
+          "net_fallback_tunnel_inert": true,
+          "net_interfaces_safe": true,
+          "net_ipv4_no_route": true,
+          "net_ipv4_unreachable": true,
+          "net_ipv6_no_route": true,
+          "net_ipv6_unreachable": true,
+          "net_loopback_only": false,
+          "network_namespace": true,
+          "network_verified": true,
+          "process": true,
+          "rlimits": true
+        },
+        "versions": {
+          "commit": "840a300c1edf4682cbd4ba7ecc7f183ba281983e",
+          "engine": "0.2.0",
+          "engine_ruleset_sha256": "988d991efb218328c97e8c00500ed6b434a33ee8e961548e817e159cc9f35b4e",
+          "olefile": "0.47",
+          "oletools": "0.60.2",
+          "pypdf": "6.19.0",
+          "ruleset_sha256": "0be9918509e95e639f866291dc297c45c8e72812d602fb149fad3484435ae3b0",
+          "yara_x": "1.21.0"
+        },
+        "coverage_complete_in_pasted_history": null,
+        "coverage_issues_in_pasted_history": null
+      }
+    },
+    {
+      "case_id": "validation-25",
+      "filename": "bad-data.pdf",
+      "purpose": "Deliberately damaged PDF data; verify fail-closed parsing",
+      "sha256": "919998d65cecd40f1c33cf56853a517acc0e18f438fcc098f4c17a086c875057",
+      "file_size_bytes": 799,
+      "detected_format": "pdf",
+      "source_url": "https://github.com/qpdf/qpdf/blob/4eba95899886e851cc41d76886483b347612f2a8/qpdf/qtest/qpdf/bad-data.pdf",
+      "direct_download_url": "https://raw.githubusercontent.com/qpdf/qpdf/4eba95899886e851cc41d76886483b347612f2a8/qpdf/qtest/qpdf/bad-data.pdf",
+      "sha256_reported_matched_pinned_source": true,
+      "baseline": {
+        "request_id": "8e8989c598a44208",
+        "recorded_at_utc": "2026-11-13T17:49:43.953Z",
+        "verdict": "SAFE",
+        "complete": true,
+        "applicable_scanners_completed": 5,
+        "failed_scanners": 0,
+        "total_duration_ms": 6990.5,
+        "observed_finding_rule_ids": []
+      },
+      "hosted": {
+        "recorded_at_utc": "2026-11-14T03:21:49.299Z",
+        "request_id": "b4e41e363e8b4afe",
+        "engine": "unified",
+        "verdict": "UNABLE_TO_SCAN",
+        "message": "Required content coverage is incomplete, so the file could not be fully analysed.",
+        "complete": true,
+        "total_duration_ms": 6044.7,
+        "scanner_counts": {
+          "completed": 6,
+          "not_applicable": 4,
+          "failed": 0
+        },
+        "scanners": {
+          "yara-x": {
+            "status": "completed",
+            "duration_ms": 0.404
+          },
+          "office": {
+            "status": "not_applicable",
+            "duration_ms": 0.005
+          },
+          "pdf": {
+            "status": "completed",
+            "duration_ms": 0.852
+          },
+          "custom": {
+            "status": "completed",
+            "duration_ms": 0.141
+          },
+          "yara-x-engine": {
+            "status": "completed",
+            "duration_ms": 85.437
+          },
+          "pdf-chains": {
+            "status": "completed",
+            "duration_ms": 1.116
+          },
+          "pdf-integrity": {
+            "status": "completed",
+            "duration_ms": 0.862
+          },
+          "vba-chains": {
+            "status": "not_applicable",
+            "duration_ms": 0.01
+          },
+          "ooxml-links": {
+            "status": "not_applicable",
+            "duration_ms": 0.007
+          },
+          "word-fields": {
+            "status": "not_applicable",
+            "duration_ms": 0.004
+          }
+        },
+        "findings": [
+          {
+            "rule_id": "ENGINE_PDF_COVERAGE_INCOMPLETE",
+            "severity": "INFO",
+            "scanner": "pdf-integrity",
+            "category": "pdf-coverage",
+            "description": "Required PDF coverage is incomplete. Evidence: PDF_CONTENT_LZW_DECODE_FAILED."
+          }
+        ],
+        "isolation": {
+          "strict_isolation_required": true,
+          "missing_required_controls": "none reported",
+          "audit_hook": true,
+          "capabilities_dropped": true,
+          "net_fallback_tunnel_inert": true,
+          "net_interfaces_safe": true,
+          "net_ipv4_no_route": true,
+          "net_ipv4_unreachable": true,
+          "net_ipv6_no_route": true,
+          "net_ipv6_unreachable": true,
+          "net_loopback_only": false,
+          "network_namespace": true,
+          "network_verified": true,
+          "process": true,
+          "rlimits": true
+        },
+        "versions": {
+          "commit": "840a300c1edf4682cbd4ba7ecc7f183ba281983e",
+          "engine": "0.2.0",
+          "engine_ruleset_sha256": "988d991efb218328c97e8c00500ed6b434a33ee8e961548e817e159cc9f35b4e",
+          "olefile": "0.47",
+          "oletools": "0.60.2",
+          "pypdf": "6.19.0",
+          "ruleset_sha256": "0be9918509e95e639f866291dc297c45c8e72812d602fb149fad3484435ae3b0",
+          "yara_x": "1.21.0"
+        },
+        "coverage_complete_in_pasted_history": null,
+        "coverage_issues_in_pasted_history": null
+      }
+    }
+  ]
+}

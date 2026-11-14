@@ -66,3 +66,9 @@ Two source-pinned qpdf regression fixtures returned `SAFE` with `complete=true`,
 - **Do not repair during the ongoing external evaluation:** establish a baseline for the rest of the qpdf cases, implement fixes on a separate branch, and compare before/after.
 
 Related freeze record: [engine-readiness-report.md](engine-readiness-report.md), which remains the authoritative November 9 research freeze and is **not** retroactively modified by these results.
+
+## Follow-up record (November 14, 2026; not a rewrite of the baseline)
+
+This document remains the **November 13 before-fix investigation**. The subsequent research-only correction was merged as `840a300c` (PR #21). Manual hosted rescans of both SHA-256-matched source files on November 14 confirmed: `V4-aes.pdf` stayed SAFE without the earlier unnecessary custom-C1 coverage note; `bad-data.pdf` changed from SAFE to UNABLE_TO_SCAN with `PDF_CONTENT_LZW_DECODE_FAILED`. Each scan used the unified engine, six completed scanners and reported required isolation controls satisfied.
+
+See [the dated remediation report](pdf-coverage-remediation-2026-11-13.md) and [the separate hosted evidence transcription](evidence/pdf-coverage-remediation-2026-11-13/staging-840a300c-2026-11-14.json). The copied hosted history did not print raw coverage booleans, and the November 9 frozen evaluation and other unresolved production-gate questions remain unchanged.

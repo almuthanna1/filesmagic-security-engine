@@ -691,3 +691,18 @@ before the change and before any held-out scan); change `c24c52c`; evidence in
   The three APA variants, 24 regression scans and 4 HTTP failure checks matched the local results;
   strict isolation complete throughout. Record:
   [`evidence/pdf-accuracy-c24c52c/staging-9882cbf.md`](evidence/pdf-accuracy-c24c52c/staging-9882cbf.md).
+
+## 22. PDF stream coverage and hosted follow-up (Nov 13-14, research branch)
+
+**Question:** Could the unified engine distinguish a finished scan from required document coverage, without losing the original reference scanner behavior or misclassifying corrupted/encrypted input as malicious?
+
+- **Original external observations (Nov 13):** pinned qpdf `V4-aes.pdf` returned SAFE and a broad custom-C1 encrypted-coverage INFO note; pinned `bad-data.pdf` returned SAFE with no findings despite a skipped LZW `/Contents` stream. Source hashes and baseline request IDs are in [the historical investigation](external-pdf-coverage-findings-2026-11-13.md).
+- **Independent follow-up:** `V4-aes.pdf` decrypted under the empty user password, permitted decoding all 30 page-content streams and had no `/ObjStm`; this made the old encryption-only C1 message overly broad for the specific fixture. Bounded pypdf LZW decoding of `bad-data.pdf` raised `PdfStreamError`, confirming an unreadable required page-content stream. Neither finding proves an exploit or malware.
+- **Change:** research-only unified `pdf-integrity` scanner; separate `complete` vs `coverage_complete` and bounded `coverage_issues`; missing required coverage refuses otherwise SAFE output. `MALICIOUS`/`SUSPICIOUS` evidence still takes precedence. Custom C1 object-stream gaps and scanner failures now contribute structured coverage issues. PR [#21](https://github.com/almuthanna1/filesmagic-security-engine/pull/21), merged commit `840a300c1edf4682cbd4ba7ecc7f183ba281983e`.
+- **Automated verification:** final Codex report: 1,073 Windows backend tests passed (41 Linux-only skips); PR Linux/isolation, non-root Docker and frontend CI checks passed. Exact pinned fixtures also passed API-worker regression tests. These runs do not replace the November 9 freeze.
+- **Hosted manual verification (Nov 14):** deployed to Render `filesmagic-security-engine-staging` (`dep-dbrsv0ei0phs73benb70`) and Vercel `filesmagic-security-lab-staging` (`dpl_62M8ScJXQmMSdWqxZZWawMgG5TRU`). `V4-aes.pdf` stayed SAFE without the unjustified C1 gap warning (request `91d02883c3d8406f`, 7,289.8 ms); `bad-data.pdf` became UNABLE_TO_SCAN with `PDF_CONTENT_LZW_DECODE_FAILED` (request `b4e41e363e8b4afe`, 6,044.7 ms). Both source hashes matched; each had 6 completed, 4 not applicable, 0 failed and worker-reported strict isolation with no required control missing.
+- **Evidence boundaries:** the hosted saved-history text did not explicitly output the new `coverage_complete` fields, although local API-worker evidence does. These are two selected benign/parser-stress regression cases, not a malware-accuracy study, performance benchmark or production conversion authorization proof.
+
+New post-freeze artifacts: [remediation analysis](pdf-coverage-remediation-2026-11-13.md), [Windows API-worker evidence](evidence/pdf-coverage-remediation-2026-11-13/api-worker-results.json), [hosted scan-history transcription](evidence/pdf-coverage-remediation-2026-11-13/staging-840a300c-2026-11-14.json).
+
+**Learning:** severity and scan completion cannot substitute for a coverage contract. A repeatable source-pinned malformed input exposes the difference, while a decryptable encrypted control prevents overstating failures simply because a file uses encryption.

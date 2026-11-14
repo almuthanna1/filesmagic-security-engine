@@ -4,8 +4,8 @@
 **Northern Illinois University | CSCI 499 Honors Capstone**  
 **Student:** Almuthanna Shihab  
 **Faculty mentor:** Dr. Nur Imtiazul Haque  
-**Period covered:** September 2026 through November 13, 2026  
-**Document status:** Living draft v0.1, created November 13, 2026  
+**Period covered:** September 2026 through November 14, 2026  
+**Document status:** Living draft v0.2, created November 13, 2026; updated November 14, 2026  
 **Repository:** https://github.com/almuthanna1/filesmagic-security-engine  
 **Current research branch:** feature/custom-unified-engine-nov18  
 **Important distinction:** This document is a chronological account of *research and engineering work*. It is not a claim that the Security Engine is integrated with, or approved to protect, the production FilesMagic Conversion Engine.
@@ -18,7 +18,7 @@ The capstone began with an operational problem: FilesMagic converts documents up
 
 The research challenge was never merely “find a suspicious string.” It became a sequence of narrower questions: Can the system describe *why* a document is risky? Can untrusted parsing run within measurable containment? Can independent layers disagree without producing dishonest conclusions? Can a custom engine reduce selected false positives without suppressing real indicators? Can the evidence be reproduced on a disconnected Linux VM? Finally, can the platform distinguish a scanner that *finished* from a document it has *fully covered*?
 
-By November 9, the unified research engine had a frozen, reproducible offline evaluation: 57 inputs scanned through two engine configurations, 114 of 114 expected results, 11 of 11 contribution checks, and strict isolation on every scan. The 1,004-test VM suite had 993 passes and 11 measured environment skips, while Linux CI passed all 1,004 tests. This established a standalone research milestone, not malware-detection accuracy or production readiness. A later November 13 external corpus revealed important new gaps: eight attachment-related conservative warnings, a correctly rejected malformed PDF, and three particularly important SAFE results on unsupported, repaired, or partially inspected documents. These findings now shape the next research phase.
+By November 9, the unified research engine had a frozen, reproducible offline evaluation: 57 inputs scanned through two engine configurations, 114 of 114 expected results, 11 of 11 contribution checks, and strict isolation on every scan. The 1,004-test VM suite had 993 passes and 11 measured environment skips, while Linux CI passed all 1,004 tests. This established a standalone research milestone, not malware-detection accuracy or production readiness. A later November 13 external corpus revealed important new gaps: eight attachment-related conservative warnings, a correctly rejected malformed PDF, and three particularly important SAFE results on unsupported, repaired, or partially inspected documents. These findings shaped a November 14, post-freeze PDF coverage remediation: the encrypted and damaged-data qpdf cases were re-scanned in the research-only hosted Lab after targeted changes. Both behaved as intended, with the damaged file now returning UNABLE_TO_SCAN rather than SAFE. Other external-validation questions and production conversion authorization remain open.
 
 ---
 
@@ -60,6 +60,7 @@ The mentor repeatedly emphasized two requirements that influenced the project: *
 | November 10–11 | PDF accuracy and Content Credentials research | Pre-registered PDF attachment accuracy, resolved the empty-attachment-name-tree false positive, and started a bounded C2PA manifest verifier study. | [PDF preregistration](pdf-accuracy-preregistration.md), [PDF evidence](evidence/pdf-accuracy-c24c52c/summary.md), [C2PA preregistration](c2pa-accuracy-preregistration.md) |
 | November 12–13 | Public research Lab refinement | Added sourced downloads, retained scan history, full evidence exports, unified-only public controls and an in-page uploader. | Merged PRs [#9](https://github.com/almuthanna1/filesmagic-security-engine/pull/9) through [#13](https://github.com/almuthanna1/filesmagic-security-engine/pull/13) |
 | November 13 | External validation and honest readiness reassessment | 32-case catalog audit: 30 saved scans, one manual note, one missing record. Identified coverage, unsupported-format, and repaired-document fail-open authorization risks. | [Batch audit](external-validation-batch-audit-2026-11-13.md), [PDF investigation](external-pdf-coverage-findings-2026-11-13.md), issues [#14](https://github.com/almuthanna1/filesmagic-security-engine/issues/14), [#18](https://github.com/almuthanna1/filesmagic-security-engine/issues/18) |
+| November 14 | PDF integrity and coverage remediation validated in hosted research Lab | PR #21 added bounded page-content stream decoding, explicit coverage issues and fail-closed verdicts. The research Render engine and staging Lab ran commit 840a300c; both pinned qpdf rescans matched expected verdict behavior under reported strict isolation. | [Remediation report](pdf-coverage-remediation-2026-11-13.md), [hosted case evidence](evidence/pdf-coverage-remediation-2026-11-13/staging-840a300c-2026-11-14.json), [PR #21](https://github.com/almuthanna1/filesmagic-security-engine/pull/21) |
 
 **Timeline qualification:** Commit dates are authoritative for code events; personal discussion dates come from meeting notes or earlier correspondence and should be cross-checked against the original calendar/email before a final academic submission. Several GitHub branches and historical documents describe different versions of the system; do not present an October architecture as if it were the November implementation.
 
@@ -303,6 +304,17 @@ The additional evaluation was **valuable precisely because it revealed weaknesse
 
 Full counts, hashes, request IDs and the 32-case matrix: [batch audit](external-validation-batch-audit-2026-11-13.md). PDF investigation: [coverage analysis](external-pdf-coverage-findings-2026-11-13.md). Open remediation: [issue #14](https://github.com/almuthanna1/filesmagic-security-engine/issues/14) and [issue #18](https://github.com/almuthanna1/filesmagic-security-engine/issues/18).
 
+### 9.9 Post-freeze correction and hosted regression (November 14)
+
+A separate correction, [PR #21](https://github.com/almuthanna1/filesmagic-security-engine/pull/21), added unified-only `pdf-integrity`, machine-readable coverage issues and a verdict policy that refuses otherwise SAFE results when required coverage is missing. It also stopped treating encryption *alone* as proof of a missing custom-C1 object stream. The PR was merged into the research branch as `840a300c1edf4682cbd4ba7ecc7f183ba281983e`, then deployed **only** to the research Render engine and Vercel Security Lab.
+
+The student manually re-uploaded the same two SHA-256-matched qpdf fixtures, both scanned by six applicable components with zero failures and no missing required isolation controls:
+
+- **`V4-aes.pdf`**, request `91d02883c3d8406f` at `2026-11-14T03:21:09.705Z`: SAFE, `complete=true`, 7,289.8 ms. The earlier `CUSTOM_PDF_COVERAGE_LIMITED` warning is absent; `PDF_ENCRYPTED_PERMISSIONS_ONLY` remains INFO.
+- **`bad-data.pdf`**, request `b4e41e363e8b4afe` at `2026-11-14T03:21:49.299Z`: UNABLE_TO_SCAN, `complete=true`, 6,044.7 ms. The `pdf-integrity` finding `ENGINE_PDF_COVERAGE_INCOMPLETE` cites `PDF_CONTENT_LZW_DECODE_FAILED`.
+
+The saved-history export lists the verdicts, scanner statuses, findings and worker-reported isolation flags but **does not print the raw `coverage_complete` / `coverage_issues` fields**. A separate Windows API-worker replay recorded those fields explicitly. Distinguish the two sources when reporting coverage. Source hashes, full scanner timings and evidence limitations are in [the hosted evidence record](evidence/pdf-coverage-remediation-2026-11-13/staging-840a300c-2026-11-14.json) and [the remediation analysis](pdf-coverage-remediation-2026-11-13.md). The November 9 frozen evaluation is unchanged. These two targeted cases do not resolve unrelated unknown-format, parser-repair, attachment-policy or converter-integration concerns.
+
 ---
 
 ## 10. Research failures and what we learned
@@ -352,6 +364,8 @@ The live research Lab is **not a substitute for a dedicated malware laboratory**
 
 ## 12. What needs to happen before production integration
 
+**November 14 status qualification:** The research unified engine now implements explicit coverage fields and bounded PDF content checks for selected cases. The gates below remain **production-authorization requirements**: format eligibility, converter-specific coverage, integration and independent external validation are not completed by the two hosted PDF rescans.
+
 **Gate A: Explicit coverage contract (high priority).** A versioned result must distinguish (i) execution of every applicable scanner, (ii) supported file type, (iii) required object and stream inspection, (iv) isolation, and (v) authorization to pass the bytes to a converter. INFO-level skipped/unknown analysis must not silently allow conversion.
 
 **Gate B: Fail-closed policy and regression fixtures.** Unsupported or unknown types, failed scans, incomplete attachment traversal, unresolved encryption, important parser repairs and required stream decoding errors must block conversion authorization. Preserve a higher-priority MALICIOUS finding if one exists; do not mislabel a corrupt document as malicious simply for being corrupt. Add positive and negative tests for all new rules.
@@ -389,7 +403,7 @@ Existing supporting material: [poster draft](poster/poster-draft.md), [poster fi
 3. **Week-by-week time investment:** import a calendar or work log to estimate hours. Git commits are not a reliable time-tracking record.
 4. **Originality audit:** list each custom algorithm, upstream dependency and license in one current table, not only in the November 6 plan.
 5. **External batch closure:** validation-03 needs a full history-backed report; validation-32 requires a recorded result or explicit rejection.
-6. **Independent parsing:** characterize the exact qpdf LZW fixture and repaired cross-reference fixtures with a bounded independent parser.
+6. **Independent parsing:** the exact qpdf LZW fixture was reproduced as a decoder failure using bounded pypdf and a hosted regression; repaired cross-reference cases and conversion-engine-specific behavior still need independent characterization.
 7. **UI and backend version split:** capture exact Vercel deployment, Render deploy and engine commit at each evaluation. A UI commit is not proof that the backend changed.
 8. **Actual future product gate:** document a threat model for the conversion service, upload paths, authorization and rollback before writing integration code.
 9. **Academic deliverables:** attach advisor feedback, final poster version, rubric, final presentation and any project report when available.
@@ -409,6 +423,7 @@ Existing supporting material: [poster draft](poster/poster-draft.md), [poster fi
 - [Final November 9 release-readiness report](engine-readiness-report.md)
 - [External November 13 batch audit](external-validation-batch-audit-2026-11-13.md)
 - [Post-freeze PDF coverage concerns](external-pdf-coverage-findings-2026-11-13.md)
+- [November 14 PDF remediation and hosted validation](pdf-coverage-remediation-2026-11-13.md) and [hosted scan-history transcription](evidence/pdf-coverage-remediation-2026-11-13/staging-840a300c-2026-11-14.json)
 
 ### Experiments, datasets, and controlled outcomes
 - [C10 Word external template](c10-docx-external-template-experiment.md) and [C10.1 inert VBA project](c10-1-vba-project-presence-experiment.md)
@@ -448,5 +463,6 @@ Update after each substantive milestone. For each addition, record:
 | Version | Date | Change |
 |---|---|---|
 | 0.1 | 2026-11-13 | First integrated chronological draft from Git commits, existing capstone documentation, November 6 meeting notes, frozen VM evidence and external-case audit. Unverified historical details explicitly listed in Section 14. |
+| 0.2 | 2026-11-14 | Added post-freeze PDF coverage remediation and two manual hosted qpdf regression outcomes at merge commit 840a300c, with request IDs, strict-isolation observations and separate evidence limits. November 9 totals preserved. |
 
 **Research posture:** Document the failures with the same precision as the successful milestones. The capstone's central result may ultimately be a defensible security architecture, a narrower custom detection contribution and an empirical statement of its limits. That is stronger research than a claim that a prototype is already perfect.
