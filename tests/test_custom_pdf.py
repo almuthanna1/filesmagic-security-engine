@@ -138,11 +138,10 @@ def test_truncated_object_stream_is_reported_as_partly_inspected():
     assert "only partly readable" in f.description and "object stream of object 5 0" in f.description
 
 
-def test_encrypted_document_is_reported_as_not_fully_inspected():
+def test_empty_password_encryption_without_object_streams_does_not_overstate_c1_gap():
     data = encrypted_pdf("")
     assert parse(data).encrypted
-    f = rules(data)["CUSTOM_PDF_COVERAGE_LIMITED"]
-    assert f.severity == Severity.INFO and "the document is encrypted" in f.description
+    assert "CUSTOM_PDF_COVERAGE_LIMITED" not in rules(data)
 
 
 def test_object_streams_of_an_encrypted_document_are_counted_as_not_inspected():

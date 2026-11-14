@@ -38,6 +38,12 @@ export interface ScannerStatus {
   duration_ms?: number | null;
 }
 
+export interface CoverageIssue {
+  code: string;
+  scanner: string;
+  detail: string;
+}
+
 export interface ScanResult {
   request_id: string;
   // The engine that produced this result, as reported by the API.
@@ -51,6 +57,8 @@ export interface ScanResult {
   detected_format: string;
   scanners: ScannerStatus[];
   complete: boolean;
+  coverage_complete: boolean;
+  coverage_issues: CoverageIssue[];
   duration_ms: number;
   versions: Record<string, string>;
   // Configured: strict mode (the worker refuses to scan unless every required isolation value is true).
@@ -94,6 +102,8 @@ function isScanResult(value: unknown): value is ScanResult {
     typeof r.sha256 === "string" &&
     typeof r.duration_ms === "number" &&
     typeof r.complete === "boolean" &&
+    typeof r.coverage_complete === "boolean" &&
+    Array.isArray(r.coverage_issues) &&
     Array.isArray(r.scanners) &&
     typeof r.versions === "object" &&
     typeof r.isolation === "object"

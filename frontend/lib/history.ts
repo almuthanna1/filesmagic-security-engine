@@ -2,7 +2,7 @@
 // timing), never file contents. Kept in this browser's localStorage until exported or cleared.
 
 import { useMemo, useSyncExternalStore } from "react";
-import type { Engine, Finding, ScanResult, ScannerStatus, Verdict } from "./api";
+import type { CoverageIssue, Engine, Finding, ScanResult, ScannerStatus, Verdict } from "./api";
 
 const STORAGE_KEY = "fm-scan-history-v1";
 const MAX_RECORDS = 500;
@@ -19,6 +19,8 @@ export interface HistoryRecord {
   detected_format: string;
   verdict: Verdict;
   complete: boolean;
+  coverage_complete: boolean;
+  coverage_issues: CoverageIssue[];
   duration_ms: number;
   findings: Finding[];
   scanners: ScannerStatus[];
@@ -43,6 +45,8 @@ export function toRecord(r: ScanResult, mode: HistoryRecord["mode"]): HistoryRec
     detected_format: r.detected_format,
     verdict: r.verdict,
     complete: r.complete,
+    coverage_complete: r.coverage_complete,
+    coverage_issues: r.coverage_issues,
     duration_ms: r.duration_ms,
     // Do not persist VBA contents or quoted literals from the uploaded document.
     // Show source only in the immediate scan view; history stores a presence marker.
@@ -141,6 +145,8 @@ const COLUMNS: [string, (r: HistoryRecord) => string | number | boolean | null][
   ["detected_format", (r) => r.detected_format],
   ["verdict", (r) => r.verdict],
   ["complete", (r) => r.complete],
+  ["coverage_complete", (r) => r.coverage_complete],
+  ["coverage_issues", (r) => r.coverage_issues.map((i) => `${i.scanner}:${i.code}`).join(";")],
   ["duration_ms", (r) => r.duration_ms],
   ["scanner_ms", (r) => r.scanners.map((s) => `${s.name}=${s.duration_ms ?? ""}`).join(";")],
   ["scanner_status", (r) => r.scanners.map((s) => `${s.name}=${s.status}`).join(";")],

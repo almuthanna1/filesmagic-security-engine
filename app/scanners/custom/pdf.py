@@ -70,10 +70,9 @@ def name_obfuscation(syntax: PdfSyntax) -> list[Signal]:
 
 
 def coverage(syntax: PdfSyntax) -> list[Signal]:
-    if not (syntax.encrypted or syntax.not_inspected or syntax.partial):
+    if not (syntax.not_inspected or syntax.partial):
         return []
-    evidence = ["the document is encrypted, so its strings and streams cannot be read"] * syntax.encrypted
-    evidence += [f"{n} object stream(s) not inspected: {reason}" for reason, n in syntax.not_inspected.most_common()]
+    evidence = [f"{n} object stream(s) not inspected: {reason}" for reason, n in syntax.not_inspected.most_common()]
     if syntax.partial:
         evidence.append(f"{len(syntax.partial)} object stream(s) only partly readable (corrupt or truncated data)")
     return [Signal("CUSTOM_PDF_COVERAGE_LIMITED", "pdf-coverage", Severity.INFO,

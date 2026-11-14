@@ -244,7 +244,8 @@ async def scan_file(request: Request) -> ScanResult:
     not_applicable = sum(s.status == "not_applicable" for s in report.scanners)
     # Not-applicable scanners neither count as analysis nor as failure.
     applicable = len(expected) - not_applicable
-    verdict = decide(findings, scanners_run=applicable, scanners_failed=failed)
+    coverage_complete = report.coverage_complete if engine == "unified" else True
+    verdict = decide(findings, scanners_run=applicable, scanners_failed=failed, coverage_complete=coverage_complete)
 
     if not expected:
         message = "No security scanners are configured yet. This file has NOT been security-scanned."
@@ -252,6 +253,8 @@ async def scan_file(request: Request) -> ScanResult:
         message = "None of the configured scanners supports this file type. This file has NOT been security-scanned."
     elif failed and verdict == Verdict.UNABLE_TO_SCAN:
         message = f"{failed} of {applicable} applicable scanners failed, so the file could not be fully analysed."
+    elif not coverage_complete and verdict == Verdict.UNABLE_TO_SCAN:
+        message = "Required content coverage is incomplete, so the file could not be fully analysed."
     else:
         message = f"Analysed by {applicable - failed} of {len(expected)} scanners"
         message += f" ({not_applicable} not applicable to this file type)." if not_applicable else "."
@@ -288,6 +291,8 @@ async def scan_file(request: Request) -> ScanResult:
         detected_format=detected_format,
         scanners=report.scanners,
         complete=applicable > 0 and failed == 0,
+        coverage_complete=coverage_complete,
+        coverage_issues=report.coverage_issues if engine == "unified" else [],
         duration_ms=duration_ms,
         versions=VERSIONS,
         isolation_required=worker.REQUIRE_ISOLATION,

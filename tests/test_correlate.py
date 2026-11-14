@@ -3,7 +3,8 @@ import asyncio
 import pytest
 
 from app import engine, worker
-from app.models import Finding, ScannerStatus, Severity, WorkerReport
+from app.decision import decide
+from app.models import MAX_COVERAGE_ISSUES, CoverageIssue, Finding, ScannerStatus, Severity, Verdict, WorkerReport
 from evaluation.cases import CLICK_LINK_JS, cases, verdicts
 from tests.pdf_fixtures import make_pdf
 
@@ -64,6 +65,36 @@ def test_an_automatic_launch_is_high():
     assert launch.severity == Severity.HIGH and "calc.exe" in launch.description
 
 
+def test_custom_c1_coverage_limit_blocks_an_otherwise_safe_unified_result():
+    report = WorkerReport(
+        scanners=[ScannerStatus(name="custom", status="completed")],
+        findings=[Finding(scanner="custom", category="pdf-coverage", severity=Severity.INFO,
+                          description="x", rule_id="CUSTOM_PDF_COVERAGE_LIMITED")],
+    )
+    correlated = engine.correlate(report)
+    assert not correlated.coverage_complete
+    assert {(issue.scanner, issue.code) for issue in correlated.coverage_issues} == {
+        ("custom", "CUSTOM_PDF_C1_COVERAGE_INCOMPLETE")}
+    assert decide(correlated.findings, scanners_run=1, coverage_complete=correlated.coverage_complete) == Verdict.UNABLE_TO_SCAN
+
+
+def test_coverage_issues_remain_bounded_when_correlation_adds_more():
+    report = WorkerReport(
+        scanners=[ScannerStatus(name="custom", status="completed"), ScannerStatus(name="pdf-chains", status="completed")],
+        findings=[
+            Finding(scanner="custom", category="pdf-coverage", severity=Severity.INFO, description="x",
+                    rule_id="CUSTOM_PDF_COVERAGE_LIMITED"),
+            Finding(scanner="pdf-chains", category="pdf-action-chain", severity=Severity.INFO, description="x",
+                    rule_id="ENGINE_PDF_CHAINS_REPAIRED"),
+        ],
+        coverage_issues=[CoverageIssue(code=f"EXISTING_{n}", scanner="pdf-integrity", detail="x")
+                         for n in range(MAX_COVERAGE_ISSUES)],
+    )
+    correlated = engine.correlate(report)
+    assert len(correlated.coverage_issues) == MAX_COVERAGE_ISSUES
+    assert not correlated.coverage_complete
+
+
 def reference_report(chain_status: str, chain_findings: list[Finding] = ()) -> WorkerReport:
     auto = Finding(scanner="pdf", category="pdf-javascript", severity=Severity.HIGH, description="x",
                    rule_id="PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD")
@@ -78,7 +109,13 @@ def reference_report(chain_status: str, chain_findings: list[Finding] = ()) -> W
                                            description="x", rule_id="ENGINE_PDF_CHAINS_REPAIRED")]),
 ])
 def test_reference_findings_stand_when_the_chain_view_is_not_unambiguous(report):
-    assert engine.correlate(report) == report
+    correlated = engine.correlate(report)
+    assert "PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD" in rules(correlated)
+    if any(f.rule_id == "ENGINE_PDF_CHAINS_REPAIRED" for f in report.findings):
+        assert not correlated.coverage_complete
+        assert {i.code for i in correlated.coverage_issues} == {"PDF_CHAIN_PARSER_REPAIRED"}
+    else:
+        assert correlated == report
 
 
 def test_the_worker_runs_the_unified_engine_only_when_asked():
@@ -86,5 +123,5 @@ def test_the_worker_runs_the_unified_engine_only_when_asked():
     reference = asyncio.run(worker.run(data))
     candidate = asyncio.run(worker.run(data, worker.command() + ["--engine=unified"]))
     assert [s.name for s in reference.scanners] == ["yara-x", "office", "pdf", "custom"]
-    assert [s.name for s in candidate.scanners] == ["yara-x", "office", "pdf", "custom", "yara-x-engine", "pdf-chains", "vba-chains", "ooxml-links", "word-fields"]
+    assert [s.name for s in candidate.scanners] == ["yara-x", "office", "pdf", "custom", "yara-x-engine", "pdf-chains", "pdf-integrity", "vba-chains", "ooxml-links", "word-fields"]
     assert (verdicts(reference)["aggregate"], verdicts(candidate)["aggregate"]) == ("MALICIOUS", "SUSPICIOUS")

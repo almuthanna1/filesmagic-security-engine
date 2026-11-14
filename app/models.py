@@ -6,6 +6,9 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 
+MAX_COVERAGE_ISSUES = 50
+
+
 class Verdict(str, Enum):
     SAFE = "SAFE"
     SUSPICIOUS = "SUSPICIOUS"
@@ -44,6 +47,14 @@ class ScannerStatus(BaseModel):
     error_type: str | None = Field(default=None, pattern=r"^[A-Za-z_][A-Za-z0-9_]{0,79}$")
     duration_ms: float | None = Field(default=None, ge=0, le=3_600_000, description="Time this scanner spent on the "
                                       "document inside the worker; None if the worker never reported it.")
+
+
+class CoverageIssue(BaseModel):
+    """A bounded, stable reason why required analysis did not cover a document region."""
+
+    code: str = Field(pattern=r"^[A-Z][A-Z0-9_]{2,79}$")
+    scanner: str = Field(max_length=40)
+    detail: str = Field(max_length=300)
 
 
 _KERNEL_NAME = r"^[A-Za-z_][A-Za-z0-9_]{0,39}$"  # exception types and errno names, e.g. ENODEV
@@ -85,6 +96,8 @@ class WorkerReport(BaseModel):
 
     scanners: list[ScannerStatus] = Field(max_length=20)
     findings: list[Finding] = Field(max_length=500)
+    coverage_complete: bool = True
+    coverage_issues: list[CoverageIssue] = Field(default_factory=list, max_length=MAX_COVERAGE_ISSUES)
     isolation: dict[str, bool] = Field(default_factory=dict, max_length=16)
     # Code locations only (file:line:function), for unexpected failures; logged, never returned.
     traces: dict[str, Annotated[str, Field(max_length=1000, pattern=r"^[A-Za-z0-9_.:<> -]*$")]] = Field(default_factory=dict, max_length=20)
@@ -104,6 +117,8 @@ class ScanResult(BaseModel):
     detected_format: str = Field(default="unknown", description="From magic bytes only: pdf, ole2, zip, rtf, unknown.")
     scanners: list[ScannerStatus] = Field(default_factory=list)
     complete: bool = Field(default=False, description="Every applicable scanner completed its analysis.")
+    coverage_complete: bool = Field(default=False, description="Every required document region was analysed.")
+    coverage_issues: list[CoverageIssue] = Field(default_factory=list, max_length=MAX_COVERAGE_ISSUES)
     duration_ms: float = 0
     versions: dict[str, str] = Field(default_factory=dict)
     isolation_required: bool = Field(default=False, description="Configured: SECURITY_ENGINE_REQUIRE_ISOLATION=1, "

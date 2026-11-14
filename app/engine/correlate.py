@@ -73,7 +73,7 @@ import re
 
 from app.engine import ooxml_links, pdf_chains, vba_chains
 from app.engine.file_paths import local_drive_path
-from app.models import Finding, Severity, WorkerReport
+from app.models import MAX_COVERAGE_ISSUES, CoverageIssue, Finding, Severity, WorkerReport
 from app.scanners.custom.indicators import NOT_PROOF, clean, listing
 
 NAME = "pdf-chains"
@@ -401,6 +401,17 @@ def correlate(report: WorkerReport) -> WorkerReport:
     status = {s.name: s.status for s in report.scanners}
     rules = {(f.scanner, f.rule_id) for f in report.findings}
     chains_ok = status.get(NAME) == "completed" and (NAME, "ENGINE_PDF_CHAINS_REPAIRED") not in rules
+    coverage = list(report.coverage_issues)
+    for scanner, rule, code, detail in [
+        (NAME, "ENGINE_PDF_CHAINS_REPAIRED", "PDF_CHAIN_PARSER_REPAIRED", "PDF action-chain parsing required repair."),
+        (NAME, "ENGINE_PDF_ATTACHMENTS_INCOMPLETE", "PDF_ATTACHMENT_COVERAGE_INCOMPLETE", "PDF attachment coverage is incomplete."),
+        ("pdf", "PDF_STRUCTURE_REPAIRED", "PDF_STRUCTURE_REPAIRED", "PDF structural parsing required repair."),
+        ("custom", "CUSTOM_PDF_COVERAGE_LIMITED", "CUSTOM_PDF_C1_COVERAGE_INCOMPLETE",
+         "Custom PDF escaped-name inspection did not cover every object stream."),
+    ]:
+        if (scanner, rule) in rules and len(coverage) < MAX_COVERAGE_ISSUES and not any(issue.code == code for issue in coverage):
+            coverage.append(CoverageIssue(code=code, scanner=scanner, detail=detail))
+    report = report.model_copy(update={"coverage_complete": not coverage, "coverage_issues": coverage})
     # drop: reference finding -> the engine scanner that replaced it; notes: engine scanner -> its decisions
     drop, notes = {}, {}
 

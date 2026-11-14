@@ -11,7 +11,7 @@ const scan: HistoryRecord = {
   recorded_at: "2026-11-13T16:40:00Z", mode: "single", engine: "unified",
   commit: "ccdb462065fcf3140e5a2295f3754f3c19324ab0",
   request_id: "9ecd06000dc14b4e", filename: file.filename, sha256: sha1,
-  size_bytes: 11600, detected_format: "zip", verdict: "SAFE", complete: true,
+  size_bytes: 11600, detected_format: "zip", verdict: "SAFE", complete: true, coverage_complete: true, coverage_issues: [],
   duration_ms: 6659.1, message: "No known indicators.",
   scanners: [
     { name: "yara-x", status: "completed", duration_ms: 0.502, error: null, error_kind: null, error_type: null },

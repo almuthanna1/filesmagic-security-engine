@@ -23,12 +23,13 @@ from evaluation.cases import cases
 from tests import custom_fixtures as fx
 from tests.scan_client import auth_headers, post_scan
 from tests.test_vba_chains import RELATED, SourceOnlyOfficeParser
+from tests.pdf_fixtures import make_pdf
 
 client = TestClient(main.app)
 CASE = {c["id"]: c["data"] for c in cases()}
 FROZEN = Path(__file__).resolve().parent.parent / "docs/evidence/custom-engine-fp-fixes"
 REFERENCE_SCANNERS = ["yara-x", "office", "pdf", "custom"]
-UNIFIED_SCANNERS = REFERENCE_SCANNERS + ["yara-x-engine", "pdf-chains", "vba-chains", "ooxml-links", "word-fields"]
+UNIFIED_SCANNERS = REFERENCE_SCANNERS + ["yara-x-engine", "pdf-chains", "pdf-integrity", "vba-chains", "ooxml-links", "word-fields"]
 CORRUPT_PDF = b"%PDF-1.7\n1 0 obj\n<< /Length 10 >>\nstream\nno end marker follows"
 
 
@@ -120,6 +121,7 @@ def test_every_frozen_case_reproduces_through_the_api(research, engine_name, cas
     status = {s["name"]: s["status"] for s in body["scanners"]}
     if engine_name == "unified":
         status.pop("word-fields")  # C7, added after the frozen run; its status: tests/test_word_fields.py
+        status.pop("pdf-integrity")  # post-freeze coverage scanner; dedicated regressions below
     assert status == frozen["status"]
     # The hash of the bytes sent, not the frozen one: DEFLATE output (the Office fixtures are ZIPs)
     # depends on the zlib build, so the same fixture can have different bytes on another platform.
@@ -132,6 +134,21 @@ def test_all_four_verdicts_through_the_unified_engine(research):
         ("malicious", CASE["5b-pdf-auto-js-exports-attachment"]), ("unable", CORRUPT_PDF)]}
     assert verdicts == {"safe": "SAFE", "suspicious": "SUSPICIOUS", "malicious": "MALICIOUS",
                         "unable": "UNABLE_TO_SCAN"}
+
+
+def test_incomplete_content_coverage_fails_closed_without_changing_complete(research):
+    bad_lzw = bytes.fromhex("789c730ae15250d0773354303251084903b2cd8d80c840212405c8d608c82f492cc9d75408c9e2720de10200cb0109c8")
+    data = make_pdf(objects={4: fx.stream_object("/Filter /LZWDecode", bad_lzw)})
+    body = scan(data, "unified").json()
+    assert body["verdict"] == "UNABLE_TO_SCAN" and body["complete"] and not body["coverage_complete"]
+    assert {issue["code"] for issue in body["coverage_issues"]} == {"PDF_CONTENT_LZW_DECODE_FAILED"}
+
+
+def test_security_evidence_still_wins_over_incomplete_coverage(research):
+    bad_lzw = bytes.fromhex("789c730ae15250d0773354303251084903b2cd8d80c840212405c8d608c82f492cc9d75408c9e2720de10200cb0109c8")
+    data = make_pdf("/OpenAction << /S /Launch /F (calc.exe) >>", objects={4: fx.stream_object("/Filter /LZWDecode", bad_lzw)})
+    body = scan(data, "unified").json()
+    assert body["verdict"] == "MALICIOUS" and not body["coverage_complete"]
 
 
 @pytest.mark.parametrize("kind", ["docx", "xlsx", "pptx"])
