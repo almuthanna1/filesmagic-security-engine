@@ -406,6 +406,8 @@ def correlate(report: WorkerReport) -> WorkerReport:
         (NAME, "ENGINE_PDF_CHAINS_REPAIRED", "PDF_CHAIN_PARSER_REPAIRED", "PDF action-chain parsing required repair."),
         (NAME, "ENGINE_PDF_ATTACHMENTS_INCOMPLETE", "PDF_ATTACHMENT_COVERAGE_INCOMPLETE", "PDF attachment coverage is incomplete."),
         ("pdf", "PDF_STRUCTURE_REPAIRED", "PDF_STRUCTURE_REPAIRED", "PDF structural parsing required repair."),
+        ("custom", "CUSTOM_PDF_COVERAGE_LIMITED", "CUSTOM_PDF_C1_COVERAGE_INCOMPLETE",
+         "Custom PDF escaped-name inspection did not cover every object stream."),
     ]:
         if (scanner, rule) in rules and not any(issue.code == code for issue in coverage):
             coverage.append(CoverageIssue(code=code, scanner=scanner, detail=detail))

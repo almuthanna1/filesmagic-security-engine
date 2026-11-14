@@ -3,7 +3,8 @@ import asyncio
 import pytest
 
 from app import engine, worker
-from app.models import Finding, ScannerStatus, Severity, WorkerReport
+from app.decision import decide
+from app.models import Finding, ScannerStatus, Severity, Verdict, WorkerReport
 from evaluation.cases import CLICK_LINK_JS, cases, verdicts
 from tests.pdf_fixtures import make_pdf
 
@@ -62,6 +63,19 @@ def test_an_automatic_launch_is_high():
     report = unified(make_pdf(catalog_extra="/OpenAction << /S /Launch /F (calc.exe) >>"))
     launch = next(f for f in report.findings if f.rule_id == "ENGINE_PDF_AUTO_CHAIN_LAUNCH")
     assert launch.severity == Severity.HIGH and "calc.exe" in launch.description
+
+
+def test_custom_c1_coverage_limit_blocks_an_otherwise_safe_unified_result():
+    report = WorkerReport(
+        scanners=[ScannerStatus(name="custom", status="completed")],
+        findings=[Finding(scanner="custom", category="pdf-coverage", severity=Severity.INFO,
+                          description="x", rule_id="CUSTOM_PDF_COVERAGE_LIMITED")],
+    )
+    correlated = engine.correlate(report)
+    assert not correlated.coverage_complete
+    assert {(issue.scanner, issue.code) for issue in correlated.coverage_issues} == {
+        ("custom", "CUSTOM_PDF_C1_COVERAGE_INCOMPLETE")}
+    assert decide(correlated.findings, scanners_run=1, coverage_complete=correlated.coverage_complete) == Verdict.UNABLE_TO_SCAN
 
 
 def reference_report(chain_status: str, chain_findings: list[Finding] = ()) -> WorkerReport:

@@ -232,9 +232,10 @@ def analyse(scanners, data: bytes, isolation: dict[str, bool] | None = None) -> 
                                           error_type=type(e.__cause__ or e).__name__, duration_ms=_ms(start)))
             if kind == "unexpected":
                 traces[scanner.name] = re.sub(r"[^A-Za-z0-9_.:<> -]", "?", code_trace(e))
-            if scanner.name == "pdf-integrity":
-                coverage_issues.append(CoverageIssue(code="PDF_INTEGRITY_ANALYSIS_FAILED", scanner=scanner.name,
-                                                     detail="Page-content integrity analysis did not complete."))
+            code = "PDF_INTEGRITY_ANALYSIS_FAILED" if scanner.name == "pdf-integrity" else "SCANNER_ANALYSIS_FAILED"
+            detail = ("Page-content integrity analysis did not complete." if scanner.name == "pdf-integrity"
+                      else "A required scanner did not complete its analysis.")
+            coverage_issues.append(CoverageIssue(code=code, scanner=scanner.name, detail=detail))
             continue
         status = "not_applicable" if result is None else "completed"
         statuses.append(ScannerStatus(name=scanner.name, status=status, duration_ms=_ms(start)))

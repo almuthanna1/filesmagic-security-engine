@@ -17,7 +17,7 @@ The unified engine adds `pdf-integrity`. It resolves each page's direct or indir
 
 Limits: 10,000 content streams, existing pypdf 20 MiB per-stream limits, 32 MiB total decoded content, existing object limit, 20-second CPU rlimit, 320 MiB worker memory default, and worker wall timeout. Unsupported filters, decode failure, unavailable password-protected content, parser repair, attachment incompleteness, and limits become bounded machine-readable coverage issues.
 
-`complete` retains its historical meaning: every applicable scanner returned. New `coverage_complete` and `coverage_issues[]` state whether required coverage was established. A unified result with incomplete coverage is `UNABLE_TO_SCAN`, unless existing LOW/MEDIUM/HIGH/CRITICAL evidence already produces `SUSPICIOUS` or `MALICIOUS`; encryption and corruption are never automatically labelled malicious. Reference scanner behavior and rules are unchanged.
+`complete` retains its historical meaning: every applicable scanner returned. New `coverage_complete` and `coverage_issues[]` state whether required coverage was established; any failed applicable unified scanner produces `SCANNER_ANALYSIS_FAILED` (or the more specific integrity failure) and makes coverage incomplete. A unified result with incomplete coverage is `UNABLE_TO_SCAN`, unless existing LOW/MEDIUM/HIGH/CRITICAL evidence already produces `SUSPICIOUS` or `MALICIOUS`; encryption and corruption are never automatically labelled malicious. Reference scanner behavior and rules are unchanged.
 
 The C1 custom lexer no longer treats encryption alone as an incomplete C1 result. It still reports encrypted object streams it cannot inspect and retains the original escaped-name spelling as evidence where it does inspect tokens.
 

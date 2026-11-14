@@ -77,6 +77,19 @@ def test_parser_repair_is_reported_as_incomplete_coverage():
     assert "PDF_PARSER_REPAIRED" in codes(make_pdf(header_offset=500))
 
 
+def test_any_failed_applicable_scanner_makes_coverage_incomplete():
+    class FailingScanner:
+        name = "required-check"
+
+        def scan(self, filename, data):
+            raise RuntimeError("inert test failure")
+
+    result = worker.analyse([FailingScanner()], b"inert")
+    assert not result.coverage_complete
+    assert {(issue.scanner, issue.code) for issue in result.coverage_issues} == {
+        ("required-check", "SCANNER_ANALYSIS_FAILED")}
+
+
 @pytest.mark.skipif(os.environ.get("FILES_MAGIC_EXTERNAL_PDF") != "1", reason="pinned qpdf fixtures are opt-in")
 @pytest.mark.parametrize(("name", "sha256", "expected"), [
     ("V4-aes.pdf", "1d8a812844b8d8c7ba085a627eb3b7ab52aa651c6143ca07315084220a113240", set()),
