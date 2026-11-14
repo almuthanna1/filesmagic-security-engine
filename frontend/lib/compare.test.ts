@@ -10,7 +10,7 @@ function result(engine: ScanResult["engine"], verdict: ScanResult["verdict"], fi
                 over: Partial<ScanResult> = {}): ScanResult {
   return {
     request_id: "r", engine, filename: "f", verdict, findings, message: "m", sha256: "a".repeat(64), size_bytes: 1,
-    detected_format: "pdf", complete: true, duration_ms: 100, versions: {}, isolation: {},
+    detected_format: "pdf", complete: true, coverage_complete: true, coverage_issues: [], duration_ms: 100, versions: {}, isolation: {},
     scanners: [{ name: "pdf", status: "completed", error: null, error_kind: null, error_type: null, duration_ms: 1.5 }],
     ...over,
   };
@@ -36,7 +36,7 @@ test("findings are retained, added or superseded, with the correlation note as t
 
 test("incomplete analyses and undetermined findings become warnings", () => {
   const reference = result("reference", "UNABLE_TO_SCAN", [], {
-    complete: false, message: "1 of 1 applicable scanners failed",
+    complete: false, coverage_complete: false, coverage_issues: [], message: "1 of 1 applicable scanners failed",
     scanners: [{ name: "pdf", status: "failed", error: "x", error_kind: "malformed_input", error_type: "E", duration_ms: 1 }] });
   const unified = result("unified", "SUSPICIOUS", [f("vba-chains", "ENGINE_VBA_CALL_PATH_UNDETERMINED", "INFO")]);
   assert.deepEqual(compareResults(reference, unified).warnings, [

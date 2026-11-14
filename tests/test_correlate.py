@@ -78,7 +78,13 @@ def reference_report(chain_status: str, chain_findings: list[Finding] = ()) -> W
                                            description="x", rule_id="ENGINE_PDF_CHAINS_REPAIRED")]),
 ])
 def test_reference_findings_stand_when_the_chain_view_is_not_unambiguous(report):
-    assert engine.correlate(report) == report
+    correlated = engine.correlate(report)
+    assert "PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD" in rules(correlated)
+    if any(f.rule_id == "ENGINE_PDF_CHAINS_REPAIRED" for f in report.findings):
+        assert not correlated.coverage_complete
+        assert {i.code for i in correlated.coverage_issues} == {"PDF_CHAIN_PARSER_REPAIRED"}
+    else:
+        assert correlated == report
 
 
 def test_the_worker_runs_the_unified_engine_only_when_asked():
@@ -86,5 +92,5 @@ def test_the_worker_runs_the_unified_engine_only_when_asked():
     reference = asyncio.run(worker.run(data))
     candidate = asyncio.run(worker.run(data, worker.command() + ["--engine=unified"]))
     assert [s.name for s in reference.scanners] == ["yara-x", "office", "pdf", "custom"]
-    assert [s.name for s in candidate.scanners] == ["yara-x", "office", "pdf", "custom", "yara-x-engine", "pdf-chains", "vba-chains", "ooxml-links", "word-fields"]
+    assert [s.name for s in candidate.scanners] == ["yara-x", "office", "pdf", "custom", "yara-x-engine", "pdf-chains", "pdf-integrity", "vba-chains", "ooxml-links", "word-fields"]
     assert (verdicts(reference)["aggregate"], verdicts(candidate)["aggregate"]) == ("MALICIOUS", "SUSPICIOUS")

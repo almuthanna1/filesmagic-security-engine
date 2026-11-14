@@ -43,7 +43,7 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
-from app.models import NetworkDiagnostics, ScannerStatus, WorkerReport
+from app.models import CoverageIssue, NetworkDiagnostics, ScannerStatus, WorkerReport
 from app.scanners.base import ScanError
 
 APP_ROOT = Path(__file__).resolve().parent.parent
@@ -221,7 +221,7 @@ def code_trace(error: Exception) -> str:
 
 
 def analyse(scanners, data: bytes, isolation: dict[str, bool] | None = None) -> WorkerReport:
-    statuses, findings, traces = [], [], {}
+    statuses, findings, traces, coverage_issues = [], [], {}, []
     for scanner in scanners:
         start = time.perf_counter()
         try:
@@ -232,11 +232,16 @@ def analyse(scanners, data: bytes, isolation: dict[str, bool] | None = None) -> 
                                           error_type=type(e.__cause__ or e).__name__, duration_ms=_ms(start)))
             if kind == "unexpected":
                 traces[scanner.name] = re.sub(r"[^A-Za-z0-9_.:<> -]", "?", code_trace(e))
+            if scanner.name == "pdf-integrity":
+                coverage_issues.append(CoverageIssue(code="PDF_INTEGRITY_ANALYSIS_FAILED", scanner=scanner.name,
+                                                     detail="Page-content integrity analysis did not complete."))
             continue
         status = "not_applicable" if result is None else "completed"
         statuses.append(ScannerStatus(name=scanner.name, status=status, duration_ms=_ms(start)))
         findings += result or []
-    return WorkerReport(scanners=statuses, findings=findings, isolation=isolation or {}, traces=traces)
+        coverage_issues += getattr(scanner, "coverage_issues", [])
+    return WorkerReport(scanners=statuses, findings=findings, coverage_complete=not coverage_issues,
+                        coverage_issues=coverage_issues, isolation=isolation or {}, traces=traces)
 
 
 def _network_namespace() -> bool:

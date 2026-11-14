@@ -11,7 +11,7 @@ test("CSV cells are quoted and cannot start a spreadsheet formula", () => {
 test("history CSV has one row per record with engine, commit, hash, verdict, findings and timing", () => {
   const record = {
     recorded_at: "t", mode: "compare", engine: "unified", commit: "abc", request_id: "r", filename: "+x.pdf",
-    sha256: "f".repeat(64), size_bytes: 3, detected_format: "pdf", verdict: "SUSPICIOUS", complete: true,
+    sha256: "f".repeat(64), size_bytes: 3, detected_format: "pdf", verdict: "SUSPICIOUS", complete: true, coverage_complete: true, coverage_issues: [],
     duration_ms: 12.5, message: "m", isolation_required: false, isolation_missing: [],
     versions: { ruleset_sha256: "r1", engine_ruleset_sha256: "r2", engine: "0.2.0" },
     scanners: [{ name: "pdf", status: "completed", error: null, error_kind: null, error_type: null, duration_ms: 0.5 }],
@@ -26,7 +26,7 @@ test("history CSV has one row per record with engine, commit, hash, verdict, fin
 test("VBA code and message literals remain in the live result, not browser history", () => {
   const result = {
     request_id: "r1", filename: "sample_with_vba.ppt", sha256: "a".repeat(64), size_bytes: 20,
-    detected_format: "ole2", engine: "unified", verdict: "SAFE", complete: true,
+    detected_format: "ole2", engine: "unified", verdict: "SAFE", complete: true, coverage_complete: true, coverage_issues: [],
     duration_ms: 1, message: "no known indicators", versions: { commit: "abc" },
     scanners: [], isolation_required: true, isolation_missing: [], isolation: {},
     findings: [{

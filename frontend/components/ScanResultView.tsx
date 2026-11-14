@@ -84,6 +84,10 @@ export default function ScanResultView({
           </dd>
         </div>
         <div>
+          <dt>Coverage</dt>
+          <dd>{result.coverage_complete ? "Required coverage complete" : result.coverage_issues.map((i) => i.code).join(", ")}</dd>
+        </div>
+        <div>
           <dt>Isolation</dt>
           <dd><IsolationReport isolation={result.isolation} required={result.isolation_required} missing={result.isolation_missing} /></dd>
         </div>

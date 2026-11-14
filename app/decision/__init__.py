@@ -14,12 +14,12 @@ configured scanner actually analysed the file.
 from app.models import Finding, Severity, Verdict
 
 
-def decide(findings: list[Finding], scanners_run: int, scanners_failed: int = 0) -> Verdict:
+def decide(findings: list[Finding], scanners_run: int, scanners_failed: int = 0, coverage_complete: bool = True) -> Verdict:
     severities = {f.severity for f in findings}
     if severities & {Severity.HIGH, Severity.CRITICAL}:
         return Verdict.MALICIOUS
     if severities & {Severity.LOW, Severity.MEDIUM}:
         return Verdict.SUSPICIOUS
-    if scanners_run == 0 or scanners_failed > 0:
+    if scanners_run == 0 or scanners_failed > 0 or not coverage_complete:
         return Verdict.UNABLE_TO_SCAN
     return Verdict.SAFE
