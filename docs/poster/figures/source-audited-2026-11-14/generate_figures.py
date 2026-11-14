@@ -9,12 +9,12 @@ FONT="Arial, Helvetica, sans-serif"
 FIGS={"01-introduction":(2820,2370,"Document feature versus dangerous behavior"),"02-methods":(6150,1380,"Implemented Security Engine workflow"),"03-pdf-correlation":(2820,1890,"PDF action-chain correlation"),"04-office-analysis":(2820,1110,"Office relationship analysis"),"05-latency":(2820,900,"Frozen scan latency comparison"),"06-results":(2760,2670,"Frozen results and hosted PDF regressions"),"07-conclusion":(2820,2190,"Research contributions and limitations")}
 
 def S(w,h,title,body):
- return f'''<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-labelledby="title desc"><title id="title">{escape(title)}</title><desc id="desc">Source-audited FilesMagic Security Engine poster figure.</desc><rect width="100%" height="100%" fill="{WHITE}"/><style>text{{font-family:{FONT};fill:{INK}}}.t{{font-size:88px;font-weight:700}}.h{{font-size:50px;font-weight:700}}.b{{font-size:38px}}.s{{font-size:30px;fill:{GRAY}}}.xs{{font-size:26px;fill:{GRAY}}}.line{{stroke:{GRAY};stroke-width:7;fill:none}}.red{{stroke:{RED};stroke-width:10;fill:none}}.box{{fill:{PALE};stroke:{GRAY};stroke-width:4}}.pink{{fill:{PINK};stroke:{RED};stroke-width:5}}.white{{fill:{WHITE};stroke:{GRAY};stroke-width:4}}</style>{body}</svg>'''
+ return f'''<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-labelledby="title desc"><title id="title">{escape(title)}</title><desc id="desc">Source-audited FilesMagic Security Engine poster figure.</desc><rect width="100%" height="100%" fill="{WHITE}"/><style>text{{font-family:{FONT};fill:{INK}}}.t{{font-size:108px;font-weight:700}}.h{{font-size:68px;font-weight:700}}.b{{font-size:50px}}.s{{font-size:38px;fill:{GRAY}}}.xs{{font-size:32px;fill:{GRAY}}}.line{{stroke:{GRAY};stroke-width:9;fill:none}}.red{{stroke:{RED};stroke-width:13;fill:none}}.box{{fill:{PALE};stroke:{GRAY};stroke-width:5}}.pink{{fill:{PINK};stroke:{RED};stroke-width:6}}.white{{fill:{WHITE};stroke:{GRAY};stroke-width:5}}</style>{body}</svg>'''
 def T(x,y,text,c="b",a="start"):
- gap={"t":98,"h":60,"b":48,"s":39,"xs":33}[c]
+ gap={"t":116,"h":78,"b":60,"s":48,"xs":39}[c]
  return "".join(f'<text x="{x}" y="{y+i*gap}" class="{c}" text-anchor="{a}">{escape(line)}</text>' for i,line in enumerate(text.split("\n")))
 def B(x,y,w,h,label,detail="",kind="white"):
- return f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="22" class="{kind}"/>'+T(x+w/2,y+70,label,"h","middle")+(T(x+w/2,y+130,detail,"s","middle") if detail else "")
+ return f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="22" class="{kind}"/>'+T(x+w/2,y+82,label,"h","middle")+(T(x+w/2,y+152,detail,"s","middle") if detail else "")
 def A(x1,y1,x2,y2,red=False):
  color=RED if red else GRAY
  return f'<path d="M{x1} {y1} L{x2} {y2}" stroke="{color}" stroke-width="{10 if red else 7}" fill="none" marker-end="url(#{"r" if red else "n"})"/>'
@@ -22,7 +22,7 @@ def D():
  return f'<defs><marker id="n" markerWidth="16" markerHeight="16" refX="13" refY="8" orient="auto"><path d="M0 0L16 8L0 16Z" fill="{GRAY}"/></marker><marker id="r" markerWidth="16" markerHeight="16" refX="13" refY="8" orient="auto"><path d="M0 0L16 8L0 16Z" fill="{RED}"/></marker></defs>'
 
 def intro():
- b=D()+T(140,145,"Document feature does not equal dangerous behavior","t")+T(140,205,"Static analysis asks whether an activation path is actually evidenced.","s")
+ b=D()+T(140,145,"Document features need context","t")+T(140,215,"Static analysis asks whether an activation path is actually evidenced.","s")
  b+=B(150,340,1160,1450,"Ordinary document features","often legitimate","white")
  for y,label,detail in [(600,"Form or link","a reader may choose to interact"),(920,"Attachment","may simply be present"),(1240,"Macro or script","may not be reached automatically")]: b+=B(280,y,900,190,label,detail,"box")
  b+=B(1510,340,1160,1450,"Potentially dangerous activation","requires a proven path","pink")
@@ -30,34 +30,34 @@ def intro():
  return b+f'<rect x="150" y="1930" width="2520" height="230" rx="24" class="box"/>'+T(1410,2025,"Presence alone is context. A verified path justifies a stronger finding.","h","middle")+T(1410,2080,"SAFE means no known indicator found by completed analysis - not proof of harmlessness.","s","middle")
 def methods():
  b=D()+T(120,115,"Implemented Security Engine workflow","t")+T(120,168,"Standalone research service: it does not invoke the FilesMagic conversion service.","s")
- for x,w,label,detail,kind in [(120,1100,"1  Upload","token, size, and hash checks","white"),(1510,1100,"2  Isolation","fresh worker and strict Linux controls","pink"),(2900,1460,"3  Analysis","reference, unified, and coverage checks","white"),(4650,1200,"4  Verdict","findings plus completeness","pink")]: b+=B(x,320,w,700,label,detail,kind)
+ for x,w,label,detail,kind in [(120,1100,"1  Upload","token, size, and hash checks","white"),(1510,1100,"2  Isolation","fresh worker and strict Linux controls","pink"),(2900,1460,"3  Analysis","reference, unified, and coverage checks","white"),(4650,1200,"4  Verdict","findings plus completeness","pink")]: b+=B(x,250,w,840,label,detail,kind)
  b+=A(1220,670,1480,670)+A(2610,670,2870,670,True)+A(4390,670,4620,670)+T(670,810,"file bytes accepted\nafter authorization","b","middle")+T(2060,810,"namespace, routes,\ncapabilities, limits","b","middle")
- b+=B(3060,570,1140,125,"Reference scanners","signatures, PDF, Office, structural","box")+B(3060,735,1140,125,"Unified research components","chains, activation, fields, correlation","pink")+B(3060,900,1140,125,"Coverage checks","required regions; fail closed","box")+T(5250,790,"SAFE\nSUSPICIOUS\nMALICIOUS\nUNABLE TO SCAN","h","middle")
+ b+=B(3060,500,1140,165,"Reference scanners","signatures, PDF, Office, structural","box")+B(3060,705,1140,165,"Unified research components","chains, activation, fields, correlation","pink")+B(3060,910,1140,165,"Coverage checks","required regions; fail closed","box")+T(5250,770,"SAFE\nSUSPICIOUS\nMALICIOUS\nUNABLE TO SCAN","h","middle")
  return b+f'<rect x="120" y="1130" width="5730" height="150" rx="20" class="box"/>'+T(2985,1195,"Reference scanners remain the baseline; the research engine adds structured evidence and coverage handling.","b","middle")
 def pdf():
- b=D()+T(130,125,"Same PDF ingredients. Different evidenced relationship.","t")+T(130,180,"Frozen cases 5a and 5b: severity changes only when the script is proven to reach the attachment.","s")
+ b=D()+T(130,125,"Same ingredients. Different relationship.","t")+T(130,210,"Frozen cases 5a and 5b: severity changes only when the script is proven to reach the attachment.","s")
  for x,case,outcome,linked in [(150,"5a - attachment is unrelated","SUSPICIOUS",False),(1480,"5b - script exports attachment","MALICIOUS",True)]:
   b+=B(x,310,1190,1220,case,"","pink" if linked else "white")+B(x+115,520,400,180,"Open action","automatic trigger","box")+A(x+315,710,x+315,875,True)+B(x+115,900,400,180,"JavaScript","active step","box")+B(x+675,900,400,180,"Attachment f","embedded file","box")
-  b+= A(x+530,990,x+650,990,True)+T(x+595,950,"exports f","h","middle") if linked else f'<path d="M{x+530} 990 H{x+650}" stroke="{GRAY}" stroke-width="9" stroke-dasharray="24 20"/><text x="{x+590}" y="950" class="h" text-anchor="middle">no path</text>'
+  b+= A(x+530,990,x+650,990,True)+T(x+595,870,"exports f","b","middle") if linked else f'<path d="M{x+530} 990 H{x+650}" stroke="{GRAY}" stroke-width="9" stroke-dasharray="24 20"/><text x="{x+590}" y="870" class="b" text-anchor="middle">no path</text>'
   b+=f'<rect x="{x+110}" y="1210" width="970" height="180" rx="18" fill="{PINK if linked else PALE}"/>'+T(x+595,1290,outcome,"t","middle")+T(x+595,1340,"unified engine outcome","s","middle")
- return b+T(1410,1690,"Reference: both MALICIOUS. Unified: only the evidenced delivery path remains MALICIOUS.","h","middle")+T(1410,1750,"Controlled synthetic fixtures - not a malware-detection accuracy measurement.","s","middle")
+ return b+T(1410,1690,"Unified result: 5a SUSPICIOUS; 5b MALICIOUS.","h","middle")+T(1410,1750,"Controlled synthetic fixtures - not a malware-detection accuracy measurement.","s","middle")
 def office():
- b=D()+T(130,115,"Office relationship analysis: declaration is not activation","t")+T(130,168,"Frozen cases 6b and 6c are alternative paths from the same declared external relationship.","s")+B(940,280,940,190,"External template relationship","declared in the package","box")
+ b=D()+T(130,115,"Office relationships: declared is not active","t")+T(130,205,"Frozen cases 6b and 6c are alternative paths from the same declared external relationship.","s")+B(940,300,940,190,"External template relationship","declared in the package","box")
  b+=f'<path d="M1410 470 V560 H610 V640" class="line" marker-end="url(#n)"/><path d="M1410 470 V560 H2210 V640" class="red" marker-end="url(#r)"/>'+B(150,660,920,320,"6b - unreferenced","No Office-loaded part uses it\nRecorded as inactive context","white")+B(1750,660,920,320,"6c - loaded on open","Settings part references it\nRecorded as active on open","pink")
- return b+T(610,1080,"INFO: declared, not activated","h","middle")+T(2210,1080,"MEDIUM: external target used on open","h","middle")
+ return b+T(610,1040,"INFO: declared, not activated","b","middle")+T(2210,1040,"MEDIUM: external target used on open","b","middle")
 def latency():
  b=T(130,110,"Frozen scan latency comparison","t")+T(130,162,"16 inert fixtures x 20 trials x engine = 320 scans per engine. Worker startup and IPC dominate wall time.","s")+f'<line x1="520" y1="730" x2="2660" y2="730" class="line"/>'
  for v in (0,200,400,600): x=520+v*3.35;b+=f'<line x1="{x}" y1="260" x2="{x}" y2="750" stroke="{PALE}" stroke-width="4"/>'+T(x,800,str(v),"xs","middle")
  for label,p50,p95,y,color in [("Reference",555.51,629.422,350,GRAY),("Unified",567.58,629.136,555,RED)]:
-  w=p50*3.35;b+=T(480,y+62,label,"h","end")+f'<rect x="520" y="{y}" width="{w}" height="105" rx="16" fill="{color}"/>'+T(550+w,y+68,f"p50 {p50:.1f} ms","h")+f'<line x1="{520+p95*3.35}" y1="{y-24}" x2="{520+p95*3.35}" y2="{y+130}" class="red"/>'+T(520+p95*3.35,y-40,f"p95 {p95:.1f}","xs","middle")
+  w=p50*3.35;b+=T(480,y+62,label,"h","end")+f'<rect x="520" y="{y}" width="{w}" height="105" rx="16" fill="{color}"/>'+f'<text x="{520+w-35}" y="{y+68}" class="b" text-anchor="end" style="fill:{WHITE}">p50 {p50:.1f} ms</text>'+f'<line x1="{520+p95*3.35}" y1="{y-24}" x2="{520+p95*3.35}" y2="{y+130}" class="red"/>'+T(520+p95*3.35,y-40,f"p95 {p95:.1f}","xs","middle")
  return b
 def results():
- b=T(130,125,"Results: frozen milestone + separate hosted PDF rescans","t")+T(130,180,"The Nov. 9 evaluation and Nov. 14 regressions are different experiments and are not combined.","s")+B(150,330,2460,1090,"Frozen standalone evaluation - Nov. 9","offline Ubuntu VM; strict isolation; evaluated code eda2a08","pink")
+ b=T(130,125,"Results: frozen evidence + hosted rescans","t")+T(130,215,"The Nov. 9 evaluation and Nov. 14 regressions are different experiments and are not combined.","s")+B(150,350,2460,1070,"Frozen standalone evaluation - Nov. 9","offline Ubuntu VM; strict isolation; evaluated code eda2a08","pink")
  b+=T(780,700,"114 / 114","t","middle")+T(780,765,"expected scan outcomes","h","middle")+T(1840,700,"11 / 11","t","middle")+T(1840,765,"contribution checks","h","middle")+f'<line x1="1380" y1="570" x2="1380" y2="870" class="line"/>'+T(1380,1010,"Controlled checks, not a malware-detection accuracy percentage.","b","middle")+T(1380,1110,"Every frozen result reported no missing required isolation control.","b","middle")
  b+=B(150,1580,2460,800,"Hosted research Lab rescans - Nov. 14","one SHA-256-matched rescan of each pinned qpdf fixture; unified engine; strict isolation reported","white")+B(280,1880,980,250,"V4-aes.pdf","SAFE\n6 complete, 4 not applicable, 0 failed","box")+B(1500,1880,980,250,"bad-data.pdf","UNABLE TO SCAN\nLZW content decoding failed","pink")
  return b+T(1380,2260,"Evidence scope: two selected benign/parser-stress regressions; no repeated hosted trials or accuracy claim.","s","middle")
 def conclusion():
- b=T(130,130,"What the research demonstrated - and what it did not","t")+T(130,185,"Standalone static-analysis research prototype, not a production conversion gate.","s")+B(150,340,1210,1320,"Demonstrated","three source-backed contributions","pink")+B(1460,340,1210,1320,"Still limited","three essential boundaries","white")
+ b=T(130,130,"What this research shows - and does not","t")+T(130,220,"Standalone static-analysis research prototype, not a production conversion gate.","s")+B(150,360,1210,1300,"Demonstrated","three source-backed contributions","pink")+B(1460,360,1210,1300,"Still limited","three essential boundaries","white")
  for i,s in enumerate(["Contextual PDF chains separate\nunrelated from delivered attachments.","Office/VBA analysis records\nactivation and call-path evidence.","Coverage gaps can fail closed\nin the unified research engine."]): b+=f'<circle cx="245" cy="{650+i*340}" r="25" fill="{RED}"/>'+T(305,660+i*340,s,"b")
  for i,s in enumerate(["No production FilesMagic\nconverter integration.","No real-world malware-detection\naccuracy claim.","No document execution; worker\ncontainment is not a full sandbox."]): b+=f'<circle cx="1555" cy="{650+i*340}" r="25" fill="{GRAY}"/>'+T(1615,660+i*340,s,"b")
  return b+f'<rect x="150" y="1820" width="2520" height="200" rx="22" class="box"/>'+T(1410,1910,"Future production gate: SAFE + complete + required coverage + required isolation.","h","middle")+T(1410,1970,"That integration is proposed, not implemented.","s","middle")
