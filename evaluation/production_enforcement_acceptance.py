@@ -49,9 +49,9 @@ def req(path, fields=(), files=()):
     )
     try:
         with urllib.request.urlopen(request, timeout=160) as response:
-            return response.status, dict(response.headers), response.read(2_000_000)
+            return response.status, {k.lower(): v for k, v in response.headers.items()}, response.read(2_000_000)
     except urllib.error.HTTPError as error:
-        return error.code, dict(error.headers), error.read(1_000_000)
+        return error.code, {k.lower(): v for k, v in error.headers.items()}, error.read(1_000_000)
 
 
 def pdf_rotate(blob, consents=()):
@@ -76,7 +76,7 @@ def verify():
 
     status, headers, raw = pdf_rotate(CLEAN)
     assert status == 200, ("SAFE must convert", status, raw[:300])
-    assert headers.get("X-FilesMagic-Security") == "SAFE", ("missing enforced SAFE header", headers)
+    assert headers.get("x-filesmagic-security") == "SAFE", ("missing enforced SAFE header", headers)
     assert raw.startswith(b"%PDF-"), "PDF rotate did not return a PDF"
     print("PASS: SAFE accepted and converted with signed security header", flush=True)
 
@@ -96,7 +96,7 @@ def verify():
 
     status, headers, raw = pdf_rotate(SUSPICIOUS, [handle])
     assert status == 200, ("explicit consent must convert", status, raw[:350])
-    assert headers.get("X-FilesMagic-Security") == "ACKNOWLEDGED", ("wrong acknowledgement header", headers)
+    assert headers.get("x-filesmagic-security") == "ACKNOWLEDGED", ("wrong acknowledgement header", headers)
     assert raw.startswith(b"%PDF-")
     print("PASS: real consent converts only same bytes with ACKNOWLEDGED", flush=True)
 
