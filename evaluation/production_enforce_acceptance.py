@@ -33,9 +33,9 @@ def post(path, files, fields):
     })
     try:
         with urlopen(req, timeout=TIMEOUT) as resp:
-            return resp.status, dict(resp.headers), resp.read(4_000_000)
+            return resp.status, resp.headers, resp.read(4_000_000)
     except HTTPError as err:
-        return err.code, dict(err.headers), err.read(100_000)
+        return err.code, err.headers, err.read(100_000)
 
 
 def parse(response):
