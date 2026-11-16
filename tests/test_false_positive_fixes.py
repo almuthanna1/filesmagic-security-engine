@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 from pypdf import PdfWriter
+from pypdf.actions import JavaScript
 
 from app import engine, worker
 from app.engine.correlate import finding as engine_finding
@@ -144,7 +145,7 @@ def pdf_with(name: str, data: bytes, js: str | None = None, more: int = 0) -> by
     for i in range(more):
         writer.add_attachment(f"{i}-{name}", data)
     if js:
-        writer.add_js(js)
+        writer.add_open_action(JavaScript(js))  # what add_js did; add_js is gone in pypdf 7
     out = io.BytesIO()
     writer.write(out)
     return out.getvalue()
