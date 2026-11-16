@@ -21,7 +21,7 @@ jobs:
         run: docker build -t filesmagic-security:25mb .
       - name: Scan a 25 MiB benign PDF under production-like resource limits
         run: |
-          docker run --rm --memory=512m --cpus=0.5 --network=none --pids-limit=96 \
+          docker run --rm --memory=512m --cpus=0.5 --network=none --pids-limit=96 -e PYTHONPATH=/srv \
             -v "$PWD/evaluation/large_25mb_smoke.py:/tmp/large_25mb_smoke.py:ro" \
             filesmagic-security:25mb python -B /tmp/large_25mb_smoke.py
       - name: Document isolation limitation
