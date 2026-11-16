@@ -30,7 +30,7 @@ from tests import custom_fixtures as fx
 ENGINES = ["reference", "unified"]
 EXPECTED_SCANNERS = {"reference": ["yara-x", "office", "pdf", "custom"],
                      "unified": ["yara-x", "office", "pdf", "custom", "yara-x-engine", "pdf-chains", "vba-chains",
-                                 "ooxml-links", "word-fields"]}
+                                 "ooxml-links", "word-fields", "pdf-integrity"]}
 # Extra cases: (id, data, expected verdict) - formats and a fail-closed parse failure.
 EXTRA = [
     ("office-clean-xlsx", fx.office_package("xlsx"), "SAFE"),
@@ -114,8 +114,9 @@ def check(result: dict, engine: str, frozen: dict | None, expected_verdict: str 
         # another platform has different bytes. The hash of the bytes actually sent is checked above.
         for key, want in (("verdict", frozen["verdicts"]["aggregate"]), ("rules", frozen["rules"]),
                           ("status", frozen["status"])):
-            if result[key] != want:
-                problems.append(f"{key}: got {result[key]}, frozen {want}")
+            got = {k: result[key].get(k) for k in want} if key == "status" else result[key]  # post-freeze scanners aside
+            if got != want:
+                problems.append(f"{key}: got {got}, frozen {want}")
     if expected_verdict and result["verdict"] != expected_verdict:
         problems.append(f"verdict {result['verdict']}, expected {expected_verdict}")
     return problems
@@ -137,8 +138,9 @@ def run(lab: str, api: str, frozen_dir: Path | None, batch: int | None = None, b
               for e in ENGINES} if frozen_dir else {e: {} for e in ENGINES}
     rows, stopped = [], None
     selected = items() if batch is None else items()[batch * batch_size:(batch + 1) * batch_size]
+    engines = [e for e in ENGINES if e in health.get("engines", ENGINES)]  # unified-only deployments
     for case, data, expected in (selected if scans else []):
-        for engine in ENGINES:
+        for engine in engines:
             result = scan(lab, api, data, engine, f"{case}.bin")
             problems = check(result, engine, frozen[engine].get(case), expected)
             if require_isolation and result.get("http") == 200 and result.get("isolation_missing"):
@@ -167,14 +169,15 @@ def failure_rows(lab: str, api: str, health: dict) -> list[dict]:
     # The engine refuses on Content-Length and closes the connection, so send only the headers and
     # read the answer before any body byte (a client still sending 10 MB would see a reset instead).
     status, issued = token(lab, b"x")
-    url, auth = f"{api}/scan?engine=reference", {"Authorization": f"Bearer {issued.get('token', '')}", "Origin": lab}
+    offered = health.get("engines") or ["reference"]
+    url, auth = f"{api}/scan?engine={offered[0]}", {"Authorization": f"Bearer {issued.get('token', '')}", "Origin": lab}
     try:
         s = headers_only_status(url, MAX_UPLOAD_BYTES + 1, auth)
     except ConnectionError:
         # A proxy in front of the engine (Render's edge) resets a request whose body never comes;
         # send the inert zero bytes, as a browser would (the engine still refuses on Content-Length).
         s = request(url, oversized, {**auth, "Content-Type": "application/octet-stream"}, "POST")[0]
-    rows.append({"case": "oversized-upload", "engine": "reference", "result": {"http": s},
+    rows.append({"case": "oversized-upload", "engine": offered[0], "result": {"http": s},
                  "problems": [] if s == 413 else [f"engine answered {s} for an oversized upload"]})
     s, _, raw = request(f"{api}/scan?engine=fastest", b"x", {"Origin": lab}, "POST")
     rows.append({"case": "unknown-engine", "engine": "fastest", "result": {"http": s},

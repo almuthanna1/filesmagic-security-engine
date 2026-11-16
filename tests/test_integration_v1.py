@@ -177,6 +177,13 @@ def test_strict_worker_refusal_is_operational():
     assert [r.code for r in reasons] == ["ISOLATION_UNVERIFIED"] and authorization == "deny"
 
 
+def test_scanner_error_alone_is_explained_without_blaming_either_side():
+    status = [ScannerStatus(name="pdf-integrity", status="failed", error="x", error_kind="unexpected")]
+    _, authorization, explanation = classify(Verdict.UNABLE_TO_SCAN, status, [], [])
+    assert authorization == "deny" and "try again" not in explanation and "our side" not in explanation
+    assert "try again" in classify(Verdict.UNABLE_TO_SCAN, status, [], ["WORKER_CRASHED"])[2]
+
+
 def test_scanner_programming_error_denies(monkeypatch):
     scanner = next(s for s in unified_engine.SCANNERS if s.name == "pdf-chains")
 
@@ -393,3 +400,99 @@ def test_health_reports_conversion_readiness():
     assert health["ready_for_conversion"] is True and health["conversion_auth_configured"] is True
     assert health["receipt_key_id"] in TRUSTED and health["max_upload_bytes"] == 10 * 1024 * 1024
     assert "PRIVATE" not in json.dumps(health).upper()
+
+
+# ----------------------------------------------------------------------------- hostile-client review
+
+
+PINS = {"commit": main.VERSIONS["commit"], "scanners": sorted(main.engine_scanners("unified")),
+        "ruleset_sha256": main.VERSIONS["ruleset_sha256"], "engine_ruleset_sha256": main.VERSIONS["engine_ruleset_sha256"],
+        "scanner_versions": {k: main.VERSIONS[k] for k in ("yara-x", "oletools", "olefile", "pypdf")}}
+
+
+def test_a_real_receipt_verifies_against_the_pinned_build():
+    data = CASE["1-pdf-clean"]
+    r, jti = convert_scan(data)
+    claims = receipts.verify(r.json()["receipt"], TRUSTED, sha256=hashlib.sha256(data).hexdigest(), size=len(data),
+                             token_jti=jti, pins=PINS)
+    assert claims["authorization"] == "allow"
+
+
+@pytest.mark.parametrize("pin, value", [("commit", "0" * 40), ("scanners", ["yara-x"]),
+                                        ("scanner_versions", {"pypdf": "6.19.0"}), ("ruleset_sha256", "f" * 64)])
+def test_a_different_build_fails_verification(pin, value):
+    data = CASE["1-pdf-clean"]
+    r, jti = convert_scan(data)
+    with pytest.raises(receipts.ReceiptError, match="RECEIPT_BUILD_MISMATCH"):
+        receipts.verify(r.json()["receipt"], TRUSTED, sha256=hashlib.sha256(data).hexdigest(), size=len(data),
+                        token_jti=jti, pins=PINS | {pin: value})
+
+
+def test_missing_version_claims_or_another_engine_fail_verification():
+    with pytest.raises(receipts.ReceiptError, match="RECEIPT_WRONG_TYPE"):  # _receipt() carries no versions
+        _verify(_receipt(), pins={"scanner_versions": PINS["scanner_versions"]})
+    with pytest.raises(receipts.ReceiptError, match="RECEIPT_BUILD_MISMATCH"):
+        _verify(_receipt(engine="reference"))
+
+
+def test_outcome_data_cannot_override_reserved_receipt_claims():
+    hostile = {k: "x" for k in ("typ", "iss", "aud", "kid", "rid")} | {"iat": 0, "exp": 10**12}
+    claims = _verify(_receipt(**hostile))
+    assert claims["kid"] in TRUSTED and claims["typ"] == receipts.TYPE and claims["aud"] == receipts.AUDIENCE
+    assert claims["exp"] - claims["iat"] == receipts.LIFETIME_SECONDS and claims["rid"] != "x"
+
+
+@pytest.mark.parametrize("payload", [b"[1, 2]", b'{"kid": ["a"]}', b"not json", b'"text"'])
+def test_malformed_receipts_only_ever_raise_receipt_errors(payload):
+    for receipt in (f"{receipts._b64(payload)}.{receipts._b64(b'sig')}", f"{receipts._b64(payload)}.!!", "a.b.c"):
+        with pytest.raises(receipts.ReceiptError):
+            _verify(receipt)
+
+
+def test_a_lab_token_claiming_the_conversion_issuer_gets_no_receipt():
+    data = CASE["1-pdf-clean"]
+    claims = {"aud": auth.AUDIENCE, "iat": int(__import__("time").time()), "jti": "a" * 32, "issuer": "conversion",
+              "sha256": hashlib.sha256(data).hexdigest(), "size": len(data)}
+    claims["exp"] = claims["iat"] + 120
+    payload = json.dumps(claims).encode()
+    from tests.scan_client import KEY as LAB_KEY
+    lab_token = f"{receipts._b64(payload)}.{receipts._b64(LAB_KEY.sign(payload))}"
+    r = client.post("/scan?engine=unified", content=data, headers={"Authorization": f"Bearer {lab_token}"})
+    assert r.status_code == 200 and r.json()["receipt"] is None
+
+
+def test_shared_lab_and_conversion_key_is_not_ready_and_issues_no_receipt(monkeypatch):
+    monkeypatch.setattr(auth, "PUBLIC_KEY", CONVERSION_KEY.public_key())
+    assert client.get("/health").json()["ready_for_conversion"] is False
+    assert convert_scan(CASE["1-pdf-clean"])[0].json()["receipt"] is None
+
+
+def test_a_malicious_answer_stays_denied_whatever_the_body_says():
+    data = CASE["5b-pdf-auto-js-exports-attachment"]
+    r, jti = convert_scan(data)
+    body = r.json() | {"verdict": "SAFE", "authorization": "allow"}  # a client editing the JSON
+    claims = verified(data, body, jti)
+    assert (claims["verdict"], claims["authorization"]) == ("MALICIOUS", "deny")
+
+
+def test_one_token_buys_one_scan_even_for_other_bytes():
+    data = CASE["1-pdf-clean"]
+    t = token(data)
+    assert client.post("/scan?engine=unified", content=data, headers={"Authorization": f"Bearer {t}"}).status_code == 200
+    for body in (data, data + b"\n"):
+        r = client.post("/scan?engine=unified", content=body, headers={"Authorization": f"Bearer {t}"})
+        assert r.status_code == 401 and r.json()["code"] == "AUTH_REPLAYED"
+
+
+def test_logs_carry_no_document_content_filename_token_or_receipt(caplog):
+    marker = b"FM-PRIVATE-MARKER-7f3a"
+    data = CASE["1-pdf-clean"] + b"% " + marker + b"\n"
+    t = token(data)
+    with caplog.at_level("DEBUG"):
+        r = client.post("/scan?engine=unified", content=data,
+                        headers={"Authorization": f"Bearer {t}", "X-Filename": "customer-contract.pdf"})
+        client.post("/scan?engine=unified", content=data, headers={"Authorization": "Bearer bad.token"})
+    text = caplog.text
+    assert r.status_code == 200 and r.json()["receipt"]
+    for secret in (marker.decode(), "customer-contract", t, r.json()["receipt"], hashlib.sha256(data).hexdigest()):
+        assert secret not in text

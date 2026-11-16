@@ -84,9 +84,11 @@ def sign(outcome: dict, key: Ed25519PrivateKey | None = None, now: float | None 
 
 
 def verify(receipt: str, trusted: dict[str, Ed25519PublicKey], *, sha256: str, size: int,
-           token_jti: str | None = None, now: float | None = None) -> dict:
+           token_jti: str | None = None, pins: dict | None = None, now: float | None = None) -> dict:
     """Reference verifier. Returns the claims of a valid receipt for exactly these bytes, or raises
-    ReceiptError. The caller must still act on claims["authorization"] and record claims["rid"] as
+    ReceiptError. `pins` maps claims to the exact values the caller deployed against (e.g. commit,
+    scanners, scanner_versions, ruleset_sha256); a missing or different claim fails. The caller must
+    still act on claims["authorization"], accept one receipt per token and record claims["rid"] as
     used, and must never treat anything outside the claims as authoritative."""
     if not isinstance(receipt, str) or not receipt or len(receipt) > MAX_RECEIPT_CHARS:
         raise ReceiptError("RECEIPT_MISSING")
@@ -116,6 +118,8 @@ def verify(receipt: str, trusted: dict[str, Ed25519PublicKey], *, sha256: str, s
             raise ReceiptError("RECEIPT_REQUEST_MISMATCH")
         if claims["authorization"] not in ("allow", "consent_required", "deny") or claims["isolation_verified"] is not True:
             raise ReceiptError("RECEIPT_WRONG_TYPE")
+        if claims["engine"] != "unified" or any(claims[k] != v for k, v in (pins or {}).items()):
+            raise ReceiptError("RECEIPT_BUILD_MISMATCH")
         if claims["verdict"] == "MALICIOUS" and claims["authorization"] != "deny":
             raise ReceiptError("RECEIPT_WRONG_TYPE")  # never possible from this engine; refuse anyway
     except (KeyError, TypeError):

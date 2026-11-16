@@ -230,12 +230,27 @@ and not `deny`, or lacks `isolation_verified: true`.
 7. Check `sha256` and `size` equal step 1's; `token_jti` equals the token just minted.
 8. Check `engine == "unified"`, `isolation_verified is true`, `commit` equals the pinned
    `SECURITY_ENGINE_COMMIT`, and `scanners` equals the pinned roster.
-9. Atomically record `rid` as used (reject if already used). Keep entries ≥ 330 s.
+9. Atomically record `token_jti` and `rid` as used (reject if either was already used): exactly one
+   accepted receipt per minted token. Keep entries ≥ 330 s.
 10. Decide **from the claims only** (§7). Ignore the response body for the decision.
 11. Immediately before conversion, re-hash the file; it must still equal `sha256`.
 
-`app/receipts.py:verify` is the reference implementation (steps 3–7 plus the checks above);
-tests in `tests/test_integration_v1.py` cover it.
+`app/receipts.py:verify` is the reference implementation of steps 3–8: it always requires
+`engine == "unified"` and `isolation_verified`, and `pins={"commit": ..., "scanners": [...],
+"scanner_versions": {...}, "ruleset_sha256": ...}` makes any missing claim fail
+(`RECEIPT_WRONG_TYPE`) and any different value fail (`RECEIPT_BUILD_MISMATCH`). It does not track
+`token_jti` / `rid`; that store is the caller's (step 9). Tests: `tests/test_integration_v1.py`.
+
+| `ReceiptError.code` | Meaning |
+|---|---|
+| `RECEIPT_MISSING` | No receipt, or longer than 8,192 characters |
+| `RECEIPT_UNKNOWN_KEY` | `kid` not in the trusted set |
+| `RECEIPT_INVALID_SIGNATURE` | Malformed, or the signature does not verify |
+| `RECEIPT_WRONG_TYPE` | Wrong `typ`/`iss`/`aud`, missing claim, unknown authorization, isolation not verified, MALICIOUS not `deny` |
+| `RECEIPT_EXPIRED` | Outside `iat - 30 ≤ now < exp`, or a lifetime over 300 s |
+| `RECEIPT_FILE_MISMATCH` | `sha256` or `size` differ from the caller's bytes |
+| `RECEIPT_REQUEST_MISMATCH` | `token_jti` is not the caller's token |
+| `RECEIPT_BUILD_MISMATCH` | Not the unified engine, or a pinned build value differs |
 
 ## 6. Reason codes
 
@@ -275,7 +290,7 @@ one added by a later release, is never eligible.**
 | `WORKER_FAILED` | Other worker failure |
 | `SCANNER_ROSTER_MISMATCH` | Worker reported a scanner set other than the engine's |
 | `SCANNER_NOT_READY` | A scanner failed to initialize (e.g. YARA-X rules did not compile) |
-| `SCANNER_INTERNAL_ERROR` | A scanner hit an unexpected error (possible bug), or YARA-X failed for any reason (it reads raw bytes, so its failures are never the document's) |
+| `SCANNER_INTERNAL_ERROR` | A scanner hit an unexpected error (possible bug), or YARA-X failed for any reason (it reads raw bytes, so its failures are never the document's). Also what a PDF pypdf cannot open at all produces: `pdf-integrity` declares no malformed causes, so that failure is "unexpected". Fail-closed; the user explanation blames neither side |
 | `ISOLATION_NOT_ENFORCED` | `SECURITY_ENGINE_REQUIRE_ISOLATION` is not `1` |
 | `ISOLATION_UNVERIFIED` | A required isolation control was not reported true, or the strict worker refused to analyse |
 
@@ -385,7 +400,7 @@ Security Engine first). Neither rotation is part of this change.
 ```
 
 `ready_for_conversion` is true only with a conversion token key, a receipt key, strict isolation,
-the unified engine enabled and every unified scanner loaded. Before enabling the gate, the
+Lab and conversion token keys that differ, the unified engine enabled and every unified scanner loaded. Before enabling the gate, the
 Conversion Engine release check must see `ready_for_conversion: true`, the pinned `commit`
 and the expected `receipt_key_id`. `/health` cannot prove isolation works on the host: only a
 real scan's `isolation_verified` does (the probe in §10).
@@ -492,9 +507,18 @@ Nothing here has been deployed. Before production:
   research-only, but the validated production scanner is the unified engine that flag enables.
   Kept the flag rather than renaming it, to stay compatible with the Lab, staging and the draft gate.
   This is documented here and in the README; renaming it is a separate change.
-- **Single instance.** Token replay (`jti`), failure counters and the busy counter are in process
-  memory. Run exactly one uvicorn process and one instance (the Dockerfile does). Scaling out
-  needs a shared store first.
+- **Single instance; replay limits.** Token replay (`jti`), failure counters and the busy counter are
+  in process memory. Run exactly one uvicorn process and one instance (the Dockerfile does). Scaling
+  out needs a shared store first. After an engine restart, a token captured in its last 120 s can be
+  used once more; it yields at most another receipt for the **same bytes and the same `token_jti`**,
+  which the Conversion Engine refuses (one receipt per token, step 9). Receipts themselves are
+  bearer statements valid 300 s: single use is enforced only by the Conversion Engine's `rid` store.
+- **Worker report trust.** Verdict, findings and isolation status come from the worker process that
+  parsed the document. A parser exploit that takes over the worker could forge its report, and so
+  the receipt's content. Isolation limits what such a worker can reach, not what it reports.
+- **Shared egress rate limit.** Failed-auth throttling is per client address (20/min). Another Render
+  service sharing the Conversion Engine's outbound address could exhaust it (`429 RATE_LIMITED`);
+  the result is denial (fail closed), not bypass.
 - **Concurrency 1.** A second simultaneous scan gets `429 ENGINE_BUSY`; the Conversion Engine queues
   locally (its single-scan lock).
 - **Isolation is not a full sandbox.** The worker shares the API's user and container; a native

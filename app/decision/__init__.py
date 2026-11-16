@@ -59,7 +59,8 @@ OPERATIONAL_REASONS = {
     "WORKER_FAILED": _OUR_SIDE,
     "SCANNER_ROSTER_MISMATCH": _OUR_SIDE,
     "SCANNER_NOT_READY": _OUR_SIDE,
-    "SCANNER_INTERNAL_ERROR": _OUR_SIDE,
+    # Also what a parser crash on a damaged upload looks like, so it does not blame either side.
+    "SCANNER_INTERNAL_ERROR": "A security check failed unexpectedly while analysing this file.",
     "ISOLATION_NOT_ENFORCED": "The scan did not run under the required security isolation.",
     "ISOLATION_UNVERIFIED": "The scan's security isolation could not be verified.",
 }
@@ -86,6 +87,7 @@ EXPLANATIONS = {
                       "You may choose to continue at your own risk.",
     "operational": "The security check could not be completed, so this file cannot be converted right now. "
                    "Please try again later.",
+    "scanner_error": "The security check could not be completed for this file, so it cannot be converted.",
     "deny": "The file could not be fully inspected, and the reason does not allow an override. "
             "This file cannot be converted.",
 }
@@ -125,8 +127,9 @@ def classify(verdict: Verdict, scanners: list[ScannerStatus], coverage_issues: l
 
     if verdict == Verdict.MALICIOUS:
         return reasons, "deny", EXPLANATIONS["MALICIOUS"]
-    if any(r.category == "operational" for r in reasons):
-        return reasons, "deny", EXPLANATIONS["operational"]
+    operational = {r.code for r in reasons if r.category == "operational"}
+    if operational:
+        return reasons, "deny", EXPLANATIONS["scanner_error" if operational == {"SCANNER_INTERNAL_ERROR"} else "operational"]
     if not all(r.override_eligible for r in reasons):
         return reasons, "deny", EXPLANATIONS["deny"]
     if verdict == Verdict.SAFE:

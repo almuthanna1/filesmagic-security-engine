@@ -162,7 +162,7 @@ async def health():
         "max_upload_bytes": MAX_UPLOAD_BYTES,
         "ready_for_conversion": bool(
             auth.CONVERSION_PUBLIC_KEY and receipts.PRIVATE_KEY and worker.REQUIRE_ISOLATION
-            and "unified" in available_engines() and engine_ready("unified")),
+            and auth.distinct_issuer_keys() and "unified" in available_engines() and engine_ready("unified")),
     }
 
 

@@ -60,6 +60,14 @@ PUBLIC_KEY = load_public_key(os.environ.get("SECURITY_ENGINE_TOKEN_PUBLIC_KEY", 
 CONVERSION_PUBLIC_KEY = load_public_key(os.environ.get("SECURITY_ENGINE_CONVERSION_TOKEN_PUBLIC_KEY", ""),
                                         "SECURITY_ENGINE_CONVERSION_TOKEN_PUBLIC_KEY")
 
+
+def distinct_issuer_keys() -> bool:
+    """False when the Lab and the Conversion Engine share a key: their tokens would be
+    indistinguishable (they verify as "lab"), so no receipt would ever be issued."""
+    if PUBLIC_KEY is None or CONVERSION_PUBLIC_KEY is None:
+        return True
+    return PUBLIC_KEY.public_bytes_raw() != CONVERSION_PUBLIC_KEY.public_bytes_raw()
+
 # ponytail: in-memory state, correct for a single API instance. With several instances,
 # a token could be replayed once per instance and failure counts are per instance; move
 # both to a shared store (e.g. Redis) before scaling out.
