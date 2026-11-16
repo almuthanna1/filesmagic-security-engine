@@ -1,0 +1,64 @@
+name: Production 12 MiB observe-mode signed scan acceptance
+
+on:
+  push:
+    branches: [audit/production-smoke-nov16]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-large-pdf:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Install inert PDF fixture generators
+        run: python3 -m pip install --disable-pip-version-check reportlab==4.4.9 pypdf==7.0.1
+      - name: Exercise public PDF-to-DOCX with a bounded 12 MiB source
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import io, os, time, uuid, urllib.request, urllib.error, zipfile
+          from reportlab.pdfgen import canvas
+          from pypdf import PdfReader, PdfWriter
+
+          pdf = io.BytesIO()
+          report = canvas.Canvas(pdf, pagesize=(612, 792))
+          report.setFont("Helvetica", 12)
+          report.drawString(72, 700, "FilesMagic 12 MiB observe-mode security test")
+          report.showPage()
+          report.save()
+          writer = PdfWriter()
+          writer.add_page(PdfReader(io.BytesIO(pdf.getvalue())).pages[0])
+          for i in range(2):
+              writer.add_attachment(filename=f"inert-{i}.txt", data=os.urandom(6 * 1024 * 1024))
+          result = io.BytesIO()
+          writer.write(result)
+          source = result.getvalue()
+          assert 10 * 1024 * 1024 < len(source) < 25 * 1024 * 1024
+          boundary = "fm-smoke-" + uuid.uuid4().hex
+          segments = []
+          def field(name, value):
+              segments.append((f"--{boundary}\r\nContent-Disposition: form-data; name=\"{name}\"\r\n\r\n{value}\r\n").encode())
+          field("target", "docx")
+          field("source", "pdf")
+          segments.append((f"--{boundary}\r\nContent-Disposition: form-data; name=\"file\"; filename=\"large-inert.pdf\"\r\nContent-Type: application/pdf\r\n\r\n").encode())
+          segments.append(source + b"\r\n")
+          segments.append((f"--{boundary}--\r\n").encode())
+          started=time.monotonic()
+          req=urllib.request.Request("https://api.filesmagic.com/api/v1/convert",data=b"".join(segments),method="POST",
+              headers={"Content-Type":f"multipart/form-data; boundary={boundary}","User-Agent":"FilesMagic-Release-LargeSmoke/1"})
+          try:
+              with urllib.request.urlopen(req,timeout=180) as response:
+                  payload=response.read(8_000_000)
+                  request_id=response.headers.get("x-request-id","-")
+                  code=response.status
+          except urllib.error.HTTPError as exc:
+              print("large-pdf HTTP error",exc.code,exc.read(1500).decode("utf-8","replace"),"input_bytes",len(source))
+              raise
+          assert code==200 and zipfile.is_zipfile(io.BytesIO(payload))
+          with zipfile.ZipFile(io.BytesIO(payload)) as document:
+              assert "word/document.xml" in document.namelist()
+          print(f"Large PDF observe conversion PASS status={code} input_bytes={len(source)} output_bytes={len(payload)} duration_s={time.monotonic()-started:.1f} request_id={request_id}")
+          PY
