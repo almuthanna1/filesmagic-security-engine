@@ -1,0 +1,361 @@
+"""VBA call graphs on inert source strings.
+
+Every module below is a Python string that never becomes a document or a VBA project. The
+"dangerous" lines only carry a keyword olevba recognises, with placeholder arguments
+(Shell "placeholder"), so nothing here could run anything even if typed into an editor.
+"""
+
+import pytest
+
+from app.engine import vba_chains
+from app.engine.vba_chains import LINKED, NO_PATH, UNDETERMINED, VbaChainError, analyse
+from tests.office_fixtures import make_ole, make_ooxml
+
+TOOL = 'Sub RunTool()\n    Shell "placeholder"\nEnd Sub\n'
+
+
+def outcome(*sources: str, problems=None):
+    result = analyse([(f"Module{i}", s) for i, s in enumerate(sources, 1)], problems)
+    return result.outcome, [(e.entry, e.outcome, e.path) for e in result.entries], result
+
+
+def test_related_procedures_establish_a_path_through_transitive_calls():
+    src = "Sub AutoOpen()\n    Prepare\nEnd Sub\nSub Prepare()\n    Call RunTool\nEnd Sub\n" + TOOL
+    overall, entries, _ = outcome(src)
+    assert overall == LINKED
+    assert entries == [("Module1.AutoOpen", LINKED, ("Module1.AutoOpen", "Module1.Prepare", "Module1.RunTool"))]
+
+
+def test_calls_across_modules_are_followed():
+    overall, entries, _ = outcome("Sub Document_Open()\n    Module2.RunTool\nEnd Sub\n", TOOL)
+    assert overall == LINKED and entries[0][2] == ("Module1.Document_Open", "Module2.RunTool")
+
+
+def test_an_unrelated_dangerous_procedure_gives_no_path():
+    # The reference Office scanner rates this HIGH: automatic entry and Shell in the same project.
+    src = 'Sub AutoOpen()\n    MsgBox "Hello"\nEnd Sub\n' + TOOL
+    overall, entries, result = outcome(src)
+    assert (overall, entries) == (NO_PATH, [("Module1.AutoOpen", NO_PATH, ())]) and not result.problems
+
+
+def test_names_in_comments_and_strings_are_not_calls():
+    src = "Sub AutoOpen()\n    ' RunTool is called elsewhere\n    MsgBox \"RunTool\"\nEnd Sub\n" + TOOL
+    assert outcome(src)[0] == NO_PATH
+
+
+def test_call_cycles_terminate():
+    src = "Sub AutoOpen()\n    PingA\nEnd Sub\nSub PingA()\n    PingB\nEnd Sub\nSub PingB()\n    PingA\nEnd Sub\n" + TOOL
+    assert outcome(src)[0] == NO_PATH
+
+
+@pytest.mark.parametrize("call", [
+    'Application.Run "RunTool"',
+    'Application.Run "Module1.RunTool"',
+    "Application.Run \"'Book.xlsm'!Module1.RunTool\"",
+    'Application.OnTime Now, "RunTool"',
+    "x = EnumWindows(AddressOf RunTool, 0)",
+])
+def test_indirect_calls_naming_a_procedure_are_resolved(call):
+    assert outcome(f"Sub Workbook_Open()\n    {call}\nEnd Sub\n" + TOOL)[0] == LINKED
+
+
+@pytest.mark.parametrize("call, reason", [
+    ('Application.OnKey "^q", procName', "calls OnKey with a name that is not a known procedure"),
+    ('CallByName obj, "Unknown" & suffix, VbMethod', "calls CallByName"),
+    ('x = Evaluate("A1")', "uses Evaluate"),
+    ('ThisWorkbook.VBProject.VBComponents(1).CodeModule.AddFromString "x"', "uses VBProject"),
+])
+def test_dynamic_calls_on_the_reachable_part_make_the_path_undetermined(call, reason):
+    overall, _, result = outcome(f'Sub AutoOpen()\n    {call}\nEnd Sub\n' + 'Sub Other()\n    MsgBox "x"\nEnd Sub\n')
+    assert overall == UNDETERMINED and reason in result.entries[0].reasons[0]
+
+
+def test_run_with_a_computed_name_is_unresolved_not_an_execution():
+    # olevba lists "Run" under "May run an executable file or a system command", but
+    # Application.Run starts a macro whose name is computed here: nothing is demonstrated.
+    overall, _, result = outcome("Sub AutoOpen()\n    Application.Run procName\nEnd Sub\n")
+    reasons = " | ".join(result.entries[0].reasons)
+    assert overall == UNDETERMINED
+    assert "only run: Run also starts macros" in reasons and "calls Run with a name that is not a known" in reasons
+
+
+# ----------------------------------------------------------------------------- demonstrated vs possible
+
+
+def reasons(*sources: str) -> str:
+    overall, _, result = outcome(*sources)
+    assert overall == UNDETERMINED, overall
+    return " | ".join(r for e in result.entries for r in e.reasons)
+
+
+@pytest.mark.parametrize("body, why", [
+    ("Dim RunTool As Long\n    RunTool = 1", "'RunTool' is also declared as a variable"),
+    ("Const RunTool = 3\n    MsgBox RunTool", "'RunTool' is also declared as a variable"),
+    ("For RunTool = 1 To 3\n    Next", "'RunTool' is also declared as a variable"),
+    ("ws.RunTool", "'RunTool' is a member of something that is not a module"),
+])
+def test_a_name_that_may_not_be_a_call_gives_only_a_possible_path(body, why):
+    assert why in reasons(f"Sub AutoOpen()\n    {body}\nEnd Sub\n" + TOOL)
+
+
+def test_a_parameter_shadows_the_procedure_name():
+    assert "also declared" in reasons("Sub AutoOpen()\n    Helper 1\nEnd Sub\n"
+                                      "Sub Helper(ByVal RunTool As Long)\n    MsgBox RunTool\nEnd Sub\n" + TOOL)
+
+
+def test_a_module_level_variable_in_another_module_shadows_the_procedure_name():
+    # Module1 declares a public variable RunTool; Module2 defines the procedure RunTool.
+    assert "also declared" in reasons("Public RunTool As Long\nSub AutoOpen()\n    RunTool = 2\nEnd Sub\n", TOOL)
+
+
+@pytest.mark.parametrize("body", [
+    "Dim t As RunTool",  # a type name
+    "Set t = New RunTool",
+    "Helper RunTool:=1",  # a named argument
+])
+def test_type_names_and_named_arguments_are_no_calls(body):
+    src = f"Sub AutoOpen()\n    {body}\nEnd Sub\nSub Helper()\nEnd Sub\n" + TOOL
+    assert outcome(src)[0] == NO_PATH
+
+
+@pytest.mark.parametrize("call", ["Call RunTool", "RunTool", "x = RunTool()", "Module1.RunTool", "If x Then RunTool"])
+def test_demonstrated_calls_still_link(call):
+    assert outcome(f"Sub AutoOpen()\n    {call}\nEnd Sub\n" + TOOL)[0] == LINKED
+
+
+@pytest.mark.parametrize("body, only", [
+    ("style = vbHide", "only vbhide: a window-style constant is an argument"),
+    ('Set o = CreateObject("WScript.Shell")\n    p = o.SpecialFolders("Desktop")', "only shell, wscript.shell"),
+    ("x = obj.Create(1)", "only create: Create is a common method name"),
+    ('Set a = CreateObject("Shell.Application")\n    MsgBox a.Namespace(0).Title', "only shell"),
+])
+def test_an_ambiguous_keyword_is_only_a_possible_capability(body, only):
+    assert only in reasons(f"Sub AutoOpen()\n    {body}\nEnd Sub\n")
+
+
+def test_a_shell32_declaration_alone_is_not_an_execution():
+    src = ('Private Declare PtrSafe Function GetFolder Lib "shell32" Alias "SHGetFolderPathA" (ByVal h As LongPtr) As Long\n'
+           "Sub AutoOpen()\n    GetFolder 0\nEnd Sub\n")
+    assert "only shell32" in reasons(src)
+
+
+@pytest.mark.parametrize("body", [
+    'Set o = CreateObject("WScript.Shell")\n    o.Run "placeholder"',
+    'Set w = GetObject("winmgmts:").Get("Win32_Process")\n    w.Create "placeholder"',
+])
+def test_an_ambiguous_keyword_confirmed_by_its_context_is_demonstrated(body):
+    assert outcome(f"Sub AutoOpen()\n    {body}\nEnd Sub\n")[0] == LINKED
+
+
+def test_keywords_in_comments_are_no_evidence():
+    src = "Sub AutoOpen()\n    ' never call Shell here\n    MsgBox \"x\"\nEnd Sub\n' AutoExec is documented elsewhere\n"
+    assert outcome(src)[:2] == (NO_PATH, [("Module1.AutoOpen", NO_PATH, ())])
+
+
+def test_a_dynamic_call_outside_the_reachable_part_does_not_matter():
+    src = 'Sub AutoOpen()\n    MsgBox "x"\nEnd Sub\nSub Elsewhere()\n    Application.Run procName\nEnd Sub\n' + TOOL
+    assert outcome(src)[0] == NO_PATH
+
+
+def test_an_established_path_wins_over_a_dynamic_call():
+    src = "Sub AutoOpen()\n    Application.Run procName\n    RunTool\nEnd Sub\n" + TOOL
+    assert outcome(src)[0] == LINKED
+
+
+def test_an_aliased_library_declaration_links_a_harmless_looking_call():
+    # The call site "OpenIt 0" carries no keyword; only the declaration names the real function.
+    src = ('Private Declare PtrSafe Function OpenIt Lib "shell32" Alias "ShellExecuteA" (ByVal h As LongPtr) As LongPtr\n'
+           "Sub AutoOpen()\n    OpenIt 0\nEnd Sub\n")
+    assert outcome(src)[1][0][2] == ("Module1.AutoOpen", "Module1.OpenIt")
+
+
+@pytest.mark.parametrize("src, problem", [
+    ('Sub AutoOpen()\n    MsgBox "x"\n' + TOOL, "has no End before RunTool"),
+    ('Sub AutoOpen()\n    MsgBox "x"\n', "is never ended"),
+    ('Const TOOL_CMD = "placeholder"\nPublic x As Object\nSub AutoOpen()\n    MsgBox "x"\nEnd Sub\n'
+     'Sub Helper()\nEnd Sub\nEnd Sub\n', "End without a procedure"),
+    ('Dim s As Object: Set s = CreateObject("WScript.Shell")\nSub AutoOpen()\n    MsgBox "x"\nEnd Sub\n',
+     "dangerous keywords outside any procedure"),
+    ("Sub Main()\n    Call AutoOpen\nEnd Sub\n" + TOOL, "automatic-entry keyword 'AutoOpen'"),
+])
+def test_incomplete_call_graphs_are_undetermined(src, problem):
+    overall, _, result = outcome(src)
+    assert overall == UNDETERMINED and any(problem in p for p in result.problems)
+
+
+def test_extraction_problems_make_any_no_path_undetermined():
+    src = 'Sub AutoOpen()\n    MsgBox "x"\nEnd Sub\n'
+    assert outcome(src)[0] == NO_PATH
+    assert outcome(src, problems=["vbaProject.bin could not be extracted"])[0] == UNDETERMINED
+
+
+def test_no_entry_means_nothing_runs_automatically():
+    assert outcome(TOOL)[:2] == (NO_PATH, [])
+
+
+# ----------------------------------------------------------------------------- documents
+
+
+class SourceOnlyParser:
+    """Stands in for olevba.VBA_Parser's container parsing only: it hands over inert source
+    strings. No VBA project is built; keyword analysis stays real olevba."""
+
+    modules: list[tuple[str, str]] = []
+    fail = False
+
+    def __init__(self, label, data=None):
+        pass
+
+    def detect_xlm_macros(self):
+        return False
+
+    def detect_vba_macros(self):
+        return bool(self.modules)
+
+    def extract_macros(self):
+        if self.fail:
+            raise RuntimeError("cannot decompress")
+        for name, code in self.modules:
+            yield "vbaProject.bin", "VBA/" + name, name, code
+
+    def close(self):
+        pass
+
+
+@pytest.fixture
+def parser(monkeypatch):
+    monkeypatch.setattr(vba_chains, "VBA_Parser", SourceOnlyParser)
+    monkeypatch.setattr(SourceOnlyParser, "fail", False)
+    return SourceOnlyParser
+
+
+DOCM = make_ooxml({"word/vbaProject.bin": make_ole({"VBA/dir": b"x"})})  # an OLE container, no VBA project
+
+
+def test_documents_are_analysed_through_their_vba_containers(parser, monkeypatch):
+    monkeypatch.setattr(parser, "modules", [("Module1", 'Sub AutoOpen()\n    MsgBox "x"\nEnd Sub\n' + TOOL)])
+    assert vba_chains.scan(DOCM).outcome == NO_PATH
+
+
+def test_a_project_that_cannot_be_extracted_is_undetermined(parser, monkeypatch):
+    monkeypatch.setattr(parser, "modules", [("Module1", "x")])
+    monkeypatch.setattr(parser, "fail", True)
+    result = vba_chains.scan(DOCM)
+    assert result.outcome == UNDETERMINED and "could not be extracted (RuntimeError)" in result.problems[0]
+
+
+def test_a_vba_part_that_is_not_ole_is_undetermined(parser):
+    result = vba_chains.scan(make_ooxml({"word/vbaProject.bin": b"not an OLE file"}))
+    assert result.outcome == UNDETERMINED and "is not an OLE VBA project" in result.problems[0]
+
+
+def test_non_office_files_and_projects_without_vba_are_not_applicable(parser):
+    assert vba_chains.scan(b"%PDF-1.7 not office") is None
+    assert vba_chains.scan(make_ooxml({})) is None
+
+
+def test_a_broken_package_fails_closed_as_malformed_input():
+    with pytest.raises(VbaChainError) as e:
+        vba_chains.scan(b"PK\x03\x04 [Content_Types].xml truncated")
+    assert type(e.value.__cause__).__name__ == "BadZipFile"
+
+
+# ----------------------------------------------------------------------------- unified engine
+
+
+class SourceOnlyOfficeParser(SourceOnlyParser):
+    """Also stands in for the Office scanner's olevba calls; its keyword analysis is real olevba
+    (VBA_Scanner) over the same inert source."""
+
+    def detect_macros(self):
+        return bool(self.modules)
+
+    def analyze_macros(self):
+        from oletools.olevba import VBA_Scanner
+        return VBA_Scanner("\n".join(code for _, code in self.modules)).scan()
+
+
+RELATED = "Sub AutoOpen()\n    Prepare\nEnd Sub\nSub Prepare()\n    RunTool\nEnd Sub\n" + TOOL
+UNRELATED = 'Sub AutoOpen()\n    MsgBox "Hello"\nEnd Sub\n' + TOOL
+UNDETERMINED_SRC = 'Sub AutoOpen()\n    Application.OnKey "^q", procName\nEnd Sub\n' + TOOL
+
+
+@pytest.mark.parametrize("source, engine_rule, note", [
+    (RELATED, "ENGINE_VBA_AUTOEXEC_REACHES_CAPABILITY", "confirmed by a macro call path"),
+    (UNRELATED, "ENGINE_VBA_NO_CALL_PATH", "kept although the source shows no call path"),
+    (UNDETERMINED_SRC, "ENGINE_VBA_CALL_PATH_UNDETERMINED", "kept: the macro call path could not be determined"),
+])
+def test_the_reference_macro_verdict_is_qualified_never_lowered(monkeypatch, source, engine_rule, note):
+    from app import engine, worker
+    from app.scanners import SCANNERS, office
+    from evaluation.cases import verdicts
+
+    monkeypatch.setattr(SourceOnlyOfficeParser, "modules", [("Module1", source)])
+    monkeypatch.setattr(office, "VBA_Parser", SourceOnlyOfficeParser)
+    monkeypatch.setattr(vba_chains, "VBA_Parser", SourceOnlyOfficeParser)
+    reference = worker.analyse(SCANNERS, DOCM)
+    unified = engine.correlate(worker.analyse(engine.SCANNERS, DOCM))
+    rules = {f.rule_id for f in unified.findings}
+    assert "OFFICE_MACRO_AUTOEXEC_EXECUTION" in {f.rule_id for f in reference.findings} & rules
+    assert engine_rule in rules
+    assert note in next(f.description for f in unified.findings if f.rule_id == "ENGINE_CORRELATION")
+    assert verdicts(unified)["aggregate"] == verdicts(reference)["aggregate"] == "MALICIOUS"
+
+
+# ----------------------------------------------------------------------------- readable VBA evidence
+
+
+def test_extracted_message_box_is_reported_verbatim_without_escalating_verdict():
+    from app.decision import decide
+    from app.engine.correlate import vba_findings
+    from app.models import Severity, Verdict
+
+    src = 'Sub Action_Click()\n  MsgBox "The action button clicked!"\nEnd Sub\n'
+    result = analyse([("Module1.bas", src)])
+    findings = vba_findings(result)
+    extracted = [f for f in findings if f.rule_id == "ENGINE_VBA_SOURCE"]
+    assert len(extracted) == 1
+    assert extracted[0].severity == Severity.INFO
+    assert extracted[0].evidence == [f"Module1.bas:\n{src}"]
+    assert "message box" in extracted[0].description
+    assert "The action button clicked!" in extracted[0].description
+    assert decide(findings, scanners_run=4) == Verdict.SAFE
+
+
+def test_source_preview_does_not_infer_benign_behavior_from_other_statements():
+    from app.engine.correlate import vba_findings
+
+    src = 'Sub Action_Click()\n  MsgBox "Hello"\n  x = 2\nEnd Sub\n'
+    findings = vba_findings(analyse([("Module1", src)]))
+    evidence = next(f for f in findings if f.rule_id == "ENGINE_VBA_SOURCE")
+    assert "no complete behavior explanation is asserted" in evidence.description
+    assert src in evidence.evidence[0]
+
+
+def test_long_macro_preview_is_bounded_and_clearly_marked_incomplete():
+    from app.engine.correlate import vba_findings
+
+    src = "Sub Action_Click()\n" + ("  'comment only\n" * 100) + "End Sub\n"
+    findings = vba_findings(analyse([("Module1", src)]))
+    finding = next(f for f in findings if f.rule_id == "ENGINE_VBA_SOURCE")
+    assert len(finding.evidence[0]) <= 500
+    assert "[truncated: source continues]" in finding.evidence[0]
+    assert "excerpt limited" in finding.description
+
+
+def test_vba_preview_limits_module_count():
+    from app.engine.correlate import vba_findings
+
+    findings = vba_findings(analyse([(f"Module{i}", "Sub Safe()\nEnd Sub\n") for i in range(12)]))
+    assert len([f for f in findings if f.rule_id == "ENGINE_VBA_SOURCE"]) == 8
+    note = next(f for f in findings if f.rule_id == "ENGINE_VBA_SOURCE_OMITTED")
+    assert "4 additional VBA modules" in note.description
+
+
+def test_vba_preview_preserves_literal_html_as_text_only():
+    from app.engine.correlate import vba_findings
+
+    src = 'Sub Action_Click()\n  MsgBox "<script>alert(1)</script>"\nEnd Sub\n'
+    finding = next(f for f in vba_findings(analyse([("Module1", src)]))
+                   if f.rule_id == "ENGINE_VBA_SOURCE")
+    assert "<script>alert(1)</script>" in finding.evidence[0]

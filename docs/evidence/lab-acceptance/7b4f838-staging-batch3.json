@@ -1,0 +1,53 @@
+{
+  "lab": "https://filesmagic-security-lab-staging.vercel.app",
+  "api": "https://filesmagic-security-engine-staging.onrender.com",
+  "health": {
+    "status": "ok",
+    "service": "filesmagic-security-engine",
+    "scanners_registered": 4,
+    "scanners_ready": 4,
+    "auth_configured": true,
+    "engines": [
+      "reference",
+      "unified"
+    ],
+    "default_engine": "reference",
+    "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8"
+  },
+  "timestamp_utc": "2026-11-08T01:59:54Z",
+  "batch": 3,
+  "batch_size": 6,
+  "stopped": null,
+  "checks": 2,
+  "failed": 2,
+  "rows": [
+    {
+      "case": "corrupt-truncated-pdf",
+      "engine": "reference",
+      "result": {
+        "http": 429,
+        "stage": "scan",
+        "wall_ms": 178.6,
+        "cors_allowed": true,
+        "detail": "The engine is busy with another scan. Try again shortly."
+      },
+      "problems": [
+        "HTTP 429 at scan: The engine is busy with another scan. Try again shortly."
+      ]
+    },
+    {
+      "case": "corrupt-truncated-pdf",
+      "engine": "unified",
+      "result": {
+        "http": 429,
+        "stage": "scan",
+        "wall_ms": 238.8,
+        "cors_allowed": true,
+        "detail": "The engine is busy with another scan. Try again shortly."
+      },
+      "problems": [
+        "HTTP 429 at scan: The engine is busy with another scan. Try again shortly."
+      ]
+    }
+  ]
+}

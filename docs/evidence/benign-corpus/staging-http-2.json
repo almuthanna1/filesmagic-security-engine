@@ -1,0 +1,266 @@
+[
+  {
+    "file": "xlsx-03-excel-hyperlinks-validation.xlsx",
+    "path": "http (Lab token route -> engine /scan)",
+    "reference": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 28032.3,
+      "cors_allowed": true,
+      "engine": "reference",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "complete": true,
+      "duration_ms": 6740.4,
+      "sha256": "8ca52f022638765eec6a068d5d761c27c065a83ad73f356cf4c6207daf3fe968",
+      "sent_sha256": "8ca52f022638765eec6a068d5d761c27c065a83ad73f356cf4c6207daf3fe968",
+      "evidence_items": 0,
+      "isolation_missing": []
+    },
+    "unified": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 7498.3,
+      "cors_allowed": true,
+      "engine": "unified",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "complete": true,
+      "duration_ms": 7350.8,
+      "sha256": "8ca52f022638765eec6a068d5d761c27c065a83ad73f356cf4c6207daf3fe968",
+      "sent_sha256": "8ca52f022638765eec6a068d5d761c27c065a83ad73f356cf4c6207daf3fe968",
+      "evidence_items": 0,
+      "isolation_missing": []
+    }
+  },
+  {
+    "file": "xlsx-04-excel-external-workbook-link.xlsx",
+    "path": "http (Lab token route -> engine /scan)",
+    "reference": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 7031.7,
+      "cors_allowed": true,
+      "engine": "reference",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SUSPICIOUS",
+      "rules": [
+        "office:OFFICE_EXTERNAL_NETWORK_PATH:MEDIUM"
+      ],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "complete": true,
+      "duration_ms": 6849.3,
+      "sha256": "e39d27d2ea088b8d7dfafac3084286ca0a89ecf97af4497ae5293dec47452920",
+      "sent_sha256": "e39d27d2ea088b8d7dfafac3084286ca0a89ecf97af4497ae5293dec47452920",
+      "evidence_items": 0,
+      "isolation_missing": []
+    },
+    "unified": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 7012.9,
+      "cors_allowed": true,
+      "engine": "unified",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SUSPICIOUS",
+      "rules": [
+        "office:OFFICE_EXTERNAL_NETWORK_PATH:MEDIUM"
+      ],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "complete": true,
+      "duration_ms": 6772.8,
+      "sha256": "e39d27d2ea088b8d7dfafac3084286ca0a89ecf97af4497ae5293dec47452920",
+      "sent_sha256": "e39d27d2ea088b8d7dfafac3084286ca0a89ecf97af4497ae5293dec47452920",
+      "evidence_items": 3,
+      "isolation_missing": []
+    }
+  },
+  {
+    "file": "xlsx-05-excel-table-pivot.xlsx",
+    "path": "http (Lab token route -> engine /scan)",
+    "reference": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 6566.2,
+      "cors_allowed": true,
+      "engine": "reference",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "complete": true,
+      "duration_ms": 6402.7,
+      "sha256": "9c340092b6acf24211587811b798153b1d177bd3610dff3e43218a5f17f02519",
+      "sent_sha256": "9c340092b6acf24211587811b798153b1d177bd3610dff3e43218a5f17f02519",
+      "evidence_items": 0,
+      "isolation_missing": []
+    },
+    "unified": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 7074.6,
+      "cors_allowed": true,
+      "engine": "unified",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "complete": true,
+      "duration_ms": 6907.6,
+      "sha256": "9c340092b6acf24211587811b798153b1d177bd3610dff3e43218a5f17f02519",
+      "sent_sha256": "9c340092b6acf24211587811b798153b1d177bd3610dff3e43218a5f17f02519",
+      "evidence_items": 0,
+      "isolation_missing": []
+    }
+  },
+  {
+    "file": "xlsx-06-excel-picture-notes.xlsx",
+    "path": "http (Lab token route -> engine /scan)",
+    "reference": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 6585.6,
+      "cors_allowed": true,
+      "engine": "reference",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "complete": true,
+      "duration_ms": 6443.1,
+      "sha256": "d48b882cf9b7aece471aa2b176bec9deeead46ee7e2ae340d22a8e596683f714",
+      "sent_sha256": "d48b882cf9b7aece471aa2b176bec9deeead46ee7e2ae340d22a8e596683f714",
+      "evidence_items": 0,
+      "isolation_missing": []
+    },
+    "unified": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 6762.2,
+      "cors_allowed": true,
+      "engine": "unified",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "complete": true,
+      "duration_ms": 6534.8,
+      "sha256": "d48b882cf9b7aece471aa2b176bec9deeead46ee7e2ae340d22a8e596683f714",
+      "sent_sha256": "d48b882cf9b7aece471aa2b176bec9deeead46ee7e2ae340d22a8e596683f714",
+      "evidence_items": 0,
+      "isolation_missing": []
+    }
+  },
+  {
+    "file": "xlsx-07-libreoffice.xlsx",
+    "path": "http (Lab token route -> engine /scan)",
+    "reference": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 6924.0,
+      "cors_allowed": true,
+      "engine": "reference",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "complete": true,
+      "duration_ms": 6743.9,
+      "sha256": "98c98ecf1a1baca8b539cb3a5087715f7235a08f41200ec9bef8189277050fe7",
+      "sent_sha256": "98c98ecf1a1baca8b539cb3a5087715f7235a08f41200ec9bef8189277050fe7",
+      "evidence_items": 0,
+      "isolation_missing": []
+    },
+    "unified": {
+      "http": 200,
+      "stage": "scan",
+      "wall_ms": 6847.1,
+      "cors_allowed": true,
+      "engine": "unified",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "verdict": "SAFE",
+      "rules": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "complete": true,
+      "duration_ms": 6688.4,
+      "sha256": "98c98ecf1a1baca8b539cb3a5087715f7235a08f41200ec9bef8189277050fe7",
+      "sent_sha256": "98c98ecf1a1baca8b539cb3a5087715f7235a08f41200ec9bef8189277050fe7",
+      "evidence_items": 0,
+      "isolation_missing": []
+    }
+  }
+]

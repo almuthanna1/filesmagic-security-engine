@@ -1,0 +1,29 @@
+{
+  "status": "completed",
+  "problems": [],
+  "preflight": {
+    "reference": {
+      "isolation_missing": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "not_applicable",
+        "custom": "not_applicable"
+      }
+    },
+    "unified": {
+      "isolation_missing": [],
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "not_applicable",
+        "custom": "not_applicable",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      }
+    }
+  }
+}

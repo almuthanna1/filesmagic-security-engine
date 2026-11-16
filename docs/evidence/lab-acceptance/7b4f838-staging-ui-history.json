@@ -1,0 +1,355 @@
+[
+  {
+    "recorded_at": "2026-11-08T02:55:28.193Z",
+    "mode": "single",
+    "engine": "unified",
+    "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+    "request_id": "ce10b0d24f5b4b05",
+    "filename": "corrupt-truncated.pdf",
+    "sha256": "e4fdd11ecceb8ed95ebcc10b9d0086afb42e91e583dc1249ddd9e0e38f8526d7",
+    "size_bytes": 62,
+    "detected_format": "pdf",
+    "verdict": "UNABLE_TO_SCAN",
+    "complete": false,
+    "duration_ms": 6413.1,
+    "findings": [],
+    "scanners": [
+      {
+        "name": "yara-x",
+        "status": "completed",
+        "error": null,
+        "error_kind": null,
+        "error_type": null,
+        "duration_ms": 0.395
+      },
+      {
+        "name": "office",
+        "status": "not_applicable",
+        "error": null,
+        "error_kind": null,
+        "error_type": null,
+        "duration_ms": 0.003
+      },
+      {
+        "name": "pdf",
+        "status": "failed",
+        "error": "PdfScanError: PDF analysis failed: PdfStreamError: Stream has ended unexpectedly",
+        "error_kind": "malformed_input",
+        "error_type": "PdfStreamError",
+        "duration_ms": 0.34
+      },
+      {
+        "name": "custom",
+        "status": "failed",
+        "error": "CustomScanError: stream at byte 34 has no endstream",
+        "error_kind": "invalid_structure",
+        "error_type": "CustomScanError",
+        "duration_ms": 0.04
+      },
+      {
+        "name": "yara-x-engine",
+        "status": "completed",
+        "error": null,
+        "error_kind": null,
+        "error_type": null,
+        "duration_ms": 0.372
+      },
+      {
+        "name": "pdf-chains",
+        "status": "failed",
+        "error": "ChainScanError: PDF action-chain analysis failed: PdfStreamError: Stream has ended unexpectedly",
+        "error_kind": "malformed_input",
+        "error_type": "PdfStreamError",
+        "duration_ms": 0.152
+      },
+      {
+        "name": "vba-chains",
+        "status": "not_applicable",
+        "error": null,
+        "error_kind": null,
+        "error_type": null,
+        "duration_ms": 0.003
+      },
+      {
+        "name": "ooxml-links",
+        "status": "not_applicable",
+        "error": null,
+        "error_kind": null,
+        "error_type": null,
+        "duration_ms": 0.003
+      }
+    ],
+    "versions": {
+      "engine": "0.2.0",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "ruleset_sha256": "0be9918509e95e639f866291dc297c45c8e72812d602fb149fad3484435ae3b0",
+      "engine_ruleset_sha256": "988d991efb218328c97e8c00500ed6b434a33ee8e961548e817e159cc9f35b4e",
+      "yara-x": "1.21.0",
+      "oletools": "0.60.2",
+      "olefile": "0.47",
+      "pypdf": "6.19.0"
+    },
+    "isolation_required": true,
+    "isolation_missing": [],
+    "message": "3 of 5 applicable scanners failed, so the file could not be fully analysed."
+  },
+  {
+    "recorded_at": "2026-11-08T02:54:47.607Z",
+    "mode": "compare",
+    "engine": "unified",
+    "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+    "request_id": "80ad089358c04fea",
+    "filename": "5a-pdf-auto-js-unrelated-attachment.pdf",
+    "sha256": "48ac8dc02c326363f7d91d947c4fbb2b8b077d1a7ec7c310c801f1fadcc382c8",
+    "size_bytes": 866,
+    "detected_format": "pdf",
+    "verdict": "SUSPICIOUS",
+    "complete": true,
+    "duration_ms": 6278.6,
+    "findings": [
+      {
+        "scanner": "yara-x",
+        "category": "pdf-embedded-file",
+        "severity": "LOW",
+        "description": "PDF carries an embedded file attachment.",
+        "rule_id": "PDF_Embedded_File",
+        "evidence": []
+      },
+      {
+        "scanner": "pdf",
+        "category": "pdf-javascript",
+        "severity": "MEDIUM",
+        "description": "PDF contains 1 JavaScript action(s).",
+        "rule_id": "PDF_JAVASCRIPT",
+        "evidence": []
+      },
+      {
+        "scanner": "pdf",
+        "category": "pdf-embedded-file",
+        "severity": "LOW",
+        "description": "PDF carries 1 embedded file(s) (e.g. 'notes.txt').",
+        "rule_id": "PDF_EMBEDDED_FILE",
+        "evidence": []
+      },
+      {
+        "scanner": "yara-x-engine",
+        "category": "pdf-active-content",
+        "severity": "MEDIUM",
+        "description": "PDF contains JavaScript and an automatic trigger: an /OpenAction that is not a page destination, or an /AA dictionary not shown to hold only user-interaction triggers.",
+        "rule_id": "ENGINE_PDF_JavaScript_With_Automatic_Trigger",
+        "evidence": []
+      },
+      {
+        "scanner": "pdf-chains",
+        "category": "pdf-action-chain",
+        "severity": "MEDIUM",
+        "description": "An automatic action chain runs JavaScript; no embedded file is used on that chain. Evidence: catalog /OpenAction: JavaScript (object 7 0). This is a structural indicator, not proof that the file is malicious.",
+        "rule_id": "ENGINE_PDF_AUTO_CHAIN_SCRIPT",
+        "evidence": [
+          "catalog /OpenAction: JavaScript (object 7 0)"
+        ]
+      },
+      {
+        "scanner": "pdf-chains",
+        "category": "pdf-action-chain",
+        "severity": "INFO",
+        "description": "Evidence correlation: replaced PDF_AUTO_JAVASCRIPT, PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD (PDF scanner) by the action-chain rules; replaced PDF_JavaScript_With_Automatic_Action (YARA-X) by ENGINE_PDF_JavaScript_With_Automatic_Trigger, which also matched.",
+        "rule_id": "ENGINE_CORRELATION",
+        "evidence": [
+          "replaced PDF_AUTO_JAVASCRIPT, PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD (PDF scanner) by the action-chain rules",
+          "replaced PDF_JavaScript_With_Automatic_Action (YARA-X) by ENGINE_PDF_JavaScript_With_Automatic_Trigger, which also matched"
+        ]
+      }
+    ],
+    "scanners": [
+      {
+        "name": "yara-x",
+        "status": "completed",
+        "error": null,
+        "error_kind": null,
+        "error_type": null,
+        "duration_ms": 0.449
+      },
+      {
+        "name": "office",
+        "status": "not_applicable",
+        "error": null,
+        "error_kind": null,
+        "error_type": null,
+        "duration_ms": 0.004
+      },
+      {
+        "name": "pdf",
+        "status": "completed",
+        "error": null,
+        "error_kind": null,
+        "error_type": null,
+        "duration_ms": 1.389
+      },
+      {
+        "name": "custom",
+        "status": "completed",
+        "error": null,
+        "error_kind": null,
+        "error_type": null,
+        "duration_ms": 0.185
+      },
+      {
+        "name": "yara-x-engine",
+        "status": "completed",
+        "error": null,
+        "error_kind": null,
+        "error_type": null,
+        "duration_ms": 0.439
+      },
+      {
+        "name": "pdf-chains",
+        "status": "completed",
+        "error": null,
+        "error_kind": null,
+        "error_type": null,
+        "duration_ms": 0.861
+      },
+      {
+        "name": "vba-chains",
+        "status": "not_applicable",
+        "error": null,
+        "error_kind": null,
+        "error_type": null,
+        "duration_ms": 0.004
+      },
+      {
+        "name": "ooxml-links",
+        "status": "not_applicable",
+        "error": null,
+        "error_kind": null,
+        "error_type": null,
+        "duration_ms": 0.004
+      }
+    ],
+    "versions": {
+      "engine": "0.2.0",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "ruleset_sha256": "0be9918509e95e639f866291dc297c45c8e72812d602fb149fad3484435ae3b0",
+      "engine_ruleset_sha256": "988d991efb218328c97e8c00500ed6b434a33ee8e961548e817e159cc9f35b4e",
+      "yara-x": "1.21.0",
+      "oletools": "0.60.2",
+      "olefile": "0.47",
+      "pypdf": "6.19.0"
+    },
+    "isolation_required": true,
+    "isolation_missing": [],
+    "message": "Analysed by 5 of 8 scanners (3 not applicable to this file type)."
+  },
+  {
+    "recorded_at": "2026-11-08T02:54:47.608Z",
+    "mode": "compare",
+    "engine": "reference",
+    "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+    "request_id": "54e6e4ac6347401a",
+    "filename": "5a-pdf-auto-js-unrelated-attachment.pdf",
+    "sha256": "48ac8dc02c326363f7d91d947c4fbb2b8b077d1a7ec7c310c801f1fadcc382c8",
+    "size_bytes": 866,
+    "detected_format": "pdf",
+    "verdict": "MALICIOUS",
+    "complete": true,
+    "duration_ms": 5847.2,
+    "findings": [
+      {
+        "scanner": "yara-x",
+        "category": "pdf-active-content",
+        "severity": "MEDIUM",
+        "description": "PDF contains JavaScript together with an automatic action (/OpenAction or /AA) that can run it when the document is opened.",
+        "rule_id": "PDF_JavaScript_With_Automatic_Action",
+        "evidence": []
+      },
+      {
+        "scanner": "yara-x",
+        "category": "pdf-embedded-file",
+        "severity": "LOW",
+        "description": "PDF carries an embedded file attachment.",
+        "rule_id": "PDF_Embedded_File",
+        "evidence": []
+      },
+      {
+        "scanner": "pdf",
+        "category": "pdf-javascript",
+        "severity": "MEDIUM",
+        "description": "PDF contains 1 JavaScript action(s).",
+        "rule_id": "PDF_JAVASCRIPT",
+        "evidence": []
+      },
+      {
+        "scanner": "pdf",
+        "category": "pdf-javascript",
+        "severity": "MEDIUM",
+        "description": "1 JavaScript action(s) run automatically when the document or a page is opened.",
+        "rule_id": "PDF_AUTO_JAVASCRIPT",
+        "evidence": []
+      },
+      {
+        "scanner": "pdf",
+        "category": "pdf-embedded-file",
+        "severity": "LOW",
+        "description": "PDF carries 1 embedded file(s) (e.g. 'notes.txt').",
+        "rule_id": "PDF_EMBEDDED_FILE",
+        "evidence": []
+      },
+      {
+        "scanner": "pdf",
+        "category": "pdf-javascript",
+        "severity": "HIGH",
+        "description": "JavaScript runs automatically in a PDF that also carries an embedded file or launch action, a common way to drop and open a payload.",
+        "rule_id": "PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD",
+        "evidence": []
+      }
+    ],
+    "scanners": [
+      {
+        "name": "yara-x",
+        "status": "completed",
+        "error": null,
+        "error_kind": null,
+        "error_type": null,
+        "duration_ms": 0.601
+      },
+      {
+        "name": "office",
+        "status": "not_applicable",
+        "error": null,
+        "error_kind": null,
+        "error_type": null,
+        "duration_ms": 0.007
+      },
+      {
+        "name": "pdf",
+        "status": "completed",
+        "error": null,
+        "error_kind": null,
+        "error_type": null,
+        "duration_ms": 1.496
+      },
+      {
+        "name": "custom",
+        "status": "completed",
+        "error": null,
+        "error_kind": null,
+        "error_type": null,
+        "duration_ms": 0.193
+      }
+    ],
+    "versions": {
+      "engine": "0.2.0",
+      "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8",
+      "ruleset_sha256": "0be9918509e95e639f866291dc297c45c8e72812d602fb149fad3484435ae3b0",
+      "engine_ruleset_sha256": "988d991efb218328c97e8c00500ed6b434a33ee8e961548e817e159cc9f35b4e",
+      "yara-x": "1.21.0",
+      "oletools": "0.60.2",
+      "olefile": "0.47",
+      "pypdf": "6.19.0"
+    },
+    "isolation_required": true,
+    "isolation_missing": [],
+    "message": "Analysed by 3 of 4 scanners (1 not applicable to this file type)."
+  }
+]

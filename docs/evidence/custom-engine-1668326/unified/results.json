@@ -1,0 +1,6450 @@
+{
+  "environment": {
+    "timestamp_utc": "2026-11-07T03:26:36+00:00",
+    "engine_commit": "1668326b91b9410d8788a1461d43bc6e2a5b8d77",
+    "working_tree_dirty": true,
+    "manifest_sha256": null,
+    "engine_version": "0.2.0",
+    "ruleset_sha256": "0be9918509e95e639f866291dc297c45c8e72812d602fb149fad3484435ae3b0",
+    "strict_isolation_configured": false,
+    "python": "3.14.3",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "packages": {
+      "yara-x": "1.21.0",
+      "oletools": "0.60.2",
+      "pypdf": "6.19.0",
+      "msoffcrypto-tool": "6.0.0",
+      "defusedxml": "0.7.1",
+      "fastapi": "0.142.4"
+    },
+    "harness_peak_rss_mib": null,
+    "worker_memory_measured": false,
+    "worker_command": [
+      "-s",
+      "-m",
+      "app.worker",
+      "--engine=unified"
+    ],
+    "trials": 20
+  },
+  "results": [
+    {
+      "id": "1-pdf-clean",
+      "ground_truth": "BENIGN",
+      "indicator": "none (negative control)",
+      "sha256": "d5784991fd896bc6b3c21c3c384d9a376a3b4b6009b83a25e0c5d8f77939011b",
+      "size_bytes": 465,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "n/a",
+        "pdf": "SAFE",
+        "custom": "SAFE",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "SAFE",
+        "vba-chains": "n/a",
+        "ooxml-links": "n/a",
+        "aggregate": "SAFE"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable"
+      },
+      "rules": [],
+      "findings": [],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 575.23,
+          "median_ms": 568.92,
+          "p95_ms": 605.316,
+          "max_ms": 629.136,
+          "min_ms": 562.096
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.36,
+          "median_ms": 0.33,
+          "p95_ms": 0.466,
+          "max_ms": 0.591,
+          "min_ms": 0.291
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.47,
+          "median_ms": 0.45,
+          "p95_ms": 0.588,
+          "max_ms": 0.695,
+          "min_ms": 0.414
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.08,
+          "median_ms": 0.08,
+          "p95_ms": 0.093,
+          "max_ms": 0.099,
+          "min_ms": 0.074
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.32,
+          "median_ms": 0.31,
+          "p95_ms": 0.449,
+          "max_ms": 0.52,
+          "min_ms": 0.263
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.22,
+          "median_ms": 0.21,
+          "p95_ms": 0.281,
+          "max_ms": 0.331,
+          "min_ms": 0.186
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.002
+        },
+        "ooxml-links": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.001
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 629.136,
+          "scanner_ms": {
+            "yara-x": 0.591,
+            "office": 0.005,
+            "pdf": 0.499,
+            "custom": 0.086,
+            "yara-x-engine": 0.336,
+            "pdf-chains": 0.227,
+            "vba-chains": 0.004,
+            "ooxml-links": 0.003
+          }
+        },
+        {
+          "harness_wall_ms": 562.096,
+          "scanner_ms": {
+            "yara-x": 0.303,
+            "office": 0.003,
+            "pdf": 0.468,
+            "custom": 0.083,
+            "yara-x-engine": 0.311,
+            "pdf-chains": 0.186,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 566.289,
+          "scanner_ms": {
+            "yara-x": 0.376,
+            "office": 0.004,
+            "pdf": 0.452,
+            "custom": 0.08,
+            "yara-x-engine": 0.306,
+            "pdf-chains": 0.226,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 575.003,
+          "scanner_ms": {
+            "yara-x": 0.358,
+            "office": 0.004,
+            "pdf": 0.695,
+            "custom": 0.084,
+            "yara-x-engine": 0.364,
+            "pdf-chains": 0.211,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 569.822,
+          "scanner_ms": {
+            "yara-x": 0.321,
+            "office": 0.003,
+            "pdf": 0.588,
+            "custom": 0.099,
+            "yara-x-engine": 0.52,
+            "pdf-chains": 0.254,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.003
+          }
+        },
+        {
+          "harness_wall_ms": 575.281,
+          "scanner_ms": {
+            "yara-x": 0.334,
+            "office": 0.002,
+            "pdf": 0.448,
+            "custom": 0.08,
+            "yara-x-engine": 0.274,
+            "pdf-chains": 0.186,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 564.644,
+          "scanner_ms": {
+            "yara-x": 0.328,
+            "office": 0.003,
+            "pdf": 0.429,
+            "custom": 0.08,
+            "yara-x-engine": 0.354,
+            "pdf-chains": 0.281,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 576.749,
+          "scanner_ms": {
+            "yara-x": 0.435,
+            "office": 0.005,
+            "pdf": 0.496,
+            "custom": 0.085,
+            "yara-x-engine": 0.307,
+            "pdf-chains": 0.224,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 567.708,
+          "scanner_ms": {
+            "yara-x": 0.314,
+            "office": 0.002,
+            "pdf": 0.452,
+            "custom": 0.084,
+            "yara-x-engine": 0.285,
+            "pdf-chains": 0.19,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 581.913,
+          "scanner_ms": {
+            "yara-x": 0.323,
+            "office": 0.003,
+            "pdf": 0.414,
+            "custom": 0.074,
+            "yara-x-engine": 0.281,
+            "pdf-chains": 0.191,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 568.024,
+          "scanner_ms": {
+            "yara-x": 0.363,
+            "office": 0.003,
+            "pdf": 0.475,
+            "custom": 0.079,
+            "yara-x-engine": 0.306,
+            "pdf-chains": 0.198,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 572.443,
+          "scanner_ms": {
+            "yara-x": 0.367,
+            "office": 0.003,
+            "pdf": 0.458,
+            "custom": 0.08,
+            "yara-x-engine": 0.289,
+            "pdf-chains": 0.204,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 588.916,
+          "scanner_ms": {
+            "yara-x": 0.414,
+            "office": 0.003,
+            "pdf": 0.472,
+            "custom": 0.081,
+            "yara-x-engine": 0.449,
+            "pdf-chains": 0.331,
+            "vba-chains": 0.004,
+            "ooxml-links": 0.003
+          }
+        },
+        {
+          "harness_wall_ms": 565.722,
+          "scanner_ms": {
+            "yara-x": 0.298,
+            "office": 0.002,
+            "pdf": 0.44,
+            "custom": 0.074,
+            "yara-x-engine": 0.27,
+            "pdf-chains": 0.21,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 566.622,
+          "scanner_ms": {
+            "yara-x": 0.291,
+            "office": 0.002,
+            "pdf": 0.42,
+            "custom": 0.074,
+            "yara-x-engine": 0.263,
+            "pdf-chains": 0.186,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 563.998,
+          "scanner_ms": {
+            "yara-x": 0.298,
+            "office": 0.002,
+            "pdf": 0.457,
+            "custom": 0.085,
+            "yara-x-engine": 0.28,
+            "pdf-chains": 0.202,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 563.873,
+          "scanner_ms": {
+            "yara-x": 0.466,
+            "office": 0.004,
+            "pdf": 0.51,
+            "custom": 0.082,
+            "yara-x-engine": 0.317,
+            "pdf-chains": 0.214,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 578.695,
+          "scanner_ms": {
+            "yara-x": 0.324,
+            "office": 0.003,
+            "pdf": 0.432,
+            "custom": 0.075,
+            "yara-x-engine": 0.266,
+            "pdf-chains": 0.186,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 562.258,
+          "scanner_ms": {
+            "yara-x": 0.296,
+            "office": 0.002,
+            "pdf": 0.419,
+            "custom": 0.093,
+            "yara-x-engine": 0.278,
+            "pdf-chains": 0.205,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 605.316,
+          "scanner_ms": {
+            "yara-x": 0.302,
+            "office": 0.002,
+            "pdf": 0.426,
+            "custom": 0.081,
+            "yara-x-engine": 0.384,
+            "pdf-chains": 0.274,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        }
+      ]
+    },
+    {
+      "id": "2-pdf-form-keystroke-js",
+      "ground_truth": "BENIGN",
+      "indicator": "form-field keystroke JavaScript (user-triggered /AA /K)",
+      "sha256": "8fb92bebda2330b5f0bb6803db1da54f63a42a8cf28a34e49c0b621612263fd5",
+      "size_bytes": 704,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SAFE",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "SAFE",
+        "vba-chains": "n/a",
+        "ooxml-links": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable"
+      },
+      "rules": [
+        "pdf:PDF_JAVASCRIPT:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 1 JavaScript action(s)."
+        },
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_ACROFORM",
+          "severity": "INFO",
+          "description": "PDF contains an interactive form (AcroForm)."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_PDF_USER_TRIGGERED_SCRIPT",
+          "severity": "INFO",
+          "description": "1 JavaScript action chain(s) run only on user interaction (a click, keystroke or form event), not automatically. Evidence: object 5 0 /AA /K: JavaScript (direct in object 5 0)."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: replaced PDF_JavaScript_With_Automatic_Action (YARA-X) by ENGINE_PDF_JavaScript_With_Automatic_Trigger, which did not match: the bytes show every /OpenAction and /AA here is not automatic."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 580.08,
+          "median_ms": 576.03,
+          "p95_ms": 602.849,
+          "max_ms": 643.997,
+          "min_ms": 560.182
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.43,
+          "median_ms": 0.42,
+          "p95_ms": 0.537,
+          "max_ms": 0.543,
+          "min_ms": 0.355
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.005,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.62,
+          "median_ms": 0.59,
+          "p95_ms": 0.852,
+          "max_ms": 0.927,
+          "min_ms": 0.565
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.1,
+          "median_ms": 0.09,
+          "p95_ms": 0.109,
+          "max_ms": 0.158,
+          "min_ms": 0.088
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.33,
+          "median_ms": 0.32,
+          "p95_ms": 0.423,
+          "max_ms": 0.454,
+          "min_ms": 0.28
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.43,
+          "median_ms": 0.4,
+          "p95_ms": 0.629,
+          "max_ms": 0.651,
+          "min_ms": 0.338
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.005,
+          "min_ms": 0.002
+        },
+        "ooxml-links": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.004,
+          "min_ms": 0.001
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 596.13,
+          "scanner_ms": {
+            "yara-x": 0.379,
+            "office": 0.002,
+            "pdf": 0.565,
+            "custom": 0.09,
+            "yara-x-engine": 0.295,
+            "pdf-chains": 0.446,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 580.716,
+          "scanner_ms": {
+            "yara-x": 0.378,
+            "office": 0.002,
+            "pdf": 0.579,
+            "custom": 0.089,
+            "yara-x-engine": 0.304,
+            "pdf-chains": 0.393,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 643.997,
+          "scanner_ms": {
+            "yara-x": 0.478,
+            "office": 0.003,
+            "pdf": 0.617,
+            "custom": 0.101,
+            "yara-x-engine": 0.338,
+            "pdf-chains": 0.381,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 602.849,
+          "scanner_ms": {
+            "yara-x": 0.441,
+            "office": 0.003,
+            "pdf": 0.588,
+            "custom": 0.091,
+            "yara-x-engine": 0.454,
+            "pdf-chains": 0.448,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 568.562,
+          "scanner_ms": {
+            "yara-x": 0.392,
+            "office": 0.003,
+            "pdf": 0.575,
+            "custom": 0.093,
+            "yara-x-engine": 0.282,
+            "pdf-chains": 0.391,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 565.771,
+          "scanner_ms": {
+            "yara-x": 0.53,
+            "office": 0.005,
+            "pdf": 0.629,
+            "custom": 0.094,
+            "yara-x-engine": 0.305,
+            "pdf-chains": 0.502,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 569.522,
+          "scanner_ms": {
+            "yara-x": 0.394,
+            "office": 0.003,
+            "pdf": 0.582,
+            "custom": 0.094,
+            "yara-x-engine": 0.334,
+            "pdf-chains": 0.406,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 568.041,
+          "scanner_ms": {
+            "yara-x": 0.378,
+            "office": 0.002,
+            "pdf": 0.567,
+            "custom": 0.089,
+            "yara-x-engine": 0.28,
+            "pdf-chains": 0.35,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 564.588,
+          "scanner_ms": {
+            "yara-x": 0.48,
+            "office": 0.003,
+            "pdf": 0.644,
+            "custom": 0.102,
+            "yara-x-engine": 0.423,
+            "pdf-chains": 0.479,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 583.02,
+          "scanner_ms": {
+            "yara-x": 0.402,
+            "office": 0.002,
+            "pdf": 0.569,
+            "custom": 0.109,
+            "yara-x-engine": 0.328,
+            "pdf-chains": 0.511,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.003
+          }
+        },
+        {
+          "harness_wall_ms": 575.958,
+          "scanner_ms": {
+            "yara-x": 0.428,
+            "office": 0.003,
+            "pdf": 0.584,
+            "custom": 0.095,
+            "yara-x-engine": 0.365,
+            "pdf-chains": 0.459,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 576.095,
+          "scanner_ms": {
+            "yara-x": 0.389,
+            "office": 0.003,
+            "pdf": 0.594,
+            "custom": 0.09,
+            "yara-x-engine": 0.28,
+            "pdf-chains": 0.342,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 564.763,
+          "scanner_ms": {
+            "yara-x": 0.365,
+            "office": 0.002,
+            "pdf": 0.573,
+            "custom": 0.098,
+            "yara-x-engine": 0.294,
+            "pdf-chains": 0.388,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 560.182,
+          "scanner_ms": {
+            "yara-x": 0.376,
+            "office": 0.002,
+            "pdf": 0.587,
+            "custom": 0.088,
+            "yara-x-engine": 0.283,
+            "pdf-chains": 0.396,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 595.87,
+          "scanner_ms": {
+            "yara-x": 0.537,
+            "office": 0.004,
+            "pdf": 0.648,
+            "custom": 0.092,
+            "yara-x-engine": 0.296,
+            "pdf-chains": 0.357,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 586.313,
+          "scanner_ms": {
+            "yara-x": 0.495,
+            "office": 0.004,
+            "pdf": 0.852,
+            "custom": 0.109,
+            "yara-x-engine": 0.367,
+            "pdf-chains": 0.447,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 562.944,
+          "scanner_ms": {
+            "yara-x": 0.355,
+            "office": 0.003,
+            "pdf": 0.607,
+            "custom": 0.09,
+            "yara-x-engine": 0.285,
+            "pdf-chains": 0.338,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 583.103,
+          "scanner_ms": {
+            "yara-x": 0.464,
+            "office": 0.003,
+            "pdf": 0.592,
+            "custom": 0.158,
+            "yara-x-engine": 0.328,
+            "pdf-chains": 0.651,
+            "vba-chains": 0.005,
+            "ooxml-links": 0.004
+          }
+        },
+        {
+          "harness_wall_ms": 583.934,
+          "scanner_ms": {
+            "yara-x": 0.543,
+            "office": 0.004,
+            "pdf": 0.589,
+            "custom": 0.096,
+            "yara-x-engine": 0.343,
+            "pdf-chains": 0.354,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 569.195,
+          "scanner_ms": {
+            "yara-x": 0.474,
+            "office": 0.004,
+            "pdf": 0.927,
+            "custom": 0.106,
+            "yara-x-engine": 0.365,
+            "pdf-chains": 0.629,
+            "vba-chains": 0.004,
+            "ooxml-links": 0.003
+          }
+        }
+      ]
+    },
+    {
+      "id": "2b-pdf-open-at-page-click-js",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction page destination + click-only link JavaScript",
+      "sha256": "09add801d7ce300528a624a753c79ebff0f1240905f2ffd0523c242f63572770",
+      "size_bytes": 651,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SAFE",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "SAFE",
+        "vba-chains": "n/a",
+        "ooxml-links": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable"
+      },
+      "rules": [
+        "pdf:PDF_JAVASCRIPT:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 2 JavaScript action(s)."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_PDF_USER_TRIGGERED_SCRIPT",
+          "severity": "INFO",
+          "description": "1 JavaScript action chain(s) run only on user interaction (a click, keystroke or form event), not automatically. Evidence: object 5 0 /A: JavaScript (direct in object 5 0)."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: replaced PDF_AUTO_JAVASCRIPT (PDF scanner) by the action-chain rules; replaced PDF_JavaScript_With_Automatic_Action (YARA-X) by ENGINE_PDF_JavaScript_With_Automatic_Trigger, which did not match: the bytes show every /OpenAction and /AA here is not automatic."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 577.86,
+          "median_ms": 572.19,
+          "p95_ms": 619.446,
+          "max_ms": 624.138,
+          "min_ms": 557.481
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.41,
+          "median_ms": 0.41,
+          "p95_ms": 0.468,
+          "max_ms": 0.51,
+          "min_ms": 0.354
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.6,
+          "median_ms": 0.57,
+          "p95_ms": 0.729,
+          "max_ms": 0.861,
+          "min_ms": 0.552
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.09,
+          "median_ms": 0.09,
+          "p95_ms": 0.094,
+          "max_ms": 0.094,
+          "min_ms": 0.083
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.32,
+          "median_ms": 0.3,
+          "p95_ms": 0.376,
+          "max_ms": 0.521,
+          "min_ms": 0.272
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.39,
+          "median_ms": 0.36,
+          "p95_ms": 0.566,
+          "max_ms": 0.634,
+          "min_ms": 0.333
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.005,
+          "min_ms": 0.002
+        },
+        "ooxml-links": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.004,
+          "min_ms": 0.001
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 559.103,
+          "scanner_ms": {
+            "yara-x": 0.435,
+            "office": 0.003,
+            "pdf": 0.562,
+            "custom": 0.083,
+            "yara-x-engine": 0.294,
+            "pdf-chains": 0.337,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 573.268,
+          "scanner_ms": {
+            "yara-x": 0.437,
+            "office": 0.003,
+            "pdf": 0.592,
+            "custom": 0.091,
+            "yara-x-engine": 0.302,
+            "pdf-chains": 0.566,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 560.029,
+          "scanner_ms": {
+            "yara-x": 0.374,
+            "office": 0.002,
+            "pdf": 0.561,
+            "custom": 0.085,
+            "yara-x-engine": 0.288,
+            "pdf-chains": 0.35,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 568.456,
+          "scanner_ms": {
+            "yara-x": 0.458,
+            "office": 0.003,
+            "pdf": 0.584,
+            "custom": 0.084,
+            "yara-x-engine": 0.298,
+            "pdf-chains": 0.359,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 564.933,
+          "scanner_ms": {
+            "yara-x": 0.354,
+            "office": 0.002,
+            "pdf": 0.559,
+            "custom": 0.084,
+            "yara-x-engine": 0.288,
+            "pdf-chains": 0.382,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 586.649,
+          "scanner_ms": {
+            "yara-x": 0.375,
+            "office": 0.002,
+            "pdf": 0.553,
+            "custom": 0.085,
+            "yara-x-engine": 0.272,
+            "pdf-chains": 0.333,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 557.481,
+          "scanner_ms": {
+            "yara-x": 0.468,
+            "office": 0.004,
+            "pdf": 0.567,
+            "custom": 0.084,
+            "yara-x-engine": 0.285,
+            "pdf-chains": 0.347,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 619.446,
+          "scanner_ms": {
+            "yara-x": 0.433,
+            "office": 0.003,
+            "pdf": 0.631,
+            "custom": 0.092,
+            "yara-x-engine": 0.32,
+            "pdf-chains": 0.359,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 624.138,
+          "scanner_ms": {
+            "yara-x": 0.385,
+            "office": 0.002,
+            "pdf": 0.861,
+            "custom": 0.093,
+            "yara-x-engine": 0.347,
+            "pdf-chains": 0.404,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 578.334,
+          "scanner_ms": {
+            "yara-x": 0.372,
+            "office": 0.004,
+            "pdf": 0.614,
+            "custom": 0.088,
+            "yara-x-engine": 0.376,
+            "pdf-chains": 0.36,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 595.305,
+          "scanner_ms": {
+            "yara-x": 0.438,
+            "office": 0.003,
+            "pdf": 0.566,
+            "custom": 0.083,
+            "yara-x-engine": 0.293,
+            "pdf-chains": 0.396,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 566.254,
+          "scanner_ms": {
+            "yara-x": 0.51,
+            "office": 0.004,
+            "pdf": 0.609,
+            "custom": 0.089,
+            "yara-x-engine": 0.521,
+            "pdf-chains": 0.634,
+            "vba-chains": 0.005,
+            "ooxml-links": 0.004
+          }
+        },
+        {
+          "harness_wall_ms": 573.293,
+          "scanner_ms": {
+            "yara-x": 0.36,
+            "office": 0.002,
+            "pdf": 0.581,
+            "custom": 0.087,
+            "yara-x-engine": 0.272,
+            "pdf-chains": 0.34,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 568.197,
+          "scanner_ms": {
+            "yara-x": 0.37,
+            "office": 0.002,
+            "pdf": 0.564,
+            "custom": 0.084,
+            "yara-x-engine": 0.282,
+            "pdf-chains": 0.355,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 563.543,
+          "scanner_ms": {
+            "yara-x": 0.428,
+            "office": 0.003,
+            "pdf": 0.552,
+            "custom": 0.085,
+            "yara-x-engine": 0.305,
+            "pdf-chains": 0.335,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 584.215,
+          "scanner_ms": {
+            "yara-x": 0.392,
+            "office": 0.004,
+            "pdf": 0.623,
+            "custom": 0.086,
+            "yara-x-engine": 0.348,
+            "pdf-chains": 0.458,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 573.052,
+          "scanner_ms": {
+            "yara-x": 0.447,
+            "office": 0.004,
+            "pdf": 0.566,
+            "custom": 0.085,
+            "yara-x-engine": 0.281,
+            "pdf-chains": 0.355,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 564.886,
+          "scanner_ms": {
+            "yara-x": 0.436,
+            "office": 0.003,
+            "pdf": 0.729,
+            "custom": 0.094,
+            "yara-x-engine": 0.353,
+            "pdf-chains": 0.374,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 571.327,
+          "scanner_ms": {
+            "yara-x": 0.371,
+            "office": 0.003,
+            "pdf": 0.566,
+            "custom": 0.083,
+            "yara-x-engine": 0.299,
+            "pdf-chains": 0.362,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 605.205,
+          "scanner_ms": {
+            "yara-x": 0.369,
+            "office": 0.002,
+            "pdf": 0.609,
+            "custom": 0.094,
+            "yara-x-engine": 0.3,
+            "pdf-chains": 0.339,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        }
+      ]
+    },
+    {
+      "id": "2c-pdf-open-at-page-page-open-js",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction page destination + that page's own open trigger /AA /O",
+      "sha256": "830dd24170f6ecf8eacb6136d7d9c8dba6ebef2fc90b804eedc46aae33b67599",
+      "size_bytes": 597,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SAFE",
+        "yara-x-engine": "SUSPICIOUS",
+        "pdf-chains": "SUSPICIOUS",
+        "vba-chains": "n/a",
+        "ooxml-links": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable"
+      },
+      "rules": [
+        "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+        "pdf:PDF_JAVASCRIPT:MEDIUM",
+        "yara-x-engine:ENGINE_PDF_JavaScript_With_Automatic_Trigger:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 1 JavaScript action(s)."
+        },
+        {
+          "scanner": "yara-x-engine",
+          "rule_id": "ENGINE_PDF_JavaScript_With_Automatic_Trigger",
+          "severity": "MEDIUM",
+          "description": "PDF contains JavaScript and an automatic trigger: an /OpenAction that is not a page destination, or an /AA dictionary not shown to hold only user-interaction triggers."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_PDF_AUTO_CHAIN_SCRIPT",
+          "severity": "MEDIUM",
+          "description": "An automatic action chain runs JavaScript; no embedded file is used on that chain. Evidence: object 3 0 /AA /O: JavaScript (object 5 0). This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: replaced PDF_AUTO_JAVASCRIPT (PDF scanner) by the action-chain rules; replaced PDF_JavaScript_With_Automatic_Action (YARA-X) by ENGINE_PDF_JavaScript_With_Automatic_Trigger, which also matched."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 577.49,
+          "median_ms": 572.9,
+          "p95_ms": 601.077,
+          "max_ms": 626.293,
+          "min_ms": 557.639
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.44,
+          "median_ms": 0.44,
+          "p95_ms": 0.525,
+          "max_ms": 0.609,
+          "min_ms": 0.355
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.59,
+          "median_ms": 0.58,
+          "p95_ms": 0.762,
+          "max_ms": 0.791,
+          "min_ms": 0.513
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.09,
+          "median_ms": 0.09,
+          "p95_ms": 0.1,
+          "max_ms": 0.136,
+          "min_ms": 0.083
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.34,
+          "median_ms": 0.32,
+          "p95_ms": 0.422,
+          "max_ms": 0.423,
+          "min_ms": 0.291
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.41,
+          "median_ms": 0.36,
+          "p95_ms": 0.657,
+          "max_ms": 0.764,
+          "min_ms": 0.315
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.006,
+          "min_ms": 0.002
+        },
+        "ooxml-links": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.004,
+          "min_ms": 0.001
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 557.639,
+          "scanner_ms": {
+            "yara-x": 0.492,
+            "office": 0.004,
+            "pdf": 0.791,
+            "custom": 0.1,
+            "yara-x-engine": 0.354,
+            "pdf-chains": 0.377,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 571.033,
+          "scanner_ms": {
+            "yara-x": 0.435,
+            "office": 0.004,
+            "pdf": 0.53,
+            "custom": 0.085,
+            "yara-x-engine": 0.302,
+            "pdf-chains": 0.318,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 574.811,
+          "scanner_ms": {
+            "yara-x": 0.492,
+            "office": 0.004,
+            "pdf": 0.598,
+            "custom": 0.095,
+            "yara-x-engine": 0.362,
+            "pdf-chains": 0.452,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 584.703,
+          "scanner_ms": {
+            "yara-x": 0.427,
+            "office": 0.003,
+            "pdf": 0.762,
+            "custom": 0.098,
+            "yara-x-engine": 0.423,
+            "pdf-chains": 0.657,
+            "vba-chains": 0.006,
+            "ooxml-links": 0.004
+          }
+        },
+        {
+          "harness_wall_ms": 595.629,
+          "scanner_ms": {
+            "yara-x": 0.431,
+            "office": 0.003,
+            "pdf": 0.647,
+            "custom": 0.136,
+            "yara-x-engine": 0.422,
+            "pdf-chains": 0.764,
+            "vba-chains": 0.005,
+            "ooxml-links": 0.003
+          }
+        },
+        {
+          "harness_wall_ms": 563.942,
+          "scanner_ms": {
+            "yara-x": 0.425,
+            "office": 0.003,
+            "pdf": 0.762,
+            "custom": 0.089,
+            "yara-x-engine": 0.345,
+            "pdf-chains": 0.36,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 566.984,
+          "scanner_ms": {
+            "yara-x": 0.456,
+            "office": 0.004,
+            "pdf": 0.574,
+            "custom": 0.099,
+            "yara-x-engine": 0.343,
+            "pdf-chains": 0.35,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 568.983,
+          "scanner_ms": {
+            "yara-x": 0.367,
+            "office": 0.002,
+            "pdf": 0.516,
+            "custom": 0.083,
+            "yara-x-engine": 0.291,
+            "pdf-chains": 0.34,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 569.285,
+          "scanner_ms": {
+            "yara-x": 0.407,
+            "office": 0.002,
+            "pdf": 0.513,
+            "custom": 0.089,
+            "yara-x-engine": 0.316,
+            "pdf-chains": 0.318,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 569.013,
+          "scanner_ms": {
+            "yara-x": 0.407,
+            "office": 0.003,
+            "pdf": 0.57,
+            "custom": 0.088,
+            "yara-x-engine": 0.302,
+            "pdf-chains": 0.473,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 569.096,
+          "scanner_ms": {
+            "yara-x": 0.609,
+            "office": 0.004,
+            "pdf": 0.592,
+            "custom": 0.094,
+            "yara-x-engine": 0.356,
+            "pdf-chains": 0.394,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.003
+          }
+        },
+        {
+          "harness_wall_ms": 574.772,
+          "scanner_ms": {
+            "yara-x": 0.439,
+            "office": 0.003,
+            "pdf": 0.529,
+            "custom": 0.084,
+            "yara-x-engine": 0.295,
+            "pdf-chains": 0.336,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 570.024,
+          "scanner_ms": {
+            "yara-x": 0.448,
+            "office": 0.003,
+            "pdf": 0.521,
+            "custom": 0.086,
+            "yara-x-engine": 0.327,
+            "pdf-chains": 0.351,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 576.202,
+          "scanner_ms": {
+            "yara-x": 0.515,
+            "office": 0.004,
+            "pdf": 0.586,
+            "custom": 0.092,
+            "yara-x-engine": 0.415,
+            "pdf-chains": 0.441,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 577.682,
+          "scanner_ms": {
+            "yara-x": 0.447,
+            "office": 0.003,
+            "pdf": 0.594,
+            "custom": 0.091,
+            "yara-x-engine": 0.354,
+            "pdf-chains": 0.487,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.003
+          }
+        },
+        {
+          "harness_wall_ms": 626.293,
+          "scanner_ms": {
+            "yara-x": 0.452,
+            "office": 0.003,
+            "pdf": 0.581,
+            "custom": 0.093,
+            "yara-x-engine": 0.308,
+            "pdf-chains": 0.351,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 584.07,
+          "scanner_ms": {
+            "yara-x": 0.525,
+            "office": 0.003,
+            "pdf": 0.541,
+            "custom": 0.091,
+            "yara-x-engine": 0.319,
+            "pdf-chains": 0.343,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 582.208,
+          "scanner_ms": {
+            "yara-x": 0.355,
+            "office": 0.003,
+            "pdf": 0.577,
+            "custom": 0.092,
+            "yara-x-engine": 0.313,
+            "pdf-chains": 0.315,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 601.077,
+          "scanner_ms": {
+            "yara-x": 0.37,
+            "office": 0.003,
+            "pdf": 0.541,
+            "custom": 0.084,
+            "yara-x-engine": 0.32,
+            "pdf-chains": 0.364,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 566.365,
+          "scanner_ms": {
+            "yara-x": 0.357,
+            "office": 0.002,
+            "pdf": 0.515,
+            "custom": 0.088,
+            "yara-x-engine": 0.303,
+            "pdf-chains": 0.318,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        }
+      ]
+    },
+    {
+      "id": "3-pdf-escaped-openaction-js",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction JavaScript written /J#61vaScript /J#53",
+      "sha256": "a1d1340bde10797020a3bf5fbf34f4d3a74dc5327b902c55268a0245b49e2a3c",
+      "size_bytes": 578,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SUSPICIOUS",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "SUSPICIOUS",
+        "vba-chains": "n/a",
+        "ooxml-links": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable"
+      },
+      "rules": [
+        "custom:CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME:MEDIUM",
+        "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+        "pdf:PDF_JAVASCRIPT:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 1 JavaScript action(s)."
+        },
+        {
+          "scanner": "custom",
+          "rule_id": "CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME",
+          "severity": "MEDIUM",
+          "description": "PDF writes 2 active-content name(s) with unnecessary #-escapes, which hides them from plain-text inspection without changing their meaning. Evidence: '/J#61vaScript' decodes to /JavaScript (1x); '/J#53' decodes to /JS (1x). Location: object 5 0. This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_PDF_AUTO_CHAIN_SCRIPT",
+          "severity": "MEDIUM",
+          "description": "An automatic action chain runs JavaScript; no embedded file is used on that chain. Evidence: catalog /OpenAction: JavaScript (object 5 0). This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: replaced PDF_AUTO_JAVASCRIPT (PDF scanner) by the action-chain rules."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 572.52,
+          "median_ms": 566.62,
+          "p95_ms": 592.655,
+          "max_ms": 600.957,
+          "min_ms": 556.894
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.35,
+          "median_ms": 0.34,
+          "p95_ms": 0.441,
+          "max_ms": 0.481,
+          "min_ms": 0.274
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.55,
+          "median_ms": 0.54,
+          "p95_ms": 0.678,
+          "max_ms": 0.713,
+          "min_ms": 0.492
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.19,
+          "median_ms": 0.18,
+          "p95_ms": 0.206,
+          "max_ms": 0.24,
+          "min_ms": 0.169
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.33,
+          "median_ms": 0.31,
+          "p95_ms": 0.366,
+          "max_ms": 0.56,
+          "min_ms": 0.279
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.32,
+          "median_ms": 0.28,
+          "p95_ms": 0.525,
+          "max_ms": 0.525,
+          "min_ms": 0.255
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.001
+        },
+        "ooxml-links": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.003,
+          "min_ms": 0.001
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 561.416,
+          "scanner_ms": {
+            "yara-x": 0.325,
+            "office": 0.002,
+            "pdf": 0.507,
+            "custom": 0.169,
+            "yara-x-engine": 0.309,
+            "pdf-chains": 0.255,
+            "vba-chains": 0.001,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 575.725,
+          "scanner_ms": {
+            "yara-x": 0.299,
+            "office": 0.002,
+            "pdf": 0.512,
+            "custom": 0.24,
+            "yara-x-engine": 0.363,
+            "pdf-chains": 0.333,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 578.561,
+          "scanner_ms": {
+            "yara-x": 0.388,
+            "office": 0.003,
+            "pdf": 0.58,
+            "custom": 0.192,
+            "yara-x-engine": 0.307,
+            "pdf-chains": 0.275,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 565.708,
+          "scanner_ms": {
+            "yara-x": 0.336,
+            "office": 0.003,
+            "pdf": 0.548,
+            "custom": 0.17,
+            "yara-x-engine": 0.288,
+            "pdf-chains": 0.28,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 567.535,
+          "scanner_ms": {
+            "yara-x": 0.298,
+            "office": 0.002,
+            "pdf": 0.536,
+            "custom": 0.179,
+            "yara-x-engine": 0.294,
+            "pdf-chains": 0.278,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 563.913,
+          "scanner_ms": {
+            "yara-x": 0.337,
+            "office": 0.003,
+            "pdf": 0.574,
+            "custom": 0.187,
+            "yara-x-engine": 0.366,
+            "pdf-chains": 0.374,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 572.835,
+          "scanner_ms": {
+            "yara-x": 0.347,
+            "office": 0.003,
+            "pdf": 0.517,
+            "custom": 0.175,
+            "yara-x-engine": 0.291,
+            "pdf-chains": 0.36,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 580.498,
+          "scanner_ms": {
+            "yara-x": 0.374,
+            "office": 0.003,
+            "pdf": 0.504,
+            "custom": 0.177,
+            "yara-x-engine": 0.348,
+            "pdf-chains": 0.348,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 592.655,
+          "scanner_ms": {
+            "yara-x": 0.481,
+            "office": 0.004,
+            "pdf": 0.625,
+            "custom": 0.196,
+            "yara-x-engine": 0.353,
+            "pdf-chains": 0.525,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.003
+          }
+        },
+        {
+          "harness_wall_ms": 563.238,
+          "scanner_ms": {
+            "yara-x": 0.441,
+            "office": 0.004,
+            "pdf": 0.572,
+            "custom": 0.188,
+            "yara-x-engine": 0.314,
+            "pdf-chains": 0.277,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 586.469,
+          "scanner_ms": {
+            "yara-x": 0.309,
+            "office": 0.003,
+            "pdf": 0.51,
+            "custom": 0.179,
+            "yara-x-engine": 0.301,
+            "pdf-chains": 0.26,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 590.671,
+          "scanner_ms": {
+            "yara-x": 0.284,
+            "office": 0.002,
+            "pdf": 0.713,
+            "custom": 0.196,
+            "yara-x-engine": 0.56,
+            "pdf-chains": 0.346,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 564.446,
+          "scanner_ms": {
+            "yara-x": 0.405,
+            "office": 0.003,
+            "pdf": 0.678,
+            "custom": 0.206,
+            "yara-x-engine": 0.357,
+            "pdf-chains": 0.297,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 575.706,
+          "scanner_ms": {
+            "yara-x": 0.289,
+            "office": 0.002,
+            "pdf": 0.55,
+            "custom": 0.176,
+            "yara-x-engine": 0.291,
+            "pdf-chains": 0.286,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 556.894,
+          "scanner_ms": {
+            "yara-x": 0.43,
+            "office": 0.003,
+            "pdf": 0.564,
+            "custom": 0.189,
+            "yara-x-engine": 0.311,
+            "pdf-chains": 0.277,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 563.471,
+          "scanner_ms": {
+            "yara-x": 0.349,
+            "office": 0.003,
+            "pdf": 0.534,
+            "custom": 0.189,
+            "yara-x-engine": 0.305,
+            "pdf-chains": 0.265,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 561.386,
+          "scanner_ms": {
+            "yara-x": 0.337,
+            "office": 0.003,
+            "pdf": 0.531,
+            "custom": 0.184,
+            "yara-x-engine": 0.31,
+            "pdf-chains": 0.525,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 563.114,
+          "scanner_ms": {
+            "yara-x": 0.274,
+            "office": 0.002,
+            "pdf": 0.492,
+            "custom": 0.186,
+            "yara-x-engine": 0.279,
+            "pdf-chains": 0.27,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 565.128,
+          "scanner_ms": {
+            "yara-x": 0.423,
+            "office": 0.003,
+            "pdf": 0.539,
+            "custom": 0.177,
+            "yara-x-engine": 0.311,
+            "pdf-chains": 0.28,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 600.957,
+          "scanner_ms": {
+            "yara-x": 0.324,
+            "office": 0.002,
+            "pdf": 0.513,
+            "custom": 0.182,
+            "yara-x-engine": 0.292,
+            "pdf-chains": 0.262,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        }
+      ]
+    },
+    {
+      "id": "4-pdf-objstm-escaped-js",
+      "ground_truth": "BENIGN",
+      "indicator": "the same action inside a FlateDecode object stream",
+      "sha256": "b256fc5452921634ec592f87184478ad91ccb9cd4167923cef881dbc0ca05cdd",
+      "size_bytes": 657,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SUSPICIOUS",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "SUSPICIOUS",
+        "vba-chains": "n/a",
+        "ooxml-links": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable"
+      },
+      "rules": [
+        "custom:CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME:MEDIUM",
+        "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+        "pdf:PDF_JAVASCRIPT:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 1 JavaScript action(s)."
+        },
+        {
+          "scanner": "custom",
+          "rule_id": "CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME",
+          "severity": "MEDIUM",
+          "description": "PDF writes 2 active-content name(s) with unnecessary #-escapes, which hides them from plain-text inspection without changing their meaning. Evidence: '/J#61vaScript' decodes to /JavaScript (1x); '/J#53' decodes to /JS (1x). Location: object stream of object 6 0. This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_PDF_AUTO_CHAIN_SCRIPT",
+          "severity": "MEDIUM",
+          "description": "An automatic action chain runs JavaScript; no embedded file is used on that chain. Evidence: catalog /OpenAction: JavaScript (object 5 0). This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: replaced PDF_AUTO_JAVASCRIPT (PDF scanner) by the action-chain rules."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 577.91,
+          "median_ms": 570.06,
+          "p95_ms": 611.466,
+          "max_ms": 621.27,
+          "min_ms": 555.143
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.34,
+          "median_ms": 0.33,
+          "p95_ms": 0.4,
+          "max_ms": 0.437,
+          "min_ms": 0.283
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.72,
+          "median_ms": 0.71,
+          "p95_ms": 0.799,
+          "max_ms": 0.946,
+          "min_ms": 0.648
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.23,
+          "median_ms": 0.21,
+          "p95_ms": 0.291,
+          "max_ms": 0.462,
+          "min_ms": 0.196
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.32,
+          "median_ms": 0.3,
+          "p95_ms": 0.443,
+          "max_ms": 0.504,
+          "min_ms": 0.283
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.41,
+          "median_ms": 0.38,
+          "p95_ms": 0.583,
+          "max_ms": 0.661,
+          "min_ms": 0.348
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.001
+        },
+        "ooxml-links": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.003,
+          "min_ms": 0.001
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 569.75,
+          "scanner_ms": {
+            "yara-x": 0.309,
+            "office": 0.002,
+            "pdf": 0.666,
+            "custom": 0.202,
+            "yara-x-engine": 0.287,
+            "pdf-chains": 0.486,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 560.352,
+          "scanner_ms": {
+            "yara-x": 0.333,
+            "office": 0.003,
+            "pdf": 0.685,
+            "custom": 0.214,
+            "yara-x-engine": 0.443,
+            "pdf-chains": 0.418,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 563.208,
+          "scanner_ms": {
+            "yara-x": 0.324,
+            "office": 0.002,
+            "pdf": 0.774,
+            "custom": 0.244,
+            "yara-x-engine": 0.34,
+            "pdf-chains": 0.389,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 568.306,
+          "scanner_ms": {
+            "yara-x": 0.322,
+            "office": 0.002,
+            "pdf": 0.669,
+            "custom": 0.213,
+            "yara-x-engine": 0.285,
+            "pdf-chains": 0.354,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 570.362,
+          "scanner_ms": {
+            "yara-x": 0.298,
+            "office": 0.003,
+            "pdf": 0.665,
+            "custom": 0.202,
+            "yara-x-engine": 0.304,
+            "pdf-chains": 0.38,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 573.126,
+          "scanner_ms": {
+            "yara-x": 0.288,
+            "office": 0.002,
+            "pdf": 0.72,
+            "custom": 0.213,
+            "yara-x-engine": 0.294,
+            "pdf-chains": 0.377,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 583.149,
+          "scanner_ms": {
+            "yara-x": 0.335,
+            "office": 0.003,
+            "pdf": 0.706,
+            "custom": 0.222,
+            "yara-x-engine": 0.29,
+            "pdf-chains": 0.374,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 568.108,
+          "scanner_ms": {
+            "yara-x": 0.366,
+            "office": 0.004,
+            "pdf": 0.946,
+            "custom": 0.462,
+            "yara-x-engine": 0.504,
+            "pdf-chains": 0.532,
+            "vba-chains": 0.004,
+            "ooxml-links": 0.003
+          }
+        },
+        {
+          "harness_wall_ms": 600.975,
+          "scanner_ms": {
+            "yara-x": 0.32,
+            "office": 0.003,
+            "pdf": 0.761,
+            "custom": 0.219,
+            "yara-x-engine": 0.335,
+            "pdf-chains": 0.396,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 621.27,
+          "scanner_ms": {
+            "yara-x": 0.324,
+            "office": 0.002,
+            "pdf": 0.726,
+            "custom": 0.218,
+            "yara-x-engine": 0.301,
+            "pdf-chains": 0.352,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 606.097,
+          "scanner_ms": {
+            "yara-x": 0.437,
+            "office": 0.003,
+            "pdf": 0.691,
+            "custom": 0.206,
+            "yara-x-engine": 0.292,
+            "pdf-chains": 0.365,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 584.272,
+          "scanner_ms": {
+            "yara-x": 0.306,
+            "office": 0.003,
+            "pdf": 0.68,
+            "custom": 0.206,
+            "yara-x-engine": 0.341,
+            "pdf-chains": 0.369,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 565.807,
+          "scanner_ms": {
+            "yara-x": 0.311,
+            "office": 0.003,
+            "pdf": 0.653,
+            "custom": 0.198,
+            "yara-x-engine": 0.292,
+            "pdf-chains": 0.374,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 566.495,
+          "scanner_ms": {
+            "yara-x": 0.365,
+            "office": 0.003,
+            "pdf": 0.717,
+            "custom": 0.212,
+            "yara-x-engine": 0.313,
+            "pdf-chains": 0.583,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 556.415,
+          "scanner_ms": {
+            "yara-x": 0.283,
+            "office": 0.002,
+            "pdf": 0.648,
+            "custom": 0.196,
+            "yara-x-engine": 0.283,
+            "pdf-chains": 0.354,
+            "vba-chains": 0.001,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 555.143,
+          "scanner_ms": {
+            "yara-x": 0.346,
+            "office": 0.003,
+            "pdf": 0.691,
+            "custom": 0.215,
+            "yara-x-engine": 0.286,
+            "pdf-chains": 0.348,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 567.923,
+          "scanner_ms": {
+            "yara-x": 0.368,
+            "office": 0.003,
+            "pdf": 0.708,
+            "custom": 0.291,
+            "yara-x-engine": 0.353,
+            "pdf-chains": 0.415,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 611.466,
+          "scanner_ms": {
+            "yara-x": 0.327,
+            "office": 0.003,
+            "pdf": 0.708,
+            "custom": 0.225,
+            "yara-x-engine": 0.318,
+            "pdf-chains": 0.356,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 571.307,
+          "scanner_ms": {
+            "yara-x": 0.4,
+            "office": 0.004,
+            "pdf": 0.725,
+            "custom": 0.213,
+            "yara-x-engine": 0.294,
+            "pdf-chains": 0.661,
+            "vba-chains": 0.004,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 594.716,
+          "scanner_ms": {
+            "yara-x": 0.38,
+            "office": 0.004,
+            "pdf": 0.799,
+            "custom": 0.207,
+            "yara-x-engine": 0.328,
+            "pdf-chains": 0.369,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        }
+      ]
+    },
+    {
+      "id": "5a-pdf-auto-js-unrelated-attachment",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction JavaScript + a text attachment it never references",
+      "sha256": "48ac8dc02c326363f7d91d947c4fbb2b8b077d1a7ec7c310c801f1fadcc382c8",
+      "size_bytes": 866,
+      "verdicts": {
+        "yara-x": "SUSPICIOUS",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SAFE",
+        "yara-x-engine": "SUSPICIOUS",
+        "pdf-chains": "SUSPICIOUS",
+        "vba-chains": "n/a",
+        "ooxml-links": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable"
+      },
+      "rules": [
+        "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+        "pdf:PDF_EMBEDDED_FILE:LOW",
+        "pdf:PDF_JAVASCRIPT:MEDIUM",
+        "yara-x-engine:ENGINE_PDF_JavaScript_With_Automatic_Trigger:MEDIUM",
+        "yara-x:PDF_Embedded_File:LOW"
+      ],
+      "findings": [
+        {
+          "scanner": "yara-x",
+          "rule_id": "PDF_Embedded_File",
+          "severity": "LOW",
+          "description": "PDF carries an embedded file attachment."
+        },
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 1 JavaScript action(s)."
+        },
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_EMBEDDED_FILE",
+          "severity": "LOW",
+          "description": "PDF carries 1 embedded file(s) (e.g. 'notes.txt')."
+        },
+        {
+          "scanner": "yara-x-engine",
+          "rule_id": "ENGINE_PDF_JavaScript_With_Automatic_Trigger",
+          "severity": "MEDIUM",
+          "description": "PDF contains JavaScript and an automatic trigger: an /OpenAction that is not a page destination, or an /AA dictionary not shown to hold only user-interaction triggers."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_PDF_AUTO_CHAIN_SCRIPT",
+          "severity": "MEDIUM",
+          "description": "An automatic action chain runs JavaScript; no embedded file is used on that chain. Evidence: catalog /OpenAction: JavaScript (object 7 0). This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: replaced PDF_AUTO_JAVASCRIPT, PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD (PDF scanner) by the action-chain rules; replaced PDF_JavaScript_With_Automatic_Action (YARA-X) by ENGINE_PDF_JavaScript_With_Automatic_Trigger, which also matched."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 607.67,
+          "median_ms": 608.62,
+          "p95_ms": 672.079,
+          "max_ms": 677.52,
+          "min_ms": 559.405
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.52,
+          "median_ms": 0.49,
+          "p95_ms": 0.823,
+          "max_ms": 0.838,
+          "min_ms": 0.366
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.006,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.79,
+          "median_ms": 0.76,
+          "p95_ms": 0.943,
+          "max_ms": 1.062,
+          "min_ms": 0.672
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.15,
+          "median_ms": 0.14,
+          "p95_ms": 0.188,
+          "max_ms": 0.333,
+          "min_ms": 0.12
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.35,
+          "median_ms": 0.36,
+          "p95_ms": 0.423,
+          "max_ms": 0.424,
+          "min_ms": 0.294
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.46,
+          "median_ms": 0.43,
+          "p95_ms": 0.576,
+          "max_ms": 0.594,
+          "min_ms": 0.384
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.008,
+          "min_ms": 0.002
+        },
+        "ooxml-links": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.005,
+          "min_ms": 0.001
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 568.631,
+          "scanner_ms": {
+            "yara-x": 0.524,
+            "office": 0.003,
+            "pdf": 0.761,
+            "custom": 0.139,
+            "yara-x-engine": 0.348,
+            "pdf-chains": 0.454,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 597.203,
+          "scanner_ms": {
+            "yara-x": 0.73,
+            "office": 0.004,
+            "pdf": 0.938,
+            "custom": 0.333,
+            "yara-x-engine": 0.424,
+            "pdf-chains": 0.546,
+            "vba-chains": 0.004,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 634.626,
+          "scanner_ms": {
+            "yara-x": 0.506,
+            "office": 0.003,
+            "pdf": 0.824,
+            "custom": 0.144,
+            "yara-x-engine": 0.391,
+            "pdf-chains": 0.465,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.003
+          }
+        },
+        {
+          "harness_wall_ms": 572.53,
+          "scanner_ms": {
+            "yara-x": 0.467,
+            "office": 0.004,
+            "pdf": 0.725,
+            "custom": 0.151,
+            "yara-x-engine": 0.346,
+            "pdf-chains": 0.428,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 571.026,
+          "scanner_ms": {
+            "yara-x": 0.403,
+            "office": 0.002,
+            "pdf": 0.682,
+            "custom": 0.137,
+            "yara-x-engine": 0.301,
+            "pdf-chains": 0.44,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 579.374,
+          "scanner_ms": {
+            "yara-x": 0.366,
+            "office": 0.003,
+            "pdf": 0.682,
+            "custom": 0.123,
+            "yara-x-engine": 0.307,
+            "pdf-chains": 0.403,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 565.999,
+          "scanner_ms": {
+            "yara-x": 0.385,
+            "office": 0.002,
+            "pdf": 0.672,
+            "custom": 0.122,
+            "yara-x-engine": 0.324,
+            "pdf-chains": 0.4,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 613.03,
+          "scanner_ms": {
+            "yara-x": 0.423,
+            "office": 0.003,
+            "pdf": 0.697,
+            "custom": 0.14,
+            "yara-x-engine": 0.344,
+            "pdf-chains": 0.409,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 672.079,
+          "scanner_ms": {
+            "yara-x": 0.838,
+            "office": 0.004,
+            "pdf": 0.778,
+            "custom": 0.127,
+            "yara-x-engine": 0.372,
+            "pdf-chains": 0.407,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 604.22,
+          "scanner_ms": {
+            "yara-x": 0.568,
+            "office": 0.003,
+            "pdf": 0.869,
+            "custom": 0.126,
+            "yara-x-engine": 0.364,
+            "pdf-chains": 0.415,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 639.263,
+          "scanner_ms": {
+            "yara-x": 0.574,
+            "office": 0.003,
+            "pdf": 0.722,
+            "custom": 0.131,
+            "yara-x-engine": 0.336,
+            "pdf-chains": 0.418,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 630.256,
+          "scanner_ms": {
+            "yara-x": 0.418,
+            "office": 0.002,
+            "pdf": 0.676,
+            "custom": 0.12,
+            "yara-x-engine": 0.294,
+            "pdf-chains": 0.384,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 615.894,
+          "scanner_ms": {
+            "yara-x": 0.404,
+            "office": 0.003,
+            "pdf": 0.701,
+            "custom": 0.12,
+            "yara-x-engine": 0.303,
+            "pdf-chains": 0.389,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 677.52,
+          "scanner_ms": {
+            "yara-x": 0.614,
+            "office": 0.005,
+            "pdf": 1.062,
+            "custom": 0.141,
+            "yara-x-engine": 0.378,
+            "pdf-chains": 0.507,
+            "vba-chains": 0.008,
+            "ooxml-links": 0.005
+          }
+        },
+        {
+          "harness_wall_ms": 640.663,
+          "scanner_ms": {
+            "yara-x": 0.823,
+            "office": 0.006,
+            "pdf": 0.943,
+            "custom": 0.137,
+            "yara-x-engine": 0.423,
+            "pdf-chains": 0.594,
+            "vba-chains": 0.004,
+            "ooxml-links": 0.003
+          }
+        },
+        {
+          "harness_wall_ms": 644.171,
+          "scanner_ms": {
+            "yara-x": 0.502,
+            "office": 0.004,
+            "pdf": 0.917,
+            "custom": 0.155,
+            "yara-x-engine": 0.367,
+            "pdf-chains": 0.574,
+            "vba-chains": 0.004,
+            "ooxml-links": 0.003
+          }
+        },
+        {
+          "harness_wall_ms": 617.716,
+          "scanner_ms": {
+            "yara-x": 0.479,
+            "office": 0.003,
+            "pdf": 0.766,
+            "custom": 0.188,
+            "yara-x-engine": 0.407,
+            "pdf-chains": 0.48,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 559.405,
+          "scanner_ms": {
+            "yara-x": 0.378,
+            "office": 0.002,
+            "pdf": 0.842,
+            "custom": 0.127,
+            "yara-x-engine": 0.368,
+            "pdf-chains": 0.576,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 576.266,
+          "scanner_ms": {
+            "yara-x": 0.426,
+            "office": 0.002,
+            "pdf": 0.689,
+            "custom": 0.127,
+            "yara-x-engine": 0.306,
+            "pdf-chains": 0.418,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 573.456,
+          "scanner_ms": {
+            "yara-x": 0.527,
+            "office": 0.004,
+            "pdf": 0.78,
+            "custom": 0.14,
+            "yara-x-engine": 0.371,
+            "pdf-chains": 0.477,
+            "vba-chains": 0.004,
+            "ooxml-links": 0.003
+          }
+        }
+      ]
+    },
+    {
+      "id": "5b-pdf-auto-js-exports-attachment",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction JavaScript that exports the attachment (nLaunch 0)",
+      "sha256": "f55c21380da9580df93ba96674baa1f865aaed4d6675d3a16a5d463d3d69dec4",
+      "size_bytes": 903,
+      "verdicts": {
+        "yara-x": "SUSPICIOUS",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SAFE",
+        "yara-x-engine": "SUSPICIOUS",
+        "pdf-chains": "MALICIOUS",
+        "vba-chains": "n/a",
+        "ooxml-links": "n/a",
+        "aggregate": "MALICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable"
+      },
+      "rules": [
+        "pdf-chains:ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT:HIGH",
+        "pdf:PDF_EMBEDDED_FILE:LOW",
+        "pdf:PDF_JAVASCRIPT:MEDIUM",
+        "yara-x-engine:ENGINE_PDF_JavaScript_With_Automatic_Trigger:MEDIUM",
+        "yara-x:PDF_Embedded_File:LOW"
+      ],
+      "findings": [
+        {
+          "scanner": "yara-x",
+          "rule_id": "PDF_Embedded_File",
+          "severity": "LOW",
+          "description": "PDF carries an embedded file attachment."
+        },
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 1 JavaScript action(s)."
+        },
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_EMBEDDED_FILE",
+          "severity": "LOW",
+          "description": "PDF carries 1 embedded file(s) (e.g. 'notes.txt')."
+        },
+        {
+          "scanner": "yara-x-engine",
+          "rule_id": "ENGINE_PDF_JavaScript_With_Automatic_Trigger",
+          "severity": "MEDIUM",
+          "description": "PDF contains JavaScript and an automatic trigger: an /OpenAction that is not a page destination, or an /AA dictionary not shown to hold only user-interaction triggers."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT",
+          "severity": "HIGH",
+          "description": "An automatic action chain launches or exports a file embedded in this PDF. Evidence: catalog /OpenAction: JavaScript (object 7 0) (exports 'f'). This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: replaced PDF_AUTO_JAVASCRIPT, PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD (PDF scanner) by the action-chain rules; replaced PDF_JavaScript_With_Automatic_Action (YARA-X) by ENGINE_PDF_JavaScript_With_Automatic_Trigger, which also matched."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 584.86,
+          "median_ms": 578.14,
+          "p95_ms": 642.271,
+          "max_ms": 647.422,
+          "min_ms": 552.942
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.48,
+          "median_ms": 0.42,
+          "p95_ms": 0.924,
+          "max_ms": 0.936,
+          "min_ms": 0.357
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.006,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.77,
+          "median_ms": 0.73,
+          "p95_ms": 0.925,
+          "max_ms": 1.207,
+          "min_ms": 0.673
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.14,
+          "median_ms": 0.13,
+          "p95_ms": 0.22,
+          "max_ms": 0.252,
+          "min_ms": 0.124
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.36,
+          "median_ms": 0.33,
+          "p95_ms": 0.439,
+          "max_ms": 0.648,
+          "min_ms": 0.302
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.5,
+          "median_ms": 0.42,
+          "p95_ms": 0.745,
+          "max_ms": 1.459,
+          "min_ms": 0.389
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.008,
+          "min_ms": 0.002
+        },
+        "ooxml-links": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.005,
+          "min_ms": 0.001
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 556.162,
+          "scanner_ms": {
+            "yara-x": 0.4,
+            "office": 0.002,
+            "pdf": 0.826,
+            "custom": 0.133,
+            "yara-x-engine": 0.416,
+            "pdf-chains": 0.432,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 581.144,
+          "scanner_ms": {
+            "yara-x": 0.417,
+            "office": 0.002,
+            "pdf": 0.843,
+            "custom": 0.148,
+            "yara-x-engine": 0.401,
+            "pdf-chains": 0.479,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 584.881,
+          "scanner_ms": {
+            "yara-x": 0.38,
+            "office": 0.003,
+            "pdf": 0.735,
+            "custom": 0.127,
+            "yara-x-engine": 0.313,
+            "pdf-chains": 0.417,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 561.741,
+          "scanner_ms": {
+            "yara-x": 0.357,
+            "office": 0.002,
+            "pdf": 0.867,
+            "custom": 0.132,
+            "yara-x-engine": 0.348,
+            "pdf-chains": 0.424,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 560.07,
+          "scanner_ms": {
+            "yara-x": 0.394,
+            "office": 0.002,
+            "pdf": 0.714,
+            "custom": 0.127,
+            "yara-x-engine": 0.313,
+            "pdf-chains": 0.397,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 587.9,
+          "scanner_ms": {
+            "yara-x": 0.469,
+            "office": 0.003,
+            "pdf": 0.71,
+            "custom": 0.133,
+            "yara-x-engine": 0.324,
+            "pdf-chains": 0.426,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 571.423,
+          "scanner_ms": {
+            "yara-x": 0.924,
+            "office": 0.004,
+            "pdf": 0.71,
+            "custom": 0.13,
+            "yara-x-engine": 0.315,
+            "pdf-chains": 0.436,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 587.738,
+          "scanner_ms": {
+            "yara-x": 0.392,
+            "office": 0.002,
+            "pdf": 0.673,
+            "custom": 0.136,
+            "yara-x-engine": 0.345,
+            "pdf-chains": 0.406,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 647.422,
+          "scanner_ms": {
+            "yara-x": 0.936,
+            "office": 0.006,
+            "pdf": 0.925,
+            "custom": 0.148,
+            "yara-x-engine": 0.648,
+            "pdf-chains": 1.459,
+            "vba-chains": 0.008,
+            "ooxml-links": 0.005
+          }
+        },
+        {
+          "harness_wall_ms": 562.323,
+          "scanner_ms": {
+            "yara-x": 0.512,
+            "office": 0.003,
+            "pdf": 0.736,
+            "custom": 0.14,
+            "yara-x-engine": 0.385,
+            "pdf-chains": 0.495,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 621.864,
+          "scanner_ms": {
+            "yara-x": 0.514,
+            "office": 0.004,
+            "pdf": 0.796,
+            "custom": 0.141,
+            "yara-x-engine": 0.348,
+            "pdf-chains": 0.437,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 622.024,
+          "scanner_ms": {
+            "yara-x": 0.457,
+            "office": 0.003,
+            "pdf": 0.705,
+            "custom": 0.125,
+            "yara-x-engine": 0.305,
+            "pdf-chains": 0.745,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.003
+          }
+        },
+        {
+          "harness_wall_ms": 560.083,
+          "scanner_ms": {
+            "yara-x": 0.389,
+            "office": 0.002,
+            "pdf": 0.718,
+            "custom": 0.124,
+            "yara-x-engine": 0.302,
+            "pdf-chains": 0.389,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 562.708,
+          "scanner_ms": {
+            "yara-x": 0.51,
+            "office": 0.003,
+            "pdf": 0.681,
+            "custom": 0.128,
+            "yara-x-engine": 0.309,
+            "pdf-chains": 0.414,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 552.942,
+          "scanner_ms": {
+            "yara-x": 0.41,
+            "office": 0.003,
+            "pdf": 0.709,
+            "custom": 0.143,
+            "yara-x-engine": 0.346,
+            "pdf-chains": 0.456,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 591.989,
+          "scanner_ms": {
+            "yara-x": 0.483,
+            "office": 0.004,
+            "pdf": 1.207,
+            "custom": 0.252,
+            "yara-x-engine": 0.439,
+            "pdf-chains": 0.552,
+            "vba-chains": 0.004,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 598.219,
+          "scanner_ms": {
+            "yara-x": 0.382,
+            "office": 0.003,
+            "pdf": 0.733,
+            "custom": 0.22,
+            "yara-x-engine": 0.316,
+            "pdf-chains": 0.411,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 642.271,
+          "scanner_ms": {
+            "yara-x": 0.484,
+            "office": 0.003,
+            "pdf": 0.685,
+            "custom": 0.125,
+            "yara-x-engine": 0.302,
+            "pdf-chains": 0.416,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 575.133,
+          "scanner_ms": {
+            "yara-x": 0.431,
+            "office": 0.003,
+            "pdf": 0.792,
+            "custom": 0.126,
+            "yara-x-engine": 0.35,
+            "pdf-chains": 0.411,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 569.142,
+          "scanner_ms": {
+            "yara-x": 0.393,
+            "office": 0.003,
+            "pdf": 0.675,
+            "custom": 0.129,
+            "yara-x-engine": 0.315,
+            "pdf-chains": 0.415,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.001
+          }
+        }
+      ]
+    },
+    {
+      "id": "6a-docx-hyperlink",
+      "ground_truth": "BENIGN",
+      "indicator": "ordinary external hyperlink (negative control)",
+      "sha256": "7a0db7d17fdf8541df4177df056be5629cd37e37b262238532653068a1913ff0",
+      "size_bytes": 1713,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SAFE",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "n/a",
+        "vba-chains": "n/a",
+        "ooxml-links": "SAFE",
+        "aggregate": "SAFE"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "rules": [],
+      "findings": [
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_OFFICE_EXTERNAL_NOT_ACTIVATED",
+          "severity": "INFO",
+          "description": "External relationships are declared, but nothing shows that Office uses them. Evidence: rId9 -> https://example.com/: no element in word/document.xml references 'rId9'."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 581.13,
+          "median_ms": 576.67,
+          "p95_ms": 615.349,
+          "max_ms": 630.088,
+          "min_ms": 560.748
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.34,
+          "median_ms": 0.33,
+          "p95_ms": 0.455,
+          "max_ms": 0.474,
+          "min_ms": 0.286
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 1.8,
+          "median_ms": 1.75,
+          "p95_ms": 1.996,
+          "max_ms": 2.519,
+          "min_ms": 1.647
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.003
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.58,
+          "median_ms": 0.57,
+          "p95_ms": 0.666,
+          "max_ms": 0.698,
+          "min_ms": 0.536
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.35,
+          "median_ms": 0.34,
+          "p95_ms": 0.535,
+          "max_ms": 0.572,
+          "min_ms": 0.29
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.006,
+          "max_ms": 0.006,
+          "min_ms": 0.003
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.07,
+          "median_ms": 0.06,
+          "p95_ms": 0.092,
+          "max_ms": 0.191,
+          "min_ms": 0.058
+        },
+        "ooxml-links": {
+          "n": 20,
+          "mean_ms": 0.42,
+          "median_ms": 0.4,
+          "p95_ms": 0.514,
+          "max_ms": 0.544,
+          "min_ms": 0.354
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 615.349,
+          "scanner_ms": {
+            "yara-x": 0.305,
+            "office": 1.708,
+            "pdf": 0.003,
+            "custom": 0.594,
+            "yara-x-engine": 0.341,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.059,
+            "ooxml-links": 0.367
+          }
+        },
+        {
+          "harness_wall_ms": 562.62,
+          "scanner_ms": {
+            "yara-x": 0.346,
+            "office": 1.672,
+            "pdf": 0.003,
+            "custom": 0.536,
+            "yara-x-engine": 0.319,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.059,
+            "ooxml-links": 0.38
+          }
+        },
+        {
+          "harness_wall_ms": 568.772,
+          "scanner_ms": {
+            "yara-x": 0.384,
+            "office": 1.846,
+            "pdf": 0.004,
+            "custom": 0.58,
+            "yara-x-engine": 0.333,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.063,
+            "ooxml-links": 0.514
+          }
+        },
+        {
+          "harness_wall_ms": 572.228,
+          "scanner_ms": {
+            "yara-x": 0.35,
+            "office": 1.647,
+            "pdf": 0.003,
+            "custom": 0.544,
+            "yara-x-engine": 0.355,
+            "pdf-chains": 0.005,
+            "vba-chains": 0.078,
+            "ooxml-links": 0.433
+          }
+        },
+        {
+          "harness_wall_ms": 564.377,
+          "scanner_ms": {
+            "yara-x": 0.365,
+            "office": 1.809,
+            "pdf": 0.003,
+            "custom": 0.55,
+            "yara-x-engine": 0.351,
+            "pdf-chains": 0.005,
+            "vba-chains": 0.071,
+            "ooxml-links": 0.478
+          }
+        },
+        {
+          "harness_wall_ms": 576.989,
+          "scanner_ms": {
+            "yara-x": 0.294,
+            "office": 1.865,
+            "pdf": 0.003,
+            "custom": 0.538,
+            "yara-x-engine": 0.32,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.059,
+            "ooxml-links": 0.355
+          }
+        },
+        {
+          "harness_wall_ms": 560.748,
+          "scanner_ms": {
+            "yara-x": 0.295,
+            "office": 1.658,
+            "pdf": 0.003,
+            "custom": 0.572,
+            "yara-x-engine": 0.292,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.059,
+            "ooxml-links": 0.358
+          }
+        },
+        {
+          "harness_wall_ms": 590.424,
+          "scanner_ms": {
+            "yara-x": 0.348,
+            "office": 1.797,
+            "pdf": 0.003,
+            "custom": 0.55,
+            "yara-x-engine": 0.321,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.059,
+            "ooxml-links": 0.373
+          }
+        },
+        {
+          "harness_wall_ms": 567.63,
+          "scanner_ms": {
+            "yara-x": 0.352,
+            "office": 1.727,
+            "pdf": 0.004,
+            "custom": 0.552,
+            "yara-x-engine": 0.535,
+            "pdf-chains": 0.006,
+            "vba-chains": 0.191,
+            "ooxml-links": 0.544
+          }
+        },
+        {
+          "harness_wall_ms": 583.366,
+          "scanner_ms": {
+            "yara-x": 0.303,
+            "office": 1.79,
+            "pdf": 0.003,
+            "custom": 0.548,
+            "yara-x-engine": 0.321,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.059,
+            "ooxml-links": 0.443
+          }
+        },
+        {
+          "harness_wall_ms": 570.123,
+          "scanner_ms": {
+            "yara-x": 0.3,
+            "office": 1.65,
+            "pdf": 0.003,
+            "custom": 0.574,
+            "yara-x-engine": 0.29,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.059,
+            "ooxml-links": 0.354
+          }
+        },
+        {
+          "harness_wall_ms": 561.465,
+          "scanner_ms": {
+            "yara-x": 0.286,
+            "office": 1.689,
+            "pdf": 0.003,
+            "custom": 0.592,
+            "yara-x-engine": 0.572,
+            "pdf-chains": 0.006,
+            "vba-chains": 0.078,
+            "ooxml-links": 0.396
+          }
+        },
+        {
+          "harness_wall_ms": 577.549,
+          "scanner_ms": {
+            "yara-x": 0.31,
+            "office": 1.775,
+            "pdf": 0.003,
+            "custom": 0.541,
+            "yara-x-engine": 0.333,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.061,
+            "ooxml-links": 0.46
+          }
+        },
+        {
+          "harness_wall_ms": 584.718,
+          "scanner_ms": {
+            "yara-x": 0.407,
+            "office": 1.934,
+            "pdf": 0.004,
+            "custom": 0.585,
+            "yara-x-engine": 0.376,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.068,
+            "ooxml-links": 0.414
+          }
+        },
+        {
+          "harness_wall_ms": 630.088,
+          "scanner_ms": {
+            "yara-x": 0.291,
+            "office": 1.71,
+            "pdf": 0.004,
+            "custom": 0.666,
+            "yara-x-engine": 0.354,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.067,
+            "ooxml-links": 0.403
+          }
+        },
+        {
+          "harness_wall_ms": 597.333,
+          "scanner_ms": {
+            "yara-x": 0.32,
+            "office": 1.694,
+            "pdf": 0.003,
+            "custom": 0.578,
+            "yara-x-engine": 0.312,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.061,
+            "ooxml-links": 0.393
+          }
+        },
+        {
+          "harness_wall_ms": 607.943,
+          "scanner_ms": {
+            "yara-x": 0.341,
+            "office": 2.519,
+            "pdf": 0.005,
+            "custom": 0.698,
+            "yara-x-engine": 0.368,
+            "pdf-chains": 0.005,
+            "vba-chains": 0.092,
+            "ooxml-links": 0.491
+          }
+        },
+        {
+          "harness_wall_ms": 576.35,
+          "scanner_ms": {
+            "yara-x": 0.293,
+            "office": 1.74,
+            "pdf": 0.003,
+            "custom": 0.571,
+            "yara-x-engine": 0.29,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.06,
+            "ooxml-links": 0.376
+          }
+        },
+        {
+          "harness_wall_ms": 563.291,
+          "scanner_ms": {
+            "yara-x": 0.455,
+            "office": 1.76,
+            "pdf": 0.005,
+            "custom": 0.644,
+            "yara-x-engine": 0.34,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.058,
+            "ooxml-links": 0.377
+          }
+        },
+        {
+          "harness_wall_ms": 591.269,
+          "scanner_ms": {
+            "yara-x": 0.474,
+            "office": 1.996,
+            "pdf": 0.005,
+            "custom": 0.585,
+            "yara-x-engine": 0.353,
+            "pdf-chains": 0.005,
+            "vba-chains": 0.07,
+            "ooxml-links": 0.424
+          }
+        }
+      ]
+    },
+    {
+      "id": "6b-docx-external-template",
+      "ground_truth": "BENIGN",
+      "indicator": "external attachedTemplate https://template.example.invalid/normal.dotm (never fetched)",
+      "sha256": "1930d78d93347a087551bf547bba07dbcdc4fe7d1b79d00cc12960e3b962ab9e",
+      "size_bytes": 1731,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "n/a",
+        "vba-chains": "n/a",
+        "ooxml-links": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "rules": [
+        "office:OFFICE_EXTERNAL_AUTOLOAD:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_EXTERNAL_AUTOLOAD",
+          "severity": "MEDIUM",
+          "description": "An external 'attachedTemplate' relationship loads external content when the document is opened (e.g. 'https://template.example.invalid/normal.dotm')."
+        },
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_OFFICE_EXTERNAL_NOT_ACTIVATED",
+          "severity": "INFO",
+          "description": "External relationships are declared, but nothing shows that Office uses them. Evidence: rId9 -> https://template.example.invalid/normal.dotm: no element in word/document.xml references 'rId9'."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: OFFICE_EXTERNAL_AUTOLOAD (Office scanner) kept although no part Office loads references it: its use is not demonstrated."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 607.52,
+          "median_ms": 604.76,
+          "p95_ms": 669.799,
+          "max_ms": 734.629,
+          "min_ms": 558.031
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.35,
+          "median_ms": 0.34,
+          "p95_ms": 0.45,
+          "max_ms": 0.462,
+          "min_ms": 0.292
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 2.06,
+          "median_ms": 2.05,
+          "p95_ms": 2.635,
+          "max_ms": 2.76,
+          "min_ms": 1.729
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.006,
+          "min_ms": 0.003
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.61,
+          "median_ms": 0.58,
+          "p95_ms": 0.826,
+          "max_ms": 0.885,
+          "min_ms": 0.531
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.36,
+          "median_ms": 0.35,
+          "p95_ms": 0.42,
+          "max_ms": 0.51,
+          "min_ms": 0.303
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.006,
+          "max_ms": 0.009,
+          "min_ms": 0.003
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.07,
+          "median_ms": 0.07,
+          "p95_ms": 0.086,
+          "max_ms": 0.1,
+          "min_ms": 0.059
+        },
+        "ooxml-links": {
+          "n": 20,
+          "mean_ms": 0.45,
+          "median_ms": 0.41,
+          "p95_ms": 0.559,
+          "max_ms": 1.004,
+          "min_ms": 0.35
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 560.132,
+          "scanner_ms": {
+            "yara-x": 0.344,
+            "office": 1.795,
+            "pdf": 0.004,
+            "custom": 0.624,
+            "yara-x-engine": 0.319,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.067,
+            "ooxml-links": 0.381
+          }
+        },
+        {
+          "harness_wall_ms": 572.452,
+          "scanner_ms": {
+            "yara-x": 0.293,
+            "office": 1.746,
+            "pdf": 0.003,
+            "custom": 0.538,
+            "yara-x-engine": 0.305,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.059,
+            "ooxml-links": 0.383
+          }
+        },
+        {
+          "harness_wall_ms": 669.799,
+          "scanner_ms": {
+            "yara-x": 0.406,
+            "office": 1.981,
+            "pdf": 0.004,
+            "custom": 0.632,
+            "yara-x-engine": 0.359,
+            "pdf-chains": 0.005,
+            "vba-chains": 0.064,
+            "ooxml-links": 0.411
+          }
+        },
+        {
+          "harness_wall_ms": 608.675,
+          "scanner_ms": {
+            "yara-x": 0.303,
+            "office": 2.092,
+            "pdf": 0.003,
+            "custom": 0.537,
+            "yara-x-engine": 0.318,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.064,
+            "ooxml-links": 0.378
+          }
+        },
+        {
+          "harness_wall_ms": 598.064,
+          "scanner_ms": {
+            "yara-x": 0.305,
+            "office": 1.864,
+            "pdf": 0.003,
+            "custom": 0.544,
+            "yara-x-engine": 0.303,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.064,
+            "ooxml-links": 1.004
+          }
+        },
+        {
+          "harness_wall_ms": 568.3,
+          "scanner_ms": {
+            "yara-x": 0.427,
+            "office": 2.053,
+            "pdf": 0.005,
+            "custom": 0.541,
+            "yara-x-engine": 0.418,
+            "pdf-chains": 0.006,
+            "vba-chains": 0.085,
+            "ooxml-links": 0.42
+          }
+        },
+        {
+          "harness_wall_ms": 558.031,
+          "scanner_ms": {
+            "yara-x": 0.368,
+            "office": 1.78,
+            "pdf": 0.003,
+            "custom": 0.536,
+            "yara-x-engine": 0.31,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.061,
+            "ooxml-links": 0.35
+          }
+        },
+        {
+          "harness_wall_ms": 596.974,
+          "scanner_ms": {
+            "yara-x": 0.324,
+            "office": 1.729,
+            "pdf": 0.003,
+            "custom": 0.548,
+            "yara-x-engine": 0.403,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.072,
+            "ooxml-links": 0.423
+          }
+        },
+        {
+          "harness_wall_ms": 558.918,
+          "scanner_ms": {
+            "yara-x": 0.313,
+            "office": 1.829,
+            "pdf": 0.003,
+            "custom": 0.531,
+            "yara-x-engine": 0.387,
+            "pdf-chains": 0.006,
+            "vba-chains": 0.082,
+            "ooxml-links": 0.492
+          }
+        },
+        {
+          "harness_wall_ms": 560.767,
+          "scanner_ms": {
+            "yara-x": 0.45,
+            "office": 2.416,
+            "pdf": 0.004,
+            "custom": 0.577,
+            "yara-x-engine": 0.42,
+            "pdf-chains": 0.006,
+            "vba-chains": 0.086,
+            "ooxml-links": 0.456
+          }
+        },
+        {
+          "harness_wall_ms": 571.414,
+          "scanner_ms": {
+            "yara-x": 0.366,
+            "office": 2.071,
+            "pdf": 0.004,
+            "custom": 0.565,
+            "yara-x-engine": 0.345,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.061,
+            "ooxml-links": 0.354
+          }
+        },
+        {
+          "harness_wall_ms": 734.629,
+          "scanner_ms": {
+            "yara-x": 0.35,
+            "office": 2.76,
+            "pdf": 0.006,
+            "custom": 0.672,
+            "yara-x-engine": 0.348,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.06,
+            "ooxml-links": 0.374
+          }
+        },
+        {
+          "harness_wall_ms": 611.712,
+          "scanner_ms": {
+            "yara-x": 0.328,
+            "office": 2.281,
+            "pdf": 0.004,
+            "custom": 0.631,
+            "yara-x-engine": 0.338,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.06,
+            "ooxml-links": 0.383
+          }
+        },
+        {
+          "harness_wall_ms": 624.077,
+          "scanner_ms": {
+            "yara-x": 0.328,
+            "office": 2.117,
+            "pdf": 0.004,
+            "custom": 0.585,
+            "yara-x-engine": 0.51,
+            "pdf-chains": 0.009,
+            "vba-chains": 0.1,
+            "ooxml-links": 0.468
+          }
+        },
+        {
+          "harness_wall_ms": 612.341,
+          "scanner_ms": {
+            "yara-x": 0.406,
+            "office": 2.052,
+            "pdf": 0.004,
+            "custom": 0.701,
+            "yara-x-engine": 0.361,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.074,
+            "ooxml-links": 0.447
+          }
+        },
+        {
+          "harness_wall_ms": 608.891,
+          "scanner_ms": {
+            "yara-x": 0.462,
+            "office": 1.841,
+            "pdf": 0.004,
+            "custom": 0.885,
+            "yara-x-engine": 0.383,
+            "pdf-chains": 0.005,
+            "vba-chains": 0.064,
+            "ooxml-links": 0.559
+          }
+        },
+        {
+          "harness_wall_ms": 654.52,
+          "scanner_ms": {
+            "yara-x": 0.292,
+            "office": 2.251,
+            "pdf": 0.005,
+            "custom": 0.826,
+            "yara-x-engine": 0.366,
+            "pdf-chains": 0.005,
+            "vba-chains": 0.068,
+            "ooxml-links": 0.412
+          }
+        },
+        {
+          "harness_wall_ms": 624.917,
+          "scanner_ms": {
+            "yara-x": 0.433,
+            "office": 2.119,
+            "pdf": 0.004,
+            "custom": 0.621,
+            "yara-x-engine": 0.338,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.06,
+            "ooxml-links": 0.373
+          }
+        },
+        {
+          "harness_wall_ms": 654.915,
+          "scanner_ms": {
+            "yara-x": 0.298,
+            "office": 1.848,
+            "pdf": 0.004,
+            "custom": 0.547,
+            "yara-x-engine": 0.334,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.068,
+            "ooxml-links": 0.531
+          }
+        },
+        {
+          "harness_wall_ms": 600.841,
+          "scanner_ms": {
+            "yara-x": 0.292,
+            "office": 2.635,
+            "pdf": 0.005,
+            "custom": 0.65,
+            "yara-x-engine": 0.38,
+            "pdf-chains": 0.005,
+            "vba-chains": 0.069,
+            "ooxml-links": 0.4
+          }
+        }
+      ]
+    },
+    {
+      "id": "6c-docx-template-referenced-by-settings",
+      "ground_truth": "BENIGN",
+      "indicator": "the same template, referenced by w:attachedTemplate in the settings part, as Word writes it",
+      "sha256": "1f6250ac26083ce3d033715f2a5e48ec6b955199f0ed4c42e33d420ad65d9a8f",
+      "size_bytes": 2412,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "n/a",
+        "vba-chains": "n/a",
+        "ooxml-links": "SUSPICIOUS",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "rules": [
+        "office:OFFICE_EXTERNAL_AUTOLOAD:MEDIUM",
+        "ooxml-links:ENGINE_OFFICE_EXTERNAL_ON_OPEN:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_EXTERNAL_AUTOLOAD",
+          "severity": "MEDIUM",
+          "description": "An external 'attachedTemplate' relationship loads external content when the document is opened (e.g. 'https://template.example.invalid/normal.dotm')."
+        },
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_OFFICE_EXTERNAL_ON_OPEN",
+          "severity": "MEDIUM",
+          "description": "A part Office loads references an external target the document asks for when it opens (fetched unless the application blocks external content). Evidence: package -> word/document.xml (officedocument) -> word/settings.xml (settings) -> attachedTemplate id='rId1' -> attachedtemplate https://template.example.invalid/normal.dotm (w:attachedTemplate: the template is attached when the document op\u2026. This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: OFFICE_EXTERNAL_AUTOLOAD (Office scanner) confirmed: a part Office loads references an external target used on open."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 567.66,
+          "median_ms": 561.14,
+          "p95_ms": 609.054,
+          "max_ms": 631.59,
+          "min_ms": 546.371
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.35,
+          "median_ms": 0.32,
+          "p95_ms": 0.526,
+          "max_ms": 0.676,
+          "min_ms": 0.277
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 1.87,
+          "median_ms": 1.86,
+          "p95_ms": 2.015,
+          "max_ms": 2.084,
+          "min_ms": 1.661
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.005,
+          "min_ms": 0.003
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.7,
+          "median_ms": 0.65,
+          "p95_ms": 0.943,
+          "max_ms": 0.984,
+          "min_ms": 0.634
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.34,
+          "median_ms": 0.32,
+          "p95_ms": 0.466,
+          "max_ms": 0.632,
+          "min_ms": 0.298
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.009,
+          "min_ms": 0.003
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.07,
+          "median_ms": 0.07,
+          "p95_ms": 0.094,
+          "max_ms": 0.108,
+          "min_ms": 0.065
+        },
+        "ooxml-links": {
+          "n": 20,
+          "mean_ms": 0.48,
+          "median_ms": 0.44,
+          "p95_ms": 0.644,
+          "max_ms": 0.72,
+          "min_ms": 0.412
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 631.59,
+          "scanner_ms": {
+            "yara-x": 0.676,
+            "office": 2.008,
+            "pdf": 0.005,
+            "custom": 0.757,
+            "yara-x-engine": 0.632,
+            "pdf-chains": 0.009,
+            "vba-chains": 0.108,
+            "ooxml-links": 0.644
+          }
+        },
+        {
+          "harness_wall_ms": 572.266,
+          "scanner_ms": {
+            "yara-x": 0.323,
+            "office": 1.862,
+            "pdf": 0.003,
+            "custom": 0.637,
+            "yara-x-engine": 0.344,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.078,
+            "ooxml-links": 0.436
+          }
+        },
+        {
+          "harness_wall_ms": 556.088,
+          "scanner_ms": {
+            "yara-x": 0.336,
+            "office": 1.774,
+            "pdf": 0.003,
+            "custom": 0.687,
+            "yara-x-engine": 0.32,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.069,
+            "ooxml-links": 0.424
+          }
+        },
+        {
+          "harness_wall_ms": 565.364,
+          "scanner_ms": {
+            "yara-x": 0.297,
+            "office": 1.82,
+            "pdf": 0.003,
+            "custom": 0.645,
+            "yara-x-engine": 0.326,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.071,
+            "ooxml-links": 0.42
+          }
+        },
+        {
+          "harness_wall_ms": 568.644,
+          "scanner_ms": {
+            "yara-x": 0.338,
+            "office": 1.813,
+            "pdf": 0.003,
+            "custom": 0.646,
+            "yara-x-engine": 0.3,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.069,
+            "ooxml-links": 0.445
+          }
+        },
+        {
+          "harness_wall_ms": 598.048,
+          "scanner_ms": {
+            "yara-x": 0.314,
+            "office": 1.853,
+            "pdf": 0.003,
+            "custom": 0.892,
+            "yara-x-engine": 0.317,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.081,
+            "ooxml-links": 0.72
+          }
+        },
+        {
+          "harness_wall_ms": 609.054,
+          "scanner_ms": {
+            "yara-x": 0.347,
+            "office": 1.924,
+            "pdf": 0.004,
+            "custom": 0.678,
+            "yara-x-engine": 0.466,
+            "pdf-chains": 0.005,
+            "vba-chains": 0.094,
+            "ooxml-links": 0.627
+          }
+        },
+        {
+          "harness_wall_ms": 571.638,
+          "scanner_ms": {
+            "yara-x": 0.322,
+            "office": 1.788,
+            "pdf": 0.003,
+            "custom": 0.637,
+            "yara-x-engine": 0.321,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.066,
+            "ooxml-links": 0.567
+          }
+        },
+        {
+          "harness_wall_ms": 571.609,
+          "scanner_ms": {
+            "yara-x": 0.295,
+            "office": 1.897,
+            "pdf": 0.003,
+            "custom": 0.64,
+            "yara-x-engine": 0.305,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.065,
+            "ooxml-links": 0.469
+          }
+        },
+        {
+          "harness_wall_ms": 569.914,
+          "scanner_ms": {
+            "yara-x": 0.293,
+            "office": 1.661,
+            "pdf": 0.003,
+            "custom": 0.647,
+            "yara-x-engine": 0.327,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.076,
+            "ooxml-links": 0.439
+          }
+        },
+        {
+          "harness_wall_ms": 553.153,
+          "scanner_ms": {
+            "yara-x": 0.277,
+            "office": 1.859,
+            "pdf": 0.003,
+            "custom": 0.984,
+            "yara-x-engine": 0.345,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.072,
+            "ooxml-links": 0.457
+          }
+        },
+        {
+          "harness_wall_ms": 558.93,
+          "scanner_ms": {
+            "yara-x": 0.342,
+            "office": 1.839,
+            "pdf": 0.004,
+            "custom": 0.634,
+            "yara-x-engine": 0.317,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.066,
+            "ooxml-links": 0.414
+          }
+        },
+        {
+          "harness_wall_ms": 549.954,
+          "scanner_ms": {
+            "yara-x": 0.29,
+            "office": 2.015,
+            "pdf": 0.004,
+            "custom": 0.673,
+            "yara-x-engine": 0.313,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.066,
+            "ooxml-links": 0.429
+          }
+        },
+        {
+          "harness_wall_ms": 553.215,
+          "scanner_ms": {
+            "yara-x": 0.377,
+            "office": 1.955,
+            "pdf": 0.004,
+            "custom": 0.642,
+            "yara-x-engine": 0.309,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.066,
+            "ooxml-links": 0.423
+          }
+        },
+        {
+          "harness_wall_ms": 553.816,
+          "scanner_ms": {
+            "yara-x": 0.306,
+            "office": 2.084,
+            "pdf": 0.004,
+            "custom": 0.681,
+            "yara-x-engine": 0.345,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.071,
+            "ooxml-links": 0.427
+          }
+        },
+        {
+          "harness_wall_ms": 552.714,
+          "scanner_ms": {
+            "yara-x": 0.294,
+            "office": 1.693,
+            "pdf": 0.003,
+            "custom": 0.638,
+            "yara-x-engine": 0.299,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.065,
+            "ooxml-links": 0.434
+          }
+        },
+        {
+          "harness_wall_ms": 554.73,
+          "scanner_ms": {
+            "yara-x": 0.297,
+            "office": 1.977,
+            "pdf": 0.003,
+            "custom": 0.638,
+            "yara-x-engine": 0.298,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.067,
+            "ooxml-links": 0.412
+          }
+        },
+        {
+          "harness_wall_ms": 546.371,
+          "scanner_ms": {
+            "yara-x": 0.304,
+            "office": 1.811,
+            "pdf": 0.003,
+            "custom": 0.644,
+            "yara-x-engine": 0.307,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.066,
+            "ooxml-links": 0.414
+          }
+        },
+        {
+          "harness_wall_ms": 563.353,
+          "scanner_ms": {
+            "yara-x": 0.483,
+            "office": 1.977,
+            "pdf": 0.003,
+            "custom": 0.943,
+            "yara-x-engine": 0.365,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.082,
+            "ooxml-links": 0.525
+          }
+        },
+        {
+          "harness_wall_ms": 552.77,
+          "scanner_ms": {
+            "yara-x": 0.526,
+            "office": 1.711,
+            "pdf": 0.003,
+            "custom": 0.747,
+            "yara-x-engine": 0.339,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.074,
+            "ooxml-links": 0.496
+          }
+        }
+      ]
+    },
+    {
+      "id": "6d-docx-linked-picture",
+      "ground_truth": "BENIGN",
+      "indicator": "a picture shown from https://images.example.invalid/pixel.png (a:blip r:link; never fetched)",
+      "sha256": "2c123328e344f3bd2eb978d92683eb52ba5a3b4319226f3269b02609ec2e5113",
+      "size_bytes": 1768,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SAFE",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "n/a",
+        "vba-chains": "n/a",
+        "ooxml-links": "SAFE",
+        "aggregate": "SAFE"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "rules": [],
+      "findings": [
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_EXTERNAL_RESOURCE",
+          "severity": "INFO",
+          "description": "An external 'image' relationship references an external resource (e.g. 'https://images.example.invalid/pixel.png')."
+        },
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_OFFICE_LINKED_PICTURE",
+          "severity": "INFO",
+          "description": "The document shows a picture stored outside the file; it is fetched only if the application loads external content, and then tells that server the document was opened. Evidence: package -> word/document.xml (officedocument) -> blip link='rId9' -> image https://images.example.invalid/pixel.png (blip link: a picture stored outside the file)."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 560.84,
+          "median_ms": 554.34,
+          "p95_ms": 589.969,
+          "max_ms": 595.997,
+          "min_ms": 546.628
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.36,
+          "median_ms": 0.33,
+          "p95_ms": 0.508,
+          "max_ms": 0.595,
+          "min_ms": 0.281
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 1.83,
+          "median_ms": 1.83,
+          "p95_ms": 1.985,
+          "max_ms": 2.093,
+          "min_ms": 1.668
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.011,
+          "min_ms": 0.003
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.59,
+          "median_ms": 0.56,
+          "p95_ms": 0.74,
+          "max_ms": 0.835,
+          "min_ms": 0.538
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.36,
+          "median_ms": 0.33,
+          "p95_ms": 0.449,
+          "max_ms": 0.629,
+          "min_ms": 0.301
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.006,
+          "max_ms": 0.023,
+          "min_ms": 0.003
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.07,
+          "median_ms": 0.06,
+          "p95_ms": 0.088,
+          "max_ms": 0.094,
+          "min_ms": 0.059
+        },
+        "ooxml-links": {
+          "n": 20,
+          "mean_ms": 0.46,
+          "median_ms": 0.42,
+          "p95_ms": 0.646,
+          "max_ms": 0.792,
+          "min_ms": 0.368
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 546.628,
+          "scanner_ms": {
+            "yara-x": 0.321,
+            "office": 1.979,
+            "pdf": 0.004,
+            "custom": 0.615,
+            "yara-x-engine": 0.354,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.064,
+            "ooxml-links": 0.425
+          }
+        },
+        {
+          "harness_wall_ms": 573.92,
+          "scanner_ms": {
+            "yara-x": 0.324,
+            "office": 1.742,
+            "pdf": 0.004,
+            "custom": 0.62,
+            "yara-x-engine": 0.329,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.06,
+            "ooxml-links": 0.397
+          }
+        },
+        {
+          "harness_wall_ms": 551.226,
+          "scanner_ms": {
+            "yara-x": 0.595,
+            "office": 1.771,
+            "pdf": 0.004,
+            "custom": 0.561,
+            "yara-x-engine": 0.422,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.071,
+            "ooxml-links": 0.42
+          }
+        },
+        {
+          "harness_wall_ms": 551.382,
+          "scanner_ms": {
+            "yara-x": 0.312,
+            "office": 1.714,
+            "pdf": 0.003,
+            "custom": 0.538,
+            "yara-x-engine": 0.629,
+            "pdf-chains": 0.006,
+            "vba-chains": 0.085,
+            "ooxml-links": 0.646
+          }
+        },
+        {
+          "harness_wall_ms": 552.826,
+          "scanner_ms": {
+            "yara-x": 0.333,
+            "office": 2.093,
+            "pdf": 0.004,
+            "custom": 0.835,
+            "yara-x-engine": 0.37,
+            "pdf-chains": 0.005,
+            "vba-chains": 0.072,
+            "ooxml-links": 0.512
+          }
+        },
+        {
+          "harness_wall_ms": 558.857,
+          "scanner_ms": {
+            "yara-x": 0.508,
+            "office": 1.906,
+            "pdf": 0.003,
+            "custom": 0.554,
+            "yara-x-engine": 0.334,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.064,
+            "ooxml-links": 0.409
+          }
+        },
+        {
+          "harness_wall_ms": 553.516,
+          "scanner_ms": {
+            "yara-x": 0.291,
+            "office": 1.864,
+            "pdf": 0.003,
+            "custom": 0.558,
+            "yara-x-engine": 0.319,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.064,
+            "ooxml-links": 0.39
+          }
+        },
+        {
+          "harness_wall_ms": 555.253,
+          "scanner_ms": {
+            "yara-x": 0.396,
+            "office": 1.985,
+            "pdf": 0.004,
+            "custom": 0.595,
+            "yara-x-engine": 0.349,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.063,
+            "ooxml-links": 0.417
+          }
+        },
+        {
+          "harness_wall_ms": 578.889,
+          "scanner_ms": {
+            "yara-x": 0.334,
+            "office": 1.788,
+            "pdf": 0.003,
+            "custom": 0.551,
+            "yara-x-engine": 0.327,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.063,
+            "ooxml-links": 0.792
+          }
+        },
+        {
+          "harness_wall_ms": 595.997,
+          "scanner_ms": {
+            "yara-x": 0.294,
+            "office": 1.72,
+            "pdf": 0.003,
+            "custom": 0.542,
+            "yara-x-engine": 0.315,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.059,
+            "ooxml-links": 0.368
+          }
+        },
+        {
+          "harness_wall_ms": 559.333,
+          "scanner_ms": {
+            "yara-x": 0.322,
+            "office": 1.892,
+            "pdf": 0.003,
+            "custom": 0.562,
+            "yara-x-engine": 0.311,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.06,
+            "ooxml-links": 0.542
+          }
+        },
+        {
+          "harness_wall_ms": 554.415,
+          "scanner_ms": {
+            "yara-x": 0.316,
+            "office": 1.857,
+            "pdf": 0.003,
+            "custom": 0.556,
+            "yara-x-engine": 0.301,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.059,
+            "ooxml-links": 0.39
+          }
+        },
+        {
+          "harness_wall_ms": 552.053,
+          "scanner_ms": {
+            "yara-x": 0.386,
+            "office": 1.905,
+            "pdf": 0.004,
+            "custom": 0.607,
+            "yara-x-engine": 0.33,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.063,
+            "ooxml-links": 0.409
+          }
+        },
+        {
+          "harness_wall_ms": 556.233,
+          "scanner_ms": {
+            "yara-x": 0.401,
+            "office": 1.9,
+            "pdf": 0.004,
+            "custom": 0.593,
+            "yara-x-engine": 0.324,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.064,
+            "ooxml-links": 0.406
+          }
+        },
+        {
+          "harness_wall_ms": 550.785,
+          "scanner_ms": {
+            "yara-x": 0.359,
+            "office": 1.773,
+            "pdf": 0.003,
+            "custom": 0.543,
+            "yara-x-engine": 0.343,
+            "pdf-chains": 0.023,
+            "vba-chains": 0.094,
+            "ooxml-links": 0.514
+          }
+        },
+        {
+          "harness_wall_ms": 580.033,
+          "scanner_ms": {
+            "yara-x": 0.369,
+            "office": 1.811,
+            "pdf": 0.011,
+            "custom": 0.545,
+            "yara-x-engine": 0.309,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.059,
+            "ooxml-links": 0.395
+          }
+        },
+        {
+          "harness_wall_ms": 589.969,
+          "scanner_ms": {
+            "yara-x": 0.326,
+            "office": 1.668,
+            "pdf": 0.003,
+            "custom": 0.54,
+            "yara-x-engine": 0.308,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.062,
+            "ooxml-links": 0.433
+          }
+        },
+        {
+          "harness_wall_ms": 551.883,
+          "scanner_ms": {
+            "yara-x": 0.281,
+            "office": 1.774,
+            "pdf": 0.003,
+            "custom": 0.603,
+            "yara-x-engine": 0.346,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.064,
+            "ooxml-links": 0.415
+          }
+        },
+        {
+          "harness_wall_ms": 554.267,
+          "scanner_ms": {
+            "yara-x": 0.342,
+            "office": 1.867,
+            "pdf": 0.004,
+            "custom": 0.549,
+            "yara-x-engine": 0.449,
+            "pdf-chains": 0.005,
+            "vba-chains": 0.088,
+            "ooxml-links": 0.491
+          }
+        },
+        {
+          "harness_wall_ms": 549.434,
+          "scanner_ms": {
+            "yara-x": 0.295,
+            "office": 1.676,
+            "pdf": 0.004,
+            "custom": 0.74,
+            "yara-x-engine": 0.332,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.064,
+            "ooxml-links": 0.387
+          }
+        }
+      ]
+    },
+    {
+      "id": "6g-docx-linked-picture-file-share",
+      "ground_truth": "BENIGN",
+      "indicator": "the same picture on a file share file://fileserver.invalid/share/pixel.png (never fetched)",
+      "sha256": "bdacf5acdcdd555fea3e6bd01827087899a55e42e16561664b16a26548bbc355",
+      "size_bytes": 1772,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "n/a",
+        "vba-chains": "n/a",
+        "ooxml-links": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "rules": [
+        "office:OFFICE_EXTERNAL_NETWORK_PATH:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_EXTERNAL_NETWORK_PATH",
+          "severity": "MEDIUM",
+          "description": "An external 'image' relationship points to a network/file path; opening it can leak Windows credentials (e.g. 'file://fileserver.invalid/share/pixel.png')."
+        },
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_OFFICE_LINKED_PICTURE",
+          "severity": "INFO",
+          "description": "The document shows a picture stored outside the file; it is fetched only if the application loads external content, and then tells that server the document was opened. Evidence: package -> word/document.xml (officedocument) -> blip link='rId9' -> image file://fileserver.invalid/share/pixel.png (blip link: a picture stored outside the file)."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 560.35,
+          "median_ms": 553.56,
+          "p95_ms": 603.669,
+          "max_ms": 611.73,
+          "min_ms": 548.074
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.34,
+          "median_ms": 0.31,
+          "p95_ms": 0.449,
+          "max_ms": 0.459,
+          "min_ms": 0.29
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 1.86,
+          "median_ms": 1.8,
+          "p95_ms": 1.968,
+          "max_ms": 2.714,
+          "min_ms": 1.661
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.003
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.58,
+          "median_ms": 0.57,
+          "p95_ms": 0.622,
+          "max_ms": 0.776,
+          "min_ms": 0.55
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.34,
+          "median_ms": 0.32,
+          "p95_ms": 0.457,
+          "max_ms": 0.484,
+          "min_ms": 0.296
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.006,
+          "max_ms": 0.007,
+          "min_ms": 0.003
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.07,
+          "median_ms": 0.06,
+          "p95_ms": 0.097,
+          "max_ms": 0.1,
+          "min_ms": 0.058
+        },
+        "ooxml-links": {
+          "n": 20,
+          "mean_ms": 0.43,
+          "median_ms": 0.4,
+          "p95_ms": 0.506,
+          "max_ms": 0.624,
+          "min_ms": 0.372
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 557.524,
+          "scanner_ms": {
+            "yara-x": 0.449,
+            "office": 1.849,
+            "pdf": 0.004,
+            "custom": 0.622,
+            "yara-x-engine": 0.319,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.066,
+            "ooxml-links": 0.384
+          }
+        },
+        {
+          "harness_wall_ms": 558.78,
+          "scanner_ms": {
+            "yara-x": 0.448,
+            "office": 1.894,
+            "pdf": 0.003,
+            "custom": 0.555,
+            "yara-x-engine": 0.319,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.059,
+            "ooxml-links": 0.389
+          }
+        },
+        {
+          "harness_wall_ms": 570.968,
+          "scanner_ms": {
+            "yara-x": 0.359,
+            "office": 1.883,
+            "pdf": 0.003,
+            "custom": 0.569,
+            "yara-x-engine": 0.426,
+            "pdf-chains": 0.006,
+            "vba-chains": 0.1,
+            "ooxml-links": 0.506
+          }
+        },
+        {
+          "harness_wall_ms": 564.701,
+          "scanner_ms": {
+            "yara-x": 0.314,
+            "office": 1.798,
+            "pdf": 0.003,
+            "custom": 0.56,
+            "yara-x-engine": 0.484,
+            "pdf-chains": 0.006,
+            "vba-chains": 0.097,
+            "ooxml-links": 0.478
+          }
+        },
+        {
+          "harness_wall_ms": 550.559,
+          "scanner_ms": {
+            "yara-x": 0.313,
+            "office": 1.781,
+            "pdf": 0.004,
+            "custom": 0.586,
+            "yara-x-engine": 0.321,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.06,
+            "ooxml-links": 0.4
+          }
+        },
+        {
+          "harness_wall_ms": 552.119,
+          "scanner_ms": {
+            "yara-x": 0.36,
+            "office": 1.87,
+            "pdf": 0.003,
+            "custom": 0.569,
+            "yara-x-engine": 0.306,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.059,
+            "ooxml-links": 0.386
+          }
+        },
+        {
+          "harness_wall_ms": 555.791,
+          "scanner_ms": {
+            "yara-x": 0.352,
+            "office": 1.785,
+            "pdf": 0.003,
+            "custom": 0.559,
+            "yara-x-engine": 0.296,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.063,
+            "ooxml-links": 0.624
+          }
+        },
+        {
+          "harness_wall_ms": 548.618,
+          "scanner_ms": {
+            "yara-x": 0.308,
+            "office": 1.661,
+            "pdf": 0.003,
+            "custom": 0.557,
+            "yara-x-engine": 0.309,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.063,
+            "ooxml-links": 0.404
+          }
+        },
+        {
+          "harness_wall_ms": 561.702,
+          "scanner_ms": {
+            "yara-x": 0.294,
+            "office": 1.928,
+            "pdf": 0.003,
+            "custom": 0.567,
+            "yara-x-engine": 0.319,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.06,
+            "ooxml-links": 0.404
+          }
+        },
+        {
+          "harness_wall_ms": 550.043,
+          "scanner_ms": {
+            "yara-x": 0.35,
+            "office": 2.714,
+            "pdf": 0.004,
+            "custom": 0.589,
+            "yara-x-engine": 0.344,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.06,
+            "ooxml-links": 0.383
+          }
+        },
+        {
+          "harness_wall_ms": 552.252,
+          "scanner_ms": {
+            "yara-x": 0.302,
+            "office": 1.673,
+            "pdf": 0.003,
+            "custom": 0.593,
+            "yara-x-engine": 0.312,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.064,
+            "ooxml-links": 0.442
+          }
+        },
+        {
+          "harness_wall_ms": 550.669,
+          "scanner_ms": {
+            "yara-x": 0.298,
+            "office": 1.909,
+            "pdf": 0.004,
+            "custom": 0.605,
+            "yara-x-engine": 0.389,
+            "pdf-chains": 0.005,
+            "vba-chains": 0.072,
+            "ooxml-links": 0.416
+          }
+        },
+        {
+          "harness_wall_ms": 552.494,
+          "scanner_ms": {
+            "yara-x": 0.291,
+            "office": 1.764,
+            "pdf": 0.003,
+            "custom": 0.55,
+            "yara-x-engine": 0.299,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.059,
+            "ooxml-links": 0.372
+          }
+        },
+        {
+          "harness_wall_ms": 548.074,
+          "scanner_ms": {
+            "yara-x": 0.299,
+            "office": 1.695,
+            "pdf": 0.003,
+            "custom": 0.776,
+            "yara-x-engine": 0.341,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.063,
+            "ooxml-links": 0.4
+          }
+        },
+        {
+          "harness_wall_ms": 603.669,
+          "scanner_ms": {
+            "yara-x": 0.312,
+            "office": 1.968,
+            "pdf": 0.004,
+            "custom": 0.616,
+            "yara-x-engine": 0.337,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.062,
+            "ooxml-links": 0.451
+          }
+        },
+        {
+          "harness_wall_ms": 611.73,
+          "scanner_ms": {
+            "yara-x": 0.459,
+            "office": 1.89,
+            "pdf": 0.004,
+            "custom": 0.567,
+            "yara-x-engine": 0.368,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.07,
+            "ooxml-links": 0.396
+          }
+        },
+        {
+          "harness_wall_ms": 554.628,
+          "scanner_ms": {
+            "yara-x": 0.318,
+            "office": 1.778,
+            "pdf": 0.003,
+            "custom": 0.564,
+            "yara-x-engine": 0.457,
+            "pdf-chains": 0.007,
+            "vba-chains": 0.096,
+            "ooxml-links": 0.478
+          }
+        },
+        {
+          "harness_wall_ms": 564.026,
+          "scanner_ms": {
+            "yara-x": 0.29,
+            "office": 1.808,
+            "pdf": 0.004,
+            "custom": 0.556,
+            "yara-x-engine": 0.305,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.058,
+            "ooxml-links": 0.382
+          }
+        },
+        {
+          "harness_wall_ms": 548.523,
+          "scanner_ms": {
+            "yara-x": 0.313,
+            "office": 1.778,
+            "pdf": 0.003,
+            "custom": 0.555,
+            "yara-x-engine": 0.314,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.061,
+            "ooxml-links": 0.468
+          }
+        },
+        {
+          "harness_wall_ms": 550.167,
+          "scanner_ms": {
+            "yara-x": 0.342,
+            "office": 1.753,
+            "pdf": 0.003,
+            "custom": 0.575,
+            "yara-x-engine": 0.3,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.058,
+            "ooxml-links": 0.425
+          }
+        }
+      ]
+    },
+    {
+      "id": "6e-docx-embedded-object-displayed",
+      "ground_truth": "BENIGN",
+      "indicator": "an inert OLE container shown by o:OLEObject Type=Embed",
+      "sha256": "f1202a9729ef09a77d8388da9a7d0e11dd705631bcfc45b434bd0d394469fbab",
+      "size_bytes": 2104,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "n/a",
+        "vba-chains": "n/a",
+        "ooxml-links": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "rules": [
+        "office:OFFICE_EMBEDDED_OLE:LOW"
+      ],
+      "findings": [
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_EMBEDDED_OLE",
+          "severity": "LOW",
+          "description": "Document contains an embedded OLE object."
+        },
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_OFFICE_EMBEDDED_OBJECT_DISPLAYED",
+          "severity": "INFO",
+          "description": "Embedded objects are shown in the document; they run only when activated. Evidence: package -> word/document.xml (officedocument) -> OLEObject id='rId10' -> oleobject word/embeddings/oleObject1.bin (OLEObject shows it in the document)."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: OFFICE_EMBEDDED_OLE (Office scanner) kept; the object is shown in the document and runs only when activated."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 555.56,
+          "median_ms": 553.93,
+          "p95_ms": 573.346,
+          "max_ms": 574.712,
+          "min_ms": 546.252
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.34,
+          "median_ms": 0.33,
+          "p95_ms": 0.391,
+          "max_ms": 0.395,
+          "min_ms": 0.285
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 2.43,
+          "median_ms": 2.41,
+          "p95_ms": 2.618,
+          "max_ms": 2.927,
+          "min_ms": 2.243
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.003
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.63,
+          "median_ms": 0.6,
+          "p95_ms": 0.852,
+          "max_ms": 0.97,
+          "min_ms": 0.553
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.35,
+          "median_ms": 0.34,
+          "p95_ms": 0.445,
+          "max_ms": 0.46,
+          "min_ms": 0.292
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.006,
+          "max_ms": 0.007,
+          "min_ms": 0.003
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.07,
+          "median_ms": 0.07,
+          "p95_ms": 0.088,
+          "max_ms": 0.101,
+          "min_ms": 0.061
+        },
+        "ooxml-links": {
+          "n": 20,
+          "mean_ms": 0.49,
+          "median_ms": 0.43,
+          "p95_ms": 0.703,
+          "max_ms": 0.889,
+          "min_ms": 0.364
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 553.954,
+          "scanner_ms": {
+            "yara-x": 0.391,
+            "office": 2.532,
+            "pdf": 0.004,
+            "custom": 0.58,
+            "yara-x-engine": 0.331,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.063,
+            "ooxml-links": 0.382
+          }
+        },
+        {
+          "harness_wall_ms": 573.346,
+          "scanner_ms": {
+            "yara-x": 0.387,
+            "office": 2.431,
+            "pdf": 0.004,
+            "custom": 0.97,
+            "yara-x-engine": 0.445,
+            "pdf-chains": 0.005,
+            "vba-chains": 0.087,
+            "ooxml-links": 0.889
+          }
+        },
+        {
+          "harness_wall_ms": 562.138,
+          "scanner_ms": {
+            "yara-x": 0.349,
+            "office": 2.352,
+            "pdf": 0.004,
+            "custom": 0.764,
+            "yara-x-engine": 0.343,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.074,
+            "ooxml-links": 0.436
+          }
+        },
+        {
+          "harness_wall_ms": 550.641,
+          "scanner_ms": {
+            "yara-x": 0.378,
+            "office": 2.475,
+            "pdf": 0.004,
+            "custom": 0.609,
+            "yara-x-engine": 0.333,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.067,
+            "ooxml-links": 0.568
+          }
+        },
+        {
+          "harness_wall_ms": 562.028,
+          "scanner_ms": {
+            "yara-x": 0.322,
+            "office": 2.406,
+            "pdf": 0.003,
+            "custom": 0.582,
+            "yara-x-engine": 0.385,
+            "pdf-chains": 0.005,
+            "vba-chains": 0.078,
+            "ooxml-links": 0.423
+          }
+        },
+        {
+          "harness_wall_ms": 555.39,
+          "scanner_ms": {
+            "yara-x": 0.314,
+            "office": 2.243,
+            "pdf": 0.003,
+            "custom": 0.599,
+            "yara-x-engine": 0.34,
+            "pdf-chains": 0.005,
+            "vba-chains": 0.073,
+            "ooxml-links": 0.402
+          }
+        },
+        {
+          "harness_wall_ms": 553.903,
+          "scanner_ms": {
+            "yara-x": 0.318,
+            "office": 2.393,
+            "pdf": 0.003,
+            "custom": 0.563,
+            "yara-x-engine": 0.308,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.063,
+            "ooxml-links": 0.388
+          }
+        },
+        {
+          "harness_wall_ms": 546.713,
+          "scanner_ms": {
+            "yara-x": 0.302,
+            "office": 2.421,
+            "pdf": 0.003,
+            "custom": 0.852,
+            "yara-x-engine": 0.342,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.077,
+            "ooxml-links": 0.403
+          }
+        },
+        {
+          "harness_wall_ms": 558.914,
+          "scanner_ms": {
+            "yara-x": 0.321,
+            "office": 2.339,
+            "pdf": 0.003,
+            "custom": 0.596,
+            "yara-x-engine": 0.306,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.063,
+            "ooxml-links": 0.405
+          }
+        },
+        {
+          "harness_wall_ms": 552.809,
+          "scanner_ms": {
+            "yara-x": 0.285,
+            "office": 2.39,
+            "pdf": 0.004,
+            "custom": 0.613,
+            "yara-x-engine": 0.356,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.073,
+            "ooxml-links": 0.591
+          }
+        },
+        {
+          "harness_wall_ms": 547.286,
+          "scanner_ms": {
+            "yara-x": 0.326,
+            "office": 2.451,
+            "pdf": 0.003,
+            "custom": 0.565,
+            "yara-x-engine": 0.391,
+            "pdf-chains": 0.006,
+            "vba-chains": 0.088,
+            "ooxml-links": 0.485
+          }
+        },
+        {
+          "harness_wall_ms": 550.164,
+          "scanner_ms": {
+            "yara-x": 0.349,
+            "office": 2.292,
+            "pdf": 0.003,
+            "custom": 0.553,
+            "yara-x-engine": 0.305,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.061,
+            "ooxml-links": 0.374
+          }
+        },
+        {
+          "harness_wall_ms": 556.494,
+          "scanner_ms": {
+            "yara-x": 0.32,
+            "office": 2.462,
+            "pdf": 0.003,
+            "custom": 0.646,
+            "yara-x-engine": 0.46,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.061,
+            "ooxml-links": 0.364
+          }
+        },
+        {
+          "harness_wall_ms": 557.437,
+          "scanner_ms": {
+            "yara-x": 0.34,
+            "office": 2.927,
+            "pdf": 0.004,
+            "custom": 0.603,
+            "yara-x-engine": 0.339,
+            "pdf-chains": 0.005,
+            "vba-chains": 0.088,
+            "ooxml-links": 0.527
+          }
+        },
+        {
+          "harness_wall_ms": 549.374,
+          "scanner_ms": {
+            "yara-x": 0.356,
+            "office": 2.475,
+            "pdf": 0.004,
+            "custom": 0.633,
+            "yara-x-engine": 0.358,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.069,
+            "ooxml-links": 0.552
+          }
+        },
+        {
+          "harness_wall_ms": 549.325,
+          "scanner_ms": {
+            "yara-x": 0.343,
+            "office": 2.3,
+            "pdf": 0.003,
+            "custom": 0.625,
+            "yara-x-engine": 0.31,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.063,
+            "ooxml-links": 0.392
+          }
+        },
+        {
+          "harness_wall_ms": 546.252,
+          "scanner_ms": {
+            "yara-x": 0.315,
+            "office": 2.379,
+            "pdf": 0.003,
+            "custom": 0.563,
+            "yara-x-engine": 0.34,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.065,
+            "ooxml-links": 0.381
+          }
+        },
+        {
+          "harness_wall_ms": 552.917,
+          "scanner_ms": {
+            "yara-x": 0.361,
+            "office": 2.449,
+            "pdf": 0.004,
+            "custom": 0.604,
+            "yara-x-engine": 0.339,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.067,
+            "ooxml-links": 0.591
+          }
+        },
+        {
+          "harness_wall_ms": 574.712,
+          "scanner_ms": {
+            "yara-x": 0.322,
+            "office": 2.284,
+            "pdf": 0.003,
+            "custom": 0.555,
+            "yara-x-engine": 0.292,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.063,
+            "ooxml-links": 0.703
+          }
+        },
+        {
+          "harness_wall_ms": 557.406,
+          "scanner_ms": {
+            "yara-x": 0.395,
+            "office": 2.618,
+            "pdf": 0.004,
+            "custom": 0.612,
+            "yara-x-engine": 0.442,
+            "pdf-chains": 0.007,
+            "vba-chains": 0.101,
+            "ooxml-links": 0.492
+          }
+        }
+      ]
+    },
+    {
+      "id": "6f-docx-embedded-object-not-displayed",
+      "ground_truth": "BENIGN",
+      "indicator": "the same object with its relationship but no element",
+      "sha256": "e24251266152ceb67bd3e8d0ae646176ccda7c6015957c3e2202d7bdaaec1820",
+      "size_bytes": 2067,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "n/a",
+        "vba-chains": "n/a",
+        "ooxml-links": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed"
+      },
+      "rules": [
+        "office:OFFICE_EMBEDDED_OLE:LOW"
+      ],
+      "findings": [
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_EMBEDDED_OLE",
+          "severity": "LOW",
+          "description": "Document contains an embedded OLE object."
+        },
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_OFFICE_EMBEDDED_OBJECT_NOT_DISPLAYED",
+          "severity": "INFO",
+          "description": "Embedded object parts are present, but no element shows them in the document. Evidence: embeddings/oleObject1.bin: no element in word/document.xml references 'rId10'."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: OFFICE_EMBEDDED_OLE (Office scanner) kept; no element shows the object in the document."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 555.69,
+          "median_ms": 555.28,
+          "p95_ms": 560.498,
+          "max_ms": 576.664,
+          "min_ms": 548.31
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.34,
+          "median_ms": 0.33,
+          "p95_ms": 0.39,
+          "max_ms": 0.401,
+          "min_ms": 0.277
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 2.47,
+          "median_ms": 2.43,
+          "p95_ms": 2.649,
+          "max_ms": 2.738,
+          "min_ms": 2.29
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.003
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.63,
+          "median_ms": 0.59,
+          "p95_ms": 0.772,
+          "max_ms": 0.83,
+          "min_ms": 0.556
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.34,
+          "median_ms": 0.33,
+          "p95_ms": 0.365,
+          "max_ms": 0.483,
+          "min_ms": 0.303
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.007,
+          "min_ms": 0.003
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.07,
+          "median_ms": 0.07,
+          "p95_ms": 0.077,
+          "max_ms": 0.089,
+          "min_ms": 0.062
+        },
+        "ooxml-links": {
+          "n": 20,
+          "mean_ms": 0.43,
+          "median_ms": 0.39,
+          "p95_ms": 0.577,
+          "max_ms": 0.618,
+          "min_ms": 0.36
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 551.014,
+          "scanner_ms": {
+            "yara-x": 0.277,
+            "office": 2.649,
+            "pdf": 0.004,
+            "custom": 0.558,
+            "yara-x-engine": 0.328,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.065,
+            "ooxml-links": 0.374
+          }
+        },
+        {
+          "harness_wall_ms": 559.893,
+          "scanner_ms": {
+            "yara-x": 0.355,
+            "office": 2.487,
+            "pdf": 0.003,
+            "custom": 0.586,
+            "yara-x-engine": 0.314,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.062,
+            "ooxml-links": 0.387
+          }
+        },
+        {
+          "harness_wall_ms": 576.664,
+          "scanner_ms": {
+            "yara-x": 0.282,
+            "office": 2.307,
+            "pdf": 0.004,
+            "custom": 0.635,
+            "yara-x-engine": 0.322,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.065,
+            "ooxml-links": 0.372
+          }
+        },
+        {
+          "harness_wall_ms": 557.23,
+          "scanner_ms": {
+            "yara-x": 0.39,
+            "office": 2.445,
+            "pdf": 0.004,
+            "custom": 0.6,
+            "yara-x-engine": 0.365,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.065,
+            "ooxml-links": 0.384
+          }
+        },
+        {
+          "harness_wall_ms": 559.541,
+          "scanner_ms": {
+            "yara-x": 0.289,
+            "office": 2.644,
+            "pdf": 0.004,
+            "custom": 0.745,
+            "yara-x-engine": 0.334,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.077,
+            "ooxml-links": 0.436
+          }
+        },
+        {
+          "harness_wall_ms": 557.375,
+          "scanner_ms": {
+            "yara-x": 0.401,
+            "office": 2.353,
+            "pdf": 0.003,
+            "custom": 0.746,
+            "yara-x-engine": 0.32,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.074,
+            "ooxml-links": 0.522
+          }
+        },
+        {
+          "harness_wall_ms": 560.498,
+          "scanner_ms": {
+            "yara-x": 0.306,
+            "office": 2.738,
+            "pdf": 0.004,
+            "custom": 0.616,
+            "yara-x-engine": 0.332,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.064,
+            "ooxml-links": 0.618
+          }
+        },
+        {
+          "harness_wall_ms": 550.288,
+          "scanner_ms": {
+            "yara-x": 0.343,
+            "office": 2.325,
+            "pdf": 0.003,
+            "custom": 0.745,
+            "yara-x-engine": 0.303,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.073,
+            "ooxml-links": 0.425
+          }
+        },
+        {
+          "harness_wall_ms": 556.003,
+          "scanner_ms": {
+            "yara-x": 0.369,
+            "office": 2.335,
+            "pdf": 0.003,
+            "custom": 0.584,
+            "yara-x-engine": 0.483,
+            "pdf-chains": 0.007,
+            "vba-chains": 0.089,
+            "ooxml-links": 0.442
+          }
+        },
+        {
+          "harness_wall_ms": 552.997,
+          "scanner_ms": {
+            "yara-x": 0.325,
+            "office": 2.591,
+            "pdf": 0.004,
+            "custom": 0.587,
+            "yara-x-engine": 0.346,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.069,
+            "ooxml-links": 0.577
+          }
+        },
+        {
+          "harness_wall_ms": 554.055,
+          "scanner_ms": {
+            "yara-x": 0.357,
+            "office": 2.424,
+            "pdf": 0.003,
+            "custom": 0.576,
+            "yara-x-engine": 0.311,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.062,
+            "ooxml-links": 0.368
+          }
+        },
+        {
+          "harness_wall_ms": 555.616,
+          "scanner_ms": {
+            "yara-x": 0.324,
+            "office": 2.587,
+            "pdf": 0.004,
+            "custom": 0.59,
+            "yara-x-engine": 0.34,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.066,
+            "ooxml-links": 0.388
+          }
+        },
+        {
+          "harness_wall_ms": 556.924,
+          "scanner_ms": {
+            "yara-x": 0.356,
+            "office": 2.404,
+            "pdf": 0.003,
+            "custom": 0.556,
+            "yara-x-engine": 0.341,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.063,
+            "ooxml-links": 0.36
+          }
+        },
+        {
+          "harness_wall_ms": 550.454,
+          "scanner_ms": {
+            "yara-x": 0.383,
+            "office": 2.409,
+            "pdf": 0.003,
+            "custom": 0.772,
+            "yara-x-engine": 0.344,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.071,
+            "ooxml-links": 0.391
+          }
+        },
+        {
+          "harness_wall_ms": 548.31,
+          "scanner_ms": {
+            "yara-x": 0.314,
+            "office": 2.459,
+            "pdf": 0.003,
+            "custom": 0.571,
+            "yara-x-engine": 0.334,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.063,
+            "ooxml-links": 0.365
+          }
+        },
+        {
+          "harness_wall_ms": 557.567,
+          "scanner_ms": {
+            "yara-x": 0.371,
+            "office": 2.409,
+            "pdf": 0.003,
+            "custom": 0.569,
+            "yara-x-engine": 0.316,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.063,
+            "ooxml-links": 0.533
+          }
+        },
+        {
+          "harness_wall_ms": 554.936,
+          "scanner_ms": {
+            "yara-x": 0.298,
+            "office": 2.363,
+            "pdf": 0.003,
+            "custom": 0.83,
+            "yara-x-engine": 0.331,
+            "pdf-chains": 0.005,
+            "vba-chains": 0.073,
+            "ooxml-links": 0.386
+          }
+        },
+        {
+          "harness_wall_ms": 553.509,
+          "scanner_ms": {
+            "yara-x": 0.328,
+            "office": 2.575,
+            "pdf": 0.003,
+            "custom": 0.577,
+            "yara-x-engine": 0.326,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.068,
+            "ooxml-links": 0.507
+          }
+        },
+        {
+          "harness_wall_ms": 552.063,
+          "scanner_ms": {
+            "yara-x": 0.335,
+            "office": 2.601,
+            "pdf": 0.004,
+            "custom": 0.591,
+            "yara-x-engine": 0.343,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.067,
+            "ooxml-links": 0.385
+          }
+        },
+        {
+          "harness_wall_ms": 548.875,
+          "scanner_ms": {
+            "yara-x": 0.329,
+            "office": 2.29,
+            "pdf": 0.004,
+            "custom": 0.603,
+            "yara-x-engine": 0.315,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.066,
+            "ooxml-links": 0.377
+          }
+        }
+      ]
+    },
+    {
+      "id": "7-docx-macro-declaration-mismatch",
+      "ground_truth": "BENIGN",
+      "indicator": "macro-free DOCX declaration with a vbaProject.bin placeholder",
+      "sha256": "298b3823825cc1fd82f19edfaa811cb5630b2f35b8e42f05cb986b8868b0ea3d",
+      "size_bytes": 1885,
+      "verdicts": {
+        "yara-x": "SUSPICIOUS",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "SUSPICIOUS",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "n/a",
+        "vba-chains": "SAFE",
+        "ooxml-links": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed"
+      },
+      "rules": [
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "office:OFFICE_VBA_UNPARSED:LOW",
+        "yara-x:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "yara-x",
+          "rule_id": "OOXML_VBA_Macros",
+          "severity": "MEDIUM",
+          "description": "Office Open XML (ZIP-based) document contains a VBA macro project (vbaProject.bin)."
+        },
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_VBA_UNPARSED",
+          "severity": "LOW",
+          "description": "Document contains a VBA project storage that could not be parsed."
+        },
+        {
+          "scanner": "custom",
+          "rule_id": "CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH",
+          "severity": "MEDIUM",
+          "description": "The package is declared as a macro-free Word document but contains macro code or macro sheets, so its declared type misrepresents what it carries. Evidence: declared main type 'application/vnd.openxmlformats-officedocument.wordprocessin\u2026'; macro part 'word/vbaProject.bin'; relationship 'rId3' of type vbaProject in 'word/_rels/document.xml.rels'. Location: [Content_Types].xml; _rels/.rels. This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "vba-chains",
+          "rule_id": "ENGINE_VBA_CALL_PATH_UNDETERMINED",
+          "severity": "INFO",
+          "description": "Whether automatically running macro code reaches a dangerous operation could not be determined. Evidence: word/vbaProject.bin is not an OLE VBA project."
+        }
+      ],
+      "isolation_missing": [
+        "network_namespace",
+        "network_verified",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv6_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_unreachable",
+        "capabilities_dropped",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 20,
+          "mean_ms": 552.94,
+          "median_ms": 551.46,
+          "p95_ms": 564.34,
+          "max_ms": 564.553,
+          "min_ms": 544.836
+        },
+        "yara-x": {
+          "n": 20,
+          "mean_ms": 0.4,
+          "median_ms": 0.4,
+          "p95_ms": 0.448,
+          "max_ms": 0.495,
+          "min_ms": 0.352
+        },
+        "office": {
+          "n": 20,
+          "mean_ms": 1.75,
+          "median_ms": 1.75,
+          "p95_ms": 1.837,
+          "max_ms": 1.915,
+          "min_ms": 1.621
+        },
+        "pdf": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.003
+        },
+        "custom": {
+          "n": 20,
+          "mean_ms": 0.61,
+          "median_ms": 0.59,
+          "p95_ms": 0.646,
+          "max_ms": 0.787,
+          "min_ms": 0.565
+        },
+        "yara-x-engine": {
+          "n": 20,
+          "mean_ms": 0.34,
+          "median_ms": 0.32,
+          "p95_ms": 0.427,
+          "max_ms": 0.547,
+          "min_ms": 0.288
+        },
+        "pdf-chains": {
+          "n": 20,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.006,
+          "max_ms": 0.006,
+          "min_ms": 0.003
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.15,
+          "median_ms": 0.14,
+          "p95_ms": 0.209,
+          "max_ms": 0.21,
+          "min_ms": 0.13
+        },
+        "ooxml-links": {
+          "n": 20,
+          "mean_ms": 0.31,
+          "median_ms": 0.29,
+          "p95_ms": 0.418,
+          "max_ms": 0.476,
+          "min_ms": 0.255
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 550.671,
+          "scanner_ms": {
+            "yara-x": 0.495,
+            "office": 1.621,
+            "pdf": 0.003,
+            "custom": 0.586,
+            "yara-x-engine": 0.345,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.154,
+            "ooxml-links": 0.305
+          }
+        },
+        {
+          "harness_wall_ms": 564.34,
+          "scanner_ms": {
+            "yara-x": 0.392,
+            "office": 1.741,
+            "pdf": 0.003,
+            "custom": 0.588,
+            "yara-x-engine": 0.308,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.133,
+            "ooxml-links": 0.272
+          }
+        },
+        {
+          "harness_wall_ms": 552.627,
+          "scanner_ms": {
+            "yara-x": 0.367,
+            "office": 1.746,
+            "pdf": 0.004,
+            "custom": 0.594,
+            "yara-x-engine": 0.326,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.139,
+            "ooxml-links": 0.287
+          }
+        },
+        {
+          "harness_wall_ms": 549.327,
+          "scanner_ms": {
+            "yara-x": 0.364,
+            "office": 1.67,
+            "pdf": 0.003,
+            "custom": 0.591,
+            "yara-x-engine": 0.294,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.13,
+            "ooxml-links": 0.255
+          }
+        },
+        {
+          "harness_wall_ms": 551.336,
+          "scanner_ms": {
+            "yara-x": 0.428,
+            "office": 1.728,
+            "pdf": 0.004,
+            "custom": 0.627,
+            "yara-x-engine": 0.316,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.132,
+            "ooxml-links": 0.281
+          }
+        },
+        {
+          "harness_wall_ms": 551.168,
+          "scanner_ms": {
+            "yara-x": 0.401,
+            "office": 1.696,
+            "pdf": 0.003,
+            "custom": 0.589,
+            "yara-x-engine": 0.303,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.137,
+            "ooxml-links": 0.257
+          }
+        },
+        {
+          "harness_wall_ms": 556.103,
+          "scanner_ms": {
+            "yara-x": 0.385,
+            "office": 1.789,
+            "pdf": 0.003,
+            "custom": 0.575,
+            "yara-x-engine": 0.355,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.136,
+            "ooxml-links": 0.276
+          }
+        },
+        {
+          "harness_wall_ms": 551.581,
+          "scanner_ms": {
+            "yara-x": 0.434,
+            "office": 1.915,
+            "pdf": 0.003,
+            "custom": 0.582,
+            "yara-x-engine": 0.32,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.141,
+            "ooxml-links": 0.264
+          }
+        },
+        {
+          "harness_wall_ms": 555.871,
+          "scanner_ms": {
+            "yara-x": 0.38,
+            "office": 1.827,
+            "pdf": 0.004,
+            "custom": 0.646,
+            "yara-x-engine": 0.355,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.149,
+            "ooxml-links": 0.291
+          }
+        },
+        {
+          "harness_wall_ms": 549.553,
+          "scanner_ms": {
+            "yara-x": 0.362,
+            "office": 1.695,
+            "pdf": 0.004,
+            "custom": 0.594,
+            "yara-x-engine": 0.547,
+            "pdf-chains": 0.006,
+            "vba-chains": 0.21,
+            "ooxml-links": 0.307
+          }
+        },
+        {
+          "harness_wall_ms": 547.21,
+          "scanner_ms": {
+            "yara-x": 0.385,
+            "office": 1.753,
+            "pdf": 0.004,
+            "custom": 0.644,
+            "yara-x-engine": 0.33,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.136,
+            "ooxml-links": 0.411
+          }
+        },
+        {
+          "harness_wall_ms": 556.763,
+          "scanner_ms": {
+            "yara-x": 0.439,
+            "office": 1.837,
+            "pdf": 0.003,
+            "custom": 0.591,
+            "yara-x-engine": 0.321,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.133,
+            "ooxml-links": 0.288
+          }
+        },
+        {
+          "harness_wall_ms": 544.836,
+          "scanner_ms": {
+            "yara-x": 0.357,
+            "office": 1.69,
+            "pdf": 0.003,
+            "custom": 0.565,
+            "yara-x-engine": 0.427,
+            "pdf-chains": 0.006,
+            "vba-chains": 0.209,
+            "ooxml-links": 0.476
+          }
+        },
+        {
+          "harness_wall_ms": 554.923,
+          "scanner_ms": {
+            "yara-x": 0.441,
+            "office": 1.752,
+            "pdf": 0.004,
+            "custom": 0.631,
+            "yara-x-engine": 0.312,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.132,
+            "ooxml-links": 0.287
+          }
+        },
+        {
+          "harness_wall_ms": 548.192,
+          "scanner_ms": {
+            "yara-x": 0.415,
+            "office": 1.753,
+            "pdf": 0.003,
+            "custom": 0.64,
+            "yara-x-engine": 0.311,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.142,
+            "ooxml-links": 0.287
+          }
+        },
+        {
+          "harness_wall_ms": 551.106,
+          "scanner_ms": {
+            "yara-x": 0.421,
+            "office": 1.794,
+            "pdf": 0.003,
+            "custom": 0.586,
+            "yara-x-engine": 0.333,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.139,
+            "ooxml-links": 0.262
+          }
+        },
+        {
+          "harness_wall_ms": 564.553,
+          "scanner_ms": {
+            "yara-x": 0.352,
+            "office": 1.757,
+            "pdf": 0.003,
+            "custom": 0.575,
+            "yara-x-engine": 0.324,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.144,
+            "ooxml-links": 0.278
+          }
+        },
+        {
+          "harness_wall_ms": 549.5,
+          "scanner_ms": {
+            "yara-x": 0.441,
+            "office": 1.815,
+            "pdf": 0.004,
+            "custom": 0.787,
+            "yara-x-engine": 0.355,
+            "pdf-chains": 0.004,
+            "vba-chains": 0.152,
+            "ooxml-links": 0.323
+          }
+        },
+        {
+          "harness_wall_ms": 552.422,
+          "scanner_ms": {
+            "yara-x": 0.38,
+            "office": 1.814,
+            "pdf": 0.003,
+            "custom": 0.576,
+            "yara-x-engine": 0.31,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.13,
+            "ooxml-links": 0.279
+          }
+        },
+        {
+          "harness_wall_ms": 556.744,
+          "scanner_ms": {
+            "yara-x": 0.448,
+            "office": 1.627,
+            "pdf": 0.003,
+            "custom": 0.576,
+            "yara-x-engine": 0.288,
+            "pdf-chains": 0.003,
+            "vba-chains": 0.131,
+            "ooxml-links": 0.418
+          }
+        }
+      ]
+    }
+  ]
+}

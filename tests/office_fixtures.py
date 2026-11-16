@@ -152,11 +152,20 @@ def word_body(inner: str = "<w:p><w:r><w:t>Hello</w:t></w:r></w:p>") -> str:
     return f'<?xml version="1.0" encoding="UTF-8"?><w:document xmlns:w="{W_NS}"><w:body>{inner}</w:body></w:document>'
 
 
+MAIN_CONTENT_TYPES = {
+    "word": "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml",
+    "xl": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml",
+    "ppt": "application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml",
+}
+
+
 def make_ooxml(parts: dict[str, str | bytes], kind: str = "word") -> bytes:
-    """A minimal OOXML package: [Content_Types].xml, root rels and the given parts."""
+    """A minimal OOXML package: [Content_Types].xml, root rels and the given parts. The main part
+    is declared with its real content type, as Office requires."""
     main = {"word": "word/document.xml", "xl": "xl/workbook.xml", "ppt": "ppt/presentation.xml"}[kind]
+    override = f'<Override PartName="/{main}" ContentType="{MAIN_CONTENT_TYPES[kind]}"/>'
     files = {
-        "[Content_Types].xml": CONTENT_TYPES,
+        "[Content_Types].xml": CONTENT_TYPES.replace("</Types>", override + "</Types>"),
         "_rels/.rels": rels(("officeDocument", main, False)),
         main: word_body() if kind == "word" else f'<?xml version="1.0"?><{kind}Root/>',
     }

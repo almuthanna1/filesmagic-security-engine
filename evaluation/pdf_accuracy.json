@@ -1,0 +1,412 @@
+{
+ "dev": [
+  {
+   "id": "D1",
+   "sha256": "a851ee590a94ea6cdb8dc314fe87b271314d6228a3cd6eeae1d06000bdc9fb7d",
+   "size": 131276,
+   "format": "pdf",
+   "note": "original export; C2PA manifest attached by an incremental update"
+  },
+  {
+   "id": "D2",
+   "sha256": "36cba588b5789fd0cbdf10a80b56ec34ab84ceeca83d5e2032da745d2131e37d",
+   "size": 103925,
+   "format": "pdf",
+   "note": "metadata removed; empty /EmbeddedFiles name tree and /AF null"
+  },
+  {
+   "id": "D3",
+   "sha256": "1f35e34990d4213a1106549f6c28bafb518acae14fe3dc63c66c80690dcba1c5",
+   "size": 103925,
+   "format": "pdf",
+   "note": "D2 with those marker bytes blanked (same length)"
+  }
+ ],
+ "heldout": [
+  {
+   "id": "L01",
+   "sha256": "59fca9e80e9a8b3d80f88106118cf9da115a980d1d323cb6124e770241444d94",
+   "size": 107040,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L02",
+   "sha256": "109600ce21a6e005fc8a6a95bd4f6d4e2bbdf26c2596bb5998646ae54321ba18",
+   "size": 3509503,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L03",
+   "sha256": "1bb80972b460a0a56807f4db32afdfac517ff1f35a8c051a37fce38bf3dc3ccd",
+   "size": 406484,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L04",
+   "sha256": "04d84fe2a1b2c1e355544f326a47880749c4cbfdfd7fdb5028e73e5cfff7573d",
+   "size": 2925847,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L05",
+   "sha256": "c73a83bed0876e696d2ded4862e4fee0086c5d42362d84192b491fd0db1c6723",
+   "size": 571880,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L06",
+   "sha256": "841582c98bd892995c3d7b1ab4743a3171929c419c960688c7afa9d2c51e9d2f",
+   "size": 3904996,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L07",
+   "sha256": "8d1ca4c1bc59c91c90729c41abc0d1efa98dfe52f7322116f98f3459f466d6d4",
+   "size": 4648604,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L08",
+   "sha256": "4641fb87304f7bd05e7ad2bc47a57c7de4c1945ea39bae89ddf9ac9d0d70f594",
+   "size": 2775598,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L09",
+   "sha256": "281b6e4e69e523689b1eca68d5442b1f1f5b8ef10a1621cd015d8625d8b3809d",
+   "size": 1037650,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L10",
+   "sha256": "b8f7283a636bfd76bf6cf738d787ee9e7449b96e9619eb83f66a7b6e596d1ed5",
+   "size": 565646,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L11",
+   "sha256": "ae1733fab63b50b86f0682222939a2390c2727b14346a8689f3c2f24ff0dfeca",
+   "size": 1721972,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L12",
+   "sha256": "0cd7a32eb2e4424d65b1bdf887d9ae6e66b3abf6b95246d3bf398db3e839a58d",
+   "size": 1914411,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L13",
+   "sha256": "eadcc89f5153b531b7294a9faba6cf6ac827c8e82bd26df45f79246efc5ac0cd",
+   "size": 871725,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L14",
+   "sha256": "adc0861183f22b9e194faf434247f850c2738b1d38a8d5231e7106a16a6036aa",
+   "size": 230729,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L15",
+   "sha256": "d0679c20d33cc0fd01c3b6773b47d757505ff163e2d06ab3dc41e5ba6dac53e0",
+   "size": 146102,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L16",
+   "sha256": "e343aa1215f794029d3a17f46e4c1e0ac06e66bbaf42c5d8292724bacea886b3",
+   "size": 227909,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L17",
+   "sha256": "03c5e595eec342bf444da20952c7bfa64db1de93e2e1b74472126bf77518c482",
+   "size": 135382,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L18",
+   "sha256": "cb466bbe7922157b900f752f1c387c61118908d56d60e8e127b5e1a4a3286734",
+   "size": 132756,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L19",
+   "sha256": "9d812853e01b59a339b4e49c4638e2c8b72574a55703355472959f73f0d6a13b",
+   "size": 125351,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L20",
+   "sha256": "92420a27a050acd5de161e0ad0b2b4d43b65b28cea8fedb33ef929f99113679d",
+   "size": 217007,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L21",
+   "sha256": "962d972631e075600c0dfc23028eca6c21bc7883d7094ca0c1303a23f3bdeb4c",
+   "size": 240327,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L22",
+   "sha256": "2de97f6c139125b2254b39c603929b0c273a8b8272fed13db0e99051f51bddc2",
+   "size": 203357,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L23",
+   "sha256": "08ecb54c50fcd6029a900d7cc8f244efe6e1c658dd0ae21a7d97c769dfdddefd",
+   "size": 85555,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L24",
+   "sha256": "5d1b21cd33d9dee678f3eb678052a5122c7775059717eb6e2ea4f9cb012704ad",
+   "size": 106111,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L25",
+   "sha256": "51f9e294c11d9c9928b411a5b98def9eb83762422fc5cb79d8af21590d0c357c",
+   "size": 94522,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L26",
+   "sha256": "9141e7d327f2469d93f2a90563a81e94f0170201911fc589a82837715c93a909",
+   "size": 253682,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L27",
+   "sha256": "196333ba5f2bf6ba434ceb0ee08016445725e78ff175034a7ea54cb247fb740a",
+   "size": 160108,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L28",
+   "sha256": "841df45995f6feef83dd73daea5b5e25af81551610232d7cae10ebf4a2f57763",
+   "size": 547251,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L29",
+   "sha256": "2dc1c3bf623d91611def220634079eb0f448b5e1a737a354075391d52e23a454",
+   "size": 195110,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L30",
+   "sha256": "daaadfe163187b1bf1c481229c5e1fb25132c4b7899ad6a5b5d344e1146240dc",
+   "size": 128543,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L31",
+   "sha256": "2f0b1a327d2776ef22977e5b416fca4fac21c70b5c7dc994518bd51b272ef4f9",
+   "size": 137518,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L32",
+   "sha256": "7c32e398c5297453fd91b2b593aeac42f63426b09a0a094a70d100ab7728f0ac",
+   "size": 212326,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L33",
+   "sha256": "f25470853ef47ad1250c8cfb9ed8bfae43821484e25e2bba0813b1e649ea4d6d",
+   "size": 215018,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L34",
+   "sha256": "4eb1889c3b6ceb7f2c5f276d04ebcf5d8434441769cd25e6421da1d93b4cda09",
+   "size": 2829796,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L35",
+   "sha256": "94b26b2d0e9233c96605eeaebcd59c67a0a80973be6d1f98c6c96460dea11a04",
+   "size": 282396,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L36",
+   "sha256": "26dc64d7a8eef082994bbb3691b2283b72d28f6f936dfde060f17e27e24dfb80",
+   "size": 84274,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L37",
+   "sha256": "b9c97ac6939c48866606f4102732eabcf1398b7e8295d11cdf6763fad496c3eb",
+   "size": 173306,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L38",
+   "sha256": "564089a1f5f57609197ad951c3582490ec8abfca0bbcc11099e0939044424bcf",
+   "size": 3863406,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L39",
+   "sha256": "e9684c0a06a2c2f060ac2014fc5ec8086dcb19f0e5abd24e167004c13a563b93",
+   "size": 2584094,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L40",
+   "sha256": "6c7bbfe87eb64b60913c77e5c70ec23324671640613b1650e807ca7d31f8125c",
+   "size": 7706459,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L41",
+   "sha256": "f5619d14990c2d116a11a8f3f3f02dc05d533332a3b1acb4613338737b23f826",
+   "size": 7929493,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L42",
+   "sha256": "baa8738e0b7a9b5aad8edd0379dc683c7dd6f87328098a070b9788315611352d",
+   "size": 6369174,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L43",
+   "sha256": "464b4665b908d9b72498f0fc51a1506e49a6729732a8c0988c14c8a64b8ae75d",
+   "size": 2077528,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L44",
+   "sha256": "e38d1e8008113cdd70ffe1b062cfcbff43fdea87b16bcbff97f567cdeab6afdb",
+   "size": 3866046,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L45",
+   "sha256": "7fba86e5f1df628500baec2c2724609f9af33d343241795a487753615d44c629",
+   "size": 2154874,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L46",
+   "sha256": "4a3e55d2d45d1511b9f7649e1213e60d315a08b19abf56efade0d08548df7480",
+   "size": 911180,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L47",
+   "sha256": "b4f1b948a36d367ad43271255b438625bc3f412bbab1831edc12ff14146e2e75",
+   "size": 1319087,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L48",
+   "sha256": "557116ec49d73bb757fba36fbfd7713aa631023eb780e12465b6b22b1ea9235d",
+   "size": 1702243,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L49",
+   "sha256": "6e3e480ee44e0d0e385cbece551c8aebbe78d31713e236730189a71e6a493f7c",
+   "size": 5971781,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L50",
+   "sha256": "50b3d6efb63ba5e1e54a7303a8d29d00a64dd190f8294d0f869a3b37a2f18cad",
+   "size": 1744740,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L51",
+   "sha256": "d94f4a9401aaaa25490bf1d38525d05015102d6e55b56f5ec63d110ef11997f7",
+   "size": 7236480,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L52",
+   "sha256": "9a377f4cc19a6e7a91159f8b1a372420263646e238b94b83af1ff84d7a21e1dc",
+   "size": 6130372,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L53",
+   "sha256": "6af968a4e915618a1038ded45a728336e44602610975b84093007c57111fb705",
+   "size": 3242611,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L54",
+   "sha256": "d5cd2b18ee85aafb699fb80385367e697f8cc2642105d3dce45c346f1bc3d289",
+   "size": 1503774,
+   "format": "pdf",
+   "note": "third-party instructional material (benign by provenance)"
+  },
+  {
+   "id": "L55",
+   "sha256": "964001770b618bbeaef4cd37465cdf0bb74924b65ba856be04ec305e6f328a31",
+   "size": 2173699,
+   "format": "pptx",
+   "note": "third-party instructional material (benign by provenance)"
+  }
+ ]
+}

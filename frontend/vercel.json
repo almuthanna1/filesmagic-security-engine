@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "git": {
+    "deploymentEnabled": {
+      "security/malware-research-hardening": false,
+      "feature/custom-unified-engine-nov18": false,
+      "fix/lab-engine-connection": false,
+      "research/offline-single-sample": false,
+      "feature/unified-pdf-accuracy": false,
+      "feature/unified-c2pa-accuracy": false,
+      "feature/unified-pypdf-upgrade": false,
+      "feature/production-scan-integration-v1": false
+    }
+  }
+}

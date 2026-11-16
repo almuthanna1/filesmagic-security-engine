@@ -5,11 +5,16 @@ application. Every uploaded file is meant to pass through this engine *before* i
 reaches the FilesMagic conversion pipeline, so dangerous files can be rejected
 early. Honors capstone project.
 
+**Project history:** [Capstone Development History and Research Journal](docs/capstone-development-history.md) is the living chronology of design decisions, experimental evidence, failed attempts, lessons learned and open research questions. It separates the November 9 frozen study from November 13 external validation and is updated as new phases are completed.
+
 ## Current status
 
-**Phase 3C: YARA-X, Office and PDF analysis are implemented. Next: review the stack and benchmark on Render.**
-Not production-ready: detection quality has not been evaluated yet.
-The deployed backend is still the Phase 2B baseline (no scanners) until redeployed.
+**Research hardening (branch `security/malware-research-hardening`), validated on a separate
+benign-only staging deployment** (Render `0a91480`, Vercel Lab `279ad39`, as of 2026-10-26).
+Not production-ready: detection quality has not been evaluated against independently labelled
+samples, and genuine-malware work is blocked pending approvals. Current evidence and status:
+[docs/capstone-evidence-package.md](docs/capstone-evidence-package.md). The original
+production deployment and `main` are unchanged by this branch.
 
 What exists:
 
@@ -23,6 +28,12 @@ What exists:
 - Office scanner (`app/scanners/office.py`): structural analysis of OLE and OOXML documents
 - PDF scanner (`app/scanners/pdf.py`): structural analysis of PDF documents
 - 10 MB upload limit on `POST /scan`
+- Scan authorization: short-lived, single-use, file-bound Ed25519 tokens issued by the passwordless research Lab (`app/auth.py`); token issuance has only a best-effort in-memory throttle
+- Per-scan isolated worker process with resource limits (`app/worker.py`)
+- Malware Evaluation workflow in the Security Lab (`/evaluation`) with CSV/JSON export
+
+Readiness for real malicious samples: **BLOCKED**, see
+[docs/malware-research-readiness.md](docs/malware-research-readiness.md).
 - pytest suite
 
 ## Security architecture
@@ -236,7 +247,8 @@ uvicorn app.main:app --reload
 ```
 
 - Health check: `curl http://localhost:8000/health`
-- Scan a file: `curl -F "file=@example.pdf" http://localhost:8000/scan`
+- Scan a file: the request body is the raw file, with a scan token (see "Access control"):
+  `curl --data-binary @example.pdf -H "Authorization: Bearer <token>" -H "X-Filename: example.pdf" http://localhost:8000/scan`
 - Interactive docs: http://localhost:8000/docs
 
 ### CORS
@@ -252,6 +264,76 @@ SECURITY_ENGINE_CORS_ORIGINS="https://lab.example.com" uvicorn app.main:app
 # Windows PowerShell
 $env:SECURITY_ENGINE_CORS_ORIGINS="https://lab.example.com"; uvicorn app.main:app
 ```
+
+### Access control
+
+`POST /scan` requires `Authorization: Bearer <token>`. Tokens are minted by the Security
+Lab's server-side route `/api/scan-token` without user login, and are:
+
+- **Ed25519-signed**: the Lab (Vercel) holds the private key; the engine (Render) holds only
+  the public key, so nothing on the scanning host can mint tokens;
+- **short-lived** (120 s, at most 300 s accepted) and **single-use** (`jti` replay check);
+- **bound to one file**: its SHA-256 and size, checked after upload (HTTP 403 on mismatch).
+
+The browser hashes the file, gets a token, and uploads the file directly to Render; file
+contents never pass through Vercel.
+
+**Passwordless staging risk:** anyone who can reach this Lab can request file-bound scan
+credentials; these tokens are not user authentication. The token route has only a
+best-effort per-IP, per-function-instance limit (12 issued per 15 minutes), which
+is not a shared distributed abuse control. The Render service still enforces its
+10 MiB upload cap, scan concurrency, token replay checks and isolation. Never
+submit genuine malware or confidential data to hosted staging; use the authorized
+offline VM for any approved malicious-document work. The token is checked before any body byte is read, and
+20 failed attempts per minute from one address make further requests from it HTTP 429. If
+`SECURITY_ENGINE_TOKEN_PUBLIC_KEY` is unset, every scan is refused (`/health` reports
+`auth_configured: false`).
+
+Generate the Ed25519 key pair (Node 20+):
+
+```bash
+node -e "const k=require('crypto').generateKeyPairSync('ed25519');console.log('LAB_SCAN_TOKEN_PRIVATE_KEY='+k.privateKey.export({format:'der',type:'pkcs8'}).toString('base64'));console.log('SECURITY_ENGINE_TOKEN_PUBLIC_KEY='+k.publicKey.export({format:'der',type:'spki'}).toString('base64'))"
+```
+
+### Scan isolation
+
+Each scan runs every scanner in a fresh `python -m app.worker` child process with an empty
+environment; the API never parses a document itself (it only hashes it and reads magic
+bytes). The parent enforces a wall-clock timeout (30 s), caps the worker's output at 1 MB,
+kills the child's whole process group afterwards, and turns any crash, timeout or invalid
+report into `UNABLE_TO_SCAN`. Before reading the document the child applies, where the
+platform allows, two kinds of control:
+
+- **Kernel-enforced (Linux):** rlimits (CPU 20 s, writable memory, no file writes, 32 open
+  files, no new processes/threads, no core dumps) and, if unprivileged namespaces are
+  allowed, a new user + network namespace with no usable network interface. Inside it the
+  worker independently verifies that no outbound route exists (only `lo`, or `lo` plus the
+  kernel's inert `tunl0` fallback device, checked field by field; no usable IPv4/IPv6 routes
+  in `/proc/net`; route lookups to documentation addresses unreachable; no DNS and no packets
+  sent) and reports `network_verified`. It then drops every Linux capability for good
+  (`capabilities_dropped`: empty capability sets including the bounding and ambient sets,
+  `no_new_privs`, locked securebits, confirmed through `/proc/self/status`), so it can no
+  longer reconfigure its namespace. Results also report `isolation_required` (strict mode
+  configured) and `isolation_missing` (required values that are not true).
+- **In-process guard only:** a Python audit hook that refuses sockets, DNS, process
+  creation, `ctypes` library loading and opening files for writing. It catches Python code
+  paths in the parsers; it is **not** an operating-system security boundary, and native
+  code (or a memory-corruption exploit) is not subject to it.
+
+Each result reports which controls were actually applied (`isolation`). With
+`SECURITY_ENGINE_REQUIRE_ISOLATION=1` a worker refuses to analyse anything unless every required one of
+them are in place. The kernel controls are exercised by `tests/test_worker_linux.py`
+(Linux only; CI in `.github/workflows/security-engine-tests.yml`, where they may not skip).
+
+**Logging.** Log lines carry only controlled values: a per-request `request_id` (also returned
+in the scan result), scanner name, failure kind (`malformed_input`, `invalid_structure`,
+`unexpected`, `worker`), exception type, a SHA-256 prefix and the verdict. Expected failures on
+malformed files are concise warnings; `unexpected` failures (possible scanner bugs) are errors
+with a code-location trace (`file:line:function` frames). Filenames, file contents and
+exception messages are never logged, because they can be attacker-controlled.
+
+This is defence in depth, **not a sandbox**: the worker runs as the same user in the same
+container as the API. See [docs/malware-research-readiness.md](docs/malware-research-readiness.md).
 
 ## Security Lab (frontend)
 
@@ -276,14 +358,26 @@ cp .env.example .env.local   # Windows PowerShell: Copy-Item .env.example .env.l
 | Variable | Purpose | Local value |
 |----------|---------|-------------|
 | `NEXT_PUBLIC_SECURITY_ENGINE_URL` | Base URL of the Security Engine API. Inlined at build time, so rebuild after changing it. | `http://localhost:8000` |
+| `LAB_SCAN_TOKEN_PRIVATE_KEY` | Server-only token signing, no login (see "Access control"). | generated locally |
+| `LAB_SCAN_TOKENS_PER_WINDOW` | Optional: tokens per client per 15 minutes (default 12). A comparison uses two. Raise it only for local test runs. | e.g. `500` |
+
+Pages: `/` (scanner: choose the **Original Engine**, the **Custom Unified Engine**, or **Compare both**,
+which scans the file with each engine one after the other and shows verdict differences, retained,
+added and superseded findings, correlation explanations, latency and incomplete-analysis warnings),
+`/history` (every scan's engine, commit, file hash, verdict, findings and timing; export as CSV or
+JSON; results only, never file contents) and `/evaluation` (Malware Evaluation: record each sample's
+source dataset and independently verified classification next to the observed verdict,
+findings, scanner status, versions, duration and isolation; export as CSV or JSON). Records
+hold results only, never file contents, and stay in the browser's localStorage.
 
 Never commit `.env.local` or any real `.env` file.
 
 **Run both services locally** (two terminals):
 
 ```bash
-# Terminal 1, repo root, venv active
-uvicorn app.main:app --reload --port 8000
+# Terminal 1, repo root, venv active. SECURITY_ENGINE_RESEARCH_ENGINES=1 lets /scan run the
+# custom unified engine as well as the original one (research only; leave unset in production).
+SECURITY_ENGINE_RESEARCH_ENGINES=1 uvicorn app.main:app --reload --port 8000
 
 # Terminal 2
 cd frontend
@@ -296,7 +390,25 @@ npm run dev
 | Engine API | http://localhost:8000 |
 | API docs | http://localhost:8000/docs |
 
-Other frontend commands: `npm run lint`, `npx tsc --noEmit`, `npm run build`.
+Other frontend commands: `npm run lint`, `npx tsc --noEmit`, `npm test`, `npm run build`.
+
+**Engine selection.** `POST /scan?engine=reference|unified`. `reference` (default) is the original
+four-scanner engine the FilesMagic pipeline uses. `unified` runs the custom engine in the same
+isolated worker and is accepted only when the API runs with `SECURITY_ENGINE_RESEARCH_ENGINES=1`;
+otherwise it is refused with HTTP 403, never answered by the other engine. The API requires the
+worker to report exactly the selected engine's scanners, and every response names its `engine`
+and source `commit` (`versions.commit`, from `SECURITY_ENGINE_COMMIT`, Render's
+`RENDER_GIT_COMMIT` or the git checkout). `/health` lists the accepted `engines`.
+
+**Acceptance over HTTP** (both services running, inert fixtures only):
+
+```bash
+python -m evaluation.lab_acceptance --lab http://localhost:3000 --api http://localhost:8000     --frozen docs/evidence/custom-engine-1668326 --out <report.json>
+```
+
+It requests a token from the Lab, uploads each fixture of `evaluation.cases` to `/scan` with the
+Lab's `Origin` for both engines, and compares verdicts, rules and scanner statuses with the frozen
+evaluation; it also checks oversized uploads, an unknown engine and an invalid token.
 
 ## Running tests
 
@@ -316,7 +428,9 @@ tiny synthetic byte strings that contain a rule's structural markers (e.g. `%PDF
 and `/Launch`); they are not malware.
 
 `POST /scan` rejects files over **10 MB** with HTTP 413: early from the declared
-`Content-Length`, and exactly while reading the file (at most 10 MB + 1 byte is read).
+`Content-Length`, and exactly while streaming the body into memory (chunked uploads
+included; nothing is spooled to disk). An upload that takes over 60 s gets HTTP 408, and
+only `SECURITY_ENGINE_MAX_CONCURRENT_SCANS` scans run at once (HTTP 429 beyond).
 
 ## Deployment
 
@@ -332,7 +446,7 @@ Vercel ─ Security Lab (Next.js, frontend/)
 Render ─ Security Engine API (FastAPI, Docker)
         │
         ▼
-YARA-X + Office + PDF analysis (in-process)
+isolated worker process per scan: YARA-X + Office + PDF analysis
 ```
 
 ### Backend on Render
@@ -367,6 +481,17 @@ detects Next.js; no `vercel.json` is needed.
 
 | Variable | Where | Value |
 |----------|-------|-------|
+| `LAB_SCAN_TOKEN_PRIVATE_KEY` | Vercel (Production, sensitive) | See "Access control". Never `NEXT_PUBLIC_`. |
+| `SECURITY_ENGINE_TOKEN_PUBLIC_KEY` | Render | Public half of the token key pair. Required: without it every scan is refused. |
+| `SECURITY_ENGINE_CONVERSION_TOKEN_PUBLIC_KEY` | Render (FilesMagic integration) | Public half of the Conversion Engine's token pair; must differ from the Lab key. Only scans authorized by it get signed receipts. See [docs/security-integration-v1.md](docs/security-integration-v1.md). |
+| `SECURITY_ENGINE_RECEIPT_PRIVATE_KEY` | Render (FilesMagic integration, secret) | Ed25519 key (base64 DER PKCS#8) that signs scan receipts. Removed from the environment at start-up. |
+| `SECURITY_ENGINE_MAX_CONCURRENT_SCANS` | Render (optional) | Default `1` (sized for 512 MB). |
+| `SECURITY_ENGINE_WORKER_MEMORY_MB` | Render (optional) | Writable memory per worker, default `320`. |
+| `SECURITY_ENGINE_WORKER_TIMEOUT_SECONDS` | Render (optional) | Default `30`. |
+| `SECURITY_ENGINE_REQUIRE_ISOLATION` | Render (optional) | `1` = refuse to scan without every isolation control. Required for real malware. |
+| `SECURITY_ENGINE_RESEARCH_ENGINES` | Render research staging; also the FilesMagic integration, which uses the unified engine (docs/security-integration-v1.md §12) | `1` = `/scan?engine=unified` runs the custom unified engine. Unset: only the original engine; `unified` is refused (403). |
+| `SECURITY_ENGINE_COMMIT` | Render (optional) | Source commit reported in every result; Render's own `RENDER_GIT_COMMIT` is used when unset. |
+| `SECURITY_ENGINE_NET_DIAGNOSTICS` | Render staging only (optional) | `1` = the worker describes its network namespace (interface names, flags, address and route counts; no addresses) and the API logs it per request ID. Never returned in responses. Diagnostic only: it never changes an isolation result. Leave unset elsewhere. |
 | `NEXT_PUBLIC_SECURITY_ENGINE_URL` | Vercel (Production) | The Render service URL, e.g. `https://<service>.onrender.com`. Inlined at build time, so **redeploy** the frontend after changing it. Public by design: never put secrets in `NEXT_PUBLIC_` variables. |
 | `SECURITY_ENGINE_CORS_ORIGINS` | Render | The exact Vercel production origin, e.g. `https://<project>.vercel.app`: scheme + host, no path, no trailing slash. Comma-separate multiple origins. Never `*` (the API refuses to start). |
 
@@ -376,6 +501,13 @@ blocked until the variable is set. Vercel preview deployments have different
 origins; they are only allowed if listed explicitly.
 
 ### Deployment order
+
+**Upgrading an existing deployment** from the multipart/no-auth version: the old and new
+Lab and engine are incompatible in both directions, so they must be switched (and rolled
+back) together. Follow the coordinated plan in
+[docs/malware-research-readiness.md](docs/malware-research-readiness.md), section 9.
+
+First deployment from scratch (also generate and set the access-control variables above):
 
 1. Deploy the backend to Render (New → Blueprint, select this repository).
 2. Copy the Render HTTPS service URL.
@@ -404,6 +536,7 @@ On the free instance type the service sleeps when idle; the first request after 
 take up to a minute, and the Security Lab may report the API as unreachable until it
 wakes. Retry after `/health` responds.
 
-**Only benign files may be uploaded to the deployed service until the
-pre-malware-testing safeguards (access control, rate limiting, scanner isolation)
-are in place.**
+**Only benign files may be uploaded to the deployed service.** Access control, rate
+limiting and per-scan worker isolation are implemented, but real-malware testing remains
+**BLOCKED** on hosting prerequisites; see
+[docs/malware-research-readiness.md](docs/malware-research-readiness.md).

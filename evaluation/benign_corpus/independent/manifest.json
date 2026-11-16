@@ -1,0 +1,50 @@
+[
+  {
+    "file": "fw9.pdf",
+    "source_url": "https://www.irs.gov/pub/irs-pdf/fw9.pdf",
+    "publisher": "U.S. Internal Revenue Service, Form W-9",
+    "retrieved_utc": "2026-11-08T05:17Z",
+    "http_status": 200,
+    "format": "pdf",
+    "size_bytes": 140815,
+    "sha256": "2d420cbb4123dcf1fb82595b2359cfbb5d81f00b9df9d359fcc7af361d093f53",
+    "ground_truth": "benign by provenance (official publisher, official URL); not verified byte by byte, not guaranteed harmless",
+    "role": "held-out validation: not used to design the false-positive fixes"
+  },
+  {
+    "file": "fw4.pdf",
+    "source_url": "https://www.irs.gov/pub/irs-pdf/fw4.pdf",
+    "publisher": "U.S. Internal Revenue Service, Form W-4",
+    "retrieved_utc": "2026-11-08T05:17Z",
+    "http_status": 200,
+    "format": "pdf",
+    "size_bytes": 208845,
+    "sha256": "92444d8856ce55d9e25dca8b6d1420634fc68b11e1ab1f760916ea29ddd312b2",
+    "ground_truth": "benign by provenance (official publisher, official URL); not verified byte by byte, not guaranteed harmless",
+    "role": "held-out validation: not used to design the false-positive fixes"
+  },
+  {
+    "file": "f1040.pdf",
+    "source_url": "https://www.irs.gov/pub/irs-pdf/f1040.pdf",
+    "publisher": "U.S. Internal Revenue Service, Form 1040",
+    "retrieved_utc": "2026-11-08T05:17Z",
+    "http_status": 200,
+    "format": "pdf",
+    "size_bytes": 220237,
+    "sha256": "3d31c226df0d189ced80e039d01cf0f8820c1019681a0f0ca6264de277b7e982",
+    "ground_truth": "benign by provenance (official publisher, official URL); not verified byte by byte, not guaranteed harmless",
+    "role": "held-out validation: not used to design the false-positive fixes"
+  },
+  {
+    "file": "NST-EST2023-POP.xlsx",
+    "source_url": "https://www2.census.gov/programs-surveys/popest/tables/2020-2023/state/totals/NST-EST2023-POP.xlsx",
+    "publisher": "U.S. Census Bureau, state population estimates 2020-2023",
+    "retrieved_utc": "2026-11-08T05:17Z",
+    "http_status": 200,
+    "format": "xlsx",
+    "size_bytes": 14964,
+    "sha256": "aec49456a006a06bdaba1ec90f032e0412617da40cdda26709074fbc6bb528e6",
+    "ground_truth": "benign by provenance (official publisher, official URL); not verified byte by byte, not guaranteed harmless",
+    "role": "held-out validation: not used to design the false-positive fixes"
+  }
+]

@@ -1,0 +1,58 @@
+{
+  "lab": "https://filesmagic-security-lab-staging.vercel.app",
+  "api": "https://filesmagic-security-engine-staging.onrender.com",
+  "health": {
+    "status": "ok",
+    "service": "filesmagic-security-engine",
+    "scanners_registered": 4,
+    "scanners_ready": 4,
+    "auth_configured": true,
+    "engines": [
+      "reference",
+      "unified"
+    ],
+    "default_engine": "reference",
+    "commit": "7b4f83832e5fdeb1b8a6d58079bbd7640c54dbd8"
+  },
+  "timestamp_utc": "2026-11-08T02:01:52Z",
+  "batch": null,
+  "batch_size": 6,
+  "stopped": null,
+  "checks": 4,
+  "failed": 0,
+  "rows": [
+    {
+      "case": "oversized-token",
+      "engine": "-",
+      "result": {
+        "http": 413,
+        "detail": "File is too large. The maximum upload size is 10 MB."
+      },
+      "problems": []
+    },
+    {
+      "case": "oversized-upload",
+      "engine": "reference",
+      "result": {
+        "http": 413
+      },
+      "problems": []
+    },
+    {
+      "case": "unknown-engine",
+      "engine": "fastest",
+      "result": {
+        "http": 400
+      },
+      "problems": []
+    },
+    {
+      "case": "bad-token",
+      "engine": "unified",
+      "result": {
+        "http": 401
+      },
+      "problems": []
+    }
+  ]
+}

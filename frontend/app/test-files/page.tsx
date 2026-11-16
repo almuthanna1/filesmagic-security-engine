@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { TEST_CASES, type Verdict } from "@/lib/testCatalog";
 import ExternalTestSection from "@/components/ExternalTestSection";
+import AdditionalValidationSection from "@/components/AdditionalValidationSection";
 import styles from "./page.module.css";
 
 type Observation = Verdict | "";
@@ -21,7 +22,7 @@ export default function TestFilesPage() {
       if (!active) return;
       try {
         const data = JSON.parse(window.localStorage.getItem(SAVE_KEY) || "{}");
-        if (data && typeof data === "object") setObserved(data as Observations);
+        if (data && typeof data === "object" && !Array.isArray(data)) setObserved(data as Observations);
       } catch { /* local storage can be blocked, so the list still works */ }
       setLoaded(true);
     });
@@ -43,7 +44,7 @@ export default function TestFilesPage() {
       <header className={styles.header}>
         <p className={styles.eyebrow}>FilesMagic Security Lab / Test library</p>
         <h1>Test Files</h1>
-        <p>Use the independently sourced 10-file evaluation below, or download generated functional fixtures further down the page. Actual verdicts are recorded separately for each set.</p>
+        <p>Test the original 10-file research set, 32 source-pinned validation downloads, or generated functional fixtures. For the new validation set, use the inline scanner to run each file and copy its actual findings without opening another scanner tab.</p>
       </header>
       <div className={styles.warning}>
         <strong>Controlled functional tests — not real malware.</strong> The expected “MALICIOUS” label means the scanner should flag an inert high-severity indicator. Do not count these as true-positive malware samples in your capstone dataset. Do not open active-content test files in PDF/Office viewers; download and upload them directly to the scanner. Real malware must never be uploaded to the public Render endpoint.
@@ -55,6 +56,7 @@ export default function TestFilesPage() {
       </div>
       <p className={styles.help}>Observed verdicts are saved only in this browser (inside the VM). Take a screenshot of this page to share results back in our chat. An unexpected verdict is useful evidence, not an automatic scanner failure.</p>
       <ExternalTestSection />
+      <AdditionalValidationSection />
       <h2 className={styles.syntheticHeading}>Generated functional fixtures</h2>
       {GROUPS.map((group) => (
         <section className={styles.group} key={group} aria-label={group}>
@@ -91,7 +93,7 @@ export default function TestFilesPage() {
           </div>
         </section>
       ))}
-      <footer className={styles.footer}>Fixture set v1 · The expected verdicts are tied to the current three-layer YARA-X / Office / PDF engine. These checks do not measure detection accuracy, recall, or false-positive rates on an independently labelled dataset.</footer>
+      <footer className={styles.footer}>Fixture set v1 · Expected verdicts exercise the unified nine-component engine using inert indicators. These checks do not measure detection accuracy, recall, or false-positive rates on an independently labelled malware dataset.</footer>
     </main>
   );
 }

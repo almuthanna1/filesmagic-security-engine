@@ -1,0 +1,192 @@
+"""OOXML activation graph on inert packages (every external target is an RFC 2606 .invalid host)."""
+
+import pytest
+
+from app import engine, worker
+from app.engine import ooxml_links as links
+from app.engine.ooxml_links import (
+    CLICK, DISPLAYED, IMAGE, NOT_ACTIVATED, ON_ACTION, ON_OPEN, UNDETERMINED, Reference, classify, references,
+)
+from app.scanners import SCANNERS
+from app.scanners.custom.errors import CustomScanError
+from evaluation.cases import INERT_OLE, cases, verdicts
+from tests import custom_fixtures as fx
+
+REL, URL = fx.REL, "https://example.invalid/x"
+CASE = {c["id"]: c["data"] for c in cases()}
+NS = f'xmlns:r="{REL}" xmlns:o="{fx.VML_OFFICE}"'
+
+
+def states(data: bytes) -> list[tuple[str, str]]:
+    return [(a.relationship.id, a.state) for a in links.scan(data).activations]
+
+
+def external(rid: str, rel_type: str = "image") -> tuple:
+    return (rid, f"{REL}/{rel_type}", URL, "External")
+
+
+# ----------------------------------------------------------------------------- what an element means
+
+@pytest.mark.parametrize("element, attrs, auto, state", [
+    ("attachedTemplate", {}, False, ON_OPEN),
+    ("sourceFileName", {}, False, ON_OPEN),
+    ("blip", {}, False, IMAGE),
+    ("imagedata", {}, False, IMAGE),
+    ("OLEObject", {"Type": "Link", "UpdateMode": "Always"}, False, ON_OPEN),
+    ("OLEObject", {"Type": "Link", "UpdateMode": "OnCall"}, False, ON_ACTION),
+    ("oleObject", {"oleUpdate": "OLEUPDATE_ALWAYS"}, False, ON_OPEN),  # Excel
+    ("oleObject", {"oleUpdate": "OLEUPDATE_ONCALL"}, False, ON_ACTION),
+    ("oleObj", {}, True, ON_OPEN),  # PowerPoint with <p:link updateAutomatic="1"/>
+    ("oleObj", {}, False, ON_ACTION),
+    ("subDoc", {}, False, ON_ACTION),
+    ("hyperlink", {}, False, CLICK),
+    ("hlinkClick", {}, False, CLICK),
+    ("somethingNew", {}, False, UNDETERMINED),
+])
+def test_what_the_referencing_element_says_about_an_external_target(element, attrs, auto, state):
+    assert classify(Reference(element, "id", attrs, auto), external=True)[0] == state
+
+
+@pytest.mark.parametrize("element, state", [("OLEObject", DISPLAYED), ("oleObj", DISPLAYED), ("control", DISPLAYED),
+                                            ("somethingNew", UNDETERMINED)])
+def test_what_the_referencing_element_says_about_an_embedded_object(element, state):
+    assert classify(Reference(element, "id", {}), external=False)[0] == state
+
+
+def test_references_are_read_from_relationship_attributes_and_vml_relid():
+    xml = (f'<root {NS} xmlns:p="urn:p"><a r:link="rId1"/><v o:relid="rId2"/><b id="rId3"/>'
+           f'<p:oleObj r:id="rId4"><p:link updateAutomatic="1"/></p:oleObj></root>').encode()
+    refs = references(xml)
+    assert sorted(refs) == ["rId1", "rId2", "rId4"]  # a plain "id" attribute names no relationship
+    assert refs["rId4"][0].auto_update is True
+
+
+# ----------------------------------------------------------------------------- packages
+
+def test_a_template_is_on_open_only_when_settings_references_it():
+    assert states(CASE["6c-docx-template-referenced-by-settings"]) == [("rId1", ON_OPEN)]
+    assert states(CASE["6b-docx-external-template"]) == [("rId9", NOT_ACTIVATED)]
+
+
+def test_the_activation_chain_names_every_step():
+    chain = links.scan(CASE["6c-docx-template-referenced-by-settings"]).activations[0].chain
+    assert chain == ("package -> word/document.xml (officedocument) -> word/settings.xml (settings) -> "
+                     "attachedTemplate id='rId1' -> attachedtemplate https://template.example.invalid/normal.dotm")
+
+
+def test_linked_pictures_and_vml_images_load_on_open():
+    vml = fx.linked_docx(body='<w:p><w:r><w:pict><v:imagedata r:id="rId9"/></w:pict></w:r></w:p>',
+                         main_rels=(external("rId9"),))
+    assert states(CASE["6d-docx-linked-picture"]) == states(vml) == [("rId9", IMAGE)]
+
+
+def test_an_auto_updating_ole_link_loads_on_open_and_an_on_call_one_on_action():
+    def ole(mode):
+        body = f'<w:p><w:r><w:object><o:OLEObject Type="Link" UpdateMode="{mode}" r:id="rId9"/></w:object></w:r></w:p>'
+        return fx.linked_docx(body=body, main_rels=(external("rId9", "oleObject"),))
+    assert states(ole("Always")) == [("rId9", ON_OPEN)] and states(ole("OnCall")) == [("rId9", ON_ACTION)]
+
+
+def test_embedded_objects_are_displayed_or_merely_present():
+    assert states(CASE["6e-docx-embedded-object-displayed"]) == [("rId10", DISPLAYED)]
+    assert states(CASE["6f-docx-embedded-object-not-displayed"]) == [("rId10", NOT_ACTIVATED)]
+    orphan = fx.linked_docx(parts={"word/embeddings/oleObject1.bin": INERT_OLE})
+    assert links.scan(orphan).unrelated_objects == ["word/embeddings/oleObject1.bin"]
+
+
+def test_relationships_of_a_part_office_never_loads_are_not_activated():
+    data = fx.linked_docx(parts={"word/orphan.xml": f'<x {NS}><y r:id="rId9"/></x>',
+                                 "word/_rels/orphan.xml.rels": fx.rels_xml(external("rId9", "attachedTemplate"))})
+    activation = links.scan(data).activations[0]
+    assert activation.state == NOT_ACTIVATED and "never loaded" in activation.why
+
+
+@pytest.mark.parametrize("data, why", [
+    (fx.linked_docx(main_rels=(("rId10", f"{REL}/oleObject", "embeddings/oleObject1.bin"),),
+                    body='<w:p><w:r><w:object><o:OLEObject Type="Embed" r:id="rId10"/></w:object></w:r></w:p>',
+                    parts={"word/embeddings/oleObject1.bin": INERT_OLE,
+                           "word/embeddings/_rels/oleObject1.bin.rels": fx.rels_xml(external("rId1", "oleObject"))}),
+     "is not XML"),
+    (fx.linked_docx(body="<w:p>", main_rels=(external("rId9"),)), "is not well-formed XML"),
+    (fx.linked_docx(body='<w:p><w:r><w:drawing><a:blip r:link="rId9"/></w:drawing></w:r></w:p>',
+                    main_rels=(external("rId9"), ("rId9", f"{REL}/image", "https://other.invalid/y", "External"))),
+     "declared more than once"),
+])
+def test_unknowable_activation_is_undetermined(data, why):
+    undetermined = [a for a in links.scan(data).activations if a.state == UNDETERMINED]
+    assert undetermined and why in undetermined[0].why
+
+
+def test_a_package_whose_relationships_cannot_be_read_fails_closed():
+    files = fx.office_parts("docx")
+    files["word/_rels/document.xml.rels"] = "<Relationships><broken"
+    with pytest.raises(CustomScanError):
+        links.scan(fx.zip_parts(files))
+
+
+def test_not_a_package_is_not_applicable():
+    assert links.scan(b"%PDF-1.7") is None
+
+
+# ----------------------------------------------------------------------------- unified engine
+
+SEVERITY = ["SAFE", "SUSPICIOUS", "MALICIOUS"]
+
+
+@pytest.mark.parametrize("case", sorted(CASE))
+def test_the_unified_verdict_is_never_lower_than_the_reference_verdict(case):
+    reference = verdicts(worker.analyse(SCANNERS, CASE[case]))["aggregate"]
+    unified = verdicts(engine.correlate(worker.analyse(engine.SCANNERS, CASE[case])))["aggregate"]
+    assert reference == unified or (reference in SEVERITY and SEVERITY.index(unified) > SEVERITY.index(reference)) \
+        or (reference, unified) == ("MALICIOUS", "SUSPICIOUS") and case.startswith("5a")  # the PDF correction
+
+
+def by_rule(report):
+    return {f.rule_id: f for f in report.findings}
+
+
+# Risk policy (app.engine.correlate, LINK_RULES): a linked picture is ordinary Word output whose
+# fetch the application may block and which carries no code, so it is evidence (INFO), not a
+# reason for SUSPICIOUS; credential exposure through file:// or UNC stays the reference's MEDIUM.
+def test_an_ordinary_linked_picture_keeps_its_evidence_but_not_a_higher_verdict():
+    unified = engine.correlate(worker.analyse(engine.SCANNERS, CASE["6d-docx-linked-picture"]))
+    picture = by_rule(unified)["ENGINE_OFFICE_LINKED_PICTURE"]
+    assert picture.severity.value == "INFO" and "a:blip" not in picture.description  # element names are local
+    assert "blip link='rId9' -> image https://images.example.invalid/pixel.png" in picture.description
+    assert verdicts(unified)["aggregate"] == "SAFE" == verdicts(worker.analyse(SCANNERS, CASE["6d-docx-linked-picture"]))["aggregate"]
+
+
+def test_a_linked_picture_on_a_file_share_stays_suspicious_through_the_reference_rule():
+    unified = engine.correlate(worker.analyse(engine.SCANNERS, CASE["6g-docx-linked-picture-file-share"]))
+    rules = by_rule(unified)
+    assert rules["OFFICE_EXTERNAL_NETWORK_PATH"].severity.value == "MEDIUM"
+    assert rules["ENGINE_OFFICE_LINKED_PICTURE"].severity.value == "INFO"
+    assert verdicts(unified)["aggregate"] == "SUSPICIOUS"
+
+
+def test_a_template_used_on_open_stays_medium():
+    unified = engine.correlate(worker.analyse(engine.SCANNERS, CASE["6c-docx-template-referenced-by-settings"]))
+    assert by_rule(unified)["ENGINE_OFFICE_EXTERNAL_ON_OPEN"].severity.value == "MEDIUM"
+
+
+def test_a_template_used_on_open_is_reported_once():
+    # The Office scanner's AUTOLOAD and the graph's ON_OPEN describe the same relationship: one
+    # MEDIUM finding, which names the Office scanner's rule it accounts for.
+    unified = engine.correlate(worker.analyse(engine.SCANNERS, CASE["6c-docx-template-referenced-by-settings"]))
+    on_open = by_rule(unified)["ENGINE_OFFICE_EXTERNAL_ON_OPEN"]
+    assert on_open.severity.value == "MEDIUM" and "accounts for office:OFFICE_EXTERNAL_AUTOLOAD" in on_open.evidence
+    assert "OFFICE_EXTERNAL_AUTOLOAD" not in by_rule(unified) and verdicts(unified)["aggregate"] == "SUSPICIOUS"
+    note = by_rule(unified)["ENGINE_CORRELATION"]
+    assert note.scanner == "ooxml-links" and "merged OFFICE_EXTERNAL_AUTOLOAD (office)" in note.description
+
+
+@pytest.mark.parametrize("case, note", [
+    ("6b-docx-external-template", "kept although no part Office loads references it"),
+    ("6e-docx-embedded-object-displayed", "shown in the document and runs only when activated"),
+    ("6f-docx-embedded-object-not-displayed", "no element shows the object"),
+])
+def test_reference_office_findings_are_qualified_not_removed(case, note):
+    reference = {f.rule_id for f in worker.analyse(SCANNERS, CASE[case]).findings}
+    unified = engine.correlate(worker.analyse(engine.SCANNERS, CASE[case]))
+    assert reference <= {f.rule_id for f in unified.findings}
+    assert note in next(f.description for f in unified.findings if f.rule_id == "ENGINE_CORRELATION")

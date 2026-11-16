@@ -1,32 +1,100 @@
+import asyncio
+import hashlib
 import logging
 import os
-from xml.etree.ElementTree import ParseError as XMLParseError
-from zipfile import BadZipFile
+import re
+import subprocess
+import time
+import uuid
+from importlib import metadata
+from pathlib import Path
+from urllib.parse import unquote
 
-from defusedxml.common import DefusedXmlException
-from pypdf.errors import PdfReadError
-
-from fastapi import FastAPI, File, HTTPException, Request, UploadFile
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.decision import decide
-from app.models import Finding, ScanResult, Verdict
+from app import auth, receipts, worker
+from app import engine as unified_engine
+from app.decision import classify, decide
+from app.models import ScannerStatus, ScanResult, Verdict, WorkerReport
 from app.scanners import SCANNERS
-from app.scanners.office import OfficeScanError
-from app.scanners.pdf import PdfScanError
+from app.scanners.yarax import RULES_DIR
 
 logger = logging.getLogger(__name__)
+# uvicorn only configures its own loggers; without this the per-scan audit lines are dropped.
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(name)s: %(message)s")
 
 # Origins of the Security Lab frontend allowed to call the API from a browser.
 DEFAULT_CORS_ORIGINS = "http://localhost:3000,http://127.0.0.1:3000"
 
 # Largest file /scan accepts. Bounds memory per request on a small instance; every
 # scanner receives the whole file, so this also bounds scanner work.
-MAX_UPLOAD_BYTES = 10 * 1024 * 1024
-# Room for multipart boundaries and part headers on top of the file itself.
-MULTIPART_OVERHEAD_BYTES = 64 * 1024
+MAX_UPLOAD_BYTES = worker.MAX_INPUT_BYTES
 UPLOAD_TOO_LARGE = f"File is too large. The maximum upload size is {MAX_UPLOAD_BYTES // (1024 * 1024)} MB."
+UPLOAD_TIMEOUT_SECONDS = 60
+# Scans running at once (each one is a worker process holding up to 10 MB of input).
+MAX_CONCURRENT_SCANS = int(os.environ.get("SECURITY_ENGINE_MAX_CONCURRENT_SCANS", "1"))
+
+# Default runner: one isolated worker process per scan. Tests swap in an in-process runner.
+run_scan = worker.run
+_active_scans = 0
+
+# The production/default API remains on the reference baseline. Research staging may opt
+# into a public unified-only mode without deleting the reference implementation or its data.
+# Misconfiguration fails closed: PUBLIC_UNIFIED_ONLY without RESEARCH_ENGINES offers no scanner.
+RESEARCH_ENGINES = os.environ.get("SECURITY_ENGINE_RESEARCH_ENGINES") == "1"
+PUBLIC_UNIFIED_ONLY = os.environ.get("SECURITY_ENGINE_PUBLIC_UNIFIED_ONLY") == "1"
+DEFAULT_ENGINE = "unified" if PUBLIC_UNIFIED_ONLY else "reference"
+
+
+def engine_scanners(engine: str) -> list[str]:
+    """Names the worker must report for `engine`, read at call time (tests replace SCANNERS)."""
+    return [s.name for s in (SCANNERS if engine == "reference" else unified_engine.SCANNERS)]
+
+
+def engine_ready(engine: str) -> bool:
+    """Every scanner of `engine` loaded in this process (the worker loads the same code and rules)."""
+    return all(getattr(s, "ready", True) for s in (SCANNERS if engine == "reference" else unified_engine.SCANNERS))
+
+
+class ApiError(HTTPException):
+    """An HTTP error with a stable machine-readable `code` next to the human `detail`."""
+
+    def __init__(self, status_code: int, code: str, detail: str, headers: dict | None = None):
+        super().__init__(status_code=status_code, detail=detail, headers=headers)
+        self.code = code
+
+
+def available_engines() -> list[str]:
+    if PUBLIC_UNIFIED_ONLY:
+        return ["unified"] if RESEARCH_ENGINES else []
+    return ["reference", "unified"] if RESEARCH_ENGINES else ["reference"]
+
+
+def source_commit() -> str:
+    """The engine's source commit: SECURITY_ENGINE_COMMIT or Render's RENDER_GIT_COMMIT when set
+    (deployments have no .git), else `git rev-parse HEAD` in a checkout, else "unknown"."""
+    commit = os.environ.get("SECURITY_ENGINE_COMMIT") or os.environ.get("RENDER_GIT_COMMIT")
+    if commit:
+        return commit[:40]
+    try:
+        out = subprocess.run(["git", "rev-parse", "HEAD"], cwd=Path(__file__).resolve().parent.parent,
+                             capture_output=True, text=True, timeout=5)
+        return out.stdout.strip()[:40] if out.returncode == 0 and out.stdout.strip() else "unknown"
+    except (OSError, subprocess.SubprocessError):
+        return "unknown"
+
+
+# Fixed explanations for expected scanner failures (logged; nothing attacker-supplied).
+FAILURE_REASONS = {
+    ("pdf", "malformed_input"): "PDF is malformed or truncated; its structure could not be read",
+    ("pdf", "invalid_structure"): "PDF structure is invalid or exceeds analysis limits",
+    ("office", "malformed_input"): "Office ZIP/XML structure is malformed or unreadable",
+    ("office", "invalid_structure"): "Office document structure is invalid or exceeds analysis limits",
+    ("custom", "malformed_input"): "Office ZIP container or XML part is malformed; the custom detector could not read it",
+    ("custom", "invalid_structure"): "Document syntax is invalid or exceeds the custom detector's analysis limits",
+}
 
 
 def parse_cors_origins(value: str) -> list[str]:
@@ -37,29 +105,39 @@ def parse_cors_origins(value: str) -> list[str]:
     return origins
 
 
+def ruleset_hash(rules_dir: Path = RULES_DIR) -> str:
+    """Version identifier of the rule set. Line endings are normalised (CRLF/CR -> LF) so a
+    Windows checkout and the Linux image report the same hash for identical rules; the rules
+    YARA-X compiles are not changed by this."""
+    h = hashlib.sha256()
+    for path in sorted(rules_dir.glob("*.yar")):
+        text = path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+        h.update(path.name.encode() + b"\0" + text)
+    return h.hexdigest()
+
+
 app = FastAPI(
     title="FilesMagic Security Engine",
     description="Pre-conversion file security analysis service for FilesMagic.",
-    version="0.1.0",
+    version="0.2.0",
 )
 
+VERSIONS = {"engine": app.version, "commit": source_commit(), "ruleset_sha256": ruleset_hash(),
+            "engine_ruleset_sha256": ruleset_hash(unified_engine.RULES_DIR)} | {
+    pkg: metadata.version(pkg) for pkg in ("yara-x", "oletools", "olefile", "pypdf")
+}
 
-# Registered before CORS so CORS stays the outer layer and the 413 still carries
-# CORS headers (otherwise the browser would report a network error instead).
-@app.middleware("http")
-async def reject_oversized_uploads(request: Request, call_next):
-    # Early rejection from the declared size, before the body is received. Clients
-    # that omit Content-Length are still caught by the exact check in scan_file.
-    length = request.headers.get("content-length", "")
-    if request.url.path == "/scan" and length.isdigit() and int(length) > MAX_UPLOAD_BYTES + MULTIPART_OVERHEAD_BYTES:
-        return JSONResponse({"detail": UPLOAD_TOO_LARGE}, status_code=413)
-    return await call_next(request)
+@app.exception_handler(ApiError)
+async def scan_error(request: Request, exc: ApiError) -> JSONResponse:
+    return JSONResponse({"detail": exc.detail, "code": exc.code}, status_code=exc.status_code, headers=exc.headers)
 
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=parse_cors_origins(os.environ.get("SECURITY_ENGINE_CORS_ORIGINS", DEFAULT_CORS_ORIGINS)),
     allow_methods=["GET", "POST"],
+    allow_headers=["Authorization", "Content-Type", "X-Filename"],
+    max_age=600,
 )
 
 
@@ -73,79 +151,220 @@ async def health():
         "service": "filesmagic-security-engine",
         "scanners_registered": len(SCANNERS),
         "scanners_ready": sum(1 for s in SCANNERS if getattr(s, "ready", True)),
+        "auth_configured": auth.PUBLIC_KEY is not None,
+        "engines": available_engines(),
+        "default_engine": DEFAULT_ENGINE,
+        "commit": VERSIONS["commit"],
+        # Integration contract v1: what the Conversion Engine needs before it sends a file.
+        "conversion_auth_configured": auth.CONVERSION_PUBLIC_KEY is not None,
+        "receipt_key_id": receipts.current_key_id(),
+        "isolation_required": worker.REQUIRE_ISOLATION,
+        "max_upload_bytes": MAX_UPLOAD_BYTES,
+        "ready_for_conversion": bool(
+            auth.CONVERSION_PUBLIC_KEY and receipts.PRIVATE_KEY and worker.REQUIRE_ISOLATION
+            and auth.distinct_issuer_keys() and "unified" in available_engines() and engine_ready("unified")),
     }
 
 
-def expected_scan_failure_reason(error: Exception) -> str | None:
-    """Describe known malformed-input failures without hiding unexpected defects.
-
-    PDF/Office scanners wrap low-level failures in their own exception types.
-    A parser error or explicit scanner limit is an expected rejection. Other
-    wrapped errors could be programming bugs and still need a full traceback.
-    Never log attacker-supplied exception text from the document itself.
-    """
-    cause = error.__cause__
-    if isinstance(error, PdfScanError):
-        if cause is None:
-            return "PDF structure is invalid or exceeds analysis limits"
-        if isinstance(cause, PdfReadError):
-            return "PDF is malformed or truncated; its structure could not be read"
-    if isinstance(error, OfficeScanError):
-        if cause is None:
-            return "Office document structure is invalid or exceeds analysis limits"
-        if isinstance(cause, (BadZipFile, XMLParseError, DefusedXmlException)):
-            return "Office ZIP/XML structure is malformed or unreadable"
-    return None
+def client_address(request: Request) -> str:
+    # The proxy in front of Render appends the connecting address as the LAST
+    # X-Forwarded-For entry; earlier entries are client-supplied and spoofable.
+    forwarded = request.headers.get("x-forwarded-for", "")
+    return forwarded.rsplit(",", 1)[-1].strip() or (request.client.host if request.client else "unknown")
 
 
-# Sync def so FastAPI runs it in a worker thread; scanners are blocking calls.
+def detect_format(data: bytes) -> str:
+    """Coarse type from magic bytes only (no parsing happens in the API process)."""
+    if b"%PDF-" in data[:1024]:
+        return "pdf"
+    if data.startswith(b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"):
+        return "ole2"
+    if data.startswith(b"PK\x03\x04"):
+        return "zip"
+    if data.startswith(b"{\\rt"):
+        return "rtf"
+    return "unknown"
+
+
+def clean_filename(header: str) -> str:
+    return re.sub(r"[\x00-\x1f\x7f]", "?", unquote(header))[:255]
+
+
+async def read_body(request: Request, limit: int) -> bytes:
+    """Read the raw upload into memory, never past `limit` bytes and never to disk."""
+    data = bytearray()
+    try:
+        async with asyncio.timeout(UPLOAD_TIMEOUT_SECONDS):
+            async for chunk in request.stream():
+                data += chunk
+                if len(data) > limit:
+                    raise ApiError(413, "UPLOAD_TOO_LARGE", UPLOAD_TOO_LARGE)
+    except TimeoutError:
+        raise ApiError(408, "UPLOAD_TIMEOUT", "Upload took too long.") from None
+    return bytes(data)
+
+
+# The request body is the raw file (no multipart parsing); the original filename, which is
+# informational only, comes percent-encoded in X-Filename. Authorization is checked before a
+# single body byte is read.
 @app.post("/scan", response_model=ScanResult)
-def scan_file(file: UploadFile = File(...)) -> ScanResult:
-    filename = file.filename or ""
-    # Read at most one byte past the limit, so an oversized upload never fully
-    # enters memory. TODO: add authentication and rate limiting before real samples.
-    data = file.file.read(MAX_UPLOAD_BYTES + 1)
-    if len(data) > MAX_UPLOAD_BYTES:
-        raise HTTPException(status_code=413, detail=UPLOAD_TOO_LARGE)
+async def scan_file(request: Request) -> ScanResult:
+    global _active_scans
+    request_id = uuid.uuid4().hex[:16]
+    client = client_address(request)
+    if auth.too_many_failures(client):
+        raise ApiError(429, "RATE_LIMITED", "Too many unauthorized requests. Try again later.",
+                        headers={"Retry-After": "60"})
+    # Checked before the token, so a refused engine does not use up the single-use token.
+    engine = request.query_params.get("engine", DEFAULT_ENGINE)
+    if engine not in worker.ENGINE_ARGS:
+        raise ApiError(400, "ENGINE_UNKNOWN", f"Unknown engine; use one of: {', '.join(worker.ENGINE_ARGS)}.")
+    if engine not in available_engines():
+        raise ApiError(403, "ENGINE_NOT_ENABLED", (
+            "This deployment accepts only the unified engine." if PUBLIC_UNIFIED_ONLY else
+            "The unified engine is research-only and is not enabled on this deployment "
+            "(SECURITY_ENGINE_RESEARCH_ENGINES=1)."
+        ))
+    expected = engine_scanners(engine)
+    try:
+        claims = auth.verify(request.headers.get("authorization", ""))
+    except auth.AuthError as e:
+        auth.record_failure(client)
+        logger.warning("scan rejected request_id=%s code=%s", request_id, e.code)
+        raise ApiError(401, e.code, str(e), headers={"WWW-Authenticate": "Bearer"}) from None
+    # The Conversion Engine may only be answered by the engine validated for production.
+    if claims["issuer"] == "conversion" and engine != "unified":
+        raise ApiError(403, "ENGINE_NOT_APPROVED", "Conversion scans must use the unified engine (engine=unified).")
 
-    findings: list[Finding] = []
-    failed = not_applicable = 0
-    for scanner in SCANNERS:
+    length = request.headers.get("content-length", "")
+    if length.isdigit() and int(length) > MAX_UPLOAD_BYTES:
+        raise ApiError(413, "UPLOAD_TOO_LARGE", UPLOAD_TOO_LARGE)
+    if _active_scans >= MAX_CONCURRENT_SCANS:
+        raise ApiError(429, "ENGINE_BUSY", "The engine is busy with another scan. Try again shortly.",
+                        headers={"Retry-After": "5"})
+
+    _active_scans += 1
+    try:
+        data = await read_body(request, MAX_UPLOAD_BYTES)
+        sha256 = hashlib.sha256(data).hexdigest()
+        if sha256 != claims["sha256"] or len(data) != claims["size"]:
+            raise ApiError(403, "TOKEN_FILE_MISMATCH", "The uploaded file does not match the scan token.")
+        start = time.perf_counter()
+        operational = [] if engine_ready(engine) else ["SCANNER_NOT_READY"]
         try:
-            result = scanner.scan(filename, data)
-        except Exception as error:
-            # Expected malformed documents are scan outcomes, not server crashes.
-            # Keep tracebacks for surprises, including bugs wrapped by scanners.
-            reason = expected_scan_failure_reason(error)
-            if reason is not None:
-                logger.warning(
-                    "Scanner %s could not analyse %r: %s (%s).",
-                    scanner.name, filename[:120], reason,
-                    type(error.__cause__ or error).__name__,
-                )
-            else:
-                logger.exception("Unexpected scanner failure in %s on %r", scanner.name, filename[:120])
-            failed += 1
-            continue
-        if result is None:  # e.g. the Office scanner on a PDF
-            not_applicable += 1
-        else:
-            findings.extend(result)
+            report = await run_scan(data, engine=engine)
+            # The selected engine's scanners, exactly: a worker that ran the other engine (or lost
+            # a scanner) fails the scan rather than answering for an engine that did not run.
+            if sorted(s.name for s in report.scanners) != sorted(expected):
+                raise worker.WorkerError(f"scan worker reported an unexpected set of scanners for the {engine} engine",
+                                         "SCANNER_ROSTER_MISMATCH")
+            if not worker.REQUIRE_ISOLATION:
+                operational.append("ISOLATION_NOT_ENFORCED")
+            elif worker.missing_controls(report.isolation):
+                operational.append("ISOLATION_UNVERIFIED")
+        except worker.WorkerError as e:
+            logger.error("scan worker failure request_id=%s engine=%s code=%s: %s", request_id, engine, e.code, e)
+            operational.append(e.code)
+            report = WorkerReport(
+                scanners=[ScannerStatus(name=name, status="failed", error=str(e), error_kind="worker")
+                          for name in expected],
+                findings=[],
+            )
+        duration_ms = round((time.perf_counter() - start) * 1000, 1)
+        detected_format = detect_format(data)
+    finally:
+        _active_scans -= 1
+        data = None  # the upload is not kept beyond the scan
 
+    findings = report.findings
+    failed = sum(s.status == "failed" for s in report.scanners)
+    not_applicable = sum(s.status == "not_applicable" for s in report.scanners)
     # Not-applicable scanners neither count as analysis nor as failure.
-    applicable = len(SCANNERS) - not_applicable
-    verdict = decide(findings, scanners_run=applicable, scanners_failed=failed)
+    applicable = len(expected) - not_applicable
+    coverage_complete = report.coverage_complete if engine == "unified" else True
+    verdict = decide(findings, scanners_run=applicable, scanners_failed=failed, coverage_complete=coverage_complete)
+    coverage_issues = report.coverage_issues if engine == "unified" else []
+    if applicable == 0:
+        operational.append("UNSUPPORTED_FILE_TYPE")
+    reasons, authorization, explanation = classify(verdict, report.scanners, coverage_issues, operational)
+    isolation_missing = worker.missing_controls(report.isolation)
+    isolation_verified = worker.REQUIRE_ISOLATION and not isolation_missing
+    complete = applicable > 0 and failed == 0
+    # A receipt only for a validated outcome, only to the Conversion Engine, only from the
+    # production engine: never with an operational reason (which includes unverified isolation).
+    receipt = None
+    if claims["issuer"] == "conversion" and engine == "unified" and isolation_verified and not any(
+            r.category == "operational" for r in reasons):
+        receipt = receipts.sign({
+            "scan_request_id": request_id, "token_jti": claims["jti"],
+            "sha256": sha256, "size": claims["size"], "detected_format": detected_format,
+            "engine": engine, "engine_version": VERSIONS["engine"], "commit": VERSIONS["commit"],
+            "ruleset_sha256": VERSIONS["ruleset_sha256"], "engine_ruleset_sha256": VERSIONS["engine_ruleset_sha256"],
+            "scanner_versions": {k: VERSIONS[k] for k in ("yara-x", "oletools", "olefile", "pypdf")},
+            "scanners": sorted(expected),
+            "verdict": verdict.value, "authorization": authorization,
+            "complete": complete, "coverage_complete": coverage_complete, "isolation_verified": isolation_verified,
+            "override_eligible": authorization == "consent_required",
+            "reason_codes": [r.code for r in reasons], "findings_count": len(findings),
+        })
 
-    if not SCANNERS:
+    if not expected:
         message = "No security scanners are configured yet. This file has NOT been security-scanned."
     elif applicable == 0:
         message = "None of the configured scanners supports this file type. This file has NOT been security-scanned."
     elif failed and verdict == Verdict.UNABLE_TO_SCAN:
         message = f"{failed} of {applicable} applicable scanners failed, so the file could not be fully analysed."
+    elif not coverage_complete and verdict == Verdict.UNABLE_TO_SCAN:
+        message = "Required content coverage is incomplete, so the file could not be fully analysed."
     else:
-        message = f"Analysed by {applicable - failed} of {len(SCANNERS)} scanners"
+        message = f"Analysed by {applicable - failed} of {len(expected)} scanners"
         message += f" ({not_applicable} not applicable to this file type)." if not_applicable else "."
         if verdict == Verdict.SAFE:
             message += " No known indicators were found; this is not a guarantee that the file is harmless."
 
-    return ScanResult(filename=filename, verdict=verdict, findings=findings, message=message)
+    # Logs carry only controlled values: never file contents, the filename, or scanner error
+    # text (which can quote attacker-controlled data). Scanner names were checked against
+    # SCANNERS, error kinds/types and traces were validated by the WorkerReport model.
+    for s in report.scanners:
+        if s.status != "failed" or s.error_kind == "worker":
+            continue
+        if s.error_kind == "unexpected":
+            logger.error("scanner failure request_id=%s scanner=%s kind=unexpected type=%s trace=%s",
+                         request_id, s.name, s.error_type, report.traces.get(s.name, "unavailable"))
+        else:
+            logger.warning("scanner failure request_id=%s scanner=%s kind=%s type=%s reason=%s",
+                           request_id, s.name, s.error_kind, s.error_type,
+                           FAILURE_REASONS.get((s.name, s.error_kind), "document could not be analysed"))
+    if report.diagnostics:  # staging only; validated by the WorkerReport model, never in the response
+        logger.warning("network diagnostics request_id=%s %s", request_id,
+                       report.diagnostics.model_dump_json(exclude_none=True))
+    logger.info("scan request_id=%s engine=%s issuer=%s sha256=%s size=%d verdict=%s authorization=%s reasons=%s "
+                "receipt=%s failed=%d duration_ms=%.0f", request_id, engine, claims["issuer"], sha256[:16],
+                claims["size"], verdict.value, authorization, ",".join(r.code for r in reasons) or "-",
+                "issued" if receipt else "none", failed, duration_ms)
+    return ScanResult(
+        request_id=request_id,
+        engine=engine,
+        filename=clean_filename(request.headers.get("x-filename", "")),
+        verdict=verdict,
+        findings=findings,
+        message=message,
+        sha256=sha256,
+        size_bytes=claims["size"],
+        detected_format=detected_format,
+        scanners=report.scanners,
+        complete=complete,
+        coverage_complete=coverage_complete,
+        coverage_issues=coverage_issues,
+        duration_ms=duration_ms,
+        versions=VERSIONS,
+        isolation_required=worker.REQUIRE_ISOLATION,
+        isolation=report.isolation,
+        isolation_missing=isolation_missing,
+        isolation_verified=isolation_verified,
+        reasons=reasons,
+        override_eligible=authorization == "consent_required",
+        authorization=authorization,
+        explanation=explanation,
+        receipt=receipt,
+    )

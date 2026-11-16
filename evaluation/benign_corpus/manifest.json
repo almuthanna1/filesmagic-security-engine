@@ -1,0 +1,311 @@
+[
+  {
+    "file": "docx-01-word-plain.docx",
+    "format": "docx",
+    "sha256": "996c1deeec6d64f42d43ddfa2c958d9a9ac6e5124a4ebf1f29ddbb54789e9f42",
+    "size_bytes": 13862,
+    "producer": "Microsoft Word 16",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": []
+  },
+  {
+    "file": "docx-02-word-rich.docx",
+    "format": "docx",
+    "sha256": "510e8dcde7bbee400a35fe1abce016cc5cf3ce7f9bed714546ff6c92e0dfaa4b",
+    "size_bytes": 28453,
+    "producer": "Microsoft Word 16",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": [
+      "external hyperlink -> https://www.niu.edu/"
+    ]
+  },
+  {
+    "file": "docx-03-word-embedded-excel.docx",
+    "format": "docx",
+    "sha256": "14928c97e104b6d540298e1bfa345ccfe6ab4adaa6c593397904218373ab4c6d",
+    "size_bytes": 24596,
+    "producer": "Microsoft Word 16",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": [
+      "embedded object"
+    ]
+  },
+  {
+    "file": "docx-04-word-linked-picture.docx",
+    "format": "docx",
+    "sha256": "483dcf58c24ca507de5e2932ebe59c6d5ba19e1c1959ea567f52420410421136",
+    "size_bytes": 13849,
+    "producer": "Microsoft Word 16",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": [
+      "external image -> file:///C:\\tmp\\fm-benign\\chart.png"
+    ]
+  },
+  {
+    "file": "docx-05-word-custom-template.docx",
+    "format": "docx",
+    "sha256": "0324b991682362579434c106053f161760aa57bed8fb0be5da8a46e6d4b697aa",
+    "size_bytes": 13925,
+    "producer": "Microsoft Word 16",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": [
+      "external attachedTemplate -> file:///C:\\tmp\\fm-benign\\committee.dotx"
+    ]
+  },
+  {
+    "file": "docx-06-word-content-controls.docx",
+    "format": "docx",
+    "sha256": "ae711ee773f3a7d0030b58502599f9899ab575062acc28da1858f86cd61e7600",
+    "size_bytes": 20555,
+    "producer": "Microsoft Word 16",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": []
+  },
+  {
+    "file": "docx-07-libreoffice.docx",
+    "format": "docx",
+    "sha256": "8fa7225d0bf904cf81304983fe42c57f23bb970038b830e64bdadd95529707c0",
+    "size_bytes": 6089,
+    "producer": "LibreOffice (headless)",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": [
+      "external hyperlink -> https://www.niu.edu/"
+    ]
+  },
+  {
+    "file": "pdf-01-word-export.pdf",
+    "format": "pdf",
+    "sha256": "29d46813a42650b0caba64f4c5c1d5c40afef7d7e6399b97b30a475424dc3c37",
+    "size_bytes": 33558,
+    "producer": "Microsoft Word 16",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": [
+      "URI",
+      "Outlines",
+      "ObjStm"
+    ]
+  },
+  {
+    "file": "pdf-02-excel-export.pdf",
+    "format": "pdf",
+    "sha256": "8690bdc8811491d8c25646f38e9c37e05f0703e6651b98d2448bab61cbac8826",
+    "size_bytes": 30788,
+    "producer": "Microsoft Excel 16",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": [
+      "ObjStm"
+    ]
+  },
+  {
+    "file": "pdf-03-powerpoint-export.pdf",
+    "format": "pdf",
+    "sha256": "ef95d5e43893663aeb1609cf54c9fd93cf09aa8edc9ffeced3e779fcd783032e",
+    "size_bytes": 17157,
+    "producer": "Microsoft PowerPoint 16",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": [
+      "Outlines",
+      "ObjStm"
+    ]
+  },
+  {
+    "file": "pdf-04-libreoffice-tagged.pdf",
+    "format": "pdf",
+    "sha256": "c7da196b3cdab092d69c79a30ead42f87ea0800971200292c0ef9c7400bd7b8f",
+    "size_bytes": 39572,
+    "producer": "LibreOffice (headless)",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": [
+      "URI",
+      "Outlines"
+    ]
+  },
+  {
+    "file": "pdf-05-libreoffice-pdfa.pdf",
+    "format": "pdf",
+    "sha256": "1fdfe797336a92fdb5b35b8959056c91a374b776d3e776b18e9c1359f3d3beb0",
+    "size_bytes": 48495,
+    "producer": "LibreOffice (headless)",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": [
+      "URI",
+      "Outlines"
+    ]
+  },
+  {
+    "file": "pdf-06-word-export-pdfa.pdf",
+    "format": "pdf",
+    "sha256": "81805bcb3c52cafce166d0d98bd8aa9a4ba66adcf12d70780e4a0cfa01634a7d",
+    "size_bytes": 35596,
+    "producer": "Microsoft Word 16",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": [
+      "Outlines"
+    ]
+  },
+  {
+    "file": "pdf-07-libreoffice-hybrid.pdf",
+    "format": "pdf",
+    "sha256": "92e878c85710fa49e4609589ba9a81fe1cd67f0f3ac093735f5f69e435e6b0d6",
+    "size_bytes": 50630,
+    "producer": "LibreOffice (headless)",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": [
+      "EmbeddedFile",
+      "URI",
+      "Outlines"
+    ]
+  },
+  {
+    "file": "pdf-08-edge-print.pdf",
+    "format": "pdf",
+    "sha256": "24fa857b9bf4a799a4f5ce9ade71c412c32d3795ddc4bfd452ab1ca2f5f51d39",
+    "size_bytes": 53652,
+    "producer": "Microsoft Edge (headless print)",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": [
+      "URI"
+    ]
+  },
+  {
+    "file": "pptx-01-ppt-plain.pptx",
+    "format": "pptx",
+    "sha256": "a65abe8dc30c05f2547c8bc507312ecdca851ea8ef90ef8e4c3850178a04093b",
+    "size_bytes": 35787,
+    "producer": "Microsoft PowerPoint 16",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": []
+  },
+  {
+    "file": "pptx-02-ppt-pictures-notes.pptx",
+    "format": "pptx",
+    "sha256": "e80056f6db30078ca73f3e475f6629f2b929d564b2083202c3dc7a394bda3246",
+    "size_bytes": 42726,
+    "producer": "Microsoft PowerPoint 16",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": []
+  },
+  {
+    "file": "pptx-03-ppt-chart-table.pptx",
+    "format": "pptx",
+    "sha256": "4e45b6708596aca1123e20f16d5f55eb42172d0af7d19df160f3b5d6ae2c85ff",
+    "size_bytes": 50942,
+    "producer": "Microsoft PowerPoint 16",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": [
+      "embedded object"
+    ]
+  },
+  {
+    "file": "pptx-04-ppt-hyperlinks-actions.pptx",
+    "format": "pptx",
+    "sha256": "0eb4c62644d0e07c1a0dd655b96a96f9b7b7a34610ebe72be9b7f5b02e67ec11",
+    "size_bytes": 35762,
+    "producer": "Microsoft PowerPoint 16",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": [
+      "external hyperlink -> https://www.niu.edu/"
+    ]
+  },
+  {
+    "file": "pptx-05-ppt-transitions-animations.pptx",
+    "format": "pptx",
+    "sha256": "b6ce6c8172923dfe90559aa2674b724a2a070c8227900a35a720a8bac585f719",
+    "size_bytes": 38099,
+    "producer": "Microsoft PowerPoint 16",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": []
+  },
+  {
+    "file": "pptx-06-ppt-embedded-excel.pptx",
+    "format": "pptx",
+    "sha256": "80a76fef2c469fabba6a6f6dec969b18ae77b5b7ab4d947de3f276c78e37ebd1",
+    "size_bytes": 47469,
+    "producer": "Microsoft PowerPoint 16",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": [
+      "embedded object"
+    ]
+  },
+  {
+    "file": "pptx-07-libreoffice-roundtrip.pptx",
+    "format": "pptx",
+    "sha256": "c22a85eb1fc9070a6b74e51bccab38d84a6a83926ae38be5467510c8fd95707d",
+    "size_bytes": 33142,
+    "producer": "LibreOffice (headless)",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": []
+  },
+  {
+    "file": "xlsx-01-excel-formulas.xlsx",
+    "format": "xlsx",
+    "sha256": "709f1cfa517407fe76fc068d6ffa14beae730829d8afd278e470d2e3bcbeb06c",
+    "size_bytes": 9286,
+    "producer": "Microsoft Excel 16",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": []
+  },
+  {
+    "file": "xlsx-02-excel-chart-formatting.xlsx",
+    "format": "xlsx",
+    "sha256": "c828f185adf32e5baa9f3c2da9e88dd6e1e2b827e49fc23224a48f8b41e175e3",
+    "size_bytes": 15769,
+    "producer": "Microsoft Excel 16",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": []
+  },
+  {
+    "file": "xlsx-03-excel-hyperlinks-validation.xlsx",
+    "format": "xlsx",
+    "sha256": "8ca52f022638765eec6a068d5d761c27c065a83ad73f356cf4c6207daf3fe968",
+    "size_bytes": 9950,
+    "producer": "Microsoft Excel 16",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": [
+      "external hyperlink -> https://www.niu.edu/"
+    ]
+  },
+  {
+    "file": "xlsx-04-excel-external-workbook-link.xlsx",
+    "format": "xlsx",
+    "sha256": "e39d27d2ea088b8d7dfafac3084286ca0a89ecf97af4497ae5293dec47452920",
+    "size_bytes": 10004,
+    "producer": "Microsoft Excel 16",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": [
+      "external externalLinkPath -> ../../../../../../../../../../tmp/fm-benign/source.xlsx",
+      "external externalLinkPath -> /tmp/fm-benign/source.xlsx",
+      "external externalLinkPath -> file:///C:\\tmp\\fm-benign\\source.xlsx",
+      "external workbook link part"
+    ]
+  },
+  {
+    "file": "xlsx-05-excel-table-pivot.xlsx",
+    "format": "xlsx",
+    "sha256": "9c340092b6acf24211587811b798153b1d177bd3610dff3e43218a5f17f02519",
+    "size_bytes": 14397,
+    "producer": "Microsoft Excel 16",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": [
+      "pivot cache"
+    ]
+  },
+  {
+    "file": "xlsx-06-excel-picture-notes.xlsx",
+    "format": "xlsx",
+    "sha256": "d48b882cf9b7aece471aa2b176bec9deeead46ee7e2ae340d22a8e596683f714",
+    "size_bytes": 15589,
+    "producer": "Microsoft Excel 16",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": []
+  },
+  {
+    "file": "xlsx-07-libreoffice.xlsx",
+    "format": "xlsx",
+    "sha256": "98c98ecf1a1baca8b539cb3a5087715f7235a08f41200ec9bef8189277050fe7",
+    "size_bytes": 6245,
+    "producer": "LibreOffice (headless)",
+    "ground_truth": "known-benign (authored here from neutral text by build.ps1; no macros)",
+    "features": []
+  }
+]

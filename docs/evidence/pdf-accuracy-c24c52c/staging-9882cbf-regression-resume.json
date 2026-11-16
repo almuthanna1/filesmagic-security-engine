@@ -1,0 +1,356 @@
+{
+ "health": {
+  "status": "ok",
+  "service": "filesmagic-security-engine",
+  "scanners_registered": 4,
+  "scanners_ready": 4,
+  "auth_configured": true,
+  "engines": [
+   "reference",
+   "unified"
+  ],
+  "default_engine": "reference",
+  "commit": "9882cbf15e4681d16dc9d39ac1701f109db00b0e"
+ },
+ "timestamp_utc": "2026-11-11T03:56:15Z",
+ "client_network_errors": [],
+ "rows": [
+  {
+   "case": "S16-auto-launch-embedded-exe",
+   "engine": "reference",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6961.6,
+    "cors_allowed": true,
+    "engine": "reference",
+    "commit": "9882cbf15e4681d16dc9d39ac1701f109db00b0e",
+    "verdict": "MALICIOUS",
+    "rules": [
+     "pdf:PDF_EMBEDDED_EXECUTABLE:HIGH",
+     "pdf:PDF_LAUNCH_ACTION:HIGH",
+     "yara-x:PDF_Embedded_File:LOW",
+     "yara-x:PDF_Launch_Action:HIGH"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed"
+    },
+    "complete": true,
+    "duration_ms": 6788.9,
+    "sha256": "a02ed8af1d99e6feefc153ba405a68dbc18da42faf1e0d8a1e91cd87305fec99",
+    "sent_sha256": "a02ed8af1d99e6feefc153ba405a68dbc18da42faf1e0d8a1e91cd87305fec99",
+    "evidence_items": 0,
+    "isolation_missing": []
+   },
+   "expected": {
+    "verdict": "MALICIOUS",
+    "rules": [
+     "pdf:PDF_EMBEDDED_EXECUTABLE:HIGH",
+     "pdf:PDF_LAUNCH_ACTION:HIGH",
+     "yara-x:PDF_Embedded_File:LOW",
+     "yara-x:PDF_Launch_Action:HIGH"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "S16-auto-launch-embedded-exe",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 7055.2,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "9882cbf15e4681d16dc9d39ac1701f109db00b0e",
+    "verdict": "MALICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT:HIGH",
+     "pdf:PDF_EMBEDDED_EXECUTABLE:HIGH",
+     "pdf:PDF_LAUNCH_ACTION:HIGH",
+     "yara-x:PDF_Launch_Action:HIGH"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6779.7,
+    "sha256": "a02ed8af1d99e6feefc153ba405a68dbc18da42faf1e0d8a1e91cd87305fec99",
+    "sent_sha256": "a02ed8af1d99e6feefc153ba405a68dbc18da42faf1e0d8a1e91cd87305fec99",
+    "evidence_items": 7,
+    "isolation_missing": []
+   },
+   "expected": {
+    "verdict": "MALICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT:HIGH",
+     "pdf:PDF_EMBEDDED_EXECUTABLE:HIGH",
+     "pdf:PDF_LAUNCH_ACTION:HIGH",
+     "yara-x:PDF_Launch_Action:HIGH"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "S17-empty-tree-auto-launch",
+   "engine": "reference",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 7177.9,
+    "cors_allowed": true,
+    "engine": "reference",
+    "commit": "9882cbf15e4681d16dc9d39ac1701f109db00b0e",
+    "verdict": "MALICIOUS",
+    "rules": [
+     "pdf:PDF_LAUNCH_ACTION:HIGH",
+     "yara-x:PDF_Embedded_File:LOW",
+     "yara-x:PDF_Launch_Action:HIGH"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed"
+    },
+    "complete": true,
+    "duration_ms": 6890.8,
+    "sha256": "31cdff5b0d4b01c2f12f190478464f13a9e956096b3133fe26bbb794ba85f90f",
+    "sent_sha256": "31cdff5b0d4b01c2f12f190478464f13a9e956096b3133fe26bbb794ba85f90f",
+    "evidence_items": 0,
+    "isolation_missing": []
+   },
+   "expected": {
+    "verdict": "MALICIOUS",
+    "rules": [
+     "pdf:PDF_LAUNCH_ACTION:HIGH",
+     "yara-x:PDF_Embedded_File:LOW",
+     "yara-x:PDF_Launch_Action:HIGH"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "S17-empty-tree-auto-launch",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6990.1,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "9882cbf15e4681d16dc9d39ac1701f109db00b0e",
+    "verdict": "MALICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_LAUNCH:HIGH",
+     "pdf:PDF_LAUNCH_ACTION:HIGH",
+     "yara-x:PDF_Launch_Action:HIGH"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    },
+    "complete": true,
+    "duration_ms": 6834.9,
+    "sha256": "31cdff5b0d4b01c2f12f190478464f13a9e956096b3133fe26bbb794ba85f90f",
+    "sent_sha256": "31cdff5b0d4b01c2f12f190478464f13a9e956096b3133fe26bbb794ba85f90f",
+    "evidence_items": 5,
+    "isolation_missing": []
+   },
+   "expected": {
+    "verdict": "MALICIOUS",
+    "rules": [
+     "pdf-chains:ENGINE_PDF_AUTO_CHAIN_LAUNCH:HIGH",
+     "pdf:PDF_LAUNCH_ACTION:HIGH",
+     "yara-x:PDF_Launch_Action:HIGH"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "not_applicable",
+     "pdf": "completed",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "completed",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "not_applicable",
+     "word-fields": "not_applicable"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "c7b-docx-ddeauto-cmd",
+   "engine": "reference",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6881.1,
+    "cors_allowed": true,
+    "engine": "reference",
+    "commit": "9882cbf15e4681d16dc9d39ac1701f109db00b0e",
+    "verdict": "MALICIOUS",
+    "rules": [
+     "office:OFFICE_DDEAUTO_FIELD:HIGH"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "completed",
+     "pdf": "not_applicable",
+     "custom": "completed"
+    },
+    "complete": true,
+    "duration_ms": 6708.1,
+    "sha256": "9d5d3fb66b99fd26d339151da6e53d90919ce796ecb590b73925cb5c014f493b",
+    "sent_sha256": "9d5d3fb66b99fd26d339151da6e53d90919ce796ecb590b73925cb5c014f493b",
+    "evidence_items": 0,
+    "isolation_missing": []
+   },
+   "expected": {
+    "verdict": "MALICIOUS",
+    "rules": [
+     "office:OFFICE_DDEAUTO_FIELD:HIGH"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "completed",
+     "pdf": "not_applicable",
+     "custom": "completed"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "c7b-docx-ddeauto-cmd",
+   "engine": "unified",
+   "result": {
+    "http": 200,
+    "stage": "scan",
+    "wall_ms": 6668.2,
+    "cors_allowed": true,
+    "engine": "unified",
+    "commit": "9882cbf15e4681d16dc9d39ac1701f109db00b0e",
+    "verdict": "MALICIOUS",
+    "rules": [
+     "office:OFFICE_DDEAUTO_FIELD:HIGH",
+     "word-fields:ENGINE_WORD_DDEAUTO_PROGRAM:HIGH"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "completed",
+     "pdf": "not_applicable",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "not_applicable",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "completed",
+     "word-fields": "completed"
+    },
+    "complete": true,
+    "duration_ms": 6453.3,
+    "sha256": "9d5d3fb66b99fd26d339151da6e53d90919ce796ecb590b73925cb5c014f493b",
+    "sent_sha256": "9d5d3fb66b99fd26d339151da6e53d90919ce796ecb590b73925cb5c014f493b",
+    "evidence_items": 1,
+    "isolation_missing": []
+   },
+   "expected": {
+    "verdict": "MALICIOUS",
+    "rules": [
+     "office:OFFICE_DDEAUTO_FIELD:HIGH",
+     "word-fields:ENGINE_WORD_DDEAUTO_PROGRAM:HIGH"
+    ],
+    "status": {
+     "yara-x": "completed",
+     "office": "completed",
+     "pdf": "not_applicable",
+     "custom": "completed",
+     "yara-x-engine": "completed",
+     "pdf-chains": "not_applicable",
+     "vba-chains": "not_applicable",
+     "ooxml-links": "completed",
+     "word-fields": "completed"
+    }
+   },
+   "problems": []
+  },
+  {
+   "case": "oversized-token",
+   "engine": "-",
+   "result": {
+    "http": 413,
+    "detail": "File is too large. The maximum upload size is 10 MB."
+   },
+   "problems": [],
+   "expected": {}
+  },
+  {
+   "case": "oversized-upload",
+   "engine": "reference",
+   "result": {
+    "http": 413
+   },
+   "problems": [],
+   "expected": {}
+  },
+  {
+   "case": "unknown-engine",
+   "engine": "fastest",
+   "result": {
+    "http": 400
+   },
+   "problems": [],
+   "expected": {}
+  },
+  {
+   "case": "bad-token",
+   "engine": "unified",
+   "result": {
+    "http": 401
+   },
+   "problems": [],
+   "expected": {}
+  }
+ ]
+}

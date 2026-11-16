@@ -1,0 +1,923 @@
+{
+  "commit": "1668326b91b9410d8788a1461d43bc6e2a5b8d77",
+  "environment": {
+    "timestamp_utc": "2026-11-07T03:23:32+00:00",
+    "engine_commit": "1668326b91b9410d8788a1461d43bc6e2a5b8d77",
+    "working_tree_dirty": true,
+    "manifest_sha256": null,
+    "engine_version": "0.2.0",
+    "ruleset_sha256": "0be9918509e95e639f866291dc297c45c8e72812d602fb149fad3484435ae3b0",
+    "strict_isolation_configured": false,
+    "python": "3.14.3",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "packages": {
+      "yara-x": "1.21.0",
+      "oletools": "0.60.2",
+      "pypdf": "6.19.0",
+      "msoffcrypto-tool": "6.0.0",
+      "defusedxml": "0.7.1",
+      "fastapi": "0.142.4"
+    },
+    "harness_peak_rss_mib": null,
+    "worker_memory_measured": false,
+    "worker_command": [
+      "-s",
+      "-m",
+      "app.worker"
+    ],
+    "trials": 20
+  },
+  "rows": [
+    {
+      "id": "1-pdf-clean",
+      "scenario": "PDF without automatic code",
+      "role": "control",
+      "label": "Clean PDF",
+      "caption": "No findings in either engine.",
+      "indicator": "none (negative control)",
+      "sha256": "d5784991fd896bc6b3c21c3c384d9a376a3b4b6009b83a25e0c5d8f77939011b",
+      "reference": "SAFE",
+      "unified": "SAFE",
+      "added": [],
+      "removed": [],
+      "qualified": [],
+      "undetermined": [],
+      "incomplete": [],
+      "deterministic": true
+    },
+    {
+      "id": "2-pdf-form-keystroke-js",
+      "scenario": "PDF without automatic code",
+      "role": "benign-content",
+      "label": "Form keystroke script",
+      "caption": "False 'automatic' claim removed; any script is still MEDIUM (PDF policy).",
+      "indicator": "form-field keystroke JavaScript (user-triggered /AA /K)",
+      "sha256": "8fb92bebda2330b5f0bb6803db1da54f63a42a8cf28a34e49c0b621612263fd5",
+      "reference": "SUSPICIOUS",
+      "unified": "SUSPICIOUS",
+      "added": [
+        [
+          "pdf-chains",
+          "ENGINE_PDF_USER_TRIGGERED_SCRIPT",
+          "INFO"
+        ]
+      ],
+      "removed": [
+        [
+          "yara-x",
+          "PDF_JavaScript_With_Automatic_Action",
+          "MEDIUM"
+        ]
+      ],
+      "qualified": [
+        "Evidence correlation: replaced PDF_JavaScript_With_Automatic_Action (YARA-X) by ENGINE_PDF_JavaScript_With_Automatic_Trigger, which did not match: the bytes show every /OpenAction and /AA here is not automatic."
+      ],
+      "undetermined": [],
+      "incomplete": [],
+      "deterministic": true
+    },
+    {
+      "id": "2b-pdf-open-at-page-click-js",
+      "scenario": "PDF without automatic code",
+      "role": "benign-content",
+      "label": "Open-at-page + click script",
+      "caption": "False 'automatic' claims removed (PDF scanner and YARA-X).",
+      "indicator": "/OpenAction page destination + click-only link JavaScript",
+      "sha256": "09add801d7ce300528a624a753c79ebff0f1240905f2ffd0523c242f63572770",
+      "reference": "SUSPICIOUS",
+      "unified": "SUSPICIOUS",
+      "added": [
+        [
+          "pdf-chains",
+          "ENGINE_PDF_USER_TRIGGERED_SCRIPT",
+          "INFO"
+        ]
+      ],
+      "removed": [
+        [
+          "pdf",
+          "PDF_AUTO_JAVASCRIPT",
+          "MEDIUM"
+        ],
+        [
+          "yara-x",
+          "PDF_JavaScript_With_Automatic_Action",
+          "MEDIUM"
+        ]
+      ],
+      "qualified": [
+        "Evidence correlation: replaced PDF_AUTO_JAVASCRIPT (PDF scanner) by the action-chain rules; replaced PDF_JavaScript_With_Automatic_Action (YARA-X) by ENGINE_PDF_JavaScript_With_Automatic_Trigger, which did not match: the bytes show every /OpenAction and /AA here is not automatic."
+      ],
+      "undetermined": [],
+      "incomplete": [],
+      "deterministic": true
+    },
+    {
+      "id": "2c-pdf-open-at-page-page-open-js",
+      "scenario": "PDF with automatic JavaScript",
+      "role": "indicator",
+      "label": "Page-open script",
+      "caption": "Kept: the page's own /AA /O runs on open.",
+      "indicator": "/OpenAction page destination + that page's own open trigger /AA /O",
+      "sha256": "830dd24170f6ecf8eacb6136d7d9c8dba6ebef2fc90b804eedc46aae33b67599",
+      "reference": "SUSPICIOUS",
+      "unified": "SUSPICIOUS",
+      "added": [
+        [
+          "pdf-chains",
+          "ENGINE_PDF_AUTO_CHAIN_SCRIPT",
+          "MEDIUM"
+        ],
+        [
+          "yara-x-engine",
+          "ENGINE_PDF_JavaScript_With_Automatic_Trigger",
+          "MEDIUM"
+        ]
+      ],
+      "removed": [
+        [
+          "pdf",
+          "PDF_AUTO_JAVASCRIPT",
+          "MEDIUM"
+        ],
+        [
+          "yara-x",
+          "PDF_JavaScript_With_Automatic_Action",
+          "MEDIUM"
+        ]
+      ],
+      "qualified": [
+        "Evidence correlation: replaced PDF_AUTO_JAVASCRIPT (PDF scanner) by the action-chain rules; replaced PDF_JavaScript_With_Automatic_Action (YARA-X) by ENGINE_PDF_JavaScript_With_Automatic_Trigger, which also matched."
+      ],
+      "undetermined": [],
+      "incomplete": [],
+      "deterministic": true
+    },
+    {
+      "id": "3-pdf-escaped-openaction-js",
+      "scenario": "PDF with automatic JavaScript",
+      "role": "indicator",
+      "label": "#-escaped OpenAction script",
+      "caption": "Automatic chain found through escaped names.",
+      "indicator": "/OpenAction JavaScript written /J#61vaScript /J#53",
+      "sha256": "a1d1340bde10797020a3bf5fbf34f4d3a74dc5327b902c55268a0245b49e2a3c",
+      "reference": "SUSPICIOUS",
+      "unified": "SUSPICIOUS",
+      "added": [
+        [
+          "pdf-chains",
+          "ENGINE_PDF_AUTO_CHAIN_SCRIPT",
+          "MEDIUM"
+        ]
+      ],
+      "removed": [
+        [
+          "pdf",
+          "PDF_AUTO_JAVASCRIPT",
+          "MEDIUM"
+        ]
+      ],
+      "qualified": [
+        "Evidence correlation: replaced PDF_AUTO_JAVASCRIPT (PDF scanner) by the action-chain rules."
+      ],
+      "undetermined": [],
+      "incomplete": [],
+      "deterministic": true
+    },
+    {
+      "id": "4-pdf-objstm-escaped-js",
+      "scenario": "PDF with automatic JavaScript",
+      "role": "indicator",
+      "label": "Same, in object stream",
+      "caption": "Automatic chain found inside a compressed object stream.",
+      "indicator": "the same action inside a FlateDecode object stream",
+      "sha256": "b256fc5452921634ec592f87184478ad91ccb9cd4167923cef881dbc0ca05cdd",
+      "reference": "SUSPICIOUS",
+      "unified": "SUSPICIOUS",
+      "added": [
+        [
+          "pdf-chains",
+          "ENGINE_PDF_AUTO_CHAIN_SCRIPT",
+          "MEDIUM"
+        ]
+      ],
+      "removed": [
+        [
+          "pdf",
+          "PDF_AUTO_JAVASCRIPT",
+          "MEDIUM"
+        ]
+      ],
+      "qualified": [
+        "Evidence correlation: replaced PDF_AUTO_JAVASCRIPT (PDF scanner) by the action-chain rules."
+      ],
+      "undetermined": [],
+      "incomplete": [],
+      "deterministic": true
+    },
+    {
+      "id": "5a-pdf-auto-js-unrelated-attachment",
+      "scenario": "PDF script and attachment",
+      "role": "indicator",
+      "label": "Auto script + unrelated file",
+      "caption": "Script never uses the attachment: no HIGH escalation.",
+      "indicator": "/OpenAction JavaScript + a text attachment it never references",
+      "sha256": "48ac8dc02c326363f7d91d947c4fbb2b8b077d1a7ec7c310c801f1fadcc382c8",
+      "reference": "MALICIOUS",
+      "unified": "SUSPICIOUS",
+      "added": [
+        [
+          "pdf-chains",
+          "ENGINE_PDF_AUTO_CHAIN_SCRIPT",
+          "MEDIUM"
+        ],
+        [
+          "yara-x-engine",
+          "ENGINE_PDF_JavaScript_With_Automatic_Trigger",
+          "MEDIUM"
+        ]
+      ],
+      "removed": [
+        [
+          "pdf",
+          "PDF_AUTO_JAVASCRIPT",
+          "MEDIUM"
+        ],
+        [
+          "pdf",
+          "PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD",
+          "HIGH"
+        ],
+        [
+          "yara-x",
+          "PDF_JavaScript_With_Automatic_Action",
+          "MEDIUM"
+        ]
+      ],
+      "qualified": [
+        "Evidence correlation: replaced PDF_AUTO_JAVASCRIPT, PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD (PDF scanner) by the action-chain rules; replaced PDF_JavaScript_With_Automatic_Action (YARA-X) by ENGINE_PDF_JavaScript_With_Automatic_Trigger, which also matched."
+      ],
+      "undetermined": [],
+      "incomplete": [],
+      "deterministic": true
+    },
+    {
+      "id": "5b-pdf-auto-js-exports-attachment",
+      "scenario": "PDF script and attachment",
+      "role": "indicator",
+      "label": "Auto script exports file",
+      "caption": "Same chain exports the attachment: HIGH, with the path as evidence.",
+      "indicator": "/OpenAction JavaScript that exports the attachment (nLaunch 0)",
+      "sha256": "f55c21380da9580df93ba96674baa1f865aaed4d6675d3a16a5d463d3d69dec4",
+      "reference": "MALICIOUS",
+      "unified": "MALICIOUS",
+      "added": [
+        [
+          "pdf-chains",
+          "ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT",
+          "HIGH"
+        ],
+        [
+          "yara-x-engine",
+          "ENGINE_PDF_JavaScript_With_Automatic_Trigger",
+          "MEDIUM"
+        ]
+      ],
+      "removed": [
+        [
+          "pdf",
+          "PDF_AUTO_JAVASCRIPT",
+          "MEDIUM"
+        ],
+        [
+          "pdf",
+          "PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD",
+          "HIGH"
+        ],
+        [
+          "yara-x",
+          "PDF_JavaScript_With_Automatic_Action",
+          "MEDIUM"
+        ]
+      ],
+      "qualified": [
+        "Evidence correlation: replaced PDF_AUTO_JAVASCRIPT, PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD (PDF scanner) by the action-chain rules; replaced PDF_JavaScript_With_Automatic_Action (YARA-X) by ENGINE_PDF_JavaScript_With_Automatic_Trigger, which also matched."
+      ],
+      "undetermined": [],
+      "incomplete": [],
+      "deterministic": true
+    },
+    {
+      "id": "6a-docx-hyperlink",
+      "scenario": "Word external content",
+      "role": "control",
+      "label": "Hyperlink relationship",
+      "caption": "Relationship no element references: recorded (INFO).",
+      "indicator": "ordinary external hyperlink (negative control)",
+      "sha256": "7a0db7d17fdf8541df4177df056be5629cd37e37b262238532653068a1913ff0",
+      "reference": "SAFE",
+      "unified": "SAFE",
+      "added": [
+        [
+          "ooxml-links",
+          "ENGINE_OFFICE_EXTERNAL_NOT_ACTIVATED",
+          "INFO"
+        ]
+      ],
+      "removed": [],
+      "qualified": [],
+      "undetermined": [],
+      "incomplete": [],
+      "deterministic": true
+    },
+    {
+      "id": "6b-docx-external-template",
+      "scenario": "Word external content",
+      "role": "indicator",
+      "label": "Unreferenced template",
+      "caption": "Template relationship nothing references: kept, use not demonstrated.",
+      "indicator": "external attachedTemplate https://template.example.invalid/normal.dotm (never fetched)",
+      "sha256": "1930d78d93347a087551bf547bba07dbcdc4fe7d1b79d00cc12960e3b962ab9e",
+      "reference": "SUSPICIOUS",
+      "unified": "SUSPICIOUS",
+      "added": [
+        [
+          "ooxml-links",
+          "ENGINE_OFFICE_EXTERNAL_NOT_ACTIVATED",
+          "INFO"
+        ]
+      ],
+      "removed": [],
+      "qualified": [
+        "Evidence correlation: OFFICE_EXTERNAL_AUTOLOAD (Office scanner) kept although no part Office loads references it: its use is not demonstrated."
+      ],
+      "undetermined": [],
+      "incomplete": [],
+      "deterministic": true
+    },
+    {
+      "id": "6c-docx-template-referenced-by-settings",
+      "scenario": "Word external content",
+      "role": "indicator",
+      "label": "Template via settings",
+      "caption": "attachedTemplate confirmed with the full chain.",
+      "indicator": "the same template, referenced by w:attachedTemplate in the settings part, as Word writes it",
+      "sha256": "1f6250ac26083ce3d033715f2a5e48ec6b955199f0ed4c42e33d420ad65d9a8f",
+      "reference": "SUSPICIOUS",
+      "unified": "SUSPICIOUS",
+      "added": [
+        [
+          "ooxml-links",
+          "ENGINE_OFFICE_EXTERNAL_ON_OPEN",
+          "MEDIUM"
+        ]
+      ],
+      "removed": [],
+      "qualified": [
+        "Evidence correlation: OFFICE_EXTERNAL_AUTOLOAD (Office scanner) confirmed: a part Office loads references an external target used on open."
+      ],
+      "undetermined": [],
+      "incomplete": [],
+      "deterministic": true
+    },
+    {
+      "id": "6d-docx-linked-picture",
+      "scenario": "Word external content",
+      "role": "benign-content",
+      "label": "Linked picture (https)",
+      "caption": "Recorded as INFO; not escalated (documented risk policy).",
+      "indicator": "a picture shown from https://images.example.invalid/pixel.png (a:blip r:link; never fetched)",
+      "sha256": "2c123328e344f3bd2eb978d92683eb52ba5a3b4319226f3269b02609ec2e5113",
+      "reference": "SAFE",
+      "unified": "SAFE",
+      "added": [
+        [
+          "ooxml-links",
+          "ENGINE_OFFICE_LINKED_PICTURE",
+          "INFO"
+        ]
+      ],
+      "removed": [],
+      "qualified": [],
+      "undetermined": [],
+      "incomplete": [],
+      "deterministic": true
+    },
+    {
+      "id": "6g-docx-linked-picture-file-share",
+      "scenario": "Word external content",
+      "role": "indicator",
+      "label": "Linked picture (file://)",
+      "caption": "Stays SUSPICIOUS: credential exposure (reference rule).",
+      "indicator": "the same picture on a file share file://fileserver.invalid/share/pixel.png (never fetched)",
+      "sha256": "bdacf5acdcdd555fea3e6bd01827087899a55e42e16561664b16a26548bbc355",
+      "reference": "SUSPICIOUS",
+      "unified": "SUSPICIOUS",
+      "added": [
+        [
+          "ooxml-links",
+          "ENGINE_OFFICE_LINKED_PICTURE",
+          "INFO"
+        ]
+      ],
+      "removed": [],
+      "qualified": [],
+      "undetermined": [],
+      "incomplete": [],
+      "deterministic": true
+    },
+    {
+      "id": "6e-docx-embedded-object-displayed",
+      "scenario": "Word embedded objects and macros",
+      "role": "benign-content",
+      "label": "Embedded object, shown",
+      "caption": "Shown in the document; runs only when activated (INFO).",
+      "indicator": "an inert OLE container shown by o:OLEObject Type=Embed",
+      "sha256": "f1202a9729ef09a77d8388da9a7d0e11dd705631bcfc45b434bd0d394469fbab",
+      "reference": "SUSPICIOUS",
+      "unified": "SUSPICIOUS",
+      "added": [
+        [
+          "ooxml-links",
+          "ENGINE_OFFICE_EMBEDDED_OBJECT_DISPLAYED",
+          "INFO"
+        ]
+      ],
+      "removed": [],
+      "qualified": [
+        "Evidence correlation: OFFICE_EMBEDDED_OLE (Office scanner) kept; the object is shown in the document and runs only when activated."
+      ],
+      "undetermined": [],
+      "incomplete": [],
+      "deterministic": true
+    },
+    {
+      "id": "6f-docx-embedded-object-not-displayed",
+      "scenario": "Word embedded objects and macros",
+      "role": "benign-content",
+      "label": "Embedded object, not shown",
+      "caption": "Present but no element shows it (INFO).",
+      "indicator": "the same object with its relationship but no element",
+      "sha256": "e24251266152ceb67bd3e8d0ae646176ccda7c6015957c3e2202d7bdaaec1820",
+      "reference": "SUSPICIOUS",
+      "unified": "SUSPICIOUS",
+      "added": [
+        [
+          "ooxml-links",
+          "ENGINE_OFFICE_EMBEDDED_OBJECT_NOT_DISPLAYED",
+          "INFO"
+        ]
+      ],
+      "removed": [],
+      "qualified": [
+        "Evidence correlation: OFFICE_EMBEDDED_OLE (Office scanner) kept; no element shows the object in the document."
+      ],
+      "undetermined": [],
+      "incomplete": [],
+      "deterministic": true
+    },
+    {
+      "id": "7-docx-macro-declaration-mismatch",
+      "scenario": "Word embedded objects and macros",
+      "role": "indicator",
+      "label": "Macro part, macro-free type",
+      "caption": "Macro call graph undetermined: the placeholder part is not a VBA project.",
+      "indicator": "macro-free DOCX declaration with a vbaProject.bin placeholder",
+      "sha256": "298b3823825cc1fd82f19edfaa811cb5630b2f35b8e42f05cb986b8868b0ea3d",
+      "reference": "SUSPICIOUS",
+      "unified": "SUSPICIOUS",
+      "added": [
+        [
+          "vba-chains",
+          "ENGINE_VBA_CALL_PATH_UNDETERMINED",
+          "INFO"
+        ]
+      ],
+      "removed": [],
+      "qualified": [],
+      "undetermined": [
+        "ENGINE_VBA_CALL_PATH_UNDETERMINED"
+      ],
+      "incomplete": [],
+      "deterministic": true
+    }
+  ],
+  "timing": {
+    "reference": {
+      "cases": 16,
+      "trials_per_case": 20,
+      "wall": {
+        "n": 320,
+        "mean_ms": 569.33,
+        "median_ms": 555.51,
+        "p95_ms": 629.422,
+        "max_ms": 1283.208,
+        "min_ms": 537.303
+      },
+      "scanning": {
+        "n": 320,
+        "mean_ms": 2.13,
+        "median_ms": 2.22,
+        "p95_ms": 3.715,
+        "max_ms": 4.985,
+        "min_ms": 0.793
+      },
+      "startup_and_ipc": {
+        "n": 320,
+        "mean_ms": 567.2,
+        "median_ms": 553.74,
+        "p95_ms": 627.591,
+        "max_ms": 1278.684,
+        "min_ms": 534.608
+      },
+      "per_scanner": {
+        "yara-x": {
+          "n": 320,
+          "mean_ms": 0.39,
+          "median_ms": 0.38,
+          "p95_ms": 0.541,
+          "max_ms": 0.861,
+          "min_ms": 0.285
+        },
+        "pdf": {
+          "n": 160,
+          "mean_ms": 0.64,
+          "median_ms": 0.62,
+          "p95_ms": 0.87,
+          "max_ms": 1.321,
+          "min_ms": 0.411
+        },
+        "custom": {
+          "n": 320,
+          "mean_ms": 0.39,
+          "median_ms": 0.51,
+          "p95_ms": 0.83,
+          "max_ms": 1.144,
+          "min_ms": 0.074
+        },
+        "office": {
+          "n": 160,
+          "mean_ms": 2.05,
+          "median_ms": 1.85,
+          "p95_ms": 2.817,
+          "max_ms": 3.731,
+          "min_ms": 1.534
+        }
+      },
+      "per_case_wall": {
+        "1-pdf-clean": {
+          "n": 20,
+          "mean_ms": 608.61,
+          "median_ms": 578.88,
+          "p95_ms": 786.307,
+          "max_ms": 798.525,
+          "min_ms": 544.084
+        },
+        "2-pdf-form-keystroke-js": {
+          "n": 20,
+          "mean_ms": 574.25,
+          "median_ms": 567.58,
+          "p95_ms": 629.422,
+          "max_ms": 638.455,
+          "min_ms": 546.173
+        },
+        "2b-pdf-open-at-page-click-js": {
+          "n": 20,
+          "mean_ms": 576.6,
+          "median_ms": 561.98,
+          "p95_ms": 622.272,
+          "max_ms": 655.891,
+          "min_ms": 542.44
+        },
+        "2c-pdf-open-at-page-page-open-js": {
+          "n": 20,
+          "mean_ms": 560.03,
+          "median_ms": 552.96,
+          "p95_ms": 601.056,
+          "max_ms": 607.78,
+          "min_ms": 541.439
+        },
+        "3-pdf-escaped-openaction-js": {
+          "n": 20,
+          "mean_ms": 576.38,
+          "median_ms": 575.79,
+          "p95_ms": 613.465,
+          "max_ms": 635.488,
+          "min_ms": 538.402
+        },
+        "4-pdf-objstm-escaped-js": {
+          "n": 20,
+          "mean_ms": 553.65,
+          "median_ms": 551.19,
+          "p95_ms": 567.886,
+          "max_ms": 588.809,
+          "min_ms": 540.467
+        },
+        "5a-pdf-auto-js-unrelated-attachment": {
+          "n": 20,
+          "mean_ms": 556.6,
+          "median_ms": 557.05,
+          "p95_ms": 568.908,
+          "max_ms": 609.593,
+          "min_ms": 539.421
+        },
+        "5b-pdf-auto-js-exports-attachment": {
+          "n": 20,
+          "mean_ms": 554.06,
+          "median_ms": 549.55,
+          "p95_ms": 570.437,
+          "max_ms": 610.757,
+          "min_ms": 537.975
+        },
+        "6a-docx-hyperlink": {
+          "n": 20,
+          "mean_ms": 554.0,
+          "median_ms": 551.83,
+          "p95_ms": 573.479,
+          "max_ms": 603.115,
+          "min_ms": 541.143
+        },
+        "6b-docx-external-template": {
+          "n": 20,
+          "mean_ms": 566.25,
+          "median_ms": 556.47,
+          "p95_ms": 595.022,
+          "max_ms": 718.162,
+          "min_ms": 537.303
+        },
+        "6c-docx-template-referenced-by-settings": {
+          "n": 20,
+          "mean_ms": 555.64,
+          "median_ms": 552.91,
+          "p95_ms": 572.358,
+          "max_ms": 574.444,
+          "min_ms": 540.043
+        },
+        "6d-docx-linked-picture": {
+          "n": 20,
+          "mean_ms": 552.32,
+          "median_ms": 548.32,
+          "p95_ms": 561.838,
+          "max_ms": 615.793,
+          "min_ms": 538.772
+        },
+        "6g-docx-linked-picture-file-share": {
+          "n": 20,
+          "mean_ms": 555.82,
+          "median_ms": 547.81,
+          "p95_ms": 596.592,
+          "max_ms": 602.104,
+          "min_ms": 537.483
+        },
+        "6e-docx-embedded-object-displayed": {
+          "n": 20,
+          "mean_ms": 591.41,
+          "median_ms": 565.88,
+          "p95_ms": 761.34,
+          "max_ms": 764.814,
+          "min_ms": 550.764
+        },
+        "6f-docx-embedded-object-not-displayed": {
+          "n": 20,
+          "mean_ms": 565.58,
+          "median_ms": 563.27,
+          "p95_ms": 586.336,
+          "max_ms": 637.479,
+          "min_ms": 544.517
+        },
+        "7-docx-macro-declaration-mismatch": {
+          "n": 20,
+          "mean_ms": 608.15,
+          "median_ms": 566.11,
+          "p95_ms": 662.272,
+          "max_ms": 1283.208,
+          "min_ms": 548.041
+        }
+      }
+    },
+    "unified": {
+      "cases": 16,
+      "trials_per_case": 20,
+      "wall": {
+        "n": 320,
+        "mean_ms": 574.71,
+        "median_ms": 567.58,
+        "p95_ms": 629.136,
+        "max_ms": 734.629,
+        "min_ms": 544.836
+      },
+      "scanning": {
+        "n": 320,
+        "mean_ms": 2.89,
+        "median_ms": 3.24,
+        "p95_ms": 4.404,
+        "max_ms": 5.218,
+        "min_ms": 1.239
+      },
+      "startup_and_ipc": {
+        "n": 320,
+        "mean_ms": 571.82,
+        "median_ms": 565.04,
+        "p95_ms": 626.589,
+        "max_ms": 730.055,
+        "min_ms": 541.103
+      },
+      "per_scanner": {
+        "yara-x": {
+          "n": 320,
+          "mean_ms": 0.38,
+          "median_ms": 0.37,
+          "p95_ms": 0.526,
+          "max_ms": 0.936,
+          "min_ms": 0.274
+        },
+        "pdf": {
+          "n": 160,
+          "mean_ms": 0.64,
+          "median_ms": 0.61,
+          "p95_ms": 0.869,
+          "max_ms": 1.207,
+          "min_ms": 0.414
+        },
+        "custom": {
+          "n": 320,
+          "mean_ms": 0.38,
+          "median_ms": 0.5,
+          "p95_ms": 0.745,
+          "max_ms": 0.984,
+          "min_ms": 0.074
+        },
+        "yara-x-engine": {
+          "n": 320,
+          "mean_ms": 0.34,
+          "median_ms": 0.33,
+          "p95_ms": 0.454,
+          "max_ms": 0.648,
+          "min_ms": 0.263
+        },
+        "pdf-chains": {
+          "n": 160,
+          "mean_ms": 0.39,
+          "median_ms": 0.38,
+          "p95_ms": 0.594,
+          "max_ms": 1.459,
+          "min_ms": 0.186
+        },
+        "office": {
+          "n": 160,
+          "mean_ms": 2.01,
+          "median_ms": 1.87,
+          "p95_ms": 2.601,
+          "max_ms": 2.927,
+          "min_ms": 1.621
+        },
+        "ooxml-links": {
+          "n": 160,
+          "mean_ms": 0.43,
+          "median_ms": 0.41,
+          "p95_ms": 0.624,
+          "max_ms": 1.004,
+          "min_ms": 0.255
+        },
+        "vba-chains": {
+          "n": 20,
+          "mean_ms": 0.15,
+          "median_ms": 0.14,
+          "p95_ms": 0.209,
+          "max_ms": 0.21,
+          "min_ms": 0.13
+        }
+      },
+      "per_case_wall": {
+        "1-pdf-clean": {
+          "n": 20,
+          "mean_ms": 575.23,
+          "median_ms": 568.92,
+          "p95_ms": 605.316,
+          "max_ms": 629.136,
+          "min_ms": 562.096
+        },
+        "2-pdf-form-keystroke-js": {
+          "n": 20,
+          "mean_ms": 580.08,
+          "median_ms": 576.03,
+          "p95_ms": 602.849,
+          "max_ms": 643.997,
+          "min_ms": 560.182
+        },
+        "2b-pdf-open-at-page-click-js": {
+          "n": 20,
+          "mean_ms": 577.86,
+          "median_ms": 572.19,
+          "p95_ms": 619.446,
+          "max_ms": 624.138,
+          "min_ms": 557.481
+        },
+        "2c-pdf-open-at-page-page-open-js": {
+          "n": 20,
+          "mean_ms": 577.49,
+          "median_ms": 572.9,
+          "p95_ms": 601.077,
+          "max_ms": 626.293,
+          "min_ms": 557.639
+        },
+        "3-pdf-escaped-openaction-js": {
+          "n": 20,
+          "mean_ms": 572.52,
+          "median_ms": 566.62,
+          "p95_ms": 592.655,
+          "max_ms": 600.957,
+          "min_ms": 556.894
+        },
+        "4-pdf-objstm-escaped-js": {
+          "n": 20,
+          "mean_ms": 577.91,
+          "median_ms": 570.06,
+          "p95_ms": 611.466,
+          "max_ms": 621.27,
+          "min_ms": 555.143
+        },
+        "5a-pdf-auto-js-unrelated-attachment": {
+          "n": 20,
+          "mean_ms": 607.67,
+          "median_ms": 608.62,
+          "p95_ms": 672.079,
+          "max_ms": 677.52,
+          "min_ms": 559.405
+        },
+        "5b-pdf-auto-js-exports-attachment": {
+          "n": 20,
+          "mean_ms": 584.86,
+          "median_ms": 578.14,
+          "p95_ms": 642.271,
+          "max_ms": 647.422,
+          "min_ms": 552.942
+        },
+        "6a-docx-hyperlink": {
+          "n": 20,
+          "mean_ms": 581.13,
+          "median_ms": 576.67,
+          "p95_ms": 615.349,
+          "max_ms": 630.088,
+          "min_ms": 560.748
+        },
+        "6b-docx-external-template": {
+          "n": 20,
+          "mean_ms": 607.52,
+          "median_ms": 604.76,
+          "p95_ms": 669.799,
+          "max_ms": 734.629,
+          "min_ms": 558.031
+        },
+        "6c-docx-template-referenced-by-settings": {
+          "n": 20,
+          "mean_ms": 567.66,
+          "median_ms": 561.14,
+          "p95_ms": 609.054,
+          "max_ms": 631.59,
+          "min_ms": 546.371
+        },
+        "6d-docx-linked-picture": {
+          "n": 20,
+          "mean_ms": 560.84,
+          "median_ms": 554.34,
+          "p95_ms": 589.969,
+          "max_ms": 595.997,
+          "min_ms": 546.628
+        },
+        "6g-docx-linked-picture-file-share": {
+          "n": 20,
+          "mean_ms": 560.35,
+          "median_ms": 553.56,
+          "p95_ms": 603.669,
+          "max_ms": 611.73,
+          "min_ms": 548.074
+        },
+        "6e-docx-embedded-object-displayed": {
+          "n": 20,
+          "mean_ms": 555.56,
+          "median_ms": 553.93,
+          "p95_ms": 573.346,
+          "max_ms": 574.712,
+          "min_ms": 546.252
+        },
+        "6f-docx-embedded-object-not-displayed": {
+          "n": 20,
+          "mean_ms": 555.69,
+          "median_ms": 555.28,
+          "p95_ms": 560.498,
+          "max_ms": 576.664,
+          "min_ms": 548.31
+        },
+        "7-docx-macro-declaration-mismatch": {
+          "n": 20,
+          "mean_ms": 552.94,
+          "median_ms": 551.46,
+          "p95_ms": 564.34,
+          "max_ms": 564.553,
+          "min_ms": 544.836
+        }
+      }
+    }
+  }
+}

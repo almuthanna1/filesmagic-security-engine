@@ -19,4 +19,8 @@ USER engine
 EXPOSE 8000
 
 # Render injects PORT (default 10000); 8000 is the local fallback. No --reload in production.
-CMD ["sh", "-c", "exec uvicorn app.main:app --host 0.0.0.0 --port \"$PORT\""]
+# Each scan runs in a child `python -m app.worker` process as this same non-root user.
+# --limit-concurrency caps open connections (HTTP 503 beyond it); scans themselves are capped
+# by SECURITY_ENGINE_MAX_CONCURRENT_SCANS. Keep ONE uvicorn process (no --workers): the
+# token replay store and failed-auth counters live in that process's memory.
+CMD ["sh", "-c", "exec uvicorn app.main:app --host 0.0.0.0 --port \"$PORT\" --no-server-header --timeout-keep-alive 5 --limit-concurrency 32"]

@@ -1,0 +1,20 @@
+{
+  "path": "Security Lab UI (Compare both), staging Lab 37737f5 -> engine 7b4f838; read from the page's History records after each comparison",
+  "browser": "DevTools-controlled Edge, isolated context; the full History export was lost when the DevTools server restarted at about 04:00 UTC",
+  "windows_utc": ["03:22-03:25 (docx-01..06)", "03:41-03:43 (docx-07, pdf-01..05)"],
+  "rows": [
+    {"file": "docx-01-word-plain.docx", "sha256_12": "996c1deeec6d", "reference": {"verdict": "SAFE", "complete": true, "ms": 6684.7, "rules": []}, "unified": {"verdict": "SAFE", "complete": true, "ms": 6967, "rules": []}},
+    {"file": "docx-02-word-rich.docx", "sha256_12": "510e8dcde7bb", "reference": {"verdict": "SAFE", "complete": true, "ms": 7102.9, "rules": []}, "unified": {"verdict": "SAFE", "complete": true, "ms": 6920, "rules": []}},
+    {"file": "docx-03-word-embedded-excel.docx", "sha256_12": "14928c97e104", "reference": {"verdict": "SAFE", "complete": true, "ms": 6239.4, "rules": []}, "unified": {"verdict": "SAFE", "complete": true, "ms": 6616.6, "rules": []}},
+    {"file": "docx-04-word-linked-picture.docx", "sha256_12": "483dcf58c24c", "reference": {"verdict": "SUSPICIOUS", "complete": true, "ms": 6188.6, "rules": ["office:OFFICE_EXTERNAL_NETWORK_PATH:MEDIUM"]}, "unified": {"verdict": "SUSPICIOUS", "complete": true, "ms": 6699.5, "rules": ["office:OFFICE_EXTERNAL_NETWORK_PATH:MEDIUM"]}},
+    {"file": "docx-05-word-custom-template.docx", "sha256_12": "0324b9916823", "reference": {"verdict": "SUSPICIOUS", "complete": true, "ms": 7488.4, "rules": ["office:OFFICE_EXTERNAL_AUTOLOAD:MEDIUM"]}, "unified": {"verdict": "SUSPICIOUS", "complete": true, "ms": 6972.1, "rules": ["office:OFFICE_EXTERNAL_AUTOLOAD:MEDIUM", "ooxml-links:ENGINE_OFFICE_EXTERNAL_ON_OPEN:MEDIUM"]}},
+    {"file": "docx-06-word-content-controls.docx", "sha256_12": "ae711ee773f3", "reference": {"verdict": "SAFE", "complete": true, "ms": 6969.6, "rules": []}, "unified": {"verdict": "SAFE", "complete": true, "ms": 6764, "rules": []}},
+    {"file": "docx-07-libreoffice.docx", "sha256_12": "8fa7225d0bf9", "reference": {"verdict": "SAFE", "complete": true, "ms": 6524.7, "rules": []}, "unified": {"verdict": "SAFE", "complete": true, "ms": 6449.3, "rules": []}},
+    {"file": "pdf-01-word-export.pdf", "sha256_12": "29d46813a426", "reference": {"verdict": "SAFE", "complete": true, "ms": 6751.3, "rules": []}, "unified": {"verdict": "SAFE", "complete": true, "ms": 6835.4, "rules": []}},
+    {"file": "pdf-02-excel-export.pdf", "sha256_12": "8690bdc88114", "reference": {"verdict": "SAFE", "complete": true, "ms": 5602.4, "rules": []}, "unified": {"verdict": "SAFE", "complete": true, "ms": 6048.4, "rules": []}},
+    {"file": "pdf-03-powerpoint-export.pdf", "sha256_12": "ef95d5e43893", "reference": {"verdict": "SAFE", "complete": true, "ms": 6051.4, "rules": []}, "unified": {"verdict": "SAFE", "complete": true, "ms": 6070, "rules": []}},
+    {"file": "pdf-04-libreoffice-tagged.pdf", "sha256_12": "c7da196b3cda", "reference": {"verdict": "SAFE", "complete": true, "ms": 5667.7, "rules": []}, "unified": {"verdict": "SAFE", "complete": true, "ms": 6482.4, "rules": []}},
+    {"file": "pdf-05-libreoffice-pdfa.pdf", "sha256_12": "1fdfe797336a", "reference": {"verdict": "SAFE", "complete": true, "ms": 6126.9, "rules": []}, "unified": {"verdict": "SAFE", "complete": true, "ms": 6817, "rules": []}}
+  ],
+  "all_rows": "commit 7b4f838, isolation_required true, isolation_missing [] and no failed scanner for every scan"
+}

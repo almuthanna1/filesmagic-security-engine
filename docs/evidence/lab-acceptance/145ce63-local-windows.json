@@ -1,0 +1,1589 @@
+{
+  "lab": "http://localhost:3000",
+  "api": "http://localhost:8001",
+  "health": {
+    "status": "ok",
+    "service": "filesmagic-security-engine",
+    "scanners_registered": 4,
+    "scanners_ready": 4,
+    "auth_configured": true,
+    "engines": [
+      "reference",
+      "unified"
+    ],
+    "default_engine": "reference",
+    "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a"
+  },
+  "timestamp_utc": "2026-11-07T05:02:10Z",
+  "checks": 42,
+  "failed": 0,
+  "rows": [
+    {
+      "case": "1-pdf-clean",
+      "engine": "reference",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2678.5,
+        "cors_allowed": true,
+        "engine": "reference",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SAFE",
+        "rules": [],
+        "status": {
+          "yara-x": "completed",
+          "office": "not_applicable",
+          "pdf": "completed",
+          "custom": "completed"
+        },
+        "complete": true,
+        "duration_ms": 661.2,
+        "sha256": "d5784991fd896bc6b3c21c3c384d9a376a3b4b6009b83a25e0c5d8f77939011b",
+        "evidence_items": 0,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "1-pdf-clean",
+      "engine": "unified",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2699.5,
+        "cors_allowed": true,
+        "engine": "unified",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SAFE",
+        "rules": [],
+        "status": {
+          "yara-x": "completed",
+          "office": "not_applicable",
+          "pdf": "completed",
+          "custom": "completed",
+          "yara-x-engine": "completed",
+          "pdf-chains": "completed",
+          "vba-chains": "not_applicable",
+          "ooxml-links": "not_applicable"
+        },
+        "complete": true,
+        "duration_ms": 681.1,
+        "sha256": "d5784991fd896bc6b3c21c3c384d9a376a3b4b6009b83a25e0c5d8f77939011b",
+        "evidence_items": 0,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "2-pdf-form-keystroke-js",
+      "engine": "reference",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2686.6,
+        "cors_allowed": true,
+        "engine": "reference",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "pdf:PDF_JAVASCRIPT:MEDIUM",
+          "yara-x:PDF_JavaScript_With_Automatic_Action:MEDIUM"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "not_applicable",
+          "pdf": "completed",
+          "custom": "completed"
+        },
+        "complete": true,
+        "duration_ms": 660.6,
+        "sha256": "8fb92bebda2330b5f0bb6803db1da54f63a42a8cf28a34e49c0b621612263fd5",
+        "evidence_items": 0,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "2-pdf-form-keystroke-js",
+      "engine": "unified",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2692.6,
+        "cors_allowed": true,
+        "engine": "unified",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "pdf:PDF_JAVASCRIPT:MEDIUM"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "not_applicable",
+          "pdf": "completed",
+          "custom": "completed",
+          "yara-x-engine": "completed",
+          "pdf-chains": "completed",
+          "vba-chains": "not_applicable",
+          "ooxml-links": "not_applicable"
+        },
+        "complete": true,
+        "duration_ms": 677.7,
+        "sha256": "8fb92bebda2330b5f0bb6803db1da54f63a42a8cf28a34e49c0b621612263fd5",
+        "evidence_items": 2,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "2b-pdf-open-at-page-click-js",
+      "engine": "reference",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2666.4,
+        "cors_allowed": true,
+        "engine": "reference",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+          "pdf:PDF_JAVASCRIPT:MEDIUM",
+          "yara-x:PDF_JavaScript_With_Automatic_Action:MEDIUM"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "not_applicable",
+          "pdf": "completed",
+          "custom": "completed"
+        },
+        "complete": true,
+        "duration_ms": 650.3,
+        "sha256": "09add801d7ce300528a624a753c79ebff0f1240905f2ffd0523c242f63572770",
+        "evidence_items": 0,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "2b-pdf-open-at-page-click-js",
+      "engine": "unified",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2701.9,
+        "cors_allowed": true,
+        "engine": "unified",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "pdf:PDF_JAVASCRIPT:MEDIUM"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "not_applicable",
+          "pdf": "completed",
+          "custom": "completed",
+          "yara-x-engine": "completed",
+          "pdf-chains": "completed",
+          "vba-chains": "not_applicable",
+          "ooxml-links": "not_applicable"
+        },
+        "complete": true,
+        "duration_ms": 684.7,
+        "sha256": "09add801d7ce300528a624a753c79ebff0f1240905f2ffd0523c242f63572770",
+        "evidence_items": 3,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "2c-pdf-open-at-page-page-open-js",
+      "engine": "reference",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2675.5,
+        "cors_allowed": true,
+        "engine": "reference",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+          "pdf:PDF_JAVASCRIPT:MEDIUM",
+          "yara-x:PDF_JavaScript_With_Automatic_Action:MEDIUM"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "not_applicable",
+          "pdf": "completed",
+          "custom": "completed"
+        },
+        "complete": true,
+        "duration_ms": 652.5,
+        "sha256": "830dd24170f6ecf8eacb6136d7d9c8dba6ebef2fc90b804eedc46aae33b67599",
+        "evidence_items": 0,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "2c-pdf-open-at-page-page-open-js",
+      "engine": "unified",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2699.3,
+        "cors_allowed": true,
+        "engine": "unified",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+          "pdf:PDF_JAVASCRIPT:MEDIUM",
+          "yara-x-engine:ENGINE_PDF_JavaScript_With_Automatic_Trigger:MEDIUM"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "not_applicable",
+          "pdf": "completed",
+          "custom": "completed",
+          "yara-x-engine": "completed",
+          "pdf-chains": "completed",
+          "vba-chains": "not_applicable",
+          "ooxml-links": "not_applicable"
+        },
+        "complete": true,
+        "duration_ms": 676.1,
+        "sha256": "830dd24170f6ecf8eacb6136d7d9c8dba6ebef2fc90b804eedc46aae33b67599",
+        "evidence_items": 3,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "3-pdf-escaped-openaction-js",
+      "engine": "reference",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2680.3,
+        "cors_allowed": true,
+        "engine": "reference",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "custom:CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME:MEDIUM",
+          "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+          "pdf:PDF_JAVASCRIPT:MEDIUM"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "not_applicable",
+          "pdf": "completed",
+          "custom": "completed"
+        },
+        "complete": true,
+        "duration_ms": 651.3,
+        "sha256": "a1d1340bde10797020a3bf5fbf34f4d3a74dc5327b902c55268a0245b49e2a3c",
+        "evidence_items": 0,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "3-pdf-escaped-openaction-js",
+      "engine": "unified",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2677.7,
+        "cors_allowed": true,
+        "engine": "unified",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "custom:CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME:MEDIUM",
+          "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+          "pdf:PDF_JAVASCRIPT:MEDIUM"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "not_applicable",
+          "pdf": "completed",
+          "custom": "completed",
+          "yara-x-engine": "completed",
+          "pdf-chains": "completed",
+          "vba-chains": "not_applicable",
+          "ooxml-links": "not_applicable"
+        },
+        "complete": true,
+        "duration_ms": 665.1,
+        "sha256": "a1d1340bde10797020a3bf5fbf34f4d3a74dc5327b902c55268a0245b49e2a3c",
+        "evidence_items": 2,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "4-pdf-objstm-escaped-js",
+      "engine": "reference",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2659.5,
+        "cors_allowed": true,
+        "engine": "reference",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "custom:CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME:MEDIUM",
+          "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+          "pdf:PDF_JAVASCRIPT:MEDIUM"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "not_applicable",
+          "pdf": "completed",
+          "custom": "completed"
+        },
+        "complete": true,
+        "duration_ms": 651.7,
+        "sha256": "b256fc5452921634ec592f87184478ad91ccb9cd4167923cef881dbc0ca05cdd",
+        "evidence_items": 0,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "4-pdf-objstm-escaped-js",
+      "engine": "unified",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2718.4,
+        "cors_allowed": true,
+        "engine": "unified",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "custom:CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME:MEDIUM",
+          "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+          "pdf:PDF_JAVASCRIPT:MEDIUM"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "not_applicable",
+          "pdf": "completed",
+          "custom": "completed",
+          "yara-x-engine": "completed",
+          "pdf-chains": "completed",
+          "vba-chains": "not_applicable",
+          "ooxml-links": "not_applicable"
+        },
+        "complete": true,
+        "duration_ms": 702.4,
+        "sha256": "b256fc5452921634ec592f87184478ad91ccb9cd4167923cef881dbc0ca05cdd",
+        "evidence_items": 2,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "5a-pdf-auto-js-unrelated-attachment",
+      "engine": "reference",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2667.1,
+        "cors_allowed": true,
+        "engine": "reference",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "MALICIOUS",
+        "rules": [
+          "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+          "pdf:PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD:HIGH",
+          "pdf:PDF_EMBEDDED_FILE:LOW",
+          "pdf:PDF_JAVASCRIPT:MEDIUM",
+          "yara-x:PDF_Embedded_File:LOW",
+          "yara-x:PDF_JavaScript_With_Automatic_Action:MEDIUM"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "not_applicable",
+          "pdf": "completed",
+          "custom": "completed"
+        },
+        "complete": true,
+        "duration_ms": 651.9,
+        "sha256": "48ac8dc02c326363f7d91d947c4fbb2b8b077d1a7ec7c310c801f1fadcc382c8",
+        "evidence_items": 0,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "5a-pdf-auto-js-unrelated-attachment",
+      "engine": "unified",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2702.7,
+        "cors_allowed": true,
+        "engine": "unified",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+          "pdf:PDF_EMBEDDED_FILE:LOW",
+          "pdf:PDF_JAVASCRIPT:MEDIUM",
+          "yara-x-engine:ENGINE_PDF_JavaScript_With_Automatic_Trigger:MEDIUM",
+          "yara-x:PDF_Embedded_File:LOW"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "not_applicable",
+          "pdf": "completed",
+          "custom": "completed",
+          "yara-x-engine": "completed",
+          "pdf-chains": "completed",
+          "vba-chains": "not_applicable",
+          "ooxml-links": "not_applicable"
+        },
+        "complete": true,
+        "duration_ms": 681.9,
+        "sha256": "48ac8dc02c326363f7d91d947c4fbb2b8b077d1a7ec7c310c801f1fadcc382c8",
+        "evidence_items": 3,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "5b-pdf-auto-js-exports-attachment",
+      "engine": "reference",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2671.7,
+        "cors_allowed": true,
+        "engine": "reference",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "MALICIOUS",
+        "rules": [
+          "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+          "pdf:PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD:HIGH",
+          "pdf:PDF_EMBEDDED_FILE:LOW",
+          "pdf:PDF_JAVASCRIPT:MEDIUM",
+          "yara-x:PDF_Embedded_File:LOW",
+          "yara-x:PDF_JavaScript_With_Automatic_Action:MEDIUM"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "not_applicable",
+          "pdf": "completed",
+          "custom": "completed"
+        },
+        "complete": true,
+        "duration_ms": 654.8,
+        "sha256": "f55c21380da9580df93ba96674baa1f865aaed4d6675d3a16a5d463d3d69dec4",
+        "evidence_items": 0,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "5b-pdf-auto-js-exports-attachment",
+      "engine": "unified",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2691.6,
+        "cors_allowed": true,
+        "engine": "unified",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "MALICIOUS",
+        "rules": [
+          "pdf-chains:ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT:HIGH",
+          "pdf:PDF_EMBEDDED_FILE:LOW",
+          "pdf:PDF_JAVASCRIPT:MEDIUM",
+          "yara-x-engine:ENGINE_PDF_JavaScript_With_Automatic_Trigger:MEDIUM",
+          "yara-x:PDF_Embedded_File:LOW"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "not_applicable",
+          "pdf": "completed",
+          "custom": "completed",
+          "yara-x-engine": "completed",
+          "pdf-chains": "completed",
+          "vba-chains": "not_applicable",
+          "ooxml-links": "not_applicable"
+        },
+        "complete": true,
+        "duration_ms": 663.7,
+        "sha256": "f55c21380da9580df93ba96674baa1f865aaed4d6675d3a16a5d463d3d69dec4",
+        "evidence_items": 3,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "6a-docx-hyperlink",
+      "engine": "reference",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2683.4,
+        "cors_allowed": true,
+        "engine": "reference",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SAFE",
+        "rules": [],
+        "status": {
+          "yara-x": "completed",
+          "office": "completed",
+          "pdf": "not_applicable",
+          "custom": "completed"
+        },
+        "complete": true,
+        "duration_ms": 668.6,
+        "sha256": "7a0db7d17fdf8541df4177df056be5629cd37e37b262238532653068a1913ff0",
+        "evidence_items": 0,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "6a-docx-hyperlink",
+      "engine": "unified",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2701.4,
+        "cors_allowed": true,
+        "engine": "unified",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SAFE",
+        "rules": [],
+        "status": {
+          "yara-x": "completed",
+          "office": "completed",
+          "pdf": "not_applicable",
+          "custom": "completed",
+          "yara-x-engine": "completed",
+          "pdf-chains": "not_applicable",
+          "vba-chains": "not_applicable",
+          "ooxml-links": "completed"
+        },
+        "complete": true,
+        "duration_ms": 670.3,
+        "sha256": "7a0db7d17fdf8541df4177df056be5629cd37e37b262238532653068a1913ff0",
+        "evidence_items": 1,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "6b-docx-external-template",
+      "engine": "reference",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2693.8,
+        "cors_allowed": true,
+        "engine": "reference",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "office:OFFICE_EXTERNAL_AUTOLOAD:MEDIUM"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "completed",
+          "pdf": "not_applicable",
+          "custom": "completed"
+        },
+        "complete": true,
+        "duration_ms": 664.8,
+        "sha256": "1930d78d93347a087551bf547bba07dbcdc4fe7d1b79d00cc12960e3b962ab9e",
+        "evidence_items": 0,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "6b-docx-external-template",
+      "engine": "unified",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2696.2,
+        "cors_allowed": true,
+        "engine": "unified",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "office:OFFICE_EXTERNAL_AUTOLOAD:MEDIUM"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "completed",
+          "pdf": "not_applicable",
+          "custom": "completed",
+          "yara-x-engine": "completed",
+          "pdf-chains": "not_applicable",
+          "vba-chains": "not_applicable",
+          "ooxml-links": "completed"
+        },
+        "complete": true,
+        "duration_ms": 680.3,
+        "sha256": "1930d78d93347a087551bf547bba07dbcdc4fe7d1b79d00cc12960e3b962ab9e",
+        "evidence_items": 2,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "6c-docx-template-referenced-by-settings",
+      "engine": "reference",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2685.8,
+        "cors_allowed": true,
+        "engine": "reference",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "office:OFFICE_EXTERNAL_AUTOLOAD:MEDIUM"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "completed",
+          "pdf": "not_applicable",
+          "custom": "completed"
+        },
+        "complete": true,
+        "duration_ms": 673.5,
+        "sha256": "1f6250ac26083ce3d033715f2a5e48ec6b955199f0ed4c42e33d420ad65d9a8f",
+        "evidence_items": 0,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "6c-docx-template-referenced-by-settings",
+      "engine": "unified",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2676.4,
+        "cors_allowed": true,
+        "engine": "unified",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "office:OFFICE_EXTERNAL_AUTOLOAD:MEDIUM",
+          "ooxml-links:ENGINE_OFFICE_EXTERNAL_ON_OPEN:MEDIUM"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "completed",
+          "pdf": "not_applicable",
+          "custom": "completed",
+          "yara-x-engine": "completed",
+          "pdf-chains": "not_applicable",
+          "vba-chains": "not_applicable",
+          "ooxml-links": "completed"
+        },
+        "complete": true,
+        "duration_ms": 671.5,
+        "sha256": "1f6250ac26083ce3d033715f2a5e48ec6b955199f0ed4c42e33d420ad65d9a8f",
+        "evidence_items": 2,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "6d-docx-linked-picture",
+      "engine": "reference",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2674.2,
+        "cors_allowed": true,
+        "engine": "reference",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SAFE",
+        "rules": [],
+        "status": {
+          "yara-x": "completed",
+          "office": "completed",
+          "pdf": "not_applicable",
+          "custom": "completed"
+        },
+        "complete": true,
+        "duration_ms": 656.8,
+        "sha256": "2c123328e344f3bd2eb978d92683eb52ba5a3b4319226f3269b02609ec2e5113",
+        "evidence_items": 0,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "6d-docx-linked-picture",
+      "engine": "unified",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2701.4,
+        "cors_allowed": true,
+        "engine": "unified",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SAFE",
+        "rules": [],
+        "status": {
+          "yara-x": "completed",
+          "office": "completed",
+          "pdf": "not_applicable",
+          "custom": "completed",
+          "yara-x-engine": "completed",
+          "pdf-chains": "not_applicable",
+          "vba-chains": "not_applicable",
+          "ooxml-links": "completed"
+        },
+        "complete": true,
+        "duration_ms": 674.0,
+        "sha256": "2c123328e344f3bd2eb978d92683eb52ba5a3b4319226f3269b02609ec2e5113",
+        "evidence_items": 1,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "6g-docx-linked-picture-file-share",
+      "engine": "reference",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2666.8,
+        "cors_allowed": true,
+        "engine": "reference",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "office:OFFICE_EXTERNAL_NETWORK_PATH:MEDIUM"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "completed",
+          "pdf": "not_applicable",
+          "custom": "completed"
+        },
+        "complete": true,
+        "duration_ms": 647.4,
+        "sha256": "bdacf5acdcdd555fea3e6bd01827087899a55e42e16561664b16a26548bbc355",
+        "evidence_items": 0,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "6g-docx-linked-picture-file-share",
+      "engine": "unified",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2683.9,
+        "cors_allowed": true,
+        "engine": "unified",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "office:OFFICE_EXTERNAL_NETWORK_PATH:MEDIUM"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "completed",
+          "pdf": "not_applicable",
+          "custom": "completed",
+          "yara-x-engine": "completed",
+          "pdf-chains": "not_applicable",
+          "vba-chains": "not_applicable",
+          "ooxml-links": "completed"
+        },
+        "complete": true,
+        "duration_ms": 673.2,
+        "sha256": "bdacf5acdcdd555fea3e6bd01827087899a55e42e16561664b16a26548bbc355",
+        "evidence_items": 1,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "6e-docx-embedded-object-displayed",
+      "engine": "reference",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2666.5,
+        "cors_allowed": true,
+        "engine": "reference",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "office:OFFICE_EMBEDDED_OLE:LOW"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "completed",
+          "pdf": "not_applicable",
+          "custom": "completed"
+        },
+        "complete": true,
+        "duration_ms": 651.0,
+        "sha256": "f1202a9729ef09a77d8388da9a7d0e11dd705631bcfc45b434bd0d394469fbab",
+        "evidence_items": 0,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "6e-docx-embedded-object-displayed",
+      "engine": "unified",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2709.5,
+        "cors_allowed": true,
+        "engine": "unified",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "office:OFFICE_EMBEDDED_OLE:LOW"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "completed",
+          "pdf": "not_applicable",
+          "custom": "completed",
+          "yara-x-engine": "completed",
+          "pdf-chains": "not_applicable",
+          "vba-chains": "not_applicable",
+          "ooxml-links": "completed"
+        },
+        "complete": true,
+        "duration_ms": 701.1,
+        "sha256": "f1202a9729ef09a77d8388da9a7d0e11dd705631bcfc45b434bd0d394469fbab",
+        "evidence_items": 2,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "6f-docx-embedded-object-not-displayed",
+      "engine": "reference",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2720.8,
+        "cors_allowed": true,
+        "engine": "reference",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "office:OFFICE_EMBEDDED_OLE:LOW"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "completed",
+          "pdf": "not_applicable",
+          "custom": "completed"
+        },
+        "complete": true,
+        "duration_ms": 684.4,
+        "sha256": "e24251266152ceb67bd3e8d0ae646176ccda7c6015957c3e2202d7bdaaec1820",
+        "evidence_items": 0,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "6f-docx-embedded-object-not-displayed",
+      "engine": "unified",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2715.5,
+        "cors_allowed": true,
+        "engine": "unified",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "office:OFFICE_EMBEDDED_OLE:LOW"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "completed",
+          "pdf": "not_applicable",
+          "custom": "completed",
+          "yara-x-engine": "completed",
+          "pdf-chains": "not_applicable",
+          "vba-chains": "not_applicable",
+          "ooxml-links": "completed"
+        },
+        "complete": true,
+        "duration_ms": 690.7,
+        "sha256": "e24251266152ceb67bd3e8d0ae646176ccda7c6015957c3e2202d7bdaaec1820",
+        "evidence_items": 2,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "7-docx-macro-declaration-mismatch",
+      "engine": "reference",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2666.4,
+        "cors_allowed": true,
+        "engine": "reference",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+          "office:OFFICE_VBA_UNPARSED:LOW",
+          "yara-x:OOXML_VBA_Macros:MEDIUM"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "completed",
+          "pdf": "not_applicable",
+          "custom": "completed"
+        },
+        "complete": true,
+        "duration_ms": 659.0,
+        "sha256": "298b3823825cc1fd82f19edfaa811cb5630b2f35b8e42f05cb986b8868b0ea3d",
+        "evidence_items": 0,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "7-docx-macro-declaration-mismatch",
+      "engine": "unified",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2695.0,
+        "cors_allowed": true,
+        "engine": "unified",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SUSPICIOUS",
+        "rules": [
+          "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+          "office:OFFICE_VBA_UNPARSED:LOW",
+          "yara-x:OOXML_VBA_Macros:MEDIUM"
+        ],
+        "status": {
+          "yara-x": "completed",
+          "office": "completed",
+          "pdf": "not_applicable",
+          "custom": "completed",
+          "yara-x-engine": "completed",
+          "pdf-chains": "not_applicable",
+          "vba-chains": "completed",
+          "ooxml-links": "completed"
+        },
+        "complete": true,
+        "duration_ms": 677.8,
+        "sha256": "298b3823825cc1fd82f19edfaa811cb5630b2f35b8e42f05cb986b8868b0ea3d",
+        "evidence_items": 1,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "office-clean-xlsx",
+      "engine": "reference",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2663.5,
+        "cors_allowed": true,
+        "engine": "reference",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SAFE",
+        "rules": [],
+        "status": {
+          "yara-x": "completed",
+          "office": "completed",
+          "pdf": "not_applicable",
+          "custom": "completed"
+        },
+        "complete": true,
+        "duration_ms": 655.6,
+        "sha256": "2342b4f3659daaed56f9a9a05d3c07783bf285b7942d10584b50716404ec730c",
+        "evidence_items": 0,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "office-clean-xlsx",
+      "engine": "unified",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2696.0,
+        "cors_allowed": true,
+        "engine": "unified",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SAFE",
+        "rules": [],
+        "status": {
+          "yara-x": "completed",
+          "office": "completed",
+          "pdf": "not_applicable",
+          "custom": "completed",
+          "yara-x-engine": "completed",
+          "pdf-chains": "not_applicable",
+          "vba-chains": "not_applicable",
+          "ooxml-links": "completed"
+        },
+        "complete": true,
+        "duration_ms": 680.0,
+        "sha256": "2342b4f3659daaed56f9a9a05d3c07783bf285b7942d10584b50716404ec730c",
+        "evidence_items": 0,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "office-clean-pptx",
+      "engine": "reference",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2680.9,
+        "cors_allowed": true,
+        "engine": "reference",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SAFE",
+        "rules": [],
+        "status": {
+          "yara-x": "completed",
+          "office": "completed",
+          "pdf": "not_applicable",
+          "custom": "completed"
+        },
+        "complete": true,
+        "duration_ms": 667.6,
+        "sha256": "fb3255ea9b2aa318b67b917ecf8960c5ed7cdabe439c1190dfa8d6c48c745a53",
+        "evidence_items": 0,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "office-clean-pptx",
+      "engine": "unified",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2682.1,
+        "cors_allowed": true,
+        "engine": "unified",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "SAFE",
+        "rules": [],
+        "status": {
+          "yara-x": "completed",
+          "office": "completed",
+          "pdf": "not_applicable",
+          "custom": "completed",
+          "yara-x-engine": "completed",
+          "pdf-chains": "not_applicable",
+          "vba-chains": "not_applicable",
+          "ooxml-links": "completed"
+        },
+        "complete": true,
+        "duration_ms": 674.9,
+        "sha256": "fb3255ea9b2aa318b67b917ecf8960c5ed7cdabe439c1190dfa8d6c48c745a53",
+        "evidence_items": 0,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "corrupt-truncated-pdf",
+      "engine": "reference",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2678.7,
+        "cors_allowed": true,
+        "engine": "reference",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "UNABLE_TO_SCAN",
+        "rules": [],
+        "status": {
+          "yara-x": "completed",
+          "office": "not_applicable",
+          "pdf": "failed",
+          "custom": "failed"
+        },
+        "complete": false,
+        "duration_ms": 651.0,
+        "sha256": "e4fdd11ecceb8ed95ebcc10b9d0086afb42e91e583dc1249ddd9e0e38f8526d7",
+        "evidence_items": 0,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "corrupt-truncated-pdf",
+      "engine": "unified",
+      "result": {
+        "http": 200,
+        "stage": "scan",
+        "wall_ms": 2688.5,
+        "cors_allowed": true,
+        "engine": "unified",
+        "commit": "145ce633969ec4c9c0aff7cb5be8b57df30e996a",
+        "verdict": "UNABLE_TO_SCAN",
+        "rules": [],
+        "status": {
+          "yara-x": "completed",
+          "office": "not_applicable",
+          "pdf": "failed",
+          "custom": "failed",
+          "yara-x-engine": "completed",
+          "pdf-chains": "failed",
+          "vba-chains": "not_applicable",
+          "ooxml-links": "not_applicable"
+        },
+        "complete": false,
+        "duration_ms": 663.0,
+        "sha256": "e4fdd11ecceb8ed95ebcc10b9d0086afb42e91e583dc1249ddd9e0e38f8526d7",
+        "evidence_items": 0,
+        "isolation_missing": [
+          "network_namespace",
+          "network_verified",
+          "net_interfaces_safe",
+          "net_ipv4_no_route",
+          "net_ipv6_no_route",
+          "net_ipv4_unreachable",
+          "net_ipv6_unreachable",
+          "capabilities_dropped",
+          "rlimits"
+        ]
+      },
+      "problems": []
+    },
+    {
+      "case": "oversized-token",
+      "engine": "-",
+      "result": {
+        "http": 413,
+        "detail": "File is too large. The maximum upload size is 10 MB."
+      },
+      "problems": []
+    },
+    {
+      "case": "oversized-upload",
+      "engine": "reference",
+      "result": {
+        "http": 413
+      },
+      "problems": []
+    },
+    {
+      "case": "unknown-engine",
+      "engine": "fastest",
+      "result": {
+        "http": 400
+      },
+      "problems": []
+    },
+    {
+      "case": "bad-token",
+      "engine": "unified",
+      "result": {
+        "http": 401
+      },
+      "problems": []
+    }
+  ]
+}

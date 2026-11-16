@@ -16,14 +16,17 @@ import io
 import re
 import zipfile
 from collections import Counter
+from xml.etree.ElementTree import ParseError as XMLParseError
 
 import defusedxml.ElementTree as SafeET
 import msoffcrypto
 import olefile
+from defusedxml.common import DefusedXmlException
 from oletools.oleobj import OleNativeStream
 from oletools.olevba import VBA_Parser
 
 from app.models import Finding, Severity
+from app.scanners.base import ScanError
 
 NAME = "office"
 
@@ -57,8 +60,11 @@ STRONG_VBA_BEHAVIOUR = re.compile(
 WORD_FIELD_PARTS = re.compile(r"^word/(document|header\d*|footer\d*|footnotes|endnotes)\.xml$", re.IGNORECASE)
 
 
-class OfficeScanError(RuntimeError):
+class OfficeScanError(ScanError):
     """The document could not be analysed reliably."""
+
+    # A broken ZIP container or unparsable XML means the input itself is malformed.
+    malformed_causes = (zipfile.BadZipFile, XMLParseError, DefusedXmlException)
 
 
 def clean(text: str, limit: int = 100) -> str:

@@ -1,0 +1,2 @@
+# Byte-for-byte, so the files keep matching the hashes taken inside the guest.
+* -text diff
