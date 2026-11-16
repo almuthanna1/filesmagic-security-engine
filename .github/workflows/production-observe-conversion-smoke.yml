@@ -1,0 +1,61 @@
+name: Production observe-mode conversion smoke
+
+on:
+  push:
+    branches: [audit/production-smoke-nov16]
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-pdf-conversion:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Python and PDF writer
+        run: python3 -m pip install --disable-pip-version-check pypdf==7.0.1
+      - name: Convert one inert synthetic PDF through FilesMagic production API
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import io
+          import uuid
+          import zipfile
+          import urllib.request
+          import urllib.error
+          from pypdf import PdfWriter
+          pdf = io.BytesIO()
+          writer = PdfWriter()
+          writer.add_blank_page(144, 144)
+          writer.write(pdf)
+          source = pdf.getvalue()
+          boundary = "fm-release-" + uuid.uuid4().hex
+          chunks = []
+          def field(name, value):
+              chunks.append((f"--{boundary}\r\nContent-Disposition: form-data; name=\"{name}\"\r\n\r\n{value}\r\n").encode())
+          field("target", "docx")
+          field("source", "pdf")
+          chunks.append((f"--{boundary}\r\nContent-Disposition: form-data; name=\"file\"; filename=\"release-smoke.pdf\"\r\nContent-Type: application/pdf\r\n\r\n").encode())
+          chunks.append(source + b"\r\n")
+          chunks.append((f"--{boundary}--\r\n").encode())
+          body = b"".join(chunks)
+          req = urllib.request.Request(
+              "https://api.filesmagic.com/api/v1/convert", body, method="POST",
+              headers={"Content-Type": f"multipart/form-data; boundary={boundary}",
+                       "User-Agent":"FilesMagic-Production-Release-Smoke/1"},
+          )
+          try:
+              with urllib.request.urlopen(req, timeout=170) as resp:
+                  result=resp.read(8_000_000)
+                  status=resp.status
+                  request_id=resp.headers.get("x-request-id", "-")
+                  security=resp.headers.get("x-filesmagic-security", "(observe, expected absent)")
+          except urllib.error.HTTPError as e:
+              print("HTTP ERROR",e.code,e.read(4000).decode(errors="replace"))
+              raise
+          assert status == 200, status
+          assert zipfile.is_zipfile(io.BytesIO(result)), "conversion returned invalid DOCX"
+          with zipfile.ZipFile(io.BytesIO(result)) as docx:
+              assert "word/document.xml" in docx.namelist()
+          print(f"HTTP {status} PDF->DOCX synthetic conversion passed, input_bytes={len(source)}, output_bytes={len(result)}, request_id={request_id}, security_header={security}")
+          PY
