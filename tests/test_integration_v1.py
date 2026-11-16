@@ -369,7 +369,11 @@ def test_tampered_receipts_are_rejected():
     payload, sig = _receipt(verdict="SUSPICIOUS", authorization="consent_required").split(".")
     claims = json.loads(base64.urlsafe_b64decode(payload + "=="))
     forged = receipts._b64(json.dumps(claims | {"authorization": "allow", "verdict": "SAFE"}).encode())
-    for receipt in (f"{forged}.{sig}", f"{payload}.{sig[:-2]}AA", f"{payload}.", "garbage", ""):
+    # Flip a bit in the decoded signature. Overwriting base64 text ("...AA") is a no-op whenever
+    # the signature's last byte is already 0, which for Ed25519 (S < 2^253) is ~1 run in 16.
+    raw_sig = receipts._unb64(sig)
+    bad_sig = receipts._b64(bytes([raw_sig[0] ^ 1]) + raw_sig[1:])
+    for receipt in (f"{forged}.{sig}", f"{payload}.{bad_sig}", f"{payload}.", "garbage", ""):
         with pytest.raises(receipts.ReceiptError):
             _verify(receipt)
 
