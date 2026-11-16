@@ -104,6 +104,16 @@ class WorkerReport(BaseModel):
     diagnostics: NetworkDiagnostics | None = None  # SECURITY_ENGINE_NET_DIAGNOSTICS=1 only; logged, never returned
 
 
+class Reason(BaseModel):
+    """Why analysis is incomplete or why the scan cannot authorize conversion (app.decision.REASONS)."""
+
+    code: str = Field(pattern=r"^[A-Z][A-Z0-9_]{2,79}$")
+    category: Literal["document", "operational"] = Field(
+        description="document: a property of this file (e.g. encrypted); operational: the scan itself did not work.")
+    override_eligible: bool = Field(description="True only for documented document reasons.")
+    explanation: str
+
+
 class ScanResult(BaseModel):
     request_id: str = Field(default="", description="Correlates this result with the engine's log lines.")
     engine: Literal["reference", "unified"] = Field(
@@ -129,3 +139,13 @@ class ScanResult(BaseModel):
                                        "exactly one is true when net_interfaces_safe is.")
     isolation_missing: list[str] = Field(default_factory=list, description="Required isolation values that are not "
                                          "true. Strict mode analyses a file only when this is empty.")
+    # Integration contract v1 (docs/security-integration-v1.md). Only `receipt` authorizes anything.
+    isolation_verified: bool = Field(default=False, description="Strict isolation was required and every required "
+                                     "control was reported true.")
+    reasons: list[Reason] = Field(default_factory=list, description="Stable reason codes for incomplete analysis "
+                                  "or operational failure.")
+    override_eligible: bool = Field(default=False, description="Explicit user consent may permit conversion.")
+    authorization: Literal["allow", "consent_required", "deny"] = "deny"
+    explanation: str = Field(default="", description="Plain-English summary of the outcome for the user.")
+    receipt: str | None = Field(default=None, description="Ed25519-signed scan receipt; issued only to the "
+                                "Conversion Engine, and only for a validated scan outcome.")

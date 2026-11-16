@@ -483,11 +483,13 @@ detects Next.js; no `vercel.json` is needed.
 |----------|-------|-------|
 | `LAB_SCAN_TOKEN_PRIVATE_KEY` | Vercel (Production, sensitive) | See "Access control". Never `NEXT_PUBLIC_`. |
 | `SECURITY_ENGINE_TOKEN_PUBLIC_KEY` | Render | Public half of the token key pair. Required: without it every scan is refused. |
+| `SECURITY_ENGINE_CONVERSION_TOKEN_PUBLIC_KEY` | Render (FilesMagic integration) | Public half of the Conversion Engine's token pair; must differ from the Lab key. Only scans authorized by it get signed receipts. See [docs/security-integration-v1.md](docs/security-integration-v1.md). |
+| `SECURITY_ENGINE_RECEIPT_PRIVATE_KEY` | Render (FilesMagic integration, secret) | Ed25519 key (base64 DER PKCS#8) that signs scan receipts. Removed from the environment at start-up. |
 | `SECURITY_ENGINE_MAX_CONCURRENT_SCANS` | Render (optional) | Default `1` (sized for 512 MB). |
 | `SECURITY_ENGINE_WORKER_MEMORY_MB` | Render (optional) | Writable memory per worker, default `320`. |
 | `SECURITY_ENGINE_WORKER_TIMEOUT_SECONDS` | Render (optional) | Default `30`. |
 | `SECURITY_ENGINE_REQUIRE_ISOLATION` | Render (optional) | `1` = refuse to scan without every isolation control. Required for real malware. |
-| `SECURITY_ENGINE_RESEARCH_ENGINES` | Render research staging only (optional) | `1` = `/scan?engine=unified` runs the custom unified engine. Unset: only the original engine; `unified` is refused (403). |
+| `SECURITY_ENGINE_RESEARCH_ENGINES` | Render research staging; also the FilesMagic integration, which uses the unified engine (docs/security-integration-v1.md §12) | `1` = `/scan?engine=unified` runs the custom unified engine. Unset: only the original engine; `unified` is refused (403). |
 | `SECURITY_ENGINE_COMMIT` | Render (optional) | Source commit reported in every result; Render's own `RENDER_GIT_COMMIT` is used when unset. |
 | `SECURITY_ENGINE_NET_DIAGNOSTICS` | Render staging only (optional) | `1` = the worker describes its network namespace (interface names, flags, address and route counts; no addresses) and the API logs it per request ID. Never returned in responses. Diagnostic only: it never changes an isolation result. Leave unset elsewhere. |
 | `NEXT_PUBLIC_SECURITY_ENGINE_URL` | Vercel (Production) | The Render service URL, e.g. `https://<service>.onrender.com`. Inlined at build time, so **redeploy** the frontend after changing it. Public by design: never put secrets in `NEXT_PUBLIC_` variables. |

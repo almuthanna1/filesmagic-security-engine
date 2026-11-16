@@ -12,10 +12,11 @@ from urllib.parse import unquote
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
-from app import auth, worker
+from app import auth, receipts, worker
 from app import engine as unified_engine
-from app.decision import decide
+from app.decision import classify, decide
 from app.models import ScannerStatus, ScanResult, Verdict, WorkerReport
 from app.scanners import SCANNERS
 from app.scanners.yarax import RULES_DIR
@@ -50,6 +51,19 @@ DEFAULT_ENGINE = "unified" if PUBLIC_UNIFIED_ONLY else "reference"
 def engine_scanners(engine: str) -> list[str]:
     """Names the worker must report for `engine`, read at call time (tests replace SCANNERS)."""
     return [s.name for s in (SCANNERS if engine == "reference" else unified_engine.SCANNERS)]
+
+
+def engine_ready(engine: str) -> bool:
+    """Every scanner of `engine` loaded in this process (the worker loads the same code and rules)."""
+    return all(getattr(s, "ready", True) for s in (SCANNERS if engine == "reference" else unified_engine.SCANNERS))
+
+
+class ApiError(HTTPException):
+    """An HTTP error with a stable machine-readable `code` next to the human `detail`."""
+
+    def __init__(self, status_code: int, code: str, detail: str, headers: dict | None = None):
+        super().__init__(status_code=status_code, detail=detail, headers=headers)
+        self.code = code
 
 
 def available_engines() -> list[str]:
@@ -113,6 +127,11 @@ VERSIONS = {"engine": app.version, "commit": source_commit(), "ruleset_sha256": 
     pkg: metadata.version(pkg) for pkg in ("yara-x", "oletools", "olefile", "pypdf")
 }
 
+@app.exception_handler(ApiError)
+async def scan_error(request: Request, exc: ApiError) -> JSONResponse:
+    return JSONResponse({"detail": exc.detail, "code": exc.code}, status_code=exc.status_code, headers=exc.headers)
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=parse_cors_origins(os.environ.get("SECURITY_ENGINE_CORS_ORIGINS", DEFAULT_CORS_ORIGINS)),
@@ -136,6 +155,14 @@ async def health():
         "engines": available_engines(),
         "default_engine": DEFAULT_ENGINE,
         "commit": VERSIONS["commit"],
+        # Integration contract v1: what the Conversion Engine needs before it sends a file.
+        "conversion_auth_configured": auth.CONVERSION_PUBLIC_KEY is not None,
+        "receipt_key_id": receipts.current_key_id(),
+        "isolation_required": worker.REQUIRE_ISOLATION,
+        "max_upload_bytes": MAX_UPLOAD_BYTES,
+        "ready_for_conversion": bool(
+            auth.CONVERSION_PUBLIC_KEY and receipts.PRIVATE_KEY and worker.REQUIRE_ISOLATION
+            and "unified" in available_engines() and engine_ready("unified")),
     }
 
 
@@ -171,9 +198,9 @@ async def read_body(request: Request, limit: int) -> bytes:
             async for chunk in request.stream():
                 data += chunk
                 if len(data) > limit:
-                    raise HTTPException(status_code=413, detail=UPLOAD_TOO_LARGE)
+                    raise ApiError(413, "UPLOAD_TOO_LARGE", UPLOAD_TOO_LARGE)
     except TimeoutError:
-        raise HTTPException(status_code=408, detail="Upload took too long.") from None
+        raise ApiError(408, "UPLOAD_TIMEOUT", "Upload took too long.") from None
     return bytes(data)
 
 
@@ -186,14 +213,14 @@ async def scan_file(request: Request) -> ScanResult:
     request_id = uuid.uuid4().hex[:16]
     client = client_address(request)
     if auth.too_many_failures(client):
-        raise HTTPException(status_code=429, detail="Too many unauthorized requests. Try again later.",
-                            headers={"Retry-After": "60"})
+        raise ApiError(429, "RATE_LIMITED", "Too many unauthorized requests. Try again later.",
+                        headers={"Retry-After": "60"})
     # Checked before the token, so a refused engine does not use up the single-use token.
     engine = request.query_params.get("engine", DEFAULT_ENGINE)
     if engine not in worker.ENGINE_ARGS:
-        raise HTTPException(status_code=400, detail=f"Unknown engine; use one of: {', '.join(worker.ENGINE_ARGS)}.")
+        raise ApiError(400, "ENGINE_UNKNOWN", f"Unknown engine; use one of: {', '.join(worker.ENGINE_ARGS)}.")
     if engine not in available_engines():
-        raise HTTPException(status_code=403, detail=(
+        raise ApiError(403, "ENGINE_NOT_ENABLED", (
             "This deployment accepts only the unified engine." if PUBLIC_UNIFIED_ONLY else
             "The unified engine is research-only and is not enabled on this deployment "
             "(SECURITY_ENGINE_RESEARCH_ENGINES=1)."
@@ -203,31 +230,41 @@ async def scan_file(request: Request) -> ScanResult:
         claims = auth.verify(request.headers.get("authorization", ""))
     except auth.AuthError as e:
         auth.record_failure(client)
-        logger.warning("scan rejected request_id=%s: %s", request_id, e)
-        raise HTTPException(status_code=401, detail=str(e), headers={"WWW-Authenticate": "Bearer"}) from None
+        logger.warning("scan rejected request_id=%s code=%s", request_id, e.code)
+        raise ApiError(401, e.code, str(e), headers={"WWW-Authenticate": "Bearer"}) from None
+    # The Conversion Engine may only be answered by the engine validated for production.
+    if claims["issuer"] == "conversion" and engine != "unified":
+        raise ApiError(403, "ENGINE_NOT_APPROVED", "Conversion scans must use the unified engine (engine=unified).")
 
     length = request.headers.get("content-length", "")
     if length.isdigit() and int(length) > MAX_UPLOAD_BYTES:
-        raise HTTPException(status_code=413, detail=UPLOAD_TOO_LARGE)
+        raise ApiError(413, "UPLOAD_TOO_LARGE", UPLOAD_TOO_LARGE)
     if _active_scans >= MAX_CONCURRENT_SCANS:
-        raise HTTPException(status_code=429, detail="The engine is busy with another scan. Try again shortly.",
-                            headers={"Retry-After": "5"})
+        raise ApiError(429, "ENGINE_BUSY", "The engine is busy with another scan. Try again shortly.",
+                        headers={"Retry-After": "5"})
 
     _active_scans += 1
     try:
         data = await read_body(request, MAX_UPLOAD_BYTES)
         sha256 = hashlib.sha256(data).hexdigest()
         if sha256 != claims["sha256"] or len(data) != claims["size"]:
-            raise HTTPException(status_code=403, detail="The uploaded file does not match the scan token.")
+            raise ApiError(403, "TOKEN_FILE_MISMATCH", "The uploaded file does not match the scan token.")
         start = time.perf_counter()
+        operational = [] if engine_ready(engine) else ["SCANNER_NOT_READY"]
         try:
             report = await run_scan(data, engine=engine)
             # The selected engine's scanners, exactly: a worker that ran the other engine (or lost
             # a scanner) fails the scan rather than answering for an engine that did not run.
             if sorted(s.name for s in report.scanners) != sorted(expected):
-                raise worker.WorkerError(f"scan worker reported an unexpected set of scanners for the {engine} engine")
+                raise worker.WorkerError(f"scan worker reported an unexpected set of scanners for the {engine} engine",
+                                         "SCANNER_ROSTER_MISMATCH")
+            if not worker.REQUIRE_ISOLATION:
+                operational.append("ISOLATION_NOT_ENFORCED")
+            elif worker.missing_controls(report.isolation):
+                operational.append("ISOLATION_UNVERIFIED")
         except worker.WorkerError as e:
-            logger.error("scan worker failure request_id=%s engine=%s: %s", request_id, engine, e)
+            logger.error("scan worker failure request_id=%s engine=%s code=%s: %s", request_id, engine, e.code, e)
+            operational.append(e.code)
             report = WorkerReport(
                 scanners=[ScannerStatus(name=name, status="failed", error=str(e), error_kind="worker")
                           for name in expected],
@@ -246,6 +283,30 @@ async def scan_file(request: Request) -> ScanResult:
     applicable = len(expected) - not_applicable
     coverage_complete = report.coverage_complete if engine == "unified" else True
     verdict = decide(findings, scanners_run=applicable, scanners_failed=failed, coverage_complete=coverage_complete)
+    coverage_issues = report.coverage_issues if engine == "unified" else []
+    if applicable == 0:
+        operational.append("UNSUPPORTED_FILE_TYPE")
+    reasons, authorization, explanation = classify(verdict, report.scanners, coverage_issues, operational)
+    isolation_missing = worker.missing_controls(report.isolation)
+    isolation_verified = worker.REQUIRE_ISOLATION and not isolation_missing
+    complete = applicable > 0 and failed == 0
+    # A receipt only for a validated outcome, only to the Conversion Engine, only from the
+    # production engine: never with an operational reason (which includes unverified isolation).
+    receipt = None
+    if claims["issuer"] == "conversion" and engine == "unified" and isolation_verified and not any(
+            r.category == "operational" for r in reasons):
+        receipt = receipts.sign({
+            "scan_request_id": request_id, "token_jti": claims["jti"],
+            "sha256": sha256, "size": claims["size"], "detected_format": detected_format,
+            "engine": engine, "engine_version": VERSIONS["engine"], "commit": VERSIONS["commit"],
+            "ruleset_sha256": VERSIONS["ruleset_sha256"], "engine_ruleset_sha256": VERSIONS["engine_ruleset_sha256"],
+            "scanner_versions": {k: VERSIONS[k] for k in ("yara-x", "oletools", "olefile", "pypdf")},
+            "scanners": sorted(expected),
+            "verdict": verdict.value, "authorization": authorization,
+            "complete": complete, "coverage_complete": coverage_complete, "isolation_verified": isolation_verified,
+            "override_eligible": authorization == "consent_required",
+            "reason_codes": [r.code for r in reasons], "findings_count": len(findings),
+        })
 
     if not expected:
         message = "No security scanners are configured yet. This file has NOT been security-scanned."
@@ -277,8 +338,10 @@ async def scan_file(request: Request) -> ScanResult:
     if report.diagnostics:  # staging only; validated by the WorkerReport model, never in the response
         logger.warning("network diagnostics request_id=%s %s", request_id,
                        report.diagnostics.model_dump_json(exclude_none=True))
-    logger.info("scan request_id=%s engine=%s sha256=%s size=%d verdict=%s failed=%d duration_ms=%.0f",
-                request_id, engine, sha256[:16], claims["size"], verdict.value, failed, duration_ms)
+    logger.info("scan request_id=%s engine=%s issuer=%s sha256=%s size=%d verdict=%s authorization=%s reasons=%s "
+                "receipt=%s failed=%d duration_ms=%.0f", request_id, engine, claims["issuer"], sha256[:16],
+                claims["size"], verdict.value, authorization, ",".join(r.code for r in reasons) or "-",
+                "issued" if receipt else "none", failed, duration_ms)
     return ScanResult(
         request_id=request_id,
         engine=engine,
@@ -290,12 +353,18 @@ async def scan_file(request: Request) -> ScanResult:
         size_bytes=claims["size"],
         detected_format=detected_format,
         scanners=report.scanners,
-        complete=applicable > 0 and failed == 0,
+        complete=complete,
         coverage_complete=coverage_complete,
-        coverage_issues=report.coverage_issues if engine == "unified" else [],
+        coverage_issues=coverage_issues,
         duration_ms=duration_ms,
         versions=VERSIONS,
         isolation_required=worker.REQUIRE_ISOLATION,
         isolation=report.isolation,
-        isolation_missing=worker.missing_controls(report.isolation),
+        isolation_missing=isolation_missing,
+        isolation_verified=isolation_verified,
+        reasons=reasons,
+        override_eligible=authorization == "consent_required",
+        authorization=authorization,
+        explanation=explanation,
+        receipt=receipt,
     )

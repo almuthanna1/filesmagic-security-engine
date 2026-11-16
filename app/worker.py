@@ -92,7 +92,12 @@ MAX_DIAG_INTERFACES = 16
 
 
 class WorkerError(RuntimeError):
-    """The worker did not produce a usable report. The message is safe to return."""
+    """The worker did not produce a usable report. The message is safe to return; `code` is a
+    stable machine-readable reason (docs/security-integration-v1.md, "Reason codes")."""
+
+    def __init__(self, message: str, code: str = "WORKER_FAILED"):
+        super().__init__(message)
+        self.code = code
 
 
 # ----------------------------------------------------------------------------- parent side
@@ -138,7 +143,7 @@ async def _exchange(proc: asyncio.subprocess.Process, data: bytes) -> bytes:
     while chunk := await proc.stdout.read(65536):
         out += chunk
         if len(out) > MAX_OUTPUT_BYTES:
-            raise WorkerError("scan worker produced too much output")
+            raise WorkerError("scan worker produced too much output", "WORKER_INVALID_REPORT")
     await proc.wait()
     return bytes(out)
 
@@ -161,7 +166,7 @@ async def run(data: bytes, cmd: list[str] | None = None, timeout: float | None =
         async with asyncio.timeout(timeout):
             out = await _exchange(proc, data)
     except TimeoutError:
-        raise WorkerError(f"scan worker timed out after {timeout:g}s") from None
+        raise WorkerError(f"scan worker timed out after {timeout:g}s", "WORKER_TIMEOUT") from None
     finally:
         _kill(proc)  # also reaps anything the child may have started
         # wait() only returns once the pipes close, so discard whatever is left in stdout.
@@ -170,11 +175,11 @@ async def run(data: bytes, cmd: list[str] | None = None, timeout: float | None =
         await proc.wait()
 
     if proc.returncode != 0:
-        raise WorkerError(f"scan worker exited abnormally (status {proc.returncode})")
+        raise WorkerError(f"scan worker exited abnormally (status {proc.returncode})", "WORKER_CRASHED")
     try:
         return WorkerReport.model_validate_json(out)
     except ValidationError:
-        raise WorkerError("scan worker returned an invalid report") from None
+        raise WorkerError("scan worker returned an invalid report", "WORKER_INVALID_REPORT") from None
 
 
 # ----------------------------------------------------------------------------- child side

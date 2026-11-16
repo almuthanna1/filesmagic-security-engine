@@ -8,6 +8,12 @@ worker) can mint new tokens.
 
 Token format: base64url(JSON claims) "." base64url(Ed25519 signature over the JSON bytes)
 Claims: aud, iat, exp, jti, sha256, size.
+
+Two issuers are trusted, each with its own key pair, and which one signed a token is decided by
+the key that verifies it, never by a claim:
+  - "lab": the Security Lab (SECURITY_ENGINE_TOKEN_PUBLIC_KEY), unchanged;
+  - "conversion": the FilesMagic Conversion Engine (SECURITY_ENGINE_CONVERSION_TOKEN_PUBLIC_KEY).
+Only conversion-issued scans receive a signed scan receipt (app/receipts.py).
 """
 
 import base64
@@ -32,21 +38,27 @@ MAX_FAILURES_PER_MINUTE = 20
 
 
 class AuthError(Exception):
-    """The request carries no valid scan token. The message is safe to return."""
+    """The request carries no valid scan token. The message is safe to return; `code` is stable."""
+
+    def __init__(self, message: str, code: str):
+        super().__init__(message)
+        self.code = code
 
 
-def load_public_key(value: str) -> Ed25519PublicKey | None:
-    """SECURITY_ENGINE_TOKEN_PUBLIC_KEY: base64 DER (SubjectPublicKeyInfo) of an Ed25519 key."""
+def load_public_key(value: str, name: str = "SECURITY_ENGINE_TOKEN_PUBLIC_KEY") -> Ed25519PublicKey | None:
+    """base64 DER (SubjectPublicKeyInfo) of an Ed25519 key."""
     if not value:
         return None
     key = load_der_public_key(base64.b64decode(value))
     if not isinstance(key, Ed25519PublicKey):
-        raise ValueError("SECURITY_ENGINE_TOKEN_PUBLIC_KEY must be an Ed25519 public key.")
+        raise ValueError(f"{name} must be an Ed25519 public key.")
     return key
 
 
-# None = not configured: every scan is refused (fail closed).
+# None = not configured: tokens from that issuer are refused (fail closed).
 PUBLIC_KEY = load_public_key(os.environ.get("SECURITY_ENGINE_TOKEN_PUBLIC_KEY", ""))
+CONVERSION_PUBLIC_KEY = load_public_key(os.environ.get("SECURITY_ENGINE_CONVERSION_TOKEN_PUBLIC_KEY", ""),
+                                        "SECURITY_ENGINE_CONVERSION_TOKEN_PUBLIC_KEY")
 
 # ponytail: in-memory state, correct for a single API instance. With several instances,
 # a token could be replayed once per instance and failure counts are per instance; move
@@ -64,19 +76,30 @@ def _b64encode(data: bytes) -> str:
 
 
 def verify(authorization: str, now: float | None = None) -> dict:
-    """Validate the Authorization header and consume the token. Returns its claims."""
-    if PUBLIC_KEY is None:
-        raise AuthError("Scanning is disabled: the engine has no token verification key configured.")
+    """Validate the Authorization header and consume the token. Returns its claims, plus
+    "issuer": "lab" or "conversion", set from the key that verified the signature."""
+    issuers = [(name, key) for name, key in (("lab", PUBLIC_KEY), ("conversion", CONVERSION_PUBLIC_KEY)) if key]
+    if not issuers:
+        raise AuthError("Scanning is disabled: the engine has no token verification key configured.", "AUTH_NOT_CONFIGURED")
     scheme, _, token = authorization.partition(" ")
     if scheme.lower() != "bearer" or not token or len(token) > MAX_TOKEN_CHARS:
-        raise AuthError("Missing or malformed scan token.")
+        raise AuthError("Missing or malformed scan token.", "AUTH_MISSING")
+    issuer = None
     try:
         payload_b64, sig_b64 = token.strip().split(".")
-        payload = _b64decode(payload_b64)
-        PUBLIC_KEY.verify(_b64decode(sig_b64), payload)
+        payload, signature = _b64decode(payload_b64), _b64decode(sig_b64)
+        for name, key in issuers:
+            try:
+                key.verify(signature, payload)
+                issuer = name
+                break
+            except InvalidSignature:
+                continue
+        if issuer is None:
+            raise InvalidSignature
         claims = json.loads(payload)
     except (ValueError, binascii.Error, InvalidSignature):
-        raise AuthError("Invalid scan token.") from None
+        raise AuthError("Invalid scan token.", "AUTH_INVALID") from None
 
     now = time.time() if now is None else now
     try:
@@ -91,15 +114,15 @@ def verify(authorization: str, now: float | None = None) -> dict:
     except (KeyError, TypeError):
         valid = False
     if not valid:
-        raise AuthError("Scan token is expired or not valid for this service.")
+        raise AuthError("Scan token is expired or not valid for this service.", "AUTH_EXPIRED_OR_INVALID_CLAIMS")
 
     for jti, exp in list(_used_tokens.items()):
         if exp <= now:
             del _used_tokens[jti]
     if claims["jti"] in _used_tokens:
-        raise AuthError("Scan token has already been used.")
+        raise AuthError("Scan token has already been used.", "AUTH_REPLAYED")
     _used_tokens[claims["jti"]] = claims["exp"]
-    return claims
+    return {**claims, "issuer": issuer}
 
 
 def mint_token(key: Ed25519PrivateKey, sha256: str, size: int, lifetime: int = 120, now: float | None = None) -> str:
