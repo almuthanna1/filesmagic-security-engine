@@ -1,0 +1,27 @@
+name: Web production security enforcement acceptance
+
+on:
+  push:
+    branches: [audit/web-enforce-acceptance-20261116]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: filesmagic-production-security-acceptance
+  cancel-in-progress: false
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout synthetic-only fixture harness
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install test-only PDF/image writers
+        run: python3 -m pip install --disable-pip-version-check pypdf==6.21.4 Pillow==12.3.0
+      - name: Validate live signed authorization, consent and denial
+        run: python3 -u evaluation/production_enforce_acceptance.py
