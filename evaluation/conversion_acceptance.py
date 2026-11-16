@@ -34,7 +34,7 @@ from tests.pdf_fixtures import encrypted_pdf, make_pdf
 ROOT = Path(__file__).resolve().parents[1]
 BENIGN = ROOT / "evaluation" / "benign_corpus" / "files"
 ROSTER = sorted(lab_acceptance.EXPECTED_SCANNERS["unified"])
-MAX_UPLOAD_BYTES = 10 * 1024 * 1024
+MAX_UPLOAD_BYTES = 25 * 1024 * 1024
 BAD_LZW = bytes.fromhex("789c730ae15250d0773354303251084903b2cd8d80c840212405c8d608c82f492cc9d75408c9e2720de10200cb0109c8")
 CASE = {c["id"]: c["data"] for c in cases()}
 # (id, bytes, verdict, authorization, a reason code that must be present)
@@ -104,7 +104,7 @@ def main(argv=None) -> int:
     record("health: conversion auth, strict isolation", health.get("conversion_auth_configured") is True
            and health.get("isolation_required") is True)
     record("health: ready_for_conversion", health.get("ready_for_conversion") is True)
-    record("health: 10 MiB limit", health.get("max_upload_bytes") == MAX_UPLOAD_BYTES, got=health.get("max_upload_bytes"))
+    record("health: 25 MiB limit", health.get("max_upload_bytes") == MAX_UPLOAD_BYTES, got=health.get("max_upload_bytes"))
 
     pins = {"commit": a.commit, "scanners": ROSTER}
     good = None
@@ -158,7 +158,7 @@ def main(argv=None) -> int:
     expect("auth: replayed token", post(api, data, replay), 401, "AUTH_REPLAYED")
     expect("integrity: token for other bytes", post(api, data + b"\n", mint(key, data)[0]), 403, "TOKEN_FILE_MISMATCH")
     big = b"0" * (MAX_UPLOAD_BYTES + 1)
-    record("size: over 10 MiB refused before upload",
+    record("size: over 25 MiB refused before upload",
            lab_acceptance.headers_only_status(f"{api}/scan?engine=unified", len(big),
                                               {"Authorization": f"Bearer {mint(key, big)[0]}"}) == 413)
 
