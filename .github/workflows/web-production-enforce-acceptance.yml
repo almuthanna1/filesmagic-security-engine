@@ -24,4 +24,4 @@ jobs:
       - name: Install test-only PDF/image writers
         run: python3 -m pip install --disable-pip-version-check pypdf==6.21.4 Pillow==12.3.0
       - name: Validate live signed authorization, consent and denial
-        run: python3 -u evaluation/production_enforce_acceptance.py
+        run: PYTHONPATH=. python3 -u evaluation/production_enforce_acceptance.py
