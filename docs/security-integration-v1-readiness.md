@@ -250,7 +250,9 @@ Conversion Engine also runs on Free; its plan is a separate decision.
   - CORS unset.
 - [ ] Deploy the SHA to production (approved); `/health` `ready_for_conversion: true`; one probe scan shows
       `isolation_verified: true` **on the production host** (Oregon, a different region from staging).
-- [ ] Conversion Engine and website updated to the handoff and rehearsed end to end; copy approved.
+- [ ] Conversion Engine PR #2 and website PR #7 reviewed against the final Security Engine SHA,
+      deployed to staging, and tested end to end with verified host isolation; copy approved.
+      Local integration was rehearsed against `ca8ca9a`, not the final `1451af8` build.
 - [ ] Enable the gate.
 
 ## 7. Production rollback
@@ -267,9 +269,14 @@ Conversion Engine also runs on Free; its plan is a separate decision.
    - receipts and `isolation_verified: true` have not been shown on a Render host with this build;
    - the local Windows dry run correctly refused every receipt (`ISOLATION_NOT_ENFORCED`), and passed every
      authentication, integrity and size check.
-2. **Conversion Engine and website not updated.** `filesmagic-engine` PR #1 has the 9-scanner roster, decides
-   from the response body, and has no receipts or consent. See the [handoff](security-integration-v1-handoff.md).
-   No end-to-end rehearsal of the new contract exists yet.
+2. **Conversion Engine and website are implemented but not deployed to staging.** The current
+   Conversion Engine PR #2 (`feature/security-gate`) and website PR #7
+   (`feature/security-scan-ui`) now use signed receipt verification, the 10-scanner
+   unified roster, server-side consent storage, and the `scan_consent` flow. They
+   were rehearsed locally against the earlier Security Engine PR #23 commit
+   `ca8ca9a` with in-process isolation simulation. **This does not establish
+   hosted isolation or integrated staging acceptance against the final `1451af8`
+   build.** Both PRs remain unmerged. See the [handoff](security-integration-v1-handoff.md).
 3. **Render plan.** Free is not suitable for a mandatory gate (§5); Starter ($7/month) needs approval.
 4. **Production keys** are not generated, and must be separate from staging's.
 5. **Genuine-malware detection not evaluated.** The accuracy evidence is synthetic and benign. The VM study is
