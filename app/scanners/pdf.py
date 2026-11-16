@@ -20,7 +20,7 @@ import threading
 from collections import defaultdict
 
 from pypdf import PasswordType, PdfReader, apply_configuration
-from pypdf.errors import PdfReadError
+from pypdf.errors import LimitReachedError, PdfReadError
 from pypdf.generic import ArrayObject, DictionaryObject, IndirectObject, StreamObject
 
 from app.models import Finding, Severity
@@ -113,6 +113,10 @@ class PdfScanner:
                 found = analyse(data)
         except PdfScanError:
             raise
+        except LimitReachedError as e:
+            # A configured parser resource ceiling is an expected document limit,
+            # not an internal scanner malfunction. Never widen the decoding cap.
+            raise PdfScanError(f"PDF exceeds permitted decoded-stream limits: {clean(e, 120)}") from None
         except Exception as e:  # any parser failure, including RecursionError on hostile nesting
             raise PdfScanError(f"PDF analysis failed: {type(e).__name__}: {clean(e, 200)}") from e
         finally:
