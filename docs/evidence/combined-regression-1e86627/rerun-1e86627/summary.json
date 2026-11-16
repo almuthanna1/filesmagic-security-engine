@@ -1,0 +1,179 @@
+{
+ "environment": {
+  "platform": "Windows-11-10.0.26300-SP0",
+  "trials": 1
+ },
+ "trees": {
+  "candidate": {
+   "commit": "1e86627560f8a88e911c81bb451730718a6e6359",
+   "dirty": false,
+   "pypdf": "7.0.1"
+  }
+ },
+ "measures": {
+  "candidate": {
+   "samples": 252,
+   "verdicts": {
+    "reference": {
+     "SUSPICIOUS": 143,
+     "SAFE": 97,
+     "MALICIOUS": 12
+    },
+    "unified": {
+     "SAFE": 153,
+     "UNABLE_TO_SCAN": 5,
+     "SUSPICIOUS": 85,
+     "MALICIOUS": 9
+    }
+   },
+   "by_class": {
+    "ambiguous": {
+     "SUSPICIOUS": 6
+    },
+    "attachment": {
+     "SUSPICIOUS": 6
+    },
+    "attack-string": {
+     "SUSPICIOUS": 13,
+     "SAFE": 19
+    },
+    "benign": {
+     "SAFE": 90,
+     "UNABLE_TO_SCAN": 5,
+     "SUSPICIOUS": 5,
+     "MALICIOUS": 1
+    },
+    "c2pa-active": {
+     "SUSPICIOUS": 15
+    },
+    "c2pa-benign": {
+     "SAFE": 35,
+     "SUSPICIOUS": 3
+    },
+    "c2pa-deceptive": {
+     "SUSPICIOUS": 11
+    },
+    "c2pa-malformed": {
+     "SUSPICIOUS": 12
+    },
+    "case": {
+     "SAFE": 5,
+     "SUSPICIOUS": 14,
+     "MALICIOUS": 3
+    },
+    "dangerous": {
+     "MALICIOUS": 5
+    },
+    "no-attachment": {
+     "SAFE": 4
+    }
+   },
+   "detection (SUSPICIOUS or MALICIOUS)": {
+    "TP": 55,
+    "FP": 9,
+    "TN": 134,
+    "FN": 0,
+    "precision": 0.8594,
+    "recall": 1.0,
+    "f1": 0.9244,
+    "false_positive_rate": 0.0629
+   },
+   "gate (anything but SAFE stops automatic conversion)": {
+    "TP": 55,
+    "FP": 14,
+    "TN": 129,
+    "FN": 0,
+    "precision": 0.7971,
+    "recall": 1.0,
+    "f1": 0.8871,
+    "false_positive_rate": 0.0979
+   },
+   "outcomes": {
+    "correct": 184,
+    "incomplete": 5,
+    "unexpected warning": 8,
+    "false positive": 1,
+    "reported": 32
+   },
+   "case_mismatches": [],
+   "scanner_failures": [
+    [
+     "CH07",
+     "pdf-chains",
+     "invalid_structure"
+    ]
+   ],
+   "worker_errors": [],
+   "incomplete_coverage": {
+    "samples": 14,
+    "codes": {
+     "PDF_ATTACHMENT_COVERAGE_INCOMPLETE": 11,
+     "PDF_CHAIN_PARSER_REPAIRED": 3,
+     "PDF_STRUCTURE_REPAIRED": 3,
+     "PDF_PARSER_REPAIRED": 1,
+     "CUSTOM_PDF_C1_COVERAGE_INCOMPLETE": 2,
+     "PDF_ENCRYPTED_CONTENT_UNAVAILABLE": 1,
+     "SCANNER_ANALYSIS_FAILED": 1
+    }
+   },
+   "not_deterministic": [],
+   "unified_latency_ms (per-sample median of trials, incl. worker start)": {
+    "median": 528.6,
+    "p95": 713.1,
+    "max": 982.6
+   },
+   "authorization": {
+    "ambiguous": {
+     "consent_required": 6
+    },
+    "attachment": {
+     "consent_required": 6
+    },
+    "attack-string": {
+     "consent_required": 13,
+     "allow": 19
+    },
+    "benign": {
+     "allow": 90,
+     "consent_required": 10,
+     "deny": 1
+    },
+    "c2pa-active": {
+     "consent_required": 15
+    },
+    "c2pa-benign": {
+     "allow": 35,
+     "consent_required": 3
+    },
+    "c2pa-deceptive": {
+     "consent_required": 11
+    },
+    "c2pa-malformed": {
+     "consent_required": 12
+    },
+    "case": {
+     "allow": 5,
+     "consent_required": 14,
+     "deny": 3
+    },
+    "dangerous": {
+     "deny": 5
+    },
+    "no-attachment": {
+     "allow": 4
+    }
+   },
+   "reason_codes": {
+    "PDF_ATTACHMENT_COVERAGE_INCOMPLETE": 11,
+    "PDF_CHAIN_PARSER_REPAIRED": 3,
+    "PDF_STRUCTURE_REPAIRED": 3,
+    "PDF_PARSER_REPAIRED": 1,
+    "CUSTOM_PDF_C1_COVERAGE_INCOMPLETE": 2,
+    "DOCUMENT_STRUCTURE_UNSUPPORTED": 1,
+    "PDF_ENCRYPTED_CONTENT_UNAVAILABLE": 1
+   },
+   "malicious_not_denied": []
+  }
+ },
+ "comparisons": {}
+}
