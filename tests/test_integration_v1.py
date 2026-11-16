@@ -309,6 +309,21 @@ def test_upload_limit_is_enforced_for_conversion_scans():
     assert main.MAX_UPLOAD_BYTES == worker.MAX_INPUT_BYTES == 25 * 1024 * 1024
 
 
+def test_exact_25_mib_upload_is_accepted_before_worker(monkeypatch):
+    """Bounded upload accepts the 25 MiB limit without allocating a scanner corpus."""
+    seen = []
+
+    async def record_and_fail(data, engine="reference"):
+        seen.append((len(data), engine))
+        raise worker.WorkerError("inert test worker stopped", "WORKER_FAILED")
+
+    monkeypatch.setattr(main, "run_scan", record_and_fail)
+    data = b"%PDF-1.4\n" + b"0" * (main.MAX_UPLOAD_BYTES - len(b"%PDF-1.4\n"))
+    r, _ = convert_scan(data)
+    assert r.status_code == 200 and seen == [(25 * 1024 * 1024, "unified")]
+    assert r.json()["receipt"] is None  # operational failure is never receipted
+
+
 def test_upload_limit_cannot_be_bypassed_by_understating_content_length():
     data = b"%PDF-1.4\n" + b"0" * main.MAX_UPLOAD_BYTES
 
