@@ -49,7 +49,7 @@ from app.scanners.base import ScanError
 APP_ROOT = Path(__file__).resolve().parent.parent
 POSIX = os.name == "posix"
 
-MAX_INPUT_BYTES = 10 * 1024 * 1024  # mirrors main.MAX_UPLOAD_BYTES
+MAX_INPUT_BYTES = 25 * 1024 * 1024  # mirrors main.MAX_UPLOAD_BYTES and the Conversion Engine's cap
 MAX_OUTPUT_BYTES = 1024 * 1024
 TIMEOUT_SECONDS = int(os.environ.get("SECURITY_ENGINE_WORKER_TIMEOUT_SECONDS", "30"))
 CPU_SECONDS = 20
