@@ -13,7 +13,7 @@ jobs:
     timeout-minutes: 8
     steps:
       - name: Python and PDF writer
-        run: python3 -m pip install --disable-pip-version-check pypdf==7.0.1
+        run: python3 -m pip install --disable-pip-version-check reportlab==4.4.9
       - name: Convert one inert synthetic PDF through FilesMagic production API
         shell: bash
         run: |
@@ -23,11 +23,13 @@ jobs:
           import zipfile
           import urllib.request
           import urllib.error
-          from pypdf import PdfWriter
+          from reportlab.pdfgen import canvas
           pdf = io.BytesIO()
-          writer = PdfWriter()
-          writer.add_blank_page(144, 144)
-          writer.write(pdf)
+          writer = canvas.Canvas(pdf, pagesize=(612, 792))
+          writer.setFont("Helvetica", 12)
+          writer.drawString(72, 720, "FilesMagic production security gate smoke test")
+          writer.showPage()
+          writer.save()
           source = pdf.getvalue()
           boundary = "fm-release-" + uuid.uuid4().hex
           chunks = []
