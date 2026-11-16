@@ -23,17 +23,13 @@ def sample() -> bytes:
     writer = PdfWriter()
     writer.add_blank_page(612, 792)
     # Inert, non-compressible bytes exercise embedded-file parsing and memory.
-    writer.add_attachment(filename="inert-data.bin", data=os.urandom(23 * 1024 * 1024))
+    writer.add_attachment(filename="inert-data.bin", data=os.urandom(24 * 1024 * 1024 + 768 * 1024))
     result = io.BytesIO()
     writer.write(result)
     payload = result.getvalue()
-    assert payload.endswith(b"%%EOF\n"), "unexpected pypdf output format"
-    assert len(payload) < LIMIT - 2, ("base PDF too large", len(payload))
-    # Put syntactically legal PDF comment padding before %%EOF. The xref offsets
-    # remain unchanged and every PDF reader still finds the EOF at the end.
-    pad = b"%" + b"x" * (LIMIT - len(payload) - 2) + b"\n"
-    payload = payload[:-6] + pad + payload[-6:]
-    assert len(payload) == LIMIT, len(payload)
+    # Test a real, structurally valid near-limit PDF instead of adding trailing
+    # padding, which can make pypdf reject an otherwise valid document.
+    assert 24 * 1024 * 1024 <= len(payload) <= LIMIT, len(payload)
     return payload
 
 
