@@ -1,0 +1,24 @@
+name: Hosted production enforcement admission acceptance
+
+on:
+  push:
+    branches: [audit/enforcement-acceptance-20261116]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  admission:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install inert PDF fixture dependency only
+        run: python3 -m pip install --disable-pip-version-check pypdf==6.21.4
+      - name: Test enforce mode on public FilesMagic conversion endpoints
+        env:
+          PYTHONPATH: .
+        run: python3 evaluation/production_enforcement_acceptance.py
