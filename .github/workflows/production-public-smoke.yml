@@ -1,0 +1,38 @@
+name: Production public smoke checks
+
+on:
+  push:
+    branches: [audit/production-smoke-nov16]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check live FilesMagic services without secrets or uploads
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request
+          def get(url):
+              req = urllib.request.Request(url, headers={"User-Agent": "FilesMagic-release-smoke/1"})
+              with urllib.request.urlopen(req, timeout=100) as response:
+                  return response.status, response.read(500000).decode("utf-8", errors="replace")
+          status, body = get("https://filesmagic-security-engine.onrender.com/health")
+          assert status == 200, ("security_http_status", status)
+          health = json.loads(body)
+          assert health.get("status") == "ok", ("security_status", health.get("status"))
+          assert health.get("commit") == "96e7743efe551b9b291a7b81816670a00cec6b89", ("security_commit", health.get("commit"))
+          print("security:", json.dumps({k: health.get(k) for k in ("commit", "scanners_registered", "scanners_ready", "auth_configured", "conversion_auth_configured", "receipt_key_id", "isolation_required", "ready_for_conversion")}, sort_keys=True))
+          status, body = get("https://api.filesmagic.com/api/v1/formats")
+          formats = json.loads(body)
+          assert status == 200 and len(formats.get("conversions", [])) > 0, ("conversion_formats", status)
+          print("conversion:", len(formats["conversions"]), "supported pairs")
+          status, body = get("https://filesmagic.com/")
+          assert status == 200 and "FilesMagic" in body, ("frontend", status)
+          print("frontend: HTTP 200, FilesMagic branding present")
+          PY
