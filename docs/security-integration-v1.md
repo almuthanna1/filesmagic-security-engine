@@ -39,10 +39,10 @@ token flow are unchanged and still pass their tests.
 |---|---|---|
 | `Authorization` | yes | `Bearer <scan token>` (§4), signed by the **Conversion Engine** token key |
 | `Content-Type` | recommended | `application/octet-stream` |
-| `Content-Length` | recommended | Exact byte count. Over 10 MiB is refused before reading |
+| `Content-Length` | recommended | Exact byte count. Over 25 MiB is refused before reading |
 | `X-Filename` | no | Percent-encoded, informational only; never used for any decision |
 
-**Body:** the raw document bytes, nothing else (no multipart). Maximum **10,485,760 bytes**.
+**Body:** the raw document bytes, nothing else (no multipart). Maximum **26,214,400 bytes**.
 
 `engine=unified` must be explicit: a conversion token used with any other engine is refused
 (`403 ENGINE_NOT_APPROVED`) and its token is consumed.
@@ -119,7 +119,7 @@ Errors that stop a scan before it runs are `{"detail": "<human text>", "code": "
 | 403 | `ENGINE_NOT_APPROVED` | Conversion token with a non-unified engine | unavailable (bug) |
 | 403 | `TOKEN_FILE_MISMATCH` | Received bytes' SHA-256/size ≠ token | unavailable |
 | 408 | `UPLOAD_TIMEOUT` | Body not received within 60 s | unavailable |
-| 413 | `UPLOAD_TOO_LARGE` | Over 10 MiB (declared or streamed) | file too large |
+| 413 | `UPLOAD_TOO_LARGE` | Over 25 MiB (declared or streamed) | file too large |
 | 429 | `RATE_LIMITED` | ≥ 20 unauthorized requests/min from this address (`Retry-After: 60`) | busy |
 | 429 | `ENGINE_BUSY` | Concurrency limit reached (`Retry-After: 5`) | busy |
 | 503 | (no body code) | uvicorn connection limit (32) | busy |
@@ -497,12 +497,15 @@ Nothing here has been deployed. Before production:
 
 ## 12. Known limits, risks and conflicts
 
-- **Upload limit stays 10 MiB.** 25 MB is not supported: at 90718ff, 2 of 10 benign 25 MB files
-  were SUSPICIOUS from the raw-byte rule `ENGINE_PDF_JavaScript_With_Automatic_Trigger`, and the
-  worst worker memory was 278 of 320 MB (filesmagic-engine `docs/SCAN-GATE-RELEASE.md`).
-  pdf-integrity adds up to 32 MiB of decoded content and was not measured at 25 MB. The
-  Conversion Engine must refuse files over 10 MiB before scanning; the Security Engine refuses
-  them by declared length **and** while streaming, so the limit cannot be bypassed.
+- **25 MiB input ceiling, requires load validation before enforcement.** The HTTP API,
+  isolated worker and Conversion Engine now use the same 26,214,400-byte limit, including
+  declared-length and streamed-size enforcement. This preserves the existing 25 MB user limit.
+  Historical 25 MB tests on `90718ff` found 2 of 10 benign files flagged SUSPICIOUS by a
+  JavaScript indicator and peak worker memory of 278 MB against a 320 MB RLIMIT_DATA.
+  Raising the byte ceiling is **not** evidence that every 25 MB file can be scanned.
+  Test actual 25 MiB PDFs and Office files under a 512 MB host constraint and the
+  strict worker isolation profile before enabling `SECURITY_MODE=enforce`. Operational
+  worker failures must remain unreceipted and fail closed.
 - **Research flag in production (conflict).** The README calls `SECURITY_ENGINE_RESEARCH_ENGINES`
   research-only, but the validated production scanner is the unified engine that flag enables.
   Kept the flag rather than renaming it, to stay compatible with the Lab, staging and the draft gate.

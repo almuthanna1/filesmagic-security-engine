@@ -1,0 +1,33 @@
+name: 25 MiB Security Engine capacity on 512 MiB container
+
+on:
+  push:
+    branches: [feature/25mb-security-scans]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  large-file:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build exact production image
+        run: docker build -t filesmagic-security:25mb .
+      - name: Test 24 MiB PDF with bounded attachment streams under production-like limits
+        run: |
+          docker run --rm --memory=512m --cpus=0.5 --network=none --pids-limit=96 -e PYTHONPATH=/srv \
+            -v "$PWD/evaluation/large_25mb_smoke.py:/tmp/large_25mb_smoke.py:ro" \
+            filesmagic-security:25mb python -B /tmp/large_25mb_smoke.py normal
+      - name: Verify oversized decoded streams fail closed without internal errors
+        run: |
+          docker run --rm --memory=512m --cpus=0.5 --network=none --pids-limit=96 -e PYTHONPATH=/srv \
+            -v "$PWD/evaluation/large_25mb_smoke.py:/tmp/large_25mb_smoke.py:ro" \
+            filesmagic-security:25mb python -B /tmp/large_25mb_smoke.py over-stream
+      - name: Document isolation limitation
+        run: echo "Docker capacity check only. Linux strict isolation is covered by security-engine-tests.yml and hosted receipt probes."

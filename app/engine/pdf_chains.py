@@ -29,7 +29,7 @@ import re
 from dataclasses import dataclass, field
 
 from pypdf import PasswordType, PdfReader, apply_configuration
-from pypdf.errors import PdfReadError
+from pypdf.errors import LimitReachedError, PdfReadError
 from pypdf.generic import ArrayObject, DictionaryObject, IndirectObject
 
 from app.engine import pdf_attachments
@@ -242,6 +242,10 @@ def scan(data: bytes) -> PdfChains | None:
             result = extract(data, log)
     except ChainScanError:
         raise
+    except LimitReachedError as e:
+        # Preserve the pypdf safety cap. Incomplete document coverage is
+        # expected for a stream beyond it and requires user acknowledgement.
+        raise ChainScanError(f"PDF exceeds permitted decoded-stream limits: {clean(e, 120)}") from None
     except Exception as e:  # any parser failure, including RecursionError on hostile nesting
         raise ChainScanError(f"PDF action-chain analysis failed: {type(e).__name__}: {clean(e, 200)}") from e
     finally:
