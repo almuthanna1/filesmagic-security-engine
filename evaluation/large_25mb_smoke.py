@@ -1,14 +1,20 @@
-"""25 MiB inert PDF worker capacity canary, meant for a 512 MiB Docker cgroup.
+"""Near-25 MiB inert PDF worker capacity canary for a 512 MiB Docker cgroup.
 
-This is a memory/performance canary, NOT a substitute for production Linux
-namespace isolation tests. Docker's default seccomp can prohibit unshare(),
-so no receipt is issued here. Use an actual strict hosted probe separately.
+Two cases isolate resource capacity from parser safety policy:
+* normal: four bounded attachments, each below the configured 20 MiB PDF
+  decoded-stream ceiling. All scanners must finish under the container limit.
+* over-stream: a valid PDF with one 24+ MiB embedded stream. Parsers must
+  report document limits as expected, not unexpected internal crashes or a
+  fully covered SAFE result. Do NOT loosen the decompression ceiling.
+
+This does not verify Linux user+network namespace isolation, which must still
+pass its own Linux CI and signed receipt probe on the deployed host.
 """
-
 import asyncio
 import io
 import os
 import resource
+import sys
 import time
 
 from pypdf import PdfWriter
@@ -19,36 +25,46 @@ from app.engine import SCANNERS
 LIMIT = 25 * 1024 * 1024
 
 
-def sample() -> bytes:
+def sample(case: str) -> bytes:
     writer = PdfWriter()
     writer.add_blank_page(612, 792)
-    # Inert, non-compressible bytes exercise embedded-file parsing and memory.
-    writer.add_attachment(filename="inert-data.bin", data=os.urandom(24 * 1024 * 1024 + 768 * 1024))
+    if case == "normal":
+        for i in range(4):
+            # PDF attachment names are deliberately non-executable, and each
+            # stream remains beneath the independent pypdf parser ceiling.
+            writer.add_attachment(filename=f"inert-{i}.txt", data=os.urandom(6 * 1024 * 1024))
+    elif case == "over-stream":
+        writer.add_attachment(filename="inert.txt", data=os.urandom(24 * 1024 * 1024 + 768 * 1024))
+    else:
+        raise ValueError(f"unknown case: {case}")
     result = io.BytesIO()
     writer.write(result)
     payload = result.getvalue()
-    # Test a real, structurally valid near-limit PDF instead of adding trailing
-    # padding, which can make pypdf reject an otherwise valid document.
-    assert 24 * 1024 * 1024 <= len(payload) <= LIMIT, len(payload)
+    assert 24 * 1024 * 1024 <= len(payload) <= LIMIT, (case, len(payload))
     return payload
 
 
-async def check() -> None:
-    data = sample()
+async def check(case: str) -> None:
+    data = sample(case)
     started = time.monotonic()
     report = await worker.run(data, engine="unified")
     duration = time.monotonic() - started
-    statuses = {s.name: s.status for s in report.scanners}
     failed = [s for s in report.scanners if s.status == "failed"]
-    print({"bytes": len(data), "duration_seconds": round(duration, 2),
-           "worker_mem_limit_mb": worker.MEMORY_MB,
-           "max_rss_kib_children": resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss,
+    rss = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss
+    print({"case": case, "bytes": len(data), "duration_seconds": round(duration, 2),
+           "worker_mem_limit_mb": worker.MEMORY_MB, "max_rss_kib_children": rss,
            "scanners_reported": len(report.scanners), "failed": len(failed),
-           "failed_statuses": {s.name: (s.error_kind, s.error_type) for s in failed}})
+           "failed_statuses": {s.name: (s.error_kind, s.error_type) for s in failed},
+           "coverage_complete": report.coverage_complete}, flush=True)
     assert len(report.scanners) == len(SCANNERS), "incomplete scanner roster"
-    assert not failed, "25 MiB benign PDF caused a scanner failure"
-    assert report.isolation.get("rlimits"), "worker did not enforce rlimits"
+    assert report.isolation.get("rlimits"), "worker failed to enforce rlimits"
+    if case == "normal":
+        assert not failed, "PDF with bounded attachments failed a scanner"
+    else:
+        assert failed, "per-stream safety ceiling unexpectedly relaxed"
+        assert all(s.error_kind == "invalid_structure" for s in failed), "resource limit caused an internal crash"
+        assert not report.coverage_complete, "truncated parser coverage must never report complete"
 
 
 if __name__ == "__main__":
-    asyncio.run(check())
+    asyncio.run(check(sys.argv[1]))
