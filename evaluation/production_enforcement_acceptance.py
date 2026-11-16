@@ -13,6 +13,7 @@ import uuid
 import zlib
 
 from tests.pdf_fixtures import attachment, js_action, make_pdf
+from tests.custom_fixtures import stream_object
 
 BASE = "https://api.filesmagic.com"
 ATTACHMENT_EXTRA, ATTACHMENT_OBJS = attachment("notes.txt")
@@ -126,6 +127,20 @@ def verify():
     assert status == 422, ("merge with MALICIOUS must block", status, raw[:350])
     json_error(status, raw, "SCAN_BLOCKED")
     print("PASS: whole PDF merge blocked if one file is malicious", flush=True)
+
+    # A page stream with an inert but invalid LZW representation is a known
+    # document-level incomplete-inspection fixture. The actual scanner must
+    # issue a consent-eligible warning, not approve or claim internal failure.
+    bad_lzw = bytes.fromhex(
+        "789c730ae15250d0773354303251084903b2cd8d80c840212405c8d608c82f492cc9d75408c9e2720de10200cb0109c8"
+    )
+    incomplete_pdf = make_pdf(objects={4: stream_object("/Filter /LZWDecode", bad_lzw)})
+    status, _, raw = pdf_rotate(incomplete_pdf)
+    assert status == 409, ("document-limited UNABLE_TO_SCAN needs consent", status, raw[:400])
+    body = json_error(status, raw, "SCAN_CONSENT_REQUIRED")
+    items = body.get("security", {}).get("files", [])
+    assert any(f.get("verdict") == "UNABLE_TO_SCAN" and f.get("consent") for f in items), body
+    print("PASS: eligible UNABLE_TO_SCAN receives informed-consent warning", flush=True)
 
     print("ALL PRODUCTION ENFORCEMENT CHECKS PASSED", flush=True)
 
