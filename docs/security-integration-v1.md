@@ -267,7 +267,7 @@ one added by a later release, is never eligible.**
 | `PDF_CONTENT_DECODE_FAILED`, `PDF_CONTENT_LZW_DECODE_FAILED` | A page-content stream is damaged |
 | `PDF_CONTENT_STREAM_UNRESOLVED` | A page `/Contents` value is not a stream |
 | `PDF_CONTENT_STREAM_LIMIT`, `PDF_CONTENT_TOTAL_LIMIT` | Over 10,000 content streams / 32 MiB decoded |
-| `PDF_PARSER_REPAIRED`, `PDF_STRUCTURE_REPAIRED`, `PDF_CHAIN_PARSER_REPAIRED` | Readable only after structural repair |
+| `PDF_PARSER_REPAIRED`, `PDF_STRUCTURE_REPAIRED`, `PDF_CHAIN_PARSER_REPAIRED` | Readable only after structural repair. A reference to an object the file does not contain (pypdf: "Object N G not defined") is not a repair when the file has no object stream and every `obj` header in it is the one its cross-reference entry lists: it is null (ISO 32000-1 7.3.10), reported as the INFO finding `PDF_UNDEFINED_REFERENCE` (`app.scanners.pdf.only_listed_objects`) |
 | `PDF_ATTACHMENT_COVERAGE_INCOMPLETE` | Not every attachment could be inspected |
 | `CUSTOM_PDF_C1_COVERAGE_INCOMPLETE` | Some object streams were not inspected |
 | `DOCUMENT_MALFORMED` | A scanner rejected the file's syntax (`error_kind: malformed_input`) |
