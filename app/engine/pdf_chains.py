@@ -164,8 +164,8 @@ def _name_tree(tree):
 
 
 def extract(data: bytes, log: _RepairLog | None = None) -> PdfChains:
-    log = log or _RepairLog()
-    reader = PdfReader(io.BytesIO(data), strict=False)
+    log = log or _RepairLog(data)
+    reader = log.reader = PdfReader(io.BytesIO(data), strict=False)
     if reader.is_encrypted and reader.decrypt("") == PasswordType.NOT_DECRYPTED:
         raise ChainScanError("PDF is password-protected; its actions cannot be read")
     root = reader.trailer.get("/Root")
@@ -235,7 +235,7 @@ def scan(data: bytes) -> PdfChains | None:
     """The chains of a PDF, None for any other file. Raises ChainScanError if unreadable."""
     if not is_pdf(data):
         return None
-    log, pypdf_logger = _RepairLog(), logging.getLogger("pypdf")
+    log, pypdf_logger = _RepairLog(data), logging.getLogger("pypdf")
     pypdf_logger.addHandler(log)
     try:
         with apply_configuration(**PDF_LIMITS):

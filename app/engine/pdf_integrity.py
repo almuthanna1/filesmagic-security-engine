@@ -53,11 +53,11 @@ class PdfIntegrityScanner:
         self.coverage_issues = []
         if not is_pdf(data):
             return None
-        log, logger = _RepairLog(), logging.getLogger("pypdf")
+        log, logger = _RepairLog(data), logging.getLogger("pypdf")
         logger.addHandler(log)
         try:
             with apply_configuration(**PDF_LIMITS):
-                reader = PdfReader(io.BytesIO(data), strict=False)
+                reader = log.reader = PdfReader(io.BytesIO(data), strict=False)
                 if reader.is_encrypted and reader.decrypt("") == PasswordType.NOT_DECRYPTED:
                     self._issue("PDF_ENCRYPTED_CONTENT_UNAVAILABLE", "Page content requires a password.")
                     return self._findings()

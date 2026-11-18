@@ -88,16 +88,66 @@ def is_pdf(data: bytes) -> bool:
     return b"%PDF-" in data[:1024]
 
 
-class _RepairLog(logging.Handler):
-    """Counts pypdf warnings raised by the current thread (pypdf logs repairs it makes)."""
+# pypdf (PdfReader.get_object) logs this for a reference to an object that is neither listed in use
+# by the cross-reference data nor found by its search of the file for "N G obj"; it reads it as null.
+UNDEFINED_REFERENCE = ("pypdf._reader", "Object %(idnum)d %(generation)d not defined.")
+# In any object header a reader accepts, "obj" follows white space (a comment ends at an EOL): PDF
+# white space (ISO 32000-1 7.2.2) plus \v, which pypdf's own search for "N G obj" also accepts.
+OBJ_KEYWORD = re.compile(rb"(?<=[\x00\t\n\v\f\r ])obj")
+OBJECT_HEADER = re.compile(rb"(?<![0-9])(\d+)[\x00\t\n\v\f\r ]+(\d+)[\x00\t\n\v\f\r ]+obj")
+# "ObjStm" in any case, any letter possibly written as a #xx name escape (ISO 32000-1 7.3.5).
+OBJSTM = re.compile(b"".join(b"(?:%c|#%02x|#%02x)" % (c, c & ~0x20, c | 0x20) for c in b"objstm"), re.I)
 
-    def __init__(self):
+
+def only_listed_objects(reader: PdfReader, data: bytes) -> bool:
+    """True if no object can be in the file without its cross-reference data listing it, so a
+    reference to an unlisted object is the null object for every reader (ISO 32000-1 7.3.10) and
+    hides nothing: the file has no object stream (no "ObjStm", escaped or not, anywhere), and every
+    "obj" after white space (any revision, inside streams and strings too) ends the header "N G obj"
+    at exactly the offset the cross-reference data lists for N G. Strict on purpose: a comment in a
+    header, an older revision or such bytes in a stream return False (counted as a repair, as before)."""
+    if reader.xref_objStm or OBJSTM.search(data):
+        return False
+    headers = set()
+    for generation, objects in reader.xref.items():
+        for idnum, offset in objects.items():
+            m = OBJECT_HEADER.match(data, offset) if isinstance(offset, int) else None
+            if m is None or (int(m[1]), int(m[2])) != (idnum, generation):
+                return False
+            headers.add(m.end() - 3)
+    return all(m.start() in headers for m in OBJ_KEYWORD.finditer(data))
+
+
+class _RepairLog(logging.Handler):
+    """Counts pypdf warnings raised by the current thread (pypdf logs repairs it makes).
+
+    References to objects the file does not contain are kept in `undefined` and count only if
+    something else needed repair or only_listed_objects cannot rule out a hidden object (`reader`
+    must be set once the PdfReader exists; until then they always count)."""
+
+    def __init__(self, data: bytes):
         super().__init__(logging.WARNING)
-        self.thread, self.count = threading.get_ident(), 0
+        self.thread, self.repairs, self.undefined = threading.get_ident(), 0, set()
+        self.data, self.reader, self._listed = data, None, None
 
     def emit(self, record):
-        if threading.get_ident() == self.thread:
-            self.count += 1
+        if threading.get_ident() != self.thread:
+            return
+        if (record.name, record.msg) == UNDEFINED_REFERENCE and isinstance(record.args, dict):
+            self.undefined.add((record.args["idnum"], record.args["generation"]))
+        else:
+            self.repairs += 1
+
+    @property
+    def count(self) -> int:
+        if self.undefined and (self.repairs or not self._only_listed()):
+            return self.repairs + len(self.undefined)
+        return self.repairs
+
+    def _only_listed(self) -> bool:
+        if self._listed is None and self.reader is not None:
+            self._listed = only_listed_objects(self.reader, self.data)
+        return bool(self._listed)
 
 
 class PdfScanner:
@@ -106,11 +156,11 @@ class PdfScanner:
     def scan(self, filename: str, data: bytes) -> list[Finding] | None:
         if not is_pdf(data):
             return None
-        log, pypdf_logger = _RepairLog(), logging.getLogger("pypdf")
+        log, pypdf_logger = _RepairLog(data), logging.getLogger("pypdf")
         pypdf_logger.addHandler(log)
         try:
             with apply_configuration(**PDF_LIMITS):
-                found = analyse(data)
+                found = analyse(data, log)
         except PdfScanError:
             raise
         except LimitReachedError as e:
@@ -125,6 +175,13 @@ class PdfScanner:
             found.append(finding("pdf-structure", Severity.INFO,
                                  f"PDF has structural errors the parser had to repair ({log.count} warnings).",
                                  "PDF_STRUCTURE_REPAIRED"))
+        elif log.undefined:
+            refs = ", ".join(f"{n} {g} R" for n, g in sorted(log.undefined)[:5])
+            found.append(finding("pdf-structure", Severity.INFO,
+                                 f"PDF refers to {len(log.undefined)} object(s) it does not contain ({refs}), read as "
+                                 "null as ISO 32000-1 7.3.10 requires. The file has no object stream and every object "
+                                 "header in it is where its cross-reference entry says, so nothing was skipped.",
+                                 "PDF_UNDEFINED_REFERENCE"))
         return found
 
 
@@ -152,8 +209,10 @@ def filespec_name(value) -> str:
     return text_of(value, 1000)
 
 
-def analyse(data: bytes) -> list[Finding]:
+def analyse(data: bytes, log: _RepairLog | None = None) -> list[Finding]:
     reader = PdfReader(io.BytesIO(data), strict=False)
+    if log is not None:
+        log.reader = reader
     found: list[Finding] = []
 
     if reader.is_encrypted:
