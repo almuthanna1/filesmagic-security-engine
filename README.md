@@ -1,5 +1,8 @@
 # FilesMagic Security Engine
 
+> **Academic mentor-review update (November 20, 2026):** The original capstone contributions are documented in [Faculty mentor review brief](docs/capstone-final-mentor-brief-2026-11-20.md) and [Source-code defense guide](docs/capstone-code-defense-2026-11-20.md). The standalone Security Engine and separate FilesMagic Conversion Engine have live Render deployments (engine commit `b6774be`; conversion commit `482e724`, observed November 20). This is **deployment evidence**, not fresh proof of every unbypassable conversion path or real-world malware accuracy. The dated research/staging status paragraphs below describe earlier experiments and must not be read as current production verification. Faculty grading and final academic acceptance remain pending.
+
+
 A pre-conversion security analysis service for FilesMagic, a file-conversion
 application. Every uploaded file is meant to pass through this engine *before* it
 reaches the FilesMagic conversion pipeline, so dangerous files can be rejected
