@@ -4,8 +4,8 @@
 **Northern Illinois University | CSCI 499 Honors Capstone**  
 **Student:** Almuthanna Shihab  
 **Faculty mentor:** Dr. Nur Imtiazul Haque  
-**Period covered:** September 2026 through November 14, 2026  
-**Document status:** Living draft v0.2, created November 13, 2026; updated November 14, 2026  
+**Period covered:** September 2026 through November 20, 2026  
+**Document status:** Living draft v0.3, created November 13, 2026; updated November 20, 2026  
 **Repository:** https://github.com/almuthanna1/filesmagic-security-engine  
 **Current research branch:** feature/custom-unified-engine-nov18  
 **Important distinction:** This document is a chronological account of *research and engineering work*. It is not a claim that the Security Engine is integrated with, or approved to protect, the production FilesMagic Conversion Engine.
@@ -466,3 +466,27 @@ Update after each substantive milestone. For each addition, record:
 | 0.2 | 2026-11-14 | Added post-freeze PDF coverage remediation and two manual hosted qpdf regression outcomes at merge commit 840a300c, with request IDs, strict-isolation observations and separate evidence limits. November 9 totals preserved. |
 
 **Research posture:** Document the failures with the same precision as the successful milestones. The capstone's central result may ultimately be a defensible security architecture, a narrower custom detection contribution and an empirical statement of its limits. That is stronger research than a claim that a prototype is already perfect.
+
+
+---
+
+## 17. November 20 mentor check-in and current disposition
+
+**Source:** Student's November 20 meeting recording/transcript with Dr. Nur Imtiazul Haque, retained separately from the public repository. These notes summarize the mentor's directions; they are **not approval of a final technical grade**.
+
+- **Poster:** The accepted poster had been submitted and approved for organizer printing. Dr. Haque liked the overall clarity but suggested filling unnecessary white space within template constraints and redrawing AI-generated figures where feasible. Since the approved file was already submitted, these were comments, not an instruction to replace the organizer-approved poster.
+- **Central academic requirement:** Dr. Haque expressly distinguished integrating YARA-X/PDF/Office tools from implementing original, substantive malware-analysis logic. He wants a demonstrable analysis method, understanding of precisely how the methods work, formal learning/research, a documentation trail and an explanation of obstacles. A simple file-size rule is insufficient. He said building atop existing source is acceptable if the implemented area is genuinely understood. The original PDF action-chain and VBA call-graph algorithms already present in the repository are candidates to defend, not evidence the mentor has yet accepted them.
+- **Timeline:** December 3 is the poster presentation; the student and mentor targeted December 4 for review of the completed project. December 12 was discussed as an approximate point around which a final course grade might be entered, not a confirmed capstone submission deadline.
+- **Grading:** CSCI 499 may require a faculty-entered grade. The mentor was uncertain about its procedure, while the student understood the Honors submission requirements as completion-oriented. The student sent separate clarification emails to Daniel and Connie, copying Dr. Haque, on November 20. Until replies arrive, neither pass/fail nor letter grading is established.
+- **Originality and teaching package:** On the review branch, [mentor-review brief](capstone-final-mentor-brief-2026-11-20.md) identifies exactly which algorithms are author-created and which features depend on external parsers. [Code defense](capstone-code-defense-2026-11-20.md) walks through the PDF and VBA implementations. [Reflection draft](capstone-reflection-draft-2026-11-20.md) remains provisional until the student checks Blackboard requirements and personal accuracy.
+
+### November 20 engineering evidence update, distinct from the older freeze
+
+The connected Render service metadata was checked November 20, 2026:
+- Customer-facing Security Engine service `srv-db3r5cc9v7es73e57frg` had a live deployment of commit `b6774bea199f13170a4dfb144048f7d63f59b859` (completed November 18).
+- Separate FilesMagic Conversion Engine service `srv-da5qcv0u01pc73853ajg` had a live deployment of commit `482e72459367196ac1a808846d630fb5f24c8300` (completed November 18).
+- The main-branch security-engine CI run for `b6774be` succeeded November 18. See https://github.com/almuthanna1/filesmagic-security-engine/actions/runs/44382980470.
+
+This is verified **deployment and CI status**, not a fresh independent test of every conversion route, security authorization, runtime coverage, or effectiveness against real malicious samples. The historical November 13 claim that integration was unverified must be read with its original evidence cutoff and is not a representation of the November 20 deployment configuration.
+
+**Academic acceptance remains open:** Completing documentation and passing CI cannot substitute for the student's independent explanation, Dr. Haque's assessment, actual December 3 attendance/presentation, Honors artifact submission and grading clarification.
