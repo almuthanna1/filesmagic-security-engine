@@ -1,0 +1,27 @@
+{
+  "signature_matcher": {
+    "inputs": 5328,
+    "bytes": 1789210,
+    "ours_ms": 48.8,
+    "ours_heap_peak_kib": 1107.2,
+    "yara_x_ms": 1471.7,
+    "yara_x_reused_scanner_ms": 8.5,
+    "agreements": 5328
+  },
+  "cases": {
+    "baseline": {
+      "cases": 16,
+      "nondeterministic": [],
+      "median_in_worker_ms": 3.56,
+      "max_in_worker_ms": 5.72,
+      "median_harness_wall_ms": 656.1
+    },
+    "after": {
+      "cases": 16,
+      "nondeterministic": [],
+      "median_in_worker_ms": 3.45,
+      "max_in_worker_ms": 5.34,
+      "median_harness_wall_ms": 622.8
+    }
+  }
+}

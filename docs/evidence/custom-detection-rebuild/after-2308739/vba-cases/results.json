@@ -1,0 +1,944 @@
+[
+  {
+    "id": "v01-autoopen-calls-shell",
+    "why": "automatic entry reaches Shell through a call",
+    "expected": "MALICIOUS",
+    "bytes": 1539,
+    "after": {
+      "verdict": "MALICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_AUTOEXEC_EXECUTION:HIGH",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "signatures:OOXML_VBA_Macros:MEDIUM",
+        "vba-chains:ENGINE_VBA_AUTOEXEC_REACHES_CAPABILITY:HIGH"
+      ],
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 635.0
+    },
+    "baseline": {
+      "verdict": "MALICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_AUTOEXEC_EXECUTION:HIGH",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "vba-chains:ENGINE_VBA_AUTOEXEC_REACHES_CAPABILITY:HIGH",
+        "yara-x:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 723.8
+    }
+  },
+  {
+    "id": "v02-qualified-call-to-shell",
+    "why": "Module.Procedure call across modules (module names without olevba's .bas extension)",
+    "expected": "MALICIOUS",
+    "bytes": 1602,
+    "after": {
+      "verdict": "MALICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_AUTOEXEC_EXECUTION:HIGH",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "signatures:OOXML_VBA_Macros:MEDIUM",
+        "vba-chains:ENGINE_VBA_AUTOEXEC_REACHES_CAPABILITY:HIGH"
+      ],
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 630.2
+    },
+    "baseline": {
+      "verdict": "MALICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_AUTOEXEC_EXECUTION:HIGH",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "yara-x:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 762.1
+    }
+  },
+  {
+    "id": "v03-entry-and-unrelated-shell",
+    "why": "no call path, kept HIGH: P-code may differ from source (never lowered on source alone)",
+    "expected": "MALICIOUS",
+    "bytes": 1548,
+    "after": {
+      "verdict": "MALICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_AUTOEXEC_EXECUTION:HIGH",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "signatures:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 647.7
+    },
+    "baseline": {
+      "verdict": "MALICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_AUTOEXEC_EXECUTION:HIGH",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "yara-x:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 750.0
+    }
+  },
+  {
+    "id": "v04-benign-formatting",
+    "why": "harmless macro: macros present is never SAFE",
+    "expected": "SUSPICIOUS",
+    "bytes": 1547,
+    "after": {
+      "verdict": "SUSPICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "signatures:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 636.6
+    },
+    "baseline": {
+      "verdict": "SUSPICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_SUSPICIOUS_KEYWORDS:LOW",
+        "yara-x:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 722.6
+    }
+  },
+  {
+    "id": "v05-vbhide-constant-only",
+    "why": "olevba listed vbHide as execution; a constant is no operation",
+    "expected": "SUSPICIOUS",
+    "bytes": 1538,
+    "after": {
+      "verdict": "SUSPICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "signatures:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 626.8
+    },
+    "baseline": {
+      "verdict": "MALICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_AUTOEXEC_EXECUTION:HIGH",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "yara-x:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 724.5
+    }
+  },
+  {
+    "id": "v06-application-run-macro",
+    "why": "olevba listed Run as execution; Application.Run starts a macro",
+    "expected": "SUSPICIOUS",
+    "bytes": 1551,
+    "after": {
+      "verdict": "SUSPICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "signatures:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 631.0
+    },
+    "baseline": {
+      "verdict": "MALICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_AUTOEXEC_EXECUTION:HIGH",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "yara-x:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 721.6
+    }
+  },
+  {
+    "id": "v07-shell32-folder-api",
+    "why": "olevba listed shell32 as execution; the declared API decides",
+    "expected": "SUSPICIOUS",
+    "bytes": 1603,
+    "after": {
+      "verdict": "SUSPICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_SUSPICIOUS_KEYWORDS:LOW",
+        "signatures:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 628.9
+    },
+    "baseline": {
+      "verdict": "MALICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_AUTOEXEC_EXECUTION:HIGH",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "office:OFFICE_MACRO_SUSPICIOUS_KEYWORDS:LOW",
+        "yara-x:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 731.2
+    }
+  },
+  {
+    "id": "v08-user-shell-procedure",
+    "why": "a user procedure named Shell shadows the built-in: only possible",
+    "expected": "SUSPICIOUS",
+    "bytes": 1538,
+    "after": {
+      "verdict": "SUSPICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_SUSPICIOUS_KEYWORDS:LOW",
+        "signatures:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 629.1
+    },
+    "baseline": {
+      "verdict": "MALICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_AUTOEXEC_EXECUTION:HIGH",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "vba-chains:ENGINE_VBA_AUTOEXEC_REACHES_CAPABILITY:HIGH",
+        "yara-x:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 726.0
+    }
+  },
+  {
+    "id": "v09-strreverse-progid-run",
+    "why": "obfuscated ProgID folded statically, method resolved on the object",
+    "expected": "MALICIOUS",
+    "bytes": 1576,
+    "after": {
+      "verdict": "MALICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_AUTOEXEC_EXECUTION:HIGH",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "office:OFFICE_MACRO_OBFUSCATION:LOW",
+        "signatures:OOXML_VBA_Macros:MEDIUM",
+        "vba-chains:ENGINE_VBA_AUTOEXEC_REACHES_CAPABILITY:HIGH"
+      ],
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 636.0
+    },
+    "baseline": {
+      "verdict": "MALICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_AUTOEXEC_EXECUTION:HIGH",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "office:OFFICE_MACRO_SUSPICIOUS_KEYWORDS:LOW",
+        "yara-x:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 734.5
+    }
+  },
+  {
+    "id": "v10-callbyname-run",
+    "why": "dynamic method call with a constant name",
+    "expected": "MALICIOUS",
+    "bytes": 1574,
+    "after": {
+      "verdict": "MALICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_AUTOEXEC_EXECUTION:HIGH",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "signatures:OOXML_VBA_Macros:MEDIUM",
+        "vba-chains:ENGINE_VBA_AUTOEXEC_REACHES_CAPABILITY:HIGH"
+      ],
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 707.0
+    },
+    "baseline": {
+      "verdict": "MALICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_AUTOEXEC_EXECUTION:HIGH",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "office:OFFICE_MACRO_SUSPICIOUS_KEYWORDS:LOW",
+        "yara-x:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 725.6
+    }
+  },
+  {
+    "id": "v11-xmlhttp-download",
+    "why": "download on open",
+    "expected": "MALICIOUS",
+    "bytes": 1598,
+    "after": {
+      "verdict": "MALICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_AUTOEXEC_EXECUTION:HIGH",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "signatures:OOXML_VBA_Macros:MEDIUM",
+        "vba-chains:ENGINE_VBA_AUTOEXEC_REACHES_CAPABILITY:HIGH"
+      ],
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 637.6
+    },
+    "baseline": {
+      "verdict": "MALICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_AUTOEXEC_EXECUTION:HIGH",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "office:OFFICE_MACRO_SUSPICIOUS_KEYWORDS:LOW",
+        "vba-chains:ENGINE_VBA_AUTOEXEC_REACHES_CAPABILITY:HIGH",
+        "yara-x:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 734.8
+    }
+  },
+  {
+    "id": "v12-run-key-persistence",
+    "why": "persistence through the Run key",
+    "expected": "MALICIOUS",
+    "bytes": 1601,
+    "after": {
+      "verdict": "MALICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_AUTOEXEC_EXECUTION:HIGH",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "office:OFFICE_MACRO_SUSPICIOUS_KEYWORDS:LOW",
+        "signatures:OOXML_VBA_Macros:MEDIUM",
+        "vba-chains:ENGINE_VBA_AUTOEXEC_REACHES_CAPABILITY:HIGH"
+      ],
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 631.9
+    },
+    "baseline": {
+      "verdict": "MALICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_AUTOEXEC_EXECUTION:HIGH",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "office:OFFICE_MACRO_SUSPICIOUS_KEYWORDS:LOW",
+        "yara-x:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 728.2
+    }
+  },
+  {
+    "id": "v13-click-handler-shell",
+    "why": "user-triggered entry with execution (trigger kind recorded as user action)",
+    "expected": "MALICIOUS",
+    "bytes": 1536,
+    "after": {
+      "verdict": "MALICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_AUTOEXEC_EXECUTION:HIGH",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "signatures:OOXML_VBA_Macros:MEDIUM",
+        "vba-chains:ENGINE_VBA_AUTOEXEC_REACHES_CAPABILITY:HIGH"
+      ],
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 635.2
+    },
+    "baseline": {
+      "verdict": "MALICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_AUTOEXEC_EXECUTION:HIGH",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "vba-chains:ENGINE_VBA_AUTOEXEC_REACHES_CAPABILITY:HIGH",
+        "yara-x:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 718.3
+    }
+  },
+  {
+    "id": "v14-obj-run-unknown-object",
+    "why": "Run on an object of unknown type: possible only",
+    "expected": "SUSPICIOUS",
+    "bytes": 1523,
+    "after": {
+      "verdict": "SUSPICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_SUSPICIOUS_KEYWORDS:LOW",
+        "signatures:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 627.9
+    },
+    "baseline": {
+      "verdict": "MALICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_AUTOEXEC_EXECUTION:HIGH",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "yara-x:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 723.5
+    }
+  },
+  {
+    "id": "v15-plain-helper-no-entry",
+    "why": "Shell without any entry point: dangerous capability (MEDIUM), not automatic",
+    "expected": "SUSPICIOUS",
+    "bytes": 1521,
+    "after": {
+      "verdict": "SUSPICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "signatures:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 630.8
+    },
+    "baseline": {
+      "verdict": "SUSPICIOUS",
+      "rules": [
+        "custom:CUSTOM_OFFICE_CONCEALED_BINARY_PART:LOW",
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "custom:CUSTOM_OFFICE_UNDECLARED_PARTS:LOW",
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "yara-x:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "wall_ms": 721.7
+    }
+  },
+  {
+    "id": "v16-legacy-doc",
+    "why": "legacy .doc with a Macros storage",
+    "expected": "MALICIOUS",
+    "bytes": 23552,
+    "after": {
+      "verdict": "MALICIOUS",
+      "rules": [
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_AUTOEXEC_EXECUTION:HIGH",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "signatures:OLE_Office_VBA_Macros:MEDIUM",
+        "vba-chains:ENGINE_VBA_AUTOEXEC_REACHES_CAPABILITY:HIGH"
+      ],
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "not_applicable",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "wall_ms": 628.6
+    },
+    "baseline": {
+      "verdict": "MALICIOUS",
+      "rules": [
+        "office:OFFICE_MACROS_PRESENT:LOW",
+        "office:OFFICE_MACRO_AUTOEXEC:MEDIUM",
+        "office:OFFICE_MACRO_AUTOEXEC_EXECUTION:HIGH",
+        "office:OFFICE_MACRO_DANGEROUS_CAPABILITY:MEDIUM",
+        "vba-chains:ENGINE_VBA_AUTOEXEC_REACHES_CAPABILITY:HIGH",
+        "yara-x:OLE_Office_VBA_Macros:MEDIUM"
+      ],
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "not_applicable",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "wall_ms": 731.1
+    }
+  }
+]

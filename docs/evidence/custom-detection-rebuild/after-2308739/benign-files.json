@@ -1,0 +1,662 @@
+[
+  {
+    "file": "docx-01-word-plain.docx",
+    "detected_format": "zip",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 727.7,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 12.25
+    }
+  },
+  {
+    "file": "docx-02-word-rich.docx",
+    "detected_format": "zip",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 641.7,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 15.65
+    }
+  },
+  {
+    "file": "docx-03-word-embedded-excel.docx",
+    "detected_format": "zip",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 634.4,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "errors": {},
+      "findings": [
+        "ooxml-links:ENGINE_OFFICE_EMBEDDED_OBJECT_DISPLAYED:INFO"
+      ],
+      "scanner_ms": 10.2
+    }
+  },
+  {
+    "file": "docx-04-word-linked-picture.docx",
+    "detected_format": "zip",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 646.2,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "errors": {},
+      "findings": [
+        "ooxml-links:ENGINE_CORRELATION:INFO",
+        "ooxml-links:ENGINE_OFFICE_LINKED_PICTURE:INFO",
+        "ooxml-links:ENGINE_OFFICE_LOCAL_FILE_TARGETS:INFO"
+      ],
+      "scanner_ms": 10.45
+    }
+  },
+  {
+    "file": "docx-05-word-custom-template.docx",
+    "detected_format": "zip",
+    "unified": {
+      "verdict": "SUSPICIOUS",
+      "wall_ms": 626.1,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "errors": {},
+      "findings": [
+        "ooxml-links:ENGINE_CORRELATION:INFO",
+        "ooxml-links:ENGINE_OFFICE_LOCAL_TEMPLATE:LOW"
+      ],
+      "scanner_ms": 10.68
+    }
+  },
+  {
+    "file": "docx-06-word-content-controls.docx",
+    "detected_format": "zip",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 635.9,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 13.23
+    }
+  },
+  {
+    "file": "docx-07-libreoffice.docx",
+    "detected_format": "zip",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 633.8,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 7.94
+    }
+  },
+  {
+    "file": "pdf-01-word-export.pdf",
+    "detected_format": "pdf",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 643.6,
+      "status": {
+        "signatures": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 10.13
+    }
+  },
+  {
+    "file": "pdf-02-excel-export.pdf",
+    "detected_format": "pdf",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 633.4,
+      "status": {
+        "signatures": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 12.33
+    }
+  },
+  {
+    "file": "pdf-03-powerpoint-export.pdf",
+    "detected_format": "pdf",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 627.5,
+      "status": {
+        "signatures": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 6.85
+    }
+  },
+  {
+    "file": "pdf-04-libreoffice-tagged.pdf",
+    "detected_format": "pdf",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 627.6,
+      "status": {
+        "signatures": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 9.2
+    }
+  },
+  {
+    "file": "pdf-05-libreoffice-pdfa.pdf",
+    "detected_format": "pdf",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 634.5,
+      "status": {
+        "signatures": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 10.63
+    }
+  },
+  {
+    "file": "pdf-06-word-export-pdfa.pdf",
+    "detected_format": "pdf",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 617.2,
+      "status": {
+        "signatures": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 7.99
+    }
+  },
+  {
+    "file": "pdf-07-libreoffice-hybrid.pdf",
+    "detected_format": "pdf",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 632.5,
+      "status": {
+        "signatures": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "errors": {},
+      "findings": [
+        "custom:CUSTOM_PDF_UNNECESSARY_NAME_ESCAPES:INFO",
+        "pdf-chains:ENGINE_CORRELATION:INFO",
+        "pdf-chains:ENGINE_PDF_ATTACHMENTS_VERIFIED:INFO"
+      ],
+      "scanner_ms": 11.89
+    }
+  },
+  {
+    "file": "pdf-08-edge-print.pdf",
+    "detected_format": "pdf",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 630.6,
+      "status": {
+        "signatures": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 10.01
+    }
+  },
+  {
+    "file": "pptx-01-ppt-plain.pptx",
+    "detected_format": "zip",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 640.1,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "not_applicable"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 12.9
+    }
+  },
+  {
+    "file": "pptx-02-ppt-pictures-notes.pptx",
+    "detected_format": "zip",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 643.6,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "not_applicable"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 11.85
+    }
+  },
+  {
+    "file": "pptx-03-ppt-chart-table.pptx",
+    "detected_format": "zip",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 646.8,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "not_applicable"
+      },
+      "errors": {},
+      "findings": [
+        "ooxml-links:ENGINE_OFFICE_ACTIVATION_UNDETERMINED:INFO"
+      ],
+      "scanner_ms": 11.79
+    }
+  },
+  {
+    "file": "pptx-04-ppt-hyperlinks-actions.pptx",
+    "detected_format": "zip",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 633.5,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "not_applicable"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 13.1
+    }
+  },
+  {
+    "file": "pptx-05-ppt-transitions-animations.pptx",
+    "detected_format": "zip",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 631.2,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "not_applicable"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 11.3
+    }
+  },
+  {
+    "file": "pptx-06-ppt-embedded-excel.pptx",
+    "detected_format": "zip",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 616.2,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "not_applicable"
+      },
+      "errors": {},
+      "findings": [
+        "ooxml-links:ENGINE_OFFICE_EMBEDDED_OBJECT_DISPLAYED:INFO"
+      ],
+      "scanner_ms": 11.94
+    }
+  },
+  {
+    "file": "pptx-07-libreoffice-roundtrip.pptx",
+    "detected_format": "zip",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 639.0,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "not_applicable"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 11.77
+    }
+  },
+  {
+    "file": "xlsx-01-excel-formulas.xlsx",
+    "detected_format": "zip",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 621.5,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "not_applicable"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 3.61
+    }
+  },
+  {
+    "file": "xlsx-02-excel-chart-formatting.xlsx",
+    "detected_format": "zip",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 642.7,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "not_applicable"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 6.82
+    }
+  },
+  {
+    "file": "xlsx-03-excel-hyperlinks-validation.xlsx",
+    "detected_format": "zip",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 625.5,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "not_applicable"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 7.11
+    }
+  },
+  {
+    "file": "xlsx-04-excel-external-workbook-link.xlsx",
+    "detected_format": "zip",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 624.4,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "not_applicable"
+      },
+      "errors": {},
+      "findings": [
+        "office:OFFICE_EXTERNAL_RESOURCE:INFO",
+        "ooxml-links:ENGINE_CORRELATION:INFO",
+        "ooxml-links:ENGINE_OFFICE_ACTIVATION_UNDETERMINED:INFO",
+        "ooxml-links:ENGINE_OFFICE_LOCAL_FILE_TARGETS:INFO"
+      ],
+      "scanner_ms": 6.83
+    }
+  },
+  {
+    "file": "xlsx-05-excel-table-pivot.xlsx",
+    "detected_format": "zip",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 627.1,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "not_applicable"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 7.69
+    }
+  },
+  {
+    "file": "xlsx-06-excel-picture-notes.xlsx",
+    "detected_format": "zip",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 634.1,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "not_applicable"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 6.07
+    }
+  },
+  {
+    "file": "xlsx-07-libreoffice.xlsx",
+    "detected_format": "zip",
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 620.7,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "not_applicable"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 2.79
+    }
+  }
+]

@@ -1,0 +1,3073 @@
+{
+  "environment": {
+    "timestamp_utc": "2026-11-21T03:23:07+00:00",
+    "engine_commit": "23087394122dac3ac4a031878d3d04af8ec15978",
+    "working_tree_dirty": false,
+    "manifest_sha256": null,
+    "engine_version": "0.2.0",
+    "ruleset_sha256": "8a6de0710117eab989bad41ec70ad9fad7c53ddce9a623b2682b9d0d14b8e837",
+    "strict_isolation_configured": false,
+    "python": "3.14.3",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "packages": {
+      "oletools": "0.60.2",
+      "pypdf": "6.19.0",
+      "msoffcrypto-tool": "6.0.0",
+      "defusedxml": "0.7.1",
+      "fastapi": "0.142.4"
+    },
+    "harness_peak_rss_mib": null,
+    "worker_memory_measured": false,
+    "worker_command": [
+      "-s",
+      "-m",
+      "app.worker",
+      "--engine=unified"
+    ],
+    "trials": 3
+  },
+  "results": [
+    {
+      "id": "1-pdf-clean",
+      "ground_truth": "BENIGN",
+      "indicator": "none (negative control)",
+      "sha256": "d5784991fd896bc6b3c21c3c384d9a376a3b4b6009b83a25e0c5d8f77939011b",
+      "size_bytes": 465,
+      "verdicts": {
+        "signatures": "SAFE",
+        "office": "n/a",
+        "pdf": "SAFE",
+        "custom": "SAFE",
+        "pdf-chains": "SAFE",
+        "pdf-integrity": "SAFE",
+        "vba-chains": "n/a",
+        "ooxml-links": "n/a",
+        "word-fields": "n/a",
+        "aggregate": "SAFE"
+      },
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "rules": [],
+      "findings": [],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 649.67,
+          "median_ms": 640.83,
+          "p95_ms": 688.207,
+          "max_ms": 688.207,
+          "min_ms": 619.982
+        },
+        "signatures": {
+          "n": 3,
+          "mean_ms": 0.06,
+          "median_ms": 0.06,
+          "p95_ms": 0.061,
+          "max_ms": 0.061,
+          "min_ms": 0.055
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.003
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.49,
+          "median_ms": 0.49,
+          "p95_ms": 0.502,
+          "max_ms": 0.502,
+          "min_ms": 0.477
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.08,
+          "median_ms": 0.08,
+          "p95_ms": 0.079,
+          "max_ms": 0.079,
+          "min_ms": 0.076
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.32,
+          "median_ms": 0.32,
+          "p95_ms": 0.339,
+          "max_ms": 0.339,
+          "min_ms": 0.316
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.21,
+          "median_ms": 0.21,
+          "p95_ms": 0.218,
+          "max_ms": 0.218,
+          "min_ms": 0.202
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.003
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.002
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.001
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 640.83,
+          "scanner_ms": {
+            "signatures": 0.055,
+            "office": 0.004,
+            "pdf": 0.491,
+            "custom": 0.079,
+            "pdf-chains": 0.339,
+            "pdf-integrity": 0.218,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002,
+            "word-fields": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 688.207,
+          "scanner_ms": {
+            "signatures": 0.058,
+            "office": 0.003,
+            "pdf": 0.502,
+            "custom": 0.077,
+            "pdf-chains": 0.318,
+            "pdf-integrity": 0.212,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002,
+            "word-fields": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 619.982,
+          "scanner_ms": {
+            "signatures": 0.061,
+            "office": 0.004,
+            "pdf": 0.477,
+            "custom": 0.076,
+            "pdf-chains": 0.316,
+            "pdf-integrity": 0.202,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002,
+            "word-fields": 0.002
+          }
+        }
+      ]
+    },
+    {
+      "id": "2-pdf-form-keystroke-js",
+      "ground_truth": "BENIGN",
+      "indicator": "form-field keystroke JavaScript (user-triggered /AA /K)",
+      "sha256": "8fb92bebda2330b5f0bb6803db1da54f63a42a8cf28a34e49c0b621612263fd5",
+      "size_bytes": 704,
+      "verdicts": {
+        "signatures": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SAFE",
+        "pdf-chains": "SAFE",
+        "pdf-integrity": "SAFE",
+        "vba-chains": "n/a",
+        "ooxml-links": "n/a",
+        "word-fields": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "rules": [
+        "pdf:PDF_JAVASCRIPT:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 1 JavaScript action(s)."
+        },
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_ACROFORM",
+          "severity": "INFO",
+          "description": "PDF contains an interactive form (AcroForm)."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_PDF_USER_TRIGGERED_SCRIPT",
+          "severity": "INFO",
+          "description": "1 JavaScript action chain(s) run only on user interaction (a click, keystroke or form event), not automatically. Evidence: object 5 0 /AA /K: JavaScript (direct in object 5 0)."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 609.28,
+          "median_ms": 609.86,
+          "p95_ms": 614.878,
+          "max_ms": 614.878,
+          "min_ms": 603.09
+        },
+        "signatures": {
+          "n": 3,
+          "mean_ms": 0.08,
+          "median_ms": 0.08,
+          "p95_ms": 0.086,
+          "max_ms": 0.086,
+          "min_ms": 0.06
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.003
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.66,
+          "median_ms": 0.61,
+          "p95_ms": 0.766,
+          "max_ms": 0.766,
+          "min_ms": 0.596
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.1,
+          "median_ms": 0.1,
+          "p95_ms": 0.102,
+          "max_ms": 0.102,
+          "min_ms": 0.091
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.51,
+          "median_ms": 0.5,
+          "p95_ms": 0.547,
+          "max_ms": 0.547,
+          "min_ms": 0.476
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.23,
+          "median_ms": 0.23,
+          "p95_ms": 0.238,
+          "max_ms": 0.238,
+          "min_ms": 0.224
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.002
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.002
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.001,
+          "max_ms": 0.001,
+          "min_ms": 0.001
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 603.09,
+          "scanner_ms": {
+            "signatures": 0.06,
+            "office": 0.003,
+            "pdf": 0.596,
+            "custom": 0.095,
+            "pdf-chains": 0.476,
+            "pdf-integrity": 0.224,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002,
+            "word-fields": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 609.862,
+          "scanner_ms": {
+            "signatures": 0.086,
+            "office": 0.003,
+            "pdf": 0.615,
+            "custom": 0.091,
+            "pdf-chains": 0.504,
+            "pdf-integrity": 0.238,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002,
+            "word-fields": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 614.878,
+          "scanner_ms": {
+            "signatures": 0.081,
+            "office": 0.003,
+            "pdf": 0.766,
+            "custom": 0.102,
+            "pdf-chains": 0.547,
+            "pdf-integrity": 0.23,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002,
+            "word-fields": 0.001
+          }
+        }
+      ]
+    },
+    {
+      "id": "2b-pdf-open-at-page-click-js",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction page destination + click-only link JavaScript",
+      "sha256": "09add801d7ce300528a624a753c79ebff0f1240905f2ffd0523c242f63572770",
+      "size_bytes": 651,
+      "verdicts": {
+        "signatures": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SAFE",
+        "pdf-chains": "SAFE",
+        "pdf-integrity": "SAFE",
+        "vba-chains": "n/a",
+        "ooxml-links": "n/a",
+        "word-fields": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "rules": [
+        "pdf:PDF_JAVASCRIPT:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 2 JavaScript action(s)."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_PDF_USER_TRIGGERED_SCRIPT",
+          "severity": "INFO",
+          "description": "1 JavaScript action chain(s) run only on user interaction (a click, keystroke or form event), not automatically. Evidence: object 5 0 /A: JavaScript (direct in object 5 0)."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: replaced PDF_AUTO_JAVASCRIPT (PDF scanner) by the action-chain rules."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 606.52,
+          "median_ms": 604.35,
+          "p95_ms": 618.091,
+          "max_ms": 618.091,
+          "min_ms": 597.127
+        },
+        "signatures": {
+          "n": 3,
+          "mean_ms": 0.07,
+          "median_ms": 0.07,
+          "p95_ms": 0.076,
+          "max_ms": 0.076,
+          "min_ms": 0.063
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.003
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.68,
+          "median_ms": 0.64,
+          "p95_ms": 0.804,
+          "max_ms": 0.804,
+          "min_ms": 0.59
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.08,
+          "median_ms": 0.08,
+          "p95_ms": 0.088,
+          "max_ms": 0.088,
+          "min_ms": 0.082
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.5,
+          "median_ms": 0.47,
+          "p95_ms": 0.558,
+          "max_ms": 0.558,
+          "min_ms": 0.467
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.22,
+          "median_ms": 0.22,
+          "p95_ms": 0.24,
+          "max_ms": 0.24,
+          "min_ms": 0.215
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.002
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.002
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.001,
+          "max_ms": 0.001,
+          "min_ms": 0.001
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 604.35,
+          "scanner_ms": {
+            "signatures": 0.076,
+            "office": 0.004,
+            "pdf": 0.643,
+            "custom": 0.082,
+            "pdf-chains": 0.475,
+            "pdf-integrity": 0.215,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002,
+            "word-fields": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 597.127,
+          "scanner_ms": {
+            "signatures": 0.063,
+            "office": 0.003,
+            "pdf": 0.59,
+            "custom": 0.084,
+            "pdf-chains": 0.467,
+            "pdf-integrity": 0.217,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002,
+            "word-fields": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 618.091,
+          "scanner_ms": {
+            "signatures": 0.068,
+            "office": 0.003,
+            "pdf": 0.804,
+            "custom": 0.088,
+            "pdf-chains": 0.558,
+            "pdf-integrity": 0.24,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002,
+            "word-fields": 0.001
+          }
+        }
+      ]
+    },
+    {
+      "id": "2c-pdf-open-at-page-page-open-js",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction page destination + that page's own open trigger /AA /O",
+      "sha256": "830dd24170f6ecf8eacb6136d7d9c8dba6ebef2fc90b804eedc46aae33b67599",
+      "size_bytes": 597,
+      "verdicts": {
+        "signatures": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SAFE",
+        "pdf-chains": "SUSPICIOUS",
+        "pdf-integrity": "SAFE",
+        "vba-chains": "n/a",
+        "ooxml-links": "n/a",
+        "word-fields": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "rules": [
+        "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+        "pdf:PDF_JAVASCRIPT:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 1 JavaScript action(s)."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_PDF_AUTO_CHAIN_SCRIPT",
+          "severity": "MEDIUM",
+          "description": "An automatic action chain runs JavaScript; no embedded file is used on that chain. Evidence: object 3 0 /AA /O: JavaScript (object 5 0). This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: replaced PDF_AUTO_JAVASCRIPT (PDF scanner) by the action-chain rules; merged ENGINE_PDF_JavaScript_With_Automatic_Trigger (signatures) into ENGINE_PDF_AUTO_CHAIN_SCRIPT: the same automatic script, counted once."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 603.29,
+          "median_ms": 603.94,
+          "p95_ms": 605.687,
+          "max_ms": 605.687,
+          "min_ms": 600.257
+        },
+        "signatures": {
+          "n": 3,
+          "mean_ms": 0.16,
+          "median_ms": 0.14,
+          "p95_ms": 0.236,
+          "max_ms": 0.236,
+          "min_ms": 0.112
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.55,
+          "median_ms": 0.53,
+          "p95_ms": 0.608,
+          "max_ms": 0.608,
+          "min_ms": 0.505
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.09,
+          "median_ms": 0.09,
+          "p95_ms": 0.1,
+          "max_ms": 0.1,
+          "min_ms": 0.087
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.49,
+          "median_ms": 0.46,
+          "p95_ms": 0.541,
+          "max_ms": 0.541,
+          "min_ms": 0.458
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.31,
+          "median_ms": 0.26,
+          "p95_ms": 0.434,
+          "max_ms": 0.434,
+          "min_ms": 0.247
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.008,
+          "max_ms": 0.008,
+          "min_ms": 0.003
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.002
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.001
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 603.941,
+          "scanner_ms": {
+            "signatures": 0.112,
+            "office": 0.002,
+            "pdf": 0.505,
+            "custom": 0.09,
+            "pdf-chains": 0.458,
+            "pdf-integrity": 0.434,
+            "vba-chains": 0.008,
+            "ooxml-links": 0.005,
+            "word-fields": 0.003
+          }
+        },
+        {
+          "harness_wall_ms": 600.257,
+          "scanner_ms": {
+            "signatures": 0.136,
+            "office": 0.003,
+            "pdf": 0.533,
+            "custom": 0.087,
+            "pdf-chains": 0.46,
+            "pdf-integrity": 0.247,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002,
+            "word-fields": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 605.687,
+          "scanner_ms": {
+            "signatures": 0.236,
+            "office": 0.003,
+            "pdf": 0.608,
+            "custom": 0.1,
+            "pdf-chains": 0.541,
+            "pdf-integrity": 0.262,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002,
+            "word-fields": 0.001
+          }
+        }
+      ]
+    },
+    {
+      "id": "3-pdf-escaped-openaction-js",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction JavaScript written /J#61vaScript /J#53",
+      "sha256": "a1d1340bde10797020a3bf5fbf34f4d3a74dc5327b902c55268a0245b49e2a3c",
+      "size_bytes": 578,
+      "verdicts": {
+        "signatures": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SUSPICIOUS",
+        "pdf-chains": "SUSPICIOUS",
+        "pdf-integrity": "SAFE",
+        "vba-chains": "n/a",
+        "ooxml-links": "n/a",
+        "word-fields": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "rules": [
+        "custom:CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME:MEDIUM",
+        "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+        "pdf:PDF_JAVASCRIPT:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 1 JavaScript action(s)."
+        },
+        {
+          "scanner": "custom",
+          "rule_id": "CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME",
+          "severity": "MEDIUM",
+          "description": "PDF writes 2 active-content name(s) with unnecessary #-escapes, which hides them from plain-text inspection without changing their meaning. Evidence: '/J#61vaScript' decodes to /JavaScript (1x); '/J#53' decodes to /JS (1x). Location: object 5 0. This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_PDF_AUTO_CHAIN_SCRIPT",
+          "severity": "MEDIUM",
+          "description": "An automatic action chain runs JavaScript; no embedded file is used on that chain. Evidence: catalog /OpenAction: JavaScript (object 5 0). This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: replaced PDF_AUTO_JAVASCRIPT (PDF scanner) by the action-chain rules."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 615.27,
+          "median_ms": 617.65,
+          "p95_ms": 624.651,
+          "max_ms": 624.651,
+          "min_ms": 603.506
+        },
+        "signatures": {
+          "n": 3,
+          "mean_ms": 0.05,
+          "median_ms": 0.05,
+          "p95_ms": 0.056,
+          "max_ms": 0.056,
+          "min_ms": 0.041
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.002
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.59,
+          "median_ms": 0.59,
+          "p95_ms": 0.595,
+          "max_ms": 0.595,
+          "min_ms": 0.575
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.22,
+          "median_ms": 0.2,
+          "p95_ms": 0.288,
+          "max_ms": 0.288,
+          "min_ms": 0.175
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.47,
+          "median_ms": 0.43,
+          "p95_ms": 0.576,
+          "max_ms": 0.576,
+          "min_ms": 0.388
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.25,
+          "median_ms": 0.23,
+          "p95_ms": 0.308,
+          "max_ms": 0.308,
+          "min_ms": 0.213
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.002
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.002
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.001,
+          "max_ms": 0.001,
+          "min_ms": 0.001
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 617.654,
+          "scanner_ms": {
+            "signatures": 0.056,
+            "office": 0.004,
+            "pdf": 0.586,
+            "custom": 0.175,
+            "pdf-chains": 0.388,
+            "pdf-integrity": 0.213,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002,
+            "word-fields": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 603.506,
+          "scanner_ms": {
+            "signatures": 0.041,
+            "office": 0.002,
+            "pdf": 0.575,
+            "custom": 0.288,
+            "pdf-chains": 0.576,
+            "pdf-integrity": 0.308,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002,
+            "word-fields": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 624.651,
+          "scanner_ms": {
+            "signatures": 0.051,
+            "office": 0.003,
+            "pdf": 0.595,
+            "custom": 0.197,
+            "pdf-chains": 0.433,
+            "pdf-integrity": 0.228,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002,
+            "word-fields": 0.001
+          }
+        }
+      ]
+    },
+    {
+      "id": "4-pdf-objstm-escaped-js",
+      "ground_truth": "BENIGN",
+      "indicator": "the same action inside a FlateDecode object stream",
+      "sha256": "b256fc5452921634ec592f87184478ad91ccb9cd4167923cef881dbc0ca05cdd",
+      "size_bytes": 657,
+      "verdicts": {
+        "signatures": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SUSPICIOUS",
+        "pdf-chains": "SUSPICIOUS",
+        "pdf-integrity": "SAFE",
+        "vba-chains": "n/a",
+        "ooxml-links": "n/a",
+        "word-fields": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "rules": [
+        "custom:CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME:MEDIUM",
+        "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+        "pdf:PDF_JAVASCRIPT:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 1 JavaScript action(s)."
+        },
+        {
+          "scanner": "custom",
+          "rule_id": "CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME",
+          "severity": "MEDIUM",
+          "description": "PDF writes 2 active-content name(s) with unnecessary #-escapes, which hides them from plain-text inspection without changing their meaning. Evidence: '/J#61vaScript' decodes to /JavaScript (1x); '/J#53' decodes to /JS (1x). Location: object stream of object 6 0. This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_PDF_AUTO_CHAIN_SCRIPT",
+          "severity": "MEDIUM",
+          "description": "An automatic action chain runs JavaScript; no embedded file is used on that chain. Evidence: catalog /OpenAction: JavaScript (object 5 0). This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: replaced PDF_AUTO_JAVASCRIPT (PDF scanner) by the action-chain rules."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 648.76,
+          "median_ms": 661.18,
+          "p95_ms": 667.785,
+          "max_ms": 667.785,
+          "min_ms": 617.314
+        },
+        "signatures": {
+          "n": 3,
+          "mean_ms": 0.08,
+          "median_ms": 0.06,
+          "p95_ms": 0.131,
+          "max_ms": 0.131,
+          "min_ms": 0.048
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.003
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.75,
+          "median_ms": 0.75,
+          "p95_ms": 0.753,
+          "max_ms": 0.753,
+          "min_ms": 0.74
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.21,
+          "median_ms": 0.22,
+          "p95_ms": 0.22,
+          "max_ms": 0.22,
+          "min_ms": 0.199
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.57,
+          "median_ms": 0.55,
+          "p95_ms": 0.649,
+          "max_ms": 0.649,
+          "min_ms": 0.515
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.28,
+          "median_ms": 0.27,
+          "p95_ms": 0.323,
+          "max_ms": 0.323,
+          "min_ms": 0.253
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.002
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.002
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.001
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 617.314,
+          "scanner_ms": {
+            "signatures": 0.058,
+            "office": 0.003,
+            "pdf": 0.74,
+            "custom": 0.22,
+            "pdf-chains": 0.55,
+            "pdf-integrity": 0.274,
+            "vba-chains": 0.004,
+            "ooxml-links": 0.002,
+            "word-fields": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 667.785,
+          "scanner_ms": {
+            "signatures": 0.131,
+            "office": 0.004,
+            "pdf": 0.753,
+            "custom": 0.22,
+            "pdf-chains": 0.649,
+            "pdf-integrity": 0.323,
+            "vba-chains": 0.004,
+            "ooxml-links": 0.002,
+            "word-fields": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 661.181,
+          "scanner_ms": {
+            "signatures": 0.048,
+            "office": 0.004,
+            "pdf": 0.748,
+            "custom": 0.199,
+            "pdf-chains": 0.515,
+            "pdf-integrity": 0.253,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002,
+            "word-fields": 0.001
+          }
+        }
+      ]
+    },
+    {
+      "id": "5a-pdf-auto-js-unrelated-attachment",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction JavaScript + a text attachment it never references",
+      "sha256": "48ac8dc02c326363f7d91d947c4fbb2b8b077d1a7ec7c310c801f1fadcc382c8",
+      "size_bytes": 866,
+      "verdicts": {
+        "signatures": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SAFE",
+        "pdf-chains": "SUSPICIOUS",
+        "pdf-integrity": "SAFE",
+        "vba-chains": "n/a",
+        "ooxml-links": "n/a",
+        "word-fields": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "rules": [
+        "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+        "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+        "pdf:PDF_JAVASCRIPT:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 1 JavaScript action(s)."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_PDF_AUTO_CHAIN_SCRIPT",
+          "severity": "MEDIUM",
+          "description": "An automatic action chain runs JavaScript; no embedded file is used on that chain. Evidence: catalog /OpenAction: JavaScript (object 7 0). This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+          "severity": "LOW",
+          "description": "The PDF carries attachments that could not be verified as content without code. Evidence: notes.txt: not verified: not an OpenDocument package (no mimetype member at the start); actions that could use an attachment: catalog /OpenAction: JavaScript (object 7 0). This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: replaced PDF_AUTO_JAVASCRIPT, PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD (PDF scanner) by the action-chain rules; merged ENGINE_PDF_JavaScript_With_Automatic_Trigger (signatures) into ENGINE_PDF_AUTO_CHAIN_SCRIPT: the same automatic script, counted once; merged PDF_EMBEDDED_FILE (pdf) into ENGINE_PDF_ATTACHMENTS_UNVERIFIED: the same evidence, counted once; merged PDF_Embedded_File (signatures) into ENGINE_PDF_ATTACHMENTS_UNVERIFIED: the same evidence, counted once."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 975.29,
+          "median_ms": 1027.97,
+          "p95_ms": 1047.2,
+          "max_ms": 1047.2,
+          "min_ms": 850.687
+        },
+        "signatures": {
+          "n": 3,
+          "mean_ms": 0.23,
+          "median_ms": 0.24,
+          "p95_ms": 0.257,
+          "max_ms": 0.257,
+          "min_ms": 0.191
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 0.01,
+          "median_ms": 0.01,
+          "p95_ms": 0.006,
+          "max_ms": 0.006,
+          "min_ms": 0.005
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 1.24,
+          "median_ms": 1.36,
+          "p95_ms": 1.56,
+          "max_ms": 1.56,
+          "min_ms": 0.801
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.19,
+          "median_ms": 0.16,
+          "p95_ms": 0.252,
+          "max_ms": 0.252,
+          "min_ms": 0.148
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 1.23,
+          "median_ms": 1.23,
+          "p95_ms": 1.252,
+          "max_ms": 1.252,
+          "min_ms": 1.207
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.53,
+          "median_ms": 0.51,
+          "p95_ms": 0.731,
+          "max_ms": 0.731,
+          "min_ms": 0.342
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.01,
+          "median_ms": 0.01,
+          "p95_ms": 0.007,
+          "max_ms": 0.007,
+          "min_ms": 0.005
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.003
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.002
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 1047.2,
+          "scanner_ms": {
+            "signatures": 0.244,
+            "office": 0.006,
+            "pdf": 1.56,
+            "custom": 0.162,
+            "pdf-chains": 1.225,
+            "pdf-integrity": 0.731,
+            "vba-chains": 0.006,
+            "ooxml-links": 0.003,
+            "word-fields": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 1027.97,
+          "scanner_ms": {
+            "signatures": 0.257,
+            "office": 0.006,
+            "pdf": 1.365,
+            "custom": 0.252,
+            "pdf-chains": 1.207,
+            "pdf-integrity": 0.51,
+            "vba-chains": 0.007,
+            "ooxml-links": 0.005,
+            "word-fields": 0.004
+          }
+        },
+        {
+          "harness_wall_ms": 850.687,
+          "scanner_ms": {
+            "signatures": 0.191,
+            "office": 0.005,
+            "pdf": 0.801,
+            "custom": 0.148,
+            "pdf-chains": 1.252,
+            "pdf-integrity": 0.342,
+            "vba-chains": 0.005,
+            "ooxml-links": 0.003,
+            "word-fields": 0.002
+          }
+        }
+      ]
+    },
+    {
+      "id": "5b-pdf-auto-js-exports-attachment",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction JavaScript that exports the attachment (nLaunch 0)",
+      "sha256": "f55c21380da9580df93ba96674baa1f865aaed4d6675d3a16a5d463d3d69dec4",
+      "size_bytes": 903,
+      "verdicts": {
+        "signatures": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SAFE",
+        "pdf-chains": "MALICIOUS",
+        "pdf-integrity": "SAFE",
+        "vba-chains": "n/a",
+        "ooxml-links": "n/a",
+        "word-fields": "n/a",
+        "aggregate": "MALICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "rules": [
+        "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+        "pdf-chains:ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT:HIGH",
+        "pdf:PDF_JAVASCRIPT:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 1 JavaScript action(s)."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT",
+          "severity": "HIGH",
+          "description": "An automatic action chain launches or exports a file embedded in this PDF. Evidence: catalog /OpenAction: JavaScript (object 7 0) (exports 'f'). This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+          "severity": "LOW",
+          "description": "The PDF carries attachments that could not be verified as content without code. Evidence: notes.txt: not verified: not an OpenDocument package (no mimetype member at the start); actions that could use an attachment: catalog /OpenAction: JavaScript (object 7 0). This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: replaced PDF_AUTO_JAVASCRIPT, PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD (PDF scanner) by the action-chain rules; merged ENGINE_PDF_JavaScript_With_Automatic_Trigger (signatures) into ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT: the same automatic script, counted once; merged PDF_EMBEDDED_FILE (pdf) into ENGINE_PDF_ATTACHMENTS_UNVERIFIED: the same evidence, counted once; merged PDF_Embedded_File (signatures) into ENGINE_PDF_ATTACHMENTS_UNVERIFIED: the same evidence, counted once."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 633.79,
+          "median_ms": 621.44,
+          "p95_ms": 688.638,
+          "max_ms": 688.638,
+          "min_ms": 591.296
+        },
+        "signatures": {
+          "n": 3,
+          "mean_ms": 0.17,
+          "median_ms": 0.16,
+          "p95_ms": 0.189,
+          "max_ms": 0.189,
+          "min_ms": 0.146
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.003
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.76,
+          "median_ms": 0.73,
+          "p95_ms": 0.821,
+          "max_ms": 0.821,
+          "min_ms": 0.717
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.14,
+          "median_ms": 0.13,
+          "p95_ms": 0.151,
+          "max_ms": 0.151,
+          "min_ms": 0.126
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.61,
+          "median_ms": 0.59,
+          "p95_ms": 0.651,
+          "max_ms": 0.651,
+          "min_ms": 0.584
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.29,
+          "median_ms": 0.27,
+          "p95_ms": 0.365,
+          "max_ms": 0.365,
+          "min_ms": 0.246
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.003
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.002
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.001
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 688.638,
+          "scanner_ms": {
+            "signatures": 0.164,
+            "office": 0.003,
+            "pdf": 0.821,
+            "custom": 0.151,
+            "pdf-chains": 0.651,
+            "pdf-integrity": 0.268,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002,
+            "word-fields": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 621.441,
+          "scanner_ms": {
+            "signatures": 0.146,
+            "office": 0.003,
+            "pdf": 0.717,
+            "custom": 0.126,
+            "pdf-chains": 0.591,
+            "pdf-integrity": 0.246,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002,
+            "word-fields": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 591.296,
+          "scanner_ms": {
+            "signatures": 0.189,
+            "office": 0.004,
+            "pdf": 0.731,
+            "custom": 0.13,
+            "pdf-chains": 0.584,
+            "pdf-integrity": 0.365,
+            "vba-chains": 0.004,
+            "ooxml-links": 0.002,
+            "word-fields": 0.002
+          }
+        }
+      ]
+    },
+    {
+      "id": "6a-docx-hyperlink",
+      "ground_truth": "BENIGN",
+      "indicator": "ordinary external hyperlink (negative control)",
+      "sha256": "7a0db7d17fdf8541df4177df056be5629cd37e37b262238532653068a1913ff0",
+      "size_bytes": 1713,
+      "verdicts": {
+        "signatures": "SAFE",
+        "office": "SAFE",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "pdf-chains": "n/a",
+        "pdf-integrity": "n/a",
+        "vba-chains": "n/a",
+        "ooxml-links": "SAFE",
+        "word-fields": "SAFE",
+        "aggregate": "SAFE"
+      },
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "rules": [],
+      "findings": [
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_OFFICE_EXTERNAL_NOT_ACTIVATED",
+          "severity": "INFO",
+          "description": "External relationships are declared, but nothing shows that Office uses them. Evidence: rId9 -> https://example.com/: no element in word/document.xml references 'rId9'."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 901.28,
+          "median_ms": 769.0,
+          "p95_ms": 1327.388,
+          "max_ms": 1327.388,
+          "min_ms": 607.455
+        },
+        "signatures": {
+          "n": 3,
+          "mean_ms": 0.05,
+          "median_ms": 0.05,
+          "p95_ms": 0.048,
+          "max_ms": 0.048,
+          "min_ms": 0.042
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 1.85,
+          "median_ms": 1.84,
+          "p95_ms": 1.994,
+          "max_ms": 1.994,
+          "min_ms": 1.72
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.01,
+          "median_ms": 0.01,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.005
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.71,
+          "median_ms": 0.62,
+          "p95_ms": 0.909,
+          "max_ms": 0.909,
+          "min_ms": 0.591
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.006,
+          "max_ms": 0.006,
+          "min_ms": 0.004
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.002
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.07,
+          "median_ms": 0.06,
+          "p95_ms": 0.078,
+          "max_ms": 0.078,
+          "min_ms": 0.062
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.68,
+          "median_ms": 0.54,
+          "p95_ms": 0.976,
+          "max_ms": 0.976,
+          "min_ms": 0.524
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.36,
+          "median_ms": 0.38,
+          "p95_ms": 0.381,
+          "max_ms": 0.381,
+          "min_ms": 0.322
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 607.455,
+          "scanner_ms": {
+            "signatures": 0.047,
+            "office": 1.836,
+            "pdf": 0.005,
+            "custom": 0.909,
+            "pdf-chains": 0.006,
+            "pdf-integrity": 0.003,
+            "vba-chains": 0.078,
+            "ooxml-links": 0.976,
+            "word-fields": 0.379
+          }
+        },
+        {
+          "harness_wall_ms": 768.995,
+          "scanner_ms": {
+            "signatures": 0.048,
+            "office": 1.994,
+            "pdf": 0.005,
+            "custom": 0.619,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.062,
+            "ooxml-links": 0.537,
+            "word-fields": 0.381
+          }
+        },
+        {
+          "harness_wall_ms": 1327.388,
+          "scanner_ms": {
+            "signatures": 0.042,
+            "office": 1.72,
+            "pdf": 0.005,
+            "custom": 0.591,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.062,
+            "ooxml-links": 0.524,
+            "word-fields": 0.322
+          }
+        }
+      ]
+    },
+    {
+      "id": "6b-docx-external-template",
+      "ground_truth": "BENIGN",
+      "indicator": "external attachedTemplate https://template.example.invalid/normal.dotm (never fetched)",
+      "sha256": "1930d78d93347a087551bf547bba07dbcdc4fe7d1b79d00cc12960e3b962ab9e",
+      "size_bytes": 1731,
+      "verdicts": {
+        "signatures": "SAFE",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "pdf-chains": "n/a",
+        "pdf-integrity": "n/a",
+        "vba-chains": "n/a",
+        "ooxml-links": "SAFE",
+        "word-fields": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "rules": [
+        "office:OFFICE_EXTERNAL_AUTOLOAD:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_EXTERNAL_AUTOLOAD",
+          "severity": "MEDIUM",
+          "description": "An external 'attachedTemplate' relationship loads external content when the document is opened (e.g. 'https://template.example.invalid/normal.dotm')."
+        },
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_OFFICE_EXTERNAL_NOT_ACTIVATED",
+          "severity": "INFO",
+          "description": "External relationships are declared, but nothing shows that Office uses them. Evidence: rId9 -> https://template.example.invalid/normal.dotm: no element in word/document.xml references 'rId9'."
+        },
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: OFFICE_EXTERNAL_AUTOLOAD (Office scanner) kept although no part Office loads references it: its use is not demonstrated."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 618.25,
+          "median_ms": 615.93,
+          "p95_ms": 629.355,
+          "max_ms": 629.355,
+          "min_ms": 609.461
+        },
+        "signatures": {
+          "n": 3,
+          "mean_ms": 0.05,
+          "median_ms": 0.04,
+          "p95_ms": 0.077,
+          "max_ms": 0.077,
+          "min_ms": 0.038
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 2.02,
+          "median_ms": 2.13,
+          "p95_ms": 2.169,
+          "max_ms": 2.169,
+          "min_ms": 1.771
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.01,
+          "median_ms": 0.01,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.005
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.62,
+          "median_ms": 0.61,
+          "p95_ms": 0.662,
+          "max_ms": 0.662,
+          "min_ms": 0.591
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.01,
+          "median_ms": 0.01,
+          "p95_ms": 0.006,
+          "max_ms": 0.006,
+          "min_ms": 0.004
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.002
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.06,
+          "median_ms": 0.06,
+          "p95_ms": 0.079,
+          "max_ms": 0.079,
+          "min_ms": 0.054
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.58,
+          "median_ms": 0.53,
+          "p95_ms": 0.688,
+          "max_ms": 0.688,
+          "min_ms": 0.526
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.36,
+          "median_ms": 0.35,
+          "p95_ms": 0.39,
+          "max_ms": 0.39,
+          "min_ms": 0.337
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 615.931,
+          "scanner_ms": {
+            "signatures": 0.038,
+            "office": 2.127,
+            "pdf": 0.005,
+            "custom": 0.614,
+            "pdf-chains": 0.005,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.057,
+            "ooxml-links": 0.526,
+            "word-fields": 0.337
+          }
+        },
+        {
+          "harness_wall_ms": 629.355,
+          "scanner_ms": {
+            "signatures": 0.04,
+            "office": 1.771,
+            "pdf": 0.005,
+            "custom": 0.591,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.054,
+            "ooxml-links": 0.527,
+            "word-fields": 0.351
+          }
+        },
+        {
+          "harness_wall_ms": 609.461,
+          "scanner_ms": {
+            "signatures": 0.077,
+            "office": 2.169,
+            "pdf": 0.005,
+            "custom": 0.662,
+            "pdf-chains": 0.006,
+            "pdf-integrity": 0.003,
+            "vba-chains": 0.079,
+            "ooxml-links": 0.688,
+            "word-fields": 0.39
+          }
+        }
+      ]
+    },
+    {
+      "id": "6c-docx-template-referenced-by-settings",
+      "ground_truth": "BENIGN",
+      "indicator": "the same template, referenced by w:attachedTemplate in the settings part, as Word writes it",
+      "sha256": "1f6250ac26083ce3d033715f2a5e48ec6b955199f0ed4c42e33d420ad65d9a8f",
+      "size_bytes": 2412,
+      "verdicts": {
+        "signatures": "SAFE",
+        "office": "SAFE",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "pdf-chains": "n/a",
+        "pdf-integrity": "n/a",
+        "vba-chains": "n/a",
+        "ooxml-links": "SUSPICIOUS",
+        "word-fields": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "rules": [
+        "ooxml-links:ENGINE_OFFICE_EXTERNAL_ON_OPEN:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_OFFICE_EXTERNAL_ON_OPEN",
+          "severity": "MEDIUM",
+          "description": "A part Office loads references an external target the document asks for when it opens (fetched unless the application blocks external content). Evidence: package -> word/document.xml (officedocument) -> word/settings.xml (settings) -> attachedTemplate id='rId1' -> attachedtemplate https://template.example.invalid/normal.dotm (w:attachedTemplate: the template is attached when the document op\u2026. This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: merged OFFICE_EXTERNAL_AUTOLOAD (office) into ENGINE_OFFICE_EXTERNAL_ON_OPEN: the same evidence, counted once."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 648.14,
+          "median_ms": 624.23,
+          "p95_ms": 705.575,
+          "max_ms": 705.575,
+          "min_ms": 614.629
+        },
+        "signatures": {
+          "n": 3,
+          "mean_ms": 0.04,
+          "median_ms": 0.04,
+          "p95_ms": 0.045,
+          "max_ms": 0.045,
+          "min_ms": 0.03
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 1.67,
+          "median_ms": 1.66,
+          "p95_ms": 1.787,
+          "max_ms": 1.787,
+          "min_ms": 1.564
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.003
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.71,
+          "median_ms": 0.71,
+          "p95_ms": 0.721,
+          "max_ms": 0.721,
+          "min_ms": 0.705
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.004
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.002
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.07,
+          "median_ms": 0.07,
+          "p95_ms": 0.077,
+          "max_ms": 0.077,
+          "min_ms": 0.068
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.65,
+          "median_ms": 0.65,
+          "p95_ms": 0.662,
+          "max_ms": 0.662,
+          "min_ms": 0.622
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 2.26,
+          "median_ms": 2.21,
+          "p95_ms": 2.382,
+          "max_ms": 2.382,
+          "min_ms": 2.184
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 624.225,
+          "scanner_ms": {
+            "signatures": 0.03,
+            "office": 1.564,
+            "pdf": 0.003,
+            "custom": 0.705,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.072,
+            "ooxml-links": 0.653,
+            "word-fields": 2.382
+          }
+        },
+        {
+          "harness_wall_ms": 614.629,
+          "scanner_ms": {
+            "signatures": 0.037,
+            "office": 1.657,
+            "pdf": 0.004,
+            "custom": 0.721,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.077,
+            "ooxml-links": 0.662,
+            "word-fields": 2.184
+          }
+        },
+        {
+          "harness_wall_ms": 705.575,
+          "scanner_ms": {
+            "signatures": 0.045,
+            "office": 1.787,
+            "pdf": 0.004,
+            "custom": 0.709,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.068,
+            "ooxml-links": 0.622,
+            "word-fields": 2.215
+          }
+        }
+      ]
+    },
+    {
+      "id": "6d-docx-linked-picture",
+      "ground_truth": "BENIGN",
+      "indicator": "a picture shown from https://images.example.invalid/pixel.png (a:blip r:link; never fetched)",
+      "sha256": "2c123328e344f3bd2eb978d92683eb52ba5a3b4319226f3269b02609ec2e5113",
+      "size_bytes": 1768,
+      "verdicts": {
+        "signatures": "SAFE",
+        "office": "SAFE",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "pdf-chains": "n/a",
+        "pdf-integrity": "n/a",
+        "vba-chains": "n/a",
+        "ooxml-links": "SAFE",
+        "word-fields": "SAFE",
+        "aggregate": "SAFE"
+      },
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "rules": [],
+      "findings": [
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_EXTERNAL_RESOURCE",
+          "severity": "INFO",
+          "description": "An external 'image' relationship references an external resource (e.g. 'https://images.example.invalid/pixel.png')."
+        },
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_OFFICE_LINKED_PICTURE",
+          "severity": "INFO",
+          "description": "The document shows a picture stored outside the file; it is fetched only if the application loads external content, and then tells that server the document was opened. Evidence: package -> word/document.xml (officedocument) -> blip link='rId9' -> image https://images.example.invalid/pixel.png (blip link: a picture stored outside the file)."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 626.35,
+          "median_ms": 625.88,
+          "p95_ms": 635.222,
+          "max_ms": 635.222,
+          "min_ms": 617.96
+        },
+        "signatures": {
+          "n": 3,
+          "mean_ms": 0.04,
+          "median_ms": 0.04,
+          "p95_ms": 0.044,
+          "max_ms": 0.044,
+          "min_ms": 0.033
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 1.85,
+          "median_ms": 1.77,
+          "p95_ms": 2.0,
+          "max_ms": 2.0,
+          "min_ms": 1.766
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.004
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.65,
+          "median_ms": 0.56,
+          "p95_ms": 0.857,
+          "max_ms": 0.857,
+          "min_ms": 0.546
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.004
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.002
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.06,
+          "median_ms": 0.06,
+          "p95_ms": 0.069,
+          "max_ms": 0.069,
+          "min_ms": 0.056
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.59,
+          "median_ms": 0.6,
+          "p95_ms": 0.609,
+          "max_ms": 0.609,
+          "min_ms": 0.571
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.4,
+          "median_ms": 0.36,
+          "p95_ms": 0.491,
+          "max_ms": 0.491,
+          "min_ms": 0.347
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 625.878,
+          "scanner_ms": {
+            "signatures": 0.044,
+            "office": 1.766,
+            "pdf": 0.004,
+            "custom": 0.546,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.056,
+            "ooxml-links": 0.609,
+            "word-fields": 0.347
+          }
+        },
+        {
+          "harness_wall_ms": 635.222,
+          "scanner_ms": {
+            "signatures": 0.043,
+            "office": 1.772,
+            "pdf": 0.004,
+            "custom": 0.556,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.057,
+            "ooxml-links": 0.571,
+            "word-fields": 0.361
+          }
+        },
+        {
+          "harness_wall_ms": 617.96,
+          "scanner_ms": {
+            "signatures": 0.033,
+            "office": 2.0,
+            "pdf": 0.004,
+            "custom": 0.857,
+            "pdf-chains": 0.005,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.069,
+            "ooxml-links": 0.598,
+            "word-fields": 0.491
+          }
+        }
+      ]
+    },
+    {
+      "id": "6g-docx-linked-picture-file-share",
+      "ground_truth": "BENIGN",
+      "indicator": "the same picture on a file share file://fileserver.invalid/share/pixel.png (never fetched)",
+      "sha256": "bdacf5acdcdd555fea3e6bd01827087899a55e42e16561664b16a26548bbc355",
+      "size_bytes": 1772,
+      "verdicts": {
+        "signatures": "SAFE",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "pdf-chains": "n/a",
+        "pdf-integrity": "n/a",
+        "vba-chains": "n/a",
+        "ooxml-links": "SAFE",
+        "word-fields": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "rules": [
+        "office:OFFICE_EXTERNAL_NETWORK_PATH:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_EXTERNAL_NETWORK_PATH",
+          "severity": "MEDIUM",
+          "description": "An external 'image' relationship points to a network/file path; opening it can leak Windows credentials (e.g. 'file://fileserver.invalid/share/pixel.png')."
+        },
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_OFFICE_LINKED_PICTURE",
+          "severity": "INFO",
+          "description": "The document shows a picture stored outside the file; it is fetched only if the application loads external content, and then tells that server the document was opened. Evidence: package -> word/document.xml (officedocument) -> blip link='rId9' -> image file://fileserver.invalid/share/pixel.png (blip link: a picture stored outside the file)."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 657.15,
+          "median_ms": 647.55,
+          "p95_ms": 694.916,
+          "max_ms": 694.916,
+          "min_ms": 628.993
+        },
+        "signatures": {
+          "n": 3,
+          "mean_ms": 0.05,
+          "median_ms": 0.05,
+          "p95_ms": 0.055,
+          "max_ms": 0.055,
+          "min_ms": 0.038
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 1.88,
+          "median_ms": 1.81,
+          "p95_ms": 2.137,
+          "max_ms": 2.137,
+          "min_ms": 1.692
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.004
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.97,
+          "median_ms": 0.87,
+          "p95_ms": 1.464,
+          "max_ms": 1.464,
+          "min_ms": 0.571
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.01,
+          "median_ms": 0.01,
+          "p95_ms": 0.009,
+          "max_ms": 0.009,
+          "min_ms": 0.004
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.002
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.08,
+          "median_ms": 0.07,
+          "p95_ms": 0.117,
+          "max_ms": 0.117,
+          "min_ms": 0.056
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.75,
+          "median_ms": 0.68,
+          "p95_ms": 0.979,
+          "max_ms": 0.979,
+          "min_ms": 0.578
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.65,
+          "median_ms": 0.72,
+          "p95_ms": 0.851,
+          "max_ms": 0.851,
+          "min_ms": 0.394
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 628.993,
+          "scanner_ms": {
+            "signatures": 0.047,
+            "office": 1.815,
+            "pdf": 0.004,
+            "custom": 0.571,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.056,
+            "ooxml-links": 0.578,
+            "word-fields": 0.394
+          }
+        },
+        {
+          "harness_wall_ms": 647.549,
+          "scanner_ms": {
+            "signatures": 0.038,
+            "office": 1.692,
+            "pdf": 0.004,
+            "custom": 1.464,
+            "pdf-chains": 0.009,
+            "pdf-integrity": 0.004,
+            "vba-chains": 0.117,
+            "ooxml-links": 0.979,
+            "word-fields": 0.716
+          }
+        },
+        {
+          "harness_wall_ms": 694.916,
+          "scanner_ms": {
+            "signatures": 0.055,
+            "office": 2.137,
+            "pdf": 0.005,
+            "custom": 0.866,
+            "pdf-chains": 0.005,
+            "pdf-integrity": 0.003,
+            "vba-chains": 0.071,
+            "ooxml-links": 0.682,
+            "word-fields": 0.851
+          }
+        }
+      ]
+    },
+    {
+      "id": "6e-docx-embedded-object-displayed",
+      "ground_truth": "BENIGN",
+      "indicator": "an inert OLE container shown by o:OLEObject Type=Embed",
+      "sha256": "f1202a9729ef09a77d8388da9a7d0e11dd705631bcfc45b434bd0d394469fbab",
+      "size_bytes": 2104,
+      "verdicts": {
+        "signatures": "SAFE",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "pdf-chains": "n/a",
+        "pdf-integrity": "n/a",
+        "vba-chains": "n/a",
+        "ooxml-links": "SAFE",
+        "word-fields": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "rules": [
+        "office:OFFICE_EMBEDDED_OLE:LOW"
+      ],
+      "findings": [
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_EMBEDDED_OLE",
+          "severity": "LOW",
+          "description": "Document contains an embedded OLE object."
+        },
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_OFFICE_EMBEDDED_OBJECT_DISPLAYED",
+          "severity": "INFO",
+          "description": "Embedded objects are shown in the document; they run only when activated. Evidence: package -> word/document.xml (officedocument) -> OLEObject id='rId10' -> oleobject word/embeddings/oleObject1.bin (OLEObject shows it in the document)."
+        },
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: OFFICE_EMBEDDED_OLE (Office scanner) kept; the object is shown in the document and runs only when activated."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 662.45,
+          "median_ms": 657.65,
+          "p95_ms": 680.277,
+          "max_ms": 680.277,
+          "min_ms": 649.432
+        },
+        "signatures": {
+          "n": 3,
+          "mean_ms": 0.05,
+          "median_ms": 0.05,
+          "p95_ms": 0.048,
+          "max_ms": 0.048,
+          "min_ms": 0.047
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 2.8,
+          "median_ms": 2.65,
+          "p95_ms": 3.463,
+          "max_ms": 3.463,
+          "min_ms": 2.285
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.01,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.004
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.6,
+          "median_ms": 0.6,
+          "p95_ms": 0.625,
+          "max_ms": 0.625,
+          "min_ms": 0.568
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.004
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.002
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.06,
+          "median_ms": 0.06,
+          "p95_ms": 0.063,
+          "max_ms": 0.063,
+          "min_ms": 0.059
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.6,
+          "median_ms": 0.52,
+          "p95_ms": 0.767,
+          "max_ms": 0.767,
+          "min_ms": 0.508
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.47,
+          "median_ms": 0.45,
+          "p95_ms": 0.636,
+          "max_ms": 0.636,
+          "min_ms": 0.339
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 680.277,
+          "scanner_ms": {
+            "signatures": 0.047,
+            "office": 3.463,
+            "pdf": 0.005,
+            "custom": 0.625,
+            "pdf-chains": 0.005,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.063,
+            "ooxml-links": 0.767,
+            "word-fields": 0.446
+          }
+        },
+        {
+          "harness_wall_ms": 649.432,
+          "scanner_ms": {
+            "signatures": 0.048,
+            "office": 2.654,
+            "pdf": 0.005,
+            "custom": 0.597,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.06,
+            "ooxml-links": 0.508,
+            "word-fields": 0.636
+          }
+        },
+        {
+          "harness_wall_ms": 657.65,
+          "scanner_ms": {
+            "signatures": 0.048,
+            "office": 2.285,
+            "pdf": 0.004,
+            "custom": 0.568,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.059,
+            "ooxml-links": 0.524,
+            "word-fields": 0.339
+          }
+        }
+      ]
+    },
+    {
+      "id": "6f-docx-embedded-object-not-displayed",
+      "ground_truth": "BENIGN",
+      "indicator": "the same object with its relationship but no element",
+      "sha256": "e24251266152ceb67bd3e8d0ae646176ccda7c6015957c3e2202d7bdaaec1820",
+      "size_bytes": 2067,
+      "verdicts": {
+        "signatures": "SAFE",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "pdf-chains": "n/a",
+        "pdf-integrity": "n/a",
+        "vba-chains": "n/a",
+        "ooxml-links": "SAFE",
+        "word-fields": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "rules": [
+        "office:OFFICE_EMBEDDED_OLE:LOW"
+      ],
+      "findings": [
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_EMBEDDED_OLE",
+          "severity": "LOW",
+          "description": "Document contains an embedded OLE object."
+        },
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_OFFICE_EMBEDDED_OBJECT_NOT_DISPLAYED",
+          "severity": "INFO",
+          "description": "Embedded object parts are present, but no element shows them in the document. Evidence: embeddings/oleObject1.bin: no element in word/document.xml references 'rId10'."
+        },
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: OFFICE_EMBEDDED_OLE (Office scanner) kept; no element shows the object in the document."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 618.02,
+          "median_ms": 617.71,
+          "p95_ms": 624.828,
+          "max_ms": 624.828,
+          "min_ms": 611.536
+        },
+        "signatures": {
+          "n": 3,
+          "mean_ms": 0.04,
+          "median_ms": 0.04,
+          "p95_ms": 0.047,
+          "max_ms": 0.047,
+          "min_ms": 0.037
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 2.58,
+          "median_ms": 2.56,
+          "p95_ms": 2.732,
+          "max_ms": 2.732,
+          "min_ms": 2.451
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.006,
+          "max_ms": 0.006,
+          "min_ms": 0.004
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.64,
+          "median_ms": 0.6,
+          "p95_ms": 0.723,
+          "max_ms": 0.723,
+          "min_ms": 0.59
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.004
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.002
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.07,
+          "median_ms": 0.07,
+          "p95_ms": 0.069,
+          "max_ms": 0.069,
+          "min_ms": 0.06
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.54,
+          "median_ms": 0.53,
+          "p95_ms": 0.587,
+          "max_ms": 0.587,
+          "min_ms": 0.509
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.43,
+          "median_ms": 0.41,
+          "p95_ms": 0.521,
+          "max_ms": 0.521,
+          "min_ms": 0.365
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 611.536,
+          "scanner_ms": {
+            "signatures": 0.047,
+            "office": 2.56,
+            "pdf": 0.006,
+            "custom": 0.723,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.069,
+            "ooxml-links": 0.587,
+            "word-fields": 0.407
+          }
+        },
+        {
+          "harness_wall_ms": 617.71,
+          "scanner_ms": {
+            "signatures": 0.042,
+            "office": 2.451,
+            "pdf": 0.004,
+            "custom": 0.603,
+            "pdf-chains": 0.005,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.068,
+            "ooxml-links": 0.531,
+            "word-fields": 0.365
+          }
+        },
+        {
+          "harness_wall_ms": 624.828,
+          "scanner_ms": {
+            "signatures": 0.037,
+            "office": 2.732,
+            "pdf": 0.004,
+            "custom": 0.59,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.06,
+            "ooxml-links": 0.509,
+            "word-fields": 0.521
+          }
+        }
+      ]
+    },
+    {
+      "id": "7-docx-macro-declaration-mismatch",
+      "ground_truth": "BENIGN",
+      "indicator": "macro-free DOCX declaration with a vbaProject.bin placeholder",
+      "sha256": "298b3823825cc1fd82f19edfaa811cb5630b2f35b8e42f05cb986b8868b0ea3d",
+      "size_bytes": 1885,
+      "verdicts": {
+        "signatures": "SUSPICIOUS",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "SUSPICIOUS",
+        "pdf-chains": "n/a",
+        "pdf-integrity": "n/a",
+        "vba-chains": "SAFE",
+        "ooxml-links": "SAFE",
+        "word-fields": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "signatures": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "rules": [
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "office:OFFICE_VBA_UNPARSED:LOW",
+        "signatures:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "signatures",
+          "rule_id": "OOXML_VBA_Macros",
+          "severity": "MEDIUM",
+          "description": "Office Open XML (ZIP-based) document contains a VBA macro project (vbaProject.bin)."
+        },
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_VBA_UNPARSED",
+          "severity": "LOW",
+          "description": "Document contains a VBA project storage that could not be parsed."
+        },
+        {
+          "scanner": "custom",
+          "rule_id": "CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH",
+          "severity": "MEDIUM",
+          "description": "The package is declared as a macro-free Word document but contains macro code or macro sheets, so its declared type misrepresents what it carries. Evidence: declared main type 'application/vnd.openxmlformats-officedocument.wordprocessin\u2026'; macro part 'word/vbaProject.bin'; relationship 'rId3' of type vbaProject in 'word/_rels/document.xml.rels'. Location: [Content_Types].xml; _rels/.rels. This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "vba-chains",
+          "rule_id": "ENGINE_VBA_CALL_PATH_UNDETERMINED",
+          "severity": "INFO",
+          "description": "Whether automatically running macro code reaches a dangerous operation could not be determined. Evidence: word/vbaProject.bin is not an OLE VBA project."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 622.46,
+          "median_ms": 621.27,
+          "p95_ms": 628.512,
+          "max_ms": 628.512,
+          "min_ms": 617.598
+        },
+        "signatures": {
+          "n": 3,
+          "mean_ms": 0.11,
+          "median_ms": 0.11,
+          "p95_ms": 0.114,
+          "max_ms": 0.114,
+          "min_ms": 0.097
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 1.95,
+          "median_ms": 1.8,
+          "p95_ms": 2.3,
+          "max_ms": 2.3,
+          "min_ms": 1.74
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.01,
+          "median_ms": 0.01,
+          "p95_ms": 0.006,
+          "max_ms": 0.006,
+          "min_ms": 0.004
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.69,
+          "median_ms": 0.73,
+          "p95_ms": 0.739,
+          "max_ms": 0.739,
+          "min_ms": 0.618
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.01,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.004
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.002
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.14,
+          "median_ms": 0.14,
+          "p95_ms": 0.153,
+          "max_ms": 0.153,
+          "min_ms": 0.138
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.42,
+          "median_ms": 0.41,
+          "p95_ms": 0.449,
+          "max_ms": 0.449,
+          "min_ms": 0.39
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.44,
+          "median_ms": 0.37,
+          "p95_ms": 0.617,
+          "max_ms": 0.617,
+          "min_ms": 0.335
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 621.274,
+          "scanner_ms": {
+            "signatures": 0.114,
+            "office": 1.74,
+            "pdf": 0.004,
+            "custom": 0.618,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.138,
+            "ooxml-links": 0.407,
+            "word-fields": 0.617
+          }
+        },
+        {
+          "harness_wall_ms": 617.598,
+          "scanner_ms": {
+            "signatures": 0.097,
+            "office": 1.801,
+            "pdf": 0.006,
+            "custom": 0.726,
+            "pdf-chains": 0.005,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.153,
+            "ooxml-links": 0.449,
+            "word-fields": 0.368
+          }
+        },
+        {
+          "harness_wall_ms": 628.512,
+          "scanner_ms": {
+            "signatures": 0.112,
+            "office": 2.3,
+            "pdf": 0.006,
+            "custom": 0.739,
+            "pdf-chains": 0.005,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.143,
+            "ooxml-links": 0.39,
+            "word-fields": 0.335
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+## synthetic cases (unified): 16 inputs
+- 2c-pdf-open-at-page-page-open-js: SUSPICIOUS -> SUSPICIOUS
+    - signatures:ENGINE_PDF_JavaScript_With_Automatic_Trigger
+- 5a-pdf-auto-js-unrelated-attachment: SUSPICIOUS -> SUSPICIOUS
+    - signatures:ENGINE_PDF_JavaScript_With_Automatic_Trigger
+- 5b-pdf-auto-js-exports-attachment: MALICIOUS -> MALICIOUS
+    - signatures:ENGINE_PDF_JavaScript_With_Automatic_Trigger
+3 changed
+
+## benign-files.json: 29 inputs
+0 changed
+
+## benign-independent.json: 4 inputs
+0 changed
+
