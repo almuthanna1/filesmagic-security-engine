@@ -11,6 +11,9 @@ Date: 2026-11-21. Production is unchanged. Nothing here has been deployed to pro
 | Conversion Engine | `almuthanna1/filesmagic-engine` | `feature/custom-security-engine-integration` | `9ee7e5d87a6b8de0404032adeecce6bfc1904de4` | `482e72459367196ac1a808846d630fb5f24c8300` |
 | Frontend | `FilesMagic-frontend` | `main` (no change needed) | `ffd8fa0` | same |
 
+The Security Engine release is tag `release/unified-engine-rc1` (= `26ac5da`). Later commits on the
+branch change only `docs/`. Deploy the tag, not the branch head: the pin must equal the deployed commit.
+
 Both branches are fast-forwards of their production `main` (Security Engine: 13 commits; Conversion
 Engine: 1 commit). This matters: the Conversion Engine trusts receipts from one exact commit, so the
 Security Engine must be deployed at `26ac5da` itself. A merge commit or a squash would produce a
