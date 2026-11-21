@@ -253,3 +253,19 @@ Conditions: fast-forward merges only, and the order in §7.
 - Delete the two staging services, or keep them for the demonstration (free plan, no cost).
 - Delete the local staging keys (scratchpad `staging-keys/`). They are staging-only and were never
   committed, printed or passed on a command line.
+
+## 11. Deployment record (2026-11-21, approved by the project owner)
+
+Every step followed §7 with fast-forward updates only. `SECURITY_MODE=enforce` stayed on throughout.
+Live tests used only the synthetic fixtures, through `https://api.filesmagic.com`.
+
+| Step (UTC) | Change | Verification |
+|---|---|---|
+| Before | none | baseline live tests 6/6 (SAFE, consent flow, MALICIOUS block + bypass attempt) |
+| 1 (17:25–17:27) | CE env `COMMIT=26ac5da…`, `PREVIOUS=b6774be…` (saved, no deploy); CE `main` 482e724 → 9ee7e5d (auto-deploy `dep-dc0t8bec6qcc73buobhg`) | startup log `commit=26ac5da1bc5e previous_commit=b6774bea199f`; live tests 6/6 against the old engine |
+| 2 (17:28) | SE `main` b6774be → 26ac5da; manual deploy `dep-dc0t9467bikc73br3gvg` | `/health`: commit 26ac5da, 9 scanners, ready, receipt key `df3ee2f1a3c368c6`; live tests 6/6; no `RECEIPT_`, timeout, worker, scanner or conversion errors in either service's logs |
+| 4 (17:30) | `PREVIOUS` deleted; CE redeploy `dep-dc0t9tm1egvs73908lrg` | startup log `previous_commit=-`; final SAFE conversion passed |
+| After | none | filesmagic.com in a browser: DDEAUTO fixture blocked ("Malicious content detected", only "Choose a different file", API 422) |
+
+Rollback from here: set `PREVIOUS=b6774be…` and redeploy the CE first, then roll back the SE (§7).
+The staging services are kept for further validation and the December 4 demonstration.
