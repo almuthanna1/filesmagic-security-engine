@@ -139,9 +139,15 @@ corpora that are not present.
   identical in both trees and never HIGH, so they do not affect the MALICIOUS/SUSPICIOUS
   comparison. They do mean that no VBA case could have come out SAFE, whatever the VBA analysis
   decided.
-- In v14 the verdict is lowered because the object type is unknown. A real `WScript.Shell` object
-  obtained in a way the analysis cannot follow (for example `GetObject` or a parameter) would also
-  be SUSPICIOUS, not MALICIOUS. That is a deliberate trade-off with a real consequence: a
+- In v14 the verdict is lowered because the object type is unknown. Phase 8 tested each lowered
+  case against an attacker's neighbour (Shell with vbHide, Application.Run of a macro that calls
+  Shell, ShellExecuteA, a user `Shell` wrapping `VBA.Shell`, a WScript.Shell object set in another
+  procedure). Each neighbour is MALICIOUS. One was not: the object created as an argument
+  (`Go CreateObject("WScript.Shell")`, then `o.Run` inside `Go`) came out SUSPICIOUS. Commit
+  04a3c7c closes that gap: `Run`/`Exec` on an unknown object is execution whenever the project
+  creates `WScript.Shell` (`tests/test_vba_chains.py::test_a_shell_object_reaching_run_indirectly_is_execution`).
+  An object the analysis still cannot follow, such as `GetObject` of a moniker that names no shell
+  object, remains SUSPICIOUS, not MALICIOUS. That is a deliberate trade-off with a real consequence: a
   MALICIOUS file can never be converted, but a SUSPICIOUS file is converted once the user
   explicitly chooses to continue (`app/decision`). The five cases lowered in §2 (v05–v08, v14)
   therefore move from "blocked" to "converted with explicit consent". A file with macros is never

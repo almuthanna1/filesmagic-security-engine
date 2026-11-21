@@ -212,7 +212,10 @@ project (vbaProject.bin).` (case 7 of `evaluation/cases`).
     - No data flow through branches, loops, procedure arguments, cell values or document variables.
     - No P-code analysis: VBA stomping is not detected.
     - Excel 4.0 (XLM) macros: only function names are detected.
-    - Objects obtained in ways the analysis does not model are "unknown" (POSSIBLE).
+    - Objects obtained in ways the analysis does not model are "unknown" (POSSIBLE), with one
+      fail-closed exception: `Run`/`Exec` on an unknown object counts as execution (DEMONSTRATED)
+      when the project creates `WScript.Shell` anywhere, since the object may reach it as an
+      argument or a collection item (`vba_analysis.Analyser.method`, `Context.created`).
 11. **Tests and results.**
     - `tests/test_vba_analysis.py` (59 tests), including parity with olevba's entry tables.
     - `tests/test_office.py` (72 tests).

@@ -37,7 +37,9 @@ the roster or the commit is out of step, every receipt fails (`RECEIPT_WRONG_ROS
 The order of operations is in §4.
 
 The old roster appears in exactly two files (searched read-only for `yara-x-engine`): this one,
-and `docs/SECURITY-GATE.md`, which should be updated too. No Conversion Engine test hard-codes it.
+and `docs/SECURITY-GATE.md`, which should be updated too. Correction (Phase 8): one Conversion
+Engine test did hard-code it (`tests/test_security_gate.py`, `len(gate.ROSTER) == 10`); the
+integration branch updates it.
 `docs/SECURITY-GATE.md:216-217` also lists `SECURITY_ENGINE_RESEARCH_ENGINES` and
 `SECURITY_ENGINE_PUBLIC_UNIFIED_ONLY` as required Security Engine settings. The Security Engine no
 longer reads either one; leaving them set is harmless.
