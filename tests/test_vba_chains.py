@@ -156,6 +156,16 @@ def test_an_ambiguous_keyword_confirmed_by_its_context_is_demonstrated(body):
     assert outcome(f"Sub AutoOpen()\n    {body}\nEnd Sub\n")[0] == LINKED
 
 
+@pytest.mark.parametrize("src", [
+    'Sub AutoOpen()\n    Go CreateObject("WScript.Shell")\nEnd Sub\nSub Go(o)\n    o.Run "placeholder"\nEnd Sub\n',
+    'Sub AutoOpen()\n    Set c = New Collection\n    c.Add CreateObject("WScript.Shell")\n    c(1).Exec "placeholder"\nEnd Sub\n',
+])
+def test_a_shell_object_reaching_run_indirectly_is_execution(src):
+    # The analysis does not follow arguments or collections, so it fails closed on Run/Exec once the
+    # project creates WScript.Shell; without that object (the test above) it stays only possible.
+    assert outcome(src)[0] == LINKED
+
+
 def test_keywords_in_comments_are_no_evidence():
     src = "Sub AutoOpen()\n    ' never call Shell here\n    MsgBox \"x\"\nEnd Sub\n' AutoExec is documented elsewhere\n"
     assert outcome(src)[:2] == (NO_PATH, [("Module1.AutoOpen", NO_PATH, ())])

@@ -205,6 +205,10 @@ per file. The rest of the difference is worker overhead that this run does not b
   - Computed JavaScript is not followed, XFA scripts are not modelled, and `GoToE` targets are
     named but not analysed.
   - VBA P-code (stomping) cannot be checked in memory.
+  - VBA object types are not tracked through arguments, collections or properties. To fail closed,
+    `Run`/`Exec` on an unresolved object counts as execution when the project creates
+    `WScript.Shell`. The cost is that a project which also uses an unrelated `.Run` gets
+    MALICIOUS.
   - Nested Word fields are not computed; they are treated as the worse case.
 - **Not covered.**
   - Word fields: RTF, binary `.doc`, Excel DDE and PowerPoint fields; `LINK`, `HYPERLINK`,

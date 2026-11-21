@@ -631,6 +631,7 @@ class Context:
     apis: dict[str, str] = field(default_factory=dict)  # declared name -> API (alias or name)
     consts: dict[str, Value] = field(default_factory=dict)  # module-level Const
     assigned: dict[str, set[str]] = field(default_factory=dict)  # Set name = <object kind>, project-wide
+    created: set[str] = field(default_factory=set)  # every object kind any CreateObject/GetObject makes
 
 
 @dataclass
@@ -857,6 +858,12 @@ class Analyser:
             if kind == "execute":
                 return self.execute(what, toks, start, line)
             self.out.add(Capability(kind, DEMONSTRATED, what, line))
+        elif method in ("run", "exec") and receiver in (None, UNKNOWN) and "wscript.shell" in self.ctx.created:
+            # The project creates WScript.Shell and this receiver could not be resolved: the object can
+            # reach it as an argument, a collection item or a property, which this flow-insensitive
+            # analysis does not follow. Treated as execution (fail closed), and labelled as inferred.
+            return self.execute(f"{method.capitalize()} on an unresolved object in a project that creates "
+                                "WScript.Shell (inferred: the object may be passed indirectly)", toks, start, line)
         elif method in AMBIGUOUS_METHODS and receiver in (None, UNKNOWN, "wmi"):
             kind, what = AMBIGUOUS_METHODS[method]
             if kind == "execute":
@@ -976,7 +983,11 @@ def context(modules: list[tuple[str, list[tuple[int, str]]]], procedures: set[st
                 elif stmt[0].is_id("set") and len(stmt) > 3 and stmt[1].kind == "id" and stmt[2].is_op("="):
                     kind = probe.chain_kind(stmt[3:], n) or UNKNOWN
                     ctx.assigned.setdefault(stmt[1].value, set()).add(kind)
+                for i, t in enumerate(stmt[:-1]):  # objects created anywhere, also as an argument
+                    if t.kind == "id" and t.value in CREATORS and stmt[i + 1].is_op("("):
+                        probe.creation(t.value, split_args(stmt, i + 1)[0], n)
     ctx.consts = {k: v for k, v in probe.env.items()}
+    ctx.created = {kind for kind, _ in probe.created}
     return ctx
 
 
