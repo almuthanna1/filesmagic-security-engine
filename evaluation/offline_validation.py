@@ -95,6 +95,23 @@ def observed(result: dict) -> tuple[str, list[str]]:
                                                    for f in result["findings"])
 
 
+# The committed evidence predates the custom signature matcher (docs/custom-detection-rebuild):
+# both YARA-X scanners became one scanner, "signatures", with the same rule IDs and severities. The
+# generic PDF JavaScript rule was not ported (the refined rule always replaced it), so the
+# correlation note that recorded that replacement is gone too. Verdicts are compared unchanged.
+RENAMED_SCANNERS = {"yara-x": "signatures", "yara-x-engine": "signatures"}
+RETIRED_FINDINGS = {"yara-x:PDF_JavaScript_With_Automatic_Action", "yara-x-engine:ENGINE_CORRELATION"}
+
+
+def unified_expected(findings: list[str]) -> list[str]:
+    out = []
+    for f in findings:
+        scanner, rule, severity = f.split(":")
+        if f"{scanner}:{rule}" not in RETIRED_FINDINGS:
+            out.append(f"{RENAMED_SCANNERS.get(scanner, scanner)}:{rule}:{severity}")
+    return sorted(out)
+
+
 def expectations() -> dict[tuple[str, str, str], tuple[str, list[str]]]:
     """(set, id, engine) -> (verdict, findings) in the committed Windows evidence."""
     out = {}
@@ -105,6 +122,9 @@ def expectations() -> dict[tuple[str, str, str], tuple[str, list[str]]]:
         for r in json.loads(path.read_text(encoding="utf-8")):
             for engine in ENGINES:
                 out["corpus", r["file"], engine] = r[engine]["verdict"], sorted(r[engine]["findings"])
+    for key, (verdict, findings) in out.items():
+        if key[2] == "unified":
+            out[key] = verdict, unified_expected(findings)
     for c in synthetic.field_cases():  # verdicts only; the rules each must report are in checks()
         for engine in ENGINES:
             out["c7", c["id"], engine] = c["expected"][engine][0], None
@@ -158,14 +178,14 @@ def checks(results: list[dict]) -> list[tuple[str, bool]]:
          v(syn, "5b-pdf-auto-js-exports-attachment", "unified") == "MALICIOUS"
          and _has(by, (syn, "5b-pdf-auto-js-exports-attachment", "unified"), ":ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT")),
         ("refined YARA-X rule fires on every automatic page-open/OpenAction script case (2c, 5a, 5b)",
-         all(_has(by, (syn, c, "unified"), "yara-x-engine:ENGINE_PDF_JavaScript_With_Automatic_Trigger") for c in auto)),
+         all(_has(by, (syn, c, "unified"), "signatures:ENGINE_PDF_JavaScript_With_Automatic_Trigger") for c in auto)),
         ("refined YARA-X rule is silent on the user-triggered cases (2, 2b), which the reference rule flags",
          all(not _has(by, (syn, c, "unified"), ":ENGINE_PDF_JavaScript_With_Automatic_Trigger")
              and _has(by, (syn, c, "reference"), "yara-x:PDF_JavaScript_With_Automatic_Action")
              for c in ("2-pdf-form-keystroke-js", "2b-pdf-open-at-page-click-js"))),
         ("VBA call graph: case 7 reports ENGINE_VBA_CALL_PATH_UNDETERMINED and keeps the reference macro findings",
          _has(by, (syn, "7-docx-macro-declaration-mismatch", "unified"), "vba-chains:ENGINE_VBA_CALL_PATH_UNDETERMINED")
-         and _has(by, (syn, "7-docx-macro-declaration-mismatch", "unified"), "yara-x:OOXML_VBA_Macros")),
+         and _has(by, (syn, "7-docx-macro-declaration-mismatch", "unified"), "signatures:OOXML_VBA_Macros")),
         ("OOXML correlation: 6c template used on open -> ENGINE_OFFICE_EXTERNAL_ON_OPEN; 6g file share keeps "
          "OFFICE_EXTERNAL_NETWORK_PATH; 6e/6f object displayed / not displayed",
          _has(by, (syn, "6c-docx-template-referenced-by-settings", "unified"), "ooxml-links:ENGINE_OFFICE_EXTERNAL_ON_OPEN")

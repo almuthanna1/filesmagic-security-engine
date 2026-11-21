@@ -18,13 +18,13 @@ its own precondition; if it does not hold, the reference finding stands (fail cl
     chain rules: the first marks everything reachable from an automatic trigger as automatic, the
     second combines an automatic script with any attachment anywhere in the file. Precondition:
     the PDF scanner and the chain scanner completed on an unrepaired structure.
-  - PDF_JavaScript_With_Automatic_Action (YARA-X) is replaced by the engine's refined signature
-    ENGINE_PDF_JavaScript_With_Automatic_Trigger (app/engine/rules/pdf.yar), which fires only
-    where it fires and stays silent only where the bytes prove every trigger non-automatic.
-    Precondition: the engine's YARA-X scanner completed. No parser result is involved, so the
-    signature evidence stays independent of pypdf.
-  - A signature claim of an automatic trigger that no automatic script chain confirms is kept and
-    marked unconfirmed (a signature can see bytes a parser does not).
+  - The signature matcher (app.engine.signatures) carries only the refined JavaScript signature
+    ENGINE_PDF_JavaScript_With_Automatic_Trigger, which fires wherever the generic JavaScript +
+    /OpenAction-or-/AA signature would and stays silent only where the bytes prove every trigger
+    non-automatic (app.engine.signature_rules). No parser result is involved, so the signature
+    evidence stays independent of pypdf. A signature claim of an automatic trigger that no
+    automatic script chain confirms is kept and marked unconfirmed (a signature can see bytes a
+    parser does not).
   - OFFICE_MACRO_AUTOEXEC_EXECUTION (Office scanner: an automatic entry and a dangerous capability
     anywhere in the same VBA project) is never removed. VbaChainScanner (app.engine.vba_chains)
     adds whether an automatic procedure's calls reach the capability: ENGINE_VBA_AUTOEXEC_REACHES_
@@ -54,7 +54,7 @@ its own precondition; if it does not hold, the reference finding stands (fail cl
         only data and pictures without script, active markup or external references, under a name
         without another extension (its signature is not validated); and no action runs a script,
         launches a file or opens an embedded document (app.engine.pdf_attachments, app.engine.c2pa).
-      ENGINE_PDF_NO_ATTACHMENTS (INFO) for PDF_Embedded_File (YARA-X) only: a complete reading of
+      ENGINE_PDF_NO_ATTACHMENTS (INFO) for PDF_Embedded_File (signatures) only: a complete reading of
         every object of the file finds no file specification with /EF and no embedded file stream,
         and every byte sequence the signature matches is the key /EmbeddedFiles of an empty name tree
         (pdf_attachments, point 5), as removing an attachment or metadata often leaves it. The PDF
@@ -78,9 +78,8 @@ from app.scanners.custom.indicators import NOT_PROOF, clean, listing
 
 NAME = "pdf-chains"
 CATEGORY = "pdf-action-chain"
-SIGNATURES = "yara-x-engine"  # the engine's own YARA-X rules (app.engine.EngineSignatures)
+SIGNATURES = "signatures"  # the engine's own signature matcher (app.engine.signatures)
 STRUCTURAL = {("pdf", "PDF_AUTO_JAVASCRIPT"), ("pdf", "PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD")}
-REFERENCE_SIGNATURE = ("yara-x", "PDF_JavaScript_With_Automatic_Action")
 REFINED_SIGNATURE = (SIGNATURES, "ENGINE_PDF_JavaScript_With_Automatic_Trigger")
 SCRIPT_RULES = {"ENGINE_PDF_AUTO_CHAIN_SCRIPT", "ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT"}
 VBA = "vba-chains"
@@ -91,7 +90,7 @@ NETWORK_PATH = ("office", "OFFICE_EXTERNAL_NETWORK_PATH")
 # Relationship type -> the only elements that may reference it: they load the target as data. A
 # file: hyperlink can start a program, so a relationship any other element uses is not superseded.
 DATA_ELEMENTS = {"image": {"blip", "imagedata"}, "externallinkpath": {"externalBook", "absoluteUrl", "relativeUrl"}}
-SIGNATURE_ATTACHMENT = ("yara-x", "PDF_Embedded_File")
+SIGNATURE_ATTACHMENT = (SIGNATURES, "PDF_Embedded_File")
 ATTACHMENT_REFERENCE = [("pdf", "PDF_EMBEDDED_FILE"), SIGNATURE_ATTACHMENT]
 NO_ATTACHMENTS = (NAME, "ENGINE_PDF_NO_ATTACHMENTS")
 # ENGINE_PDF_NO_ATTACHMENTS also needs the PDF scanner to agree: completed, no attachment, no repair.
@@ -421,14 +420,8 @@ def correlate(report: WorkerReport) -> WorkerReport:
     if chains_ok and status.get("pdf") == "completed" and (found := rules & STRUCTURAL):
         drop |= dict.fromkeys(found, NAME)
         note(NAME, f"replaced {', '.join(sorted(r for _, r in found))} (PDF scanner) by the action-chain rules")
-    if status.get(SIGNATURES) == "completed" and REFERENCE_SIGNATURE in rules:
-        drop[REFERENCE_SIGNATURE] = SIGNATURES
-        note(SIGNATURES, f"replaced {REFERENCE_SIGNATURE[1]} (YARA-X) by {REFINED_SIGNATURE[1]}, which "
-             + ("also matched" if REFINED_SIGNATURE in rules else
-                "did not match: the bytes show every /OpenAction and /AA here is not automatic"))
-    claim = next((r for r in (REFINED_SIGNATURE, REFERENCE_SIGNATURE) if r in rules and r not in drop), None)
-    if chains_ok and claim and not any(s == NAME and r in SCRIPT_RULES for s, r in rules):
-        note(NAME, f"{claim[1]} ({claim[0]}) kept but not confirmed: no automatic action chain runs a script")
+    if chains_ok and REFINED_SIGNATURE in rules and not any(s == NAME and r in SCRIPT_RULES for s, r in rules):
+        note(NAME, f"{REFINED_SIGNATURE[1]} ({SIGNATURES}) kept but not confirmed: no automatic action chain runs a script")
 
     # Accounting: an engine finding that re-listed and examined everything behind a reference
     # finding replaces it, keeping the reference scanner's name in its evidence. Both scanners must

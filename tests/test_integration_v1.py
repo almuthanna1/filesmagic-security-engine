@@ -196,7 +196,7 @@ def test_scanner_programming_error_denies(monkeypatch):
 
 
 def test_scanner_not_ready_denies(monkeypatch):
-    scanner = next(s for s in unified_engine.SCANNERS if s.name == "yara-x-engine")
+    scanner = next(s for s in unified_engine.SCANNERS if s.name == "signatures")
     monkeypatch.setattr(scanner, "error", "rules failed to compile")
     monkeypatch.setattr(scanner, "_rules", None)
     assert not main.engine_ready("unified")

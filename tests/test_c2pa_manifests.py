@@ -65,10 +65,10 @@ def test_every_synthetic_case_meets_its_required_outcome(sid):
         [verified] = [f for f in unified.findings if f.rule_id == VERIFIED]
         assert "whose signature was not validated" in verified.evidence[0]
         assert verified.evidence[-2:] == [ACCOUNTS.format("pdf", "PDF_EMBEDDED_FILE"),
-                                          ACCOUNTS.format("yara-x", "PDF_Embedded_File")]
+                                          ACCOUNTS.format("signatures", "PDF_Embedded_File")]
         note = next(f for f in unified.findings if f.rule_id == "ENGINE_CORRELATION")
         assert any(e.startswith("raw pdf:PDF_EMBEDDED_FILE LOW: ") for e in note.evidence)
-        assert any(e.startswith("raw yara-x:PDF_Embedded_File LOW: ") for e in note.evidence)
+        assert any(e.startswith("raw signatures:PDF_Embedded_File LOW: ") for e in note.evidence)
     elif sid in REASONS:
         [unverified] = [f for f in unified.findings if f.rule_id == UNVERIFIED]
         assert any("not verified" in e and REASONS[sid] in e for e in unverified.evidence), unverified.evidence

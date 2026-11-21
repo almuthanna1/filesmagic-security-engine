@@ -1,32 +1,19 @@
-"""FilesMagic custom document-security engine (capstone candidate).
+"""FilesMagic Unified Security Engine: the scanners every scan runs, followed by evidence correlation.
 
-The reference scanners (app.scanners.SCANNERS, unchanged) plus the engine's own components,
-followed by evidence correlation. Run only by `python -m app.worker --engine=unified`; the API's
-/scan keeps using the reference scanners, which stay the comparison baseline. See
-docs/custom-engine-research-log.md.
+Run by `python -m app.worker --engine=unified`. Every detection decision is made by this
+repository's own code; third-party libraries only parse (pypdf, olefile, oletools' VBA source
+extraction, msoffcrypto, zipfile/defusedxml). See docs/custom-detection-rebuild/.
 """
 
-from pathlib import Path
-
-from app.engine.correlate import SIGNATURES, LinkScanner, PdfChainScanner, VbaChainScanner, correlate
-from app.engine.word_fields import FieldScanner
+from app.engine.correlate import LinkScanner, PdfChainScanner, VbaChainScanner, correlate
 from app.engine.pdf_integrity import PdfIntegrityScanner
-from app.scanners import SCANNERS as REFERENCE_SCANNERS
-from app.scanners.yarax import YaraXScanner
+from app.engine.signatures import SignatureScanner, ruleset_hash
+from app.engine.word_fields import FieldScanner
+from app.scanners.custom import CustomScanner
+from app.scanners.office import OfficeScanner
+from app.scanners.pdf import PdfScanner
 
-RULES_DIR = Path(__file__).resolve().parent / "rules"
+SCANNERS = [SignatureScanner(), OfficeScanner(), PdfScanner(), CustomScanner(), PdfChainScanner(),
+            PdfIntegrityScanner(), VbaChainScanner(), LinkScanner(), FieldScanner()]
 
-
-class EngineSignatures(YaraXScanner):
-    """The engine's own YARA-X rules (app/engine/rules), with the reference scanner's compiler
-    checks, timeout, match cap and fail-closed handling."""
-
-    name = SIGNATURES
-
-    def __init__(self, rules_dir: Path = RULES_DIR):
-        super().__init__(rules_dir)
-
-
-SCANNERS = [*REFERENCE_SCANNERS, EngineSignatures(), PdfChainScanner(), PdfIntegrityScanner(), VbaChainScanner(), LinkScanner(), FieldScanner()]
-
-__all__ = ["SCANNERS", "correlate"]
+__all__ = ["SCANNERS", "correlate", "ruleset_hash"]

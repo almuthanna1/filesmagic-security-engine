@@ -72,8 +72,8 @@ UNOVERRIDABLE_REASONS = {
     "ANALYSIS_INCOMPLETE_UNCLASSIFIED": "The file could not be fully inspected, for a reason that does not allow an override.",
 }
 
-# YARA-X reads raw bytes: no document structure can make it fail, so its failures are ours.
-_BYTE_SCANNERS = {"yara-x", "yara-x-engine"}
+# Byte-signature matchers read raw bytes: no document structure can make them fail, so their failures are ours.
+_BYTE_SCANNERS = {"yara-x", "signatures"}
 # Added by the worker for any failed scanner; the scanner's own status classifies it instead.
 _FAILURE_COVERAGE = {"SCANNER_ANALYSIS_FAILED", "PDF_INTEGRITY_ANALYSIS_FAILED"}
 

@@ -29,7 +29,7 @@ from tests import custom_fixtures as fx
 
 ENGINES = ["reference", "unified"]
 EXPECTED_SCANNERS = {"reference": ["yara-x", "office", "pdf", "custom"],
-                     "unified": ["yara-x", "office", "pdf", "custom", "yara-x-engine", "pdf-chains", "vba-chains",
+                     "unified": ["signatures", "office", "pdf", "custom", "pdf-chains", "vba-chains",
                                  "ooxml-links", "word-fields", "pdf-integrity"]}
 # Extra cases: (id, data, expected verdict) - formats and a fail-closed parse failure.
 EXTRA = [

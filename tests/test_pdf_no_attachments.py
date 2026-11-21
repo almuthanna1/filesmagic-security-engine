@@ -33,10 +33,10 @@ def test_an_empty_name_tree_is_not_an_attachment(sid):
     assert verdicts(reference)["aggregate"] == "SUSPICIOUS" and rules(reference) == {SIGNATURE: "LOW"}
     assert verdicts(unified)["aggregate"] == "SAFE" and SIGNATURE not in rules(unified) and rules(unified)[RULE] == "INFO"
     proof = next(f for f in unified.findings if f.rule_id == RULE).evidence
-    assert proof[0].startswith("byte ") and "an empty name tree" in proof[0] and proof[-1] == ACCOUNTS.format("yara-x", SIGNATURE)
+    assert proof[0].startswith("byte ") and "an empty name tree" in proof[0] and proof[-1] == ACCOUNTS.format("signatures", SIGNATURE)
     # The removed finding is kept, as it was, in the audit trail.
     note = next(f for f in unified.findings if f.rule_id == "ENGINE_CORRELATION")
-    assert f"raw yara-x:{SIGNATURE} LOW: PDF carries an embedded file attachment." in note.evidence
+    assert f"raw signatures:{SIGNATURE} LOW: PDF carries an embedded file attachment." in note.evidence
 
 
 @pytest.mark.parametrize("sid", SAMPLES)
@@ -73,11 +73,11 @@ def test_several_empty_trees_are_each_explained():
 
 
 def report(pdf_status: str = "completed", pdf_rule: str | None = None, severity: Severity = Severity.LOW) -> WorkerReport:
-    proof = engine_finding(RULE, Severity.INFO, "x", evidence=["byte 9: ...", ACCOUNTS.format("yara-x", SIGNATURE)])
-    match = Finding(scanner="yara-x", category="pdf-embedded-file", severity=severity, description="x", rule_id=SIGNATURE)
+    proof = engine_finding(RULE, Severity.INFO, "x", evidence=["byte 9: ...", ACCOUNTS.format("signatures", SIGNATURE)])
+    match = Finding(scanner="signatures", category="pdf-embedded-file", severity=severity, description="x", rule_id=SIGNATURE)
     extra = [Finding(scanner="pdf", category="pdf", severity=Severity.LOW, description="x", rule_id=pdf_rule)] if pdf_rule else []
     return WorkerReport(scanners=[ScannerStatus(name=n, status=s) for n, s in
-                                  (("yara-x", "completed"), ("pdf", pdf_status), ("pdf-chains", "completed"))],
+                                  (("signatures", "completed"), ("pdf", pdf_status), ("pdf-chains", "completed"))],
                         findings=[match, proof, *extra])
 
 

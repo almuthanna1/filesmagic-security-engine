@@ -1,15 +1,18 @@
-"""The engine's refined YARA-X rule (app/engine/rules/pdf.yar) against the reference rule."""
+"""The refined PDF JavaScript signature (app.engine.signature_rules) on documents built to probe it.
+
+The generic signature it refines (JavaScript plus any /OpenAction or /AA bytes) fires on every
+variant below; the refined rule must stay silent only where the bytes prove the trigger is not
+automatic. YARA-X parity for the same rule is in tests/test_signatures.py.
+"""
 
 import pytest
 
-from app import engine
-from app.engine.correlate import REFERENCE_SIGNATURE, REFINED_SIGNATURE, correlate
-from app.models import Finding, ScannerStatus, Severity, WorkerReport
-from app.scanners.yarax import YaraXScanner
+from app.engine.correlate import REFINED_SIGNATURE
+from app.engine.signatures import SignatureScanner
 from evaluation.cases import cases
 from tests.pdf_fixtures import js_action, make_pdf
 
-REFERENCE, REFINED = YaraXScanner(), engine.EngineSignatures()
+REFINED = SignatureScanner()
 WIDGET = "<< /Type /Annot /Subtype /Widget /FT /Tx /T (a) /Rect [0 0 1 1] /AA {} >>"
 
 
@@ -30,38 +33,31 @@ VARIANTS = {
         make_pdf(catalog_extra="/OpenAction 6 0 R", objects={5: js_action(), 6: "[3 0 R /Fit]"}), True),
     "page destination plus page-open /AA /O": (
         make_pdf(catalog_extra="/OpenAction [3 0 R /Fit]", page_extra="/AA << /O 5 0 R >>", objects={5: js_action()}), True),
-    # Measured: YARA-X ends a regex match at about 4 KiB, so a longer /AA dictionary is not proven.
+    # A regex match is at most MAX_REGEX_MATCH (4095) bytes, as in YARA-X: a longer /AA dictionary is not proven.
     "user-only /AA with a 4,000-byte script": (widget("<< /K << /S /JavaScript /JS (" + "a" * 4000 + ") >> >>"), False),
     "user-only /AA with a 5,000-byte script (beyond the regex limit)": (
         widget("<< /K << /S /JavaScript /JS (" + "a" * 5000 + ") >> >>"), True),
 }
 
 
-def fires(scanner, data: bytes, rule: str) -> bool:
-    return any(f.rule_id == rule for f in scanner.scan("", data))
+
+def generic(data: bytes) -> bool:
+    """The superseded generic signature's condition (tests/signature_parity/reference.yar)."""
+    return (data.find(b"%PDF-", 0, 1029) >= 0 and (b"/JS" in data or b"/JavaScript" in data)
+            and (b"/OpenAction" in data or b"/AA" in data))
+
+
+def fires(data: bytes) -> bool:
+    return any(f.rule_id == REFINED_SIGNATURE[1] for f in REFINED.scan("", data))
 
 
 @pytest.mark.parametrize("name", VARIANTS)
 def test_refined_rule_discounts_only_triggers_its_bytes_prove_non_automatic(name):
     data, expected = VARIANTS[name]
-    assert fires(REFERENCE, data, REFERENCE_SIGNATURE[1])  # every variant is a reference match
-    assert fires(REFINED, data, REFINED_SIGNATURE[1]) == expected
+    assert generic(data)  # every variant is a generic match
+    assert fires(data) == expected
 
 
 @pytest.mark.parametrize("data", [d for d, _ in VARIANTS.values()] + [c["data"] for c in cases()])
-def test_refined_rule_never_fires_where_the_reference_rule_does_not(data):
-    assert not fires(REFINED, data, REFINED_SIGNATURE[1]) or fires(REFERENCE, data, REFERENCE_SIGNATURE[1])
-
-
-def report(engine_status: str) -> WorkerReport:
-    match = Finding(scanner="yara-x", category="pdf-active-content", severity=Severity.MEDIUM, description="x",
-                    rule_id=REFERENCE_SIGNATURE[1])
-    return WorkerReport(scanners=[ScannerStatus(name="yara-x", status="completed"),
-                                  ScannerStatus(name="yara-x-engine", status=engine_status)], findings=[match])
-
-
-def test_reference_match_is_replaced_only_when_the_refined_rules_ran():
-    assert correlate(report("failed")) == report("failed")
-    replaced = correlate(report("completed"))
-    assert [f.rule_id for f in replaced.findings] == ["ENGINE_CORRELATION"]
-    assert "did not match" in replaced.findings[0].description
+def test_refined_rule_never_fires_where_the_generic_rule_does_not(data):
+    assert not fires(data) or generic(data)

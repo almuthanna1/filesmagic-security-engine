@@ -123,7 +123,7 @@ app = FastAPI(
 )
 
 VERSIONS = {"engine": app.version, "commit": source_commit(), "ruleset_sha256": ruleset_hash(),
-            "engine_ruleset_sha256": ruleset_hash(unified_engine.RULES_DIR)} | {
+            "engine_ruleset_sha256": unified_engine.ruleset_hash()} | {
     pkg: metadata.version(pkg) for pkg in ("yara-x", "oletools", "olefile", "pypdf")
 }
 
