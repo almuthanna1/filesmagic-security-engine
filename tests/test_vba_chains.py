@@ -297,7 +297,7 @@ UNDETERMINED_SRC = 'Sub AutoOpen()\n    Application.OnKey "^q", procName\nEnd Su
 ])
 def test_the_reference_macro_verdict_is_qualified_never_lowered(monkeypatch, source, engine_rule, note):
     from app import engine, worker
-    from app.scanners import SCANNERS, office
+    from tests.scan_client import FORMAT_ONLY as SCANNERS  # the retired reference roster's equivalent
     from evaluation.cases import verdicts
 
     monkeypatch.setattr(SourceOnlyOfficeParser, "modules", [("Module1", source)])

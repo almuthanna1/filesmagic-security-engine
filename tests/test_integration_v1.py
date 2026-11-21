@@ -30,7 +30,7 @@ TRUSTED = {receipts.key_id(RECEIPT_KEY.public_key()): RECEIPT_KEY.public_key()}
 VERIFIED = dict.fromkeys(worker.ISOLATION_CONTROLS, True) | {"net_fallback_tunnel_inert": False}
 
 
-async def isolated(data: bytes, engine: str = "reference"):
+async def isolated(data: bytes, engine: str = "unified"):
     """The in-process scan, reporting what a strict Linux worker reports when every control holds."""
     report = await in_process(data, engine)
     return report.model_copy(update={"isolation": VERIFIED})
@@ -41,7 +41,6 @@ def production(monkeypatch):
     monkeypatch.setattr(auth, "CONVERSION_PUBLIC_KEY", CONVERSION_KEY.public_key())
     monkeypatch.setattr(receipts, "PRIVATE_KEY", RECEIPT_KEY)
     monkeypatch.setattr(worker, "REQUIRE_ISOLATION", True)
-    monkeypatch.setattr(main, "RESEARCH_ENGINES", True)
     monkeypatch.setattr(main, "run_scan", isolated)
 
 
@@ -128,7 +127,7 @@ def test_damaged_page_content_is_unable_to_scan_with_a_document_reason():
 
 
 def _fake_worker(mode: str, timeout: float | None = None):
-    async def run(data, engine="reference"):
+    async def run(data, engine="unified"):
         return await worker.run(data, cmd=[sys.executable, "-m", "tests.fake_worker", mode], timeout=timeout, engine=engine)
     return run
 
@@ -144,9 +143,12 @@ def test_worker_failures_deny_without_receipt(monkeypatch, mode, code):
 
 
 def test_wrong_scanner_roster_denies(monkeypatch):
-    async def reference_only(data, engine="reference"):
-        return await isolated(data, "reference")
-    monkeypatch.setattr(main, "run_scan", reference_only)
+    async def retired_roster(data, engine="unified"):  # a stale worker answering with the retired scanners
+        report = await isolated(data)
+        names = iter(["yara-x", "office", "pdf", "custom"])
+        return report.model_copy(update={"scanners": [s.model_copy(update={"name": next(names)})
+                                                      for s in report.scanners[:4]]})
+    monkeypatch.setattr(main, "run_scan", retired_roster)
     body = convert_scan(CASE["1-pdf-clean"])[0].json()
     assert body["authorization"] == "deny" and body["receipt"] is None
     assert body["reasons"][0]["code"] == "SCANNER_ROSTER_MISMATCH"
@@ -154,7 +156,7 @@ def test_wrong_scanner_roster_denies(monkeypatch):
 
 @pytest.mark.parametrize("missing", ["network_verified", "capabilities_dropped", "audit_hook"])
 def test_unverified_isolation_denies_even_a_clean_file(monkeypatch, missing):
-    async def partial(data, engine="reference"):
+    async def partial(data, engine="unified"):
         report = await in_process(data, engine)
         return report.model_copy(update={"isolation": VERIFIED | {missing: False}})
     monkeypatch.setattr(main, "run_scan", partial)
@@ -210,7 +212,7 @@ def test_scanner_not_ready_denies(monkeypatch):
 @pytest.mark.parametrize("kind, name, expected", [
     ("malformed_input", "office", "DOCUMENT_MALFORMED"),
     ("invalid_structure", "pdf", "DOCUMENT_STRUCTURE_UNSUPPORTED"),
-    ("invalid_structure", "yara-x", "SCANNER_INTERNAL_ERROR"),  # YARA-X reads raw bytes: never the document
+    ("invalid_structure", "signatures", "SCANNER_INTERNAL_ERROR"),  # reads raw bytes: never the document
     ("unexpected", "pdf", "SCANNER_INTERNAL_ERROR"),
 ])
 def test_scanner_failure_classification(kind, name, expected):
@@ -277,9 +279,9 @@ def test_token_for_other_bytes_is_refused(change):
     assert r.status_code == 403 and r.json()["code"] == "TOKEN_FILE_MISMATCH"
 
 
-def test_conversion_tokens_cannot_use_the_reference_engine():
+def test_the_retired_reference_engine_is_refused_never_substituted():
     r, _ = convert_scan(CASE["1-pdf-clean"], engine="reference")
-    assert r.status_code == 403 and r.json()["code"] == "ENGINE_NOT_APPROVED"
+    assert r.status_code == 410 and r.json()["code"] == "ENGINE_RETIRED"
 
 
 def test_security_lab_tokens_keep_working_and_never_get_receipts():
@@ -288,8 +290,8 @@ def test_security_lab_tokens_keep_working_and_never_get_receipts():
     body = r.json()
     assert r.status_code == 200 and body["verdict"] == "SAFE" and body["authorization"] == "allow"
     assert body["receipt"] is None
-    r = client.post("/scan", content=data, headers=auth_headers(data))  # the Lab's default engine still works
-    assert r.status_code == 200 and r.json()["engine"] == "reference" and r.json()["receipt"] is None
+    r = client.post("/scan", content=data, headers=auth_headers(data))  # no engine given: the unified engine
+    assert r.status_code == 200 and r.json()["engine"] == "unified" and r.json()["receipt"] is None
 
 
 def test_no_receipt_without_a_receipt_key(monkeypatch):
@@ -313,7 +315,7 @@ def test_exact_25_mib_upload_is_accepted_before_worker(monkeypatch):
     """Bounded upload accepts the 25 MiB limit without allocating a scanner corpus."""
     seen = []
 
-    async def record_and_fail(data, engine="reference"):
+    async def record_and_fail(data, engine="unified"):
         seen.append((len(data), engine))
         raise worker.WorkerError("inert test worker stopped", "WORKER_FAILED")
 
@@ -426,7 +428,7 @@ def test_health_reports_conversion_readiness():
 
 PINS = {"commit": main.VERSIONS["commit"], "scanners": sorted(main.engine_scanners("unified")),
         "ruleset_sha256": main.VERSIONS["ruleset_sha256"], "engine_ruleset_sha256": main.VERSIONS["engine_ruleset_sha256"],
-        "scanner_versions": {k: main.VERSIONS[k] for k in ("yara-x", "oletools", "olefile", "pypdf")}}
+        "scanner_versions": {k: main.VERSIONS[k] for k in main.PARSERS}}
 
 
 def test_a_real_receipt_verifies_against_the_pinned_build():

@@ -81,14 +81,15 @@ def main(argv=None) -> int:
               for tag, p in pythons.items()}}
     changes = []
     for r in rows:
-        for engine in ENGINES:
+        for engine in [e for e in ENGINES if e in r["before"] and e in r["after"]]:
             kinds = compare(r["before"][engine], r["after"][engine])
             if kinds:
                 changes.append({"id": r["id"], "split": r["split"], "engine": engine, "kinds": kinds,
                                 "verdict": [r["before"][engine]["verdict"], r["after"][engine]["verdict"]],
                                 "rules": [pdf_accuracy.rules(r["before"][engine]),
                                           pdf_accuracy.rules(r["after"][engine])]})
-    wall = {tag: {e: sum(min(r[tag][e]["wall_ms"]) for r in rows) for e in ENGINES} for tag in pythons}
+    wall = {tag: {e: sum(min(r[tag][e]["wall_ms"]) for r in rows) for e in ENGINES if all(e in r[tag] for r in rows)}
+            for tag in pythons}
     summary = {"environment": env, "samples": len(rows), "comparisons": len(rows) * len(ENGINES),
                "changed": len(changes), "changes": changes, "total_min_wall_ms": wall}
     args.out.mkdir(parents=True, exist_ok=True)

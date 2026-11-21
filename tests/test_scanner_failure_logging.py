@@ -35,7 +35,7 @@ def scan(caplog, data, filename):
 
 
 def test_corrupt_pdf_explained_as_warning_without_filename(monkeypatch, caplog):
-    monkeypatch.setattr(main, "SCANNERS", [PdfScanner()])
+    monkeypatch.setattr(main.unified_engine, "SCANNERS", [PdfScanner()])
     body = scan(caplog, b"%PDF-1.4\nnot really a PDF\n", "corrupted.pdf")
     assert body["verdict"] == Verdict.UNABLE_TO_SCAN
     assert body["scanners"][0]["error_kind"] == "malformed_input"
@@ -50,7 +50,7 @@ def test_corrupt_pdf_explained_as_warning_without_filename(monkeypatch, caplog):
 
 
 def test_malformed_office_xml_explained_as_warning(monkeypatch, caplog):
-    monkeypatch.setattr(main, "SCANNERS", [OfficeScanner()])
+    monkeypatch.setattr(main.unified_engine, "SCANNERS", [OfficeScanner()])
     body = scan(caplog, make_ooxml({"word/_rels/document.xml.rels": "<broken"}), "corrupted.docx")
     assert body["verdict"] == Verdict.UNABLE_TO_SCAN
     [record] = scanner_logs(caplog)
@@ -60,7 +60,7 @@ def test_malformed_office_xml_explained_as_warning(monkeypatch, caplog):
 
 
 def test_scanner_limit_is_invalid_structure(monkeypatch, caplog):
-    monkeypatch.setattr(main, "SCANNERS", [PdfScanner()])
+    monkeypatch.setattr(main.unified_engine, "SCANNERS", [PdfScanner()])
     monkeypatch.setattr(pdf, "MAX_OBJECTS", 1)
     from tests.pdf_fixtures import make_pdf
 
@@ -78,7 +78,7 @@ def test_unexpected_scanner_crash_logs_error_with_code_trace(monkeypatch, caplog
         def scan(self, filename, data):
             raise RuntimeError("unexpected code problem with SECRET-DOC-TEXT")
 
-    monkeypatch.setattr(main, "SCANNERS", [BrokenScanner()])
+    monkeypatch.setattr(main.unified_engine, "SCANNERS", [BrokenScanner()])
     body = scan(caplog, b"safe", "test.txt")
     assert body["verdict"] == Verdict.UNABLE_TO_SCAN
     assert body["scanners"][0]["error_kind"] == "unexpected"
@@ -95,7 +95,7 @@ def test_unexpected_failure_wrapped_as_pdf_scan_error_is_still_an_error(monkeypa
         raise RuntimeError("unexpected programming failure")
 
     monkeypatch.setattr(pdf, "PdfReader", broken_reader)
-    monkeypatch.setattr(main, "SCANNERS", [PdfScanner()])
+    monkeypatch.setattr(main.unified_engine, "SCANNERS", [PdfScanner()])
     body = scan(caplog, b"%PDF-1.4\n", "unexpected.pdf")
     assert body["verdict"] == Verdict.UNABLE_TO_SCAN
     [record] = scanner_logs(caplog)
@@ -104,7 +104,7 @@ def test_unexpected_failure_wrapped_as_pdf_scan_error_is_still_an_error(monkeypa
 
 
 def test_worker_failure_logged_once_with_request_id(monkeypatch, caplog):
-    async def dead_worker(data, engine="reference"):
+    async def dead_worker(data, engine="unified"):
         raise main.worker.WorkerError("scan worker timed out after 30s")
 
     monkeypatch.setattr(main, "run_scan", dead_worker)

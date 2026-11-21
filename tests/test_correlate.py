@@ -145,10 +145,10 @@ def test_reference_findings_stand_when_the_chain_view_is_not_unambiguous(report)
         assert correlated == report
 
 
-def test_the_worker_runs_the_unified_engine_only_when_asked():
+def test_the_worker_runs_only_the_unified_engine():
+    # With or without --engine=unified (older callers pass it): the retired roster never runs.
     data = CASE["5a-pdf-auto-js-unrelated-attachment"]
-    reference = asyncio.run(worker.run(data))
-    candidate = asyncio.run(worker.run(data, worker.command() + ["--engine=unified"]))
-    assert [s.name for s in reference.scanners] == ["yara-x", "office", "pdf", "custom"]
-    assert [s.name for s in candidate.scanners] == ["signatures", "office", "pdf", "custom", "pdf-chains", "pdf-integrity", "vba-chains", "ooxml-links", "word-fields"]
-    assert (verdicts(reference)["aggregate"], verdicts(candidate)["aggregate"]) == ("MALICIOUS", "SUSPICIOUS")
+    for report in (asyncio.run(worker.run(data, worker.command())), asyncio.run(worker.run(data))):
+        assert [s.name for s in report.scanners] == ["signatures", "office", "pdf", "custom", "pdf-chains",
+                                                     "pdf-integrity", "vba-chains", "ooxml-links", "word-fields"]
+        assert verdicts(report)["aggregate"] == "SUSPICIOUS"

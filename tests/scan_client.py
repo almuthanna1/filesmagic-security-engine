@@ -18,3 +18,14 @@ def auth_headers(data: bytes, filename: str = "upload", **token_kw) -> dict[str,
 
 def post_scan(client, data: bytes, filename: str = "upload", **kw):
     return client.post("/scan", content=data, headers=auth_headers(data, filename), **kw)
+
+
+def _format_only():
+    from app import engine
+    return [s for s in engine.SCANNERS if s.name in ("signatures", "office", "pdf", "custom")]
+
+
+# The retired reference roster's equivalent for comparisons in tests: the format scanners on their
+# own, without the engine's graph analyses and correlation ("signatures" in place of YARA-X, the
+# same rules; office's macro rules now computed by app.engine.vba_analysis).
+FORMAT_ONLY = _format_only()

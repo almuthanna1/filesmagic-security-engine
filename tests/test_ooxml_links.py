@@ -7,7 +7,7 @@ from app.engine import ooxml_links as links
 from app.engine.ooxml_links import (
     CLICK, DISPLAYED, IMAGE, NOT_ACTIVATED, ON_ACTION, ON_OPEN, UNDETERMINED, Reference, classify, references,
 )
-from app.scanners import SCANNERS
+from tests.scan_client import FORMAT_ONLY as SCANNERS  # the retired reference roster's equivalent
 from app.scanners.custom.errors import CustomScanError
 from evaluation.cases import INERT_OLE, cases, verdicts
 from tests import custom_fixtures as fx

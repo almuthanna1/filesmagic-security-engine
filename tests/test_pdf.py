@@ -14,7 +14,7 @@ from app.models import Severity, Verdict
 from app.scanners import pdf
 from app.scanners.office import OfficeScanner
 from app.scanners.pdf import PdfScanError, PdfScanner
-from app.scanners.yarax import YaraXScanner
+from app.engine.signatures import SignatureScanner
 from tests.office_fixtures import make_ooxml
 from tests.pdf_fixtures import attachment, encrypted_pdf, js_action, make_pdf, uri_link
 from tests.scan_client import post_scan
@@ -298,20 +298,20 @@ def test_jbig2_decoder_is_disabled():
     assert pdf.PDF_LIMITS["jbig2dec_binary"] is None
 
 
-# --------------------------------------------------------------------- YARA-X interaction and API
+# --------------------------------------------------------------------- signature interaction and API
 
 client = TestClient(main.app)
 
 
 def post(monkeypatch, data, scanners=None):
-    monkeypatch.setattr(main, "SCANNERS", scanners or [YaraXScanner(), OfficeScanner(), PdfScanner()])
+    monkeypatch.setattr(main.unified_engine, "SCANNERS", scanners or [SignatureScanner(), OfficeScanner(), PdfScanner()])
     r = post_scan(client, data)
     assert r.status_code == 200
     return r.json()
 
 
-def test_default_registry_has_four_scanners():
-    assert [s.name for s in main.SCANNERS] == ["yara-x", "office", "pdf", "custom"]
+def test_default_registry_starts_with_the_format_scanners():
+    assert [s.name for s in main.unified_engine.SCANNERS][:4] == ["signatures", "office", "pdf", "custom"]
 
 
 def test_api_benign_pdf_is_safe(monkeypatch):

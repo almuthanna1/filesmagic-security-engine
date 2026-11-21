@@ -1,9 +1,5 @@
-from app.scanners.base import Scanner
-from app.scanners.custom import CustomScanner
-from app.scanners.office import OfficeScanner
-from app.scanners.pdf import PdfScanner
-from app.scanners.yarax import YaraXScanner
+"""Format scanners the unified Security Engine (app.engine.SCANNERS) runs: office, pdf, custom.
 
-# Scanners run by POST /scan. A scanner that fails (for example, rules that do not
-# compile) makes the scan UNABLE_TO_SCAN, never SAFE.
-SCANNERS: list[Scanner] = [YaraXScanner(), OfficeScanner(), PdfScanner(), CustomScanner()]
+The reference roster that used to be defined here (YARA-X, office, pdf, custom) was retired by the
+custom detection rebuild; app.engine is the only scanner list.
+"""

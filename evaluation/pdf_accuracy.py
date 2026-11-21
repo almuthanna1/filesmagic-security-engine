@@ -133,7 +133,7 @@ from evaluation.cases import verdicts
 trials, rows = int(sys.argv[1]), []
 for path in json.load(sys.stdin):
     data, row = open(path, "rb").read(), {}
-    for engine in ("reference", "unified"):
+    for engine in [e for e in ("reference", "unified") if e in worker.ENGINE_ARGS]:  # what the tree offers
         runs = []
         for _ in range(trials):
             start = time.perf_counter()
@@ -210,7 +210,8 @@ def rules(result: dict) -> list[str]:
 
 
 def summarise(rows: list[dict]) -> dict:
-    runs = [(t, e) for t in ("before", "after") for e in ("reference", "unified")]
+    runs = [(t, e) for t in ("before", "after") for e in ("reference", "unified")
+            if all(e in r[t] for r in rows)]  # a tree after the rebuild has unified only
     labelled = [r for r in rows if r["cls"] != "case"]
     by = {}
     for t, e in runs:
@@ -240,7 +241,7 @@ def summarise(rows: list[dict]) -> dict:
                 "before": r["before"][e]["verdict"], "after": r["after"][e]["verdict"],
                 "removed": sorted(set(rules(r["before"][e])) - set(rules(r["after"][e]))),
                 "added": sorted(set(rules(r["after"][e])) - set(rules(r["before"][e])))}
-               for r in rows for e in ("reference", "unified")
+               for r in rows for e in ("reference", "unified") if e in r["before"] and e in r["after"]
                if r["before"][e]["verdict"] != r["after"][e]["verdict"] or rules(r["before"][e]) != rules(r["after"][e])]
     high = lambda res: {x for x in rules(res) if x.endswith((":HIGH", ":CRITICAL"))}  # noqa: E731
     outcomes = {f"{t}/{e}": [{"id": r["id"], "split": r["split"], "class": r["cls"], "verdict": r[t][e]["verdict"],
@@ -261,7 +262,7 @@ def summarise(rows: list[dict]) -> dict:
     return {"samples": Counter(f"{r['split']}/{r['cls']}" for r in rows), "by_run": by, "changes": changes,
             "lost_high_or_critical": [{"id": r["id"], "engine": e, "lost": sorted(high(r["before"][e]) - high(r["after"][e]))}
                                       for r in rows for e in ("reference", "unified")
-                                      if high(r["before"][e]) - high(r["after"][e])],
+                                      if e in r["before"] and e in r["after"] if high(r["before"][e]) - high(r["after"][e])],
             "nondeterministic": [r["id"] for r in rows for t, e in runs if not r[t][e]["deterministic"]],
             "outcomes": outcomes, "timing": timing}
 

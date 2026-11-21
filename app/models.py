@@ -27,7 +27,7 @@ class Severity(str, Enum):
 
 
 class Finding(BaseModel):
-    scanner: str = Field(description="Scanner that produced the finding, e.g. 'yara-x'.")
+    scanner: str = Field(description="Scanner that produced the finding, e.g. 'signatures'.")
     category: str = Field(description="Kind of finding, e.g. 'malware', 'macro', 'pdf-javascript'.")
     severity: Severity
     description: str
@@ -116,8 +116,8 @@ class Reason(BaseModel):
 
 class ScanResult(BaseModel):
     request_id: str = Field(default="", description="Correlates this result with the engine's log lines.")
-    engine: Literal["reference", "unified"] = Field(
-        default="reference", description="reference: the four original scanners; unified: the custom engine candidate.")
+    engine: Literal["unified"] = Field(
+        default="unified", description="The unified Security Engine (the reference engine was retired).")
     filename: str
     verdict: Verdict
     findings: list[Finding] = Field(default_factory=list)

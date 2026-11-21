@@ -73,7 +73,7 @@ UNOVERRIDABLE_REASONS = {
 }
 
 # Byte-signature matchers read raw bytes: no document structure can make them fail, so their failures are ours.
-_BYTE_SCANNERS = {"yara-x", "signatures"}
+_BYTE_SCANNERS = {"signatures"}
 # Added by the worker for any failed scanner; the scanner's own status classifies it instead.
 _FAILURE_COVERAGE = {"SCANNER_ANALYSIS_FAILED", "PDF_INTEGRITY_ANALYSIS_FAILED"}
 

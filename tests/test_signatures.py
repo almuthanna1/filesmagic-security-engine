@@ -243,3 +243,40 @@ def test_refined_rule_never_fires_where_the_superseded_generic_rule_would_not():
     # The superseded rule's own condition, from its YARA text: header, any JS, any /OpenAction or /AA.
     generic = lambda d: (d.find(b"%PDF-", 0, 1029) >= 0 and (b"/JS" in d or b"/JavaScript" in d) and (b"/OpenAction" in d or b"/AA" in d))  # noqa: E731
     assert all(generic(d) for d in parity_corpus() if REFINED in rules_for(d))
+
+
+# ----------------------------------------------------------------------------- ported from test_yarax.py
+# (the YARA-X scanner was retired; these behaviours of it must hold for its replacement)
+
+
+def test_pdf_header_after_leading_junk_is_still_detected():
+    assert [f.rule_id for f in SCANNER.scan("f", b"junk" * 100 + b"%PDF-1.7 /Launch")] == ["PDF_Launch_Action"]
+
+
+def test_large_clean_input_and_many_repeated_matches():
+    assert SCANNER.scan("f", b"\0" * (10 * 1024 * 1024)) == []
+    data = b"%PDF-1.7 " + b"/Launch " * 100_000  # far more matches than the cap
+    assert [f.rule_id for f in SCANNER.scan("f", data)] == ["PDF_Launch_Action"]
+
+
+def test_api_verdicts_and_readiness(monkeypatch):
+    from fastapi.testclient import TestClient
+
+    from app import main
+    from app.models import Verdict
+    from tests.scan_client import post_scan
+
+    client = TestClient(main.app)
+    broken = SignatureScanner([Rule("bad id", "x", "pdf", Severity.HIGH, {}, lambda m: True)])
+
+    def verdict(data, scanner=SCANNER):
+        monkeypatch.setattr(main.unified_engine, "SCANNERS", [scanner])
+        return post_scan(client, data, "f.bin").json()["verdict"]
+
+    assert verdict(b"hello world") == Verdict.SAFE
+    assert verdict(b"%PDF-1.7 /Launch") == Verdict.MALICIOUS
+    assert verdict(b"\x7fELF") == Verdict.SUSPICIOUS
+    assert verdict(b"hello", broken) == Verdict.UNABLE_TO_SCAN
+    monkeypatch.setattr(main.unified_engine, "SCANNERS", [SCANNER, broken])
+    health = client.get("/health").json()
+    assert (health["scanners_registered"], health["scanners_ready"]) == (2, 1)

@@ -448,7 +448,7 @@ def environment(manifest: Path | None) -> dict:
         "engine_version": main.VERSIONS.get("engine"), "ruleset_sha256": main.VERSIONS.get("ruleset_sha256"),
         "strict_isolation_configured": worker.REQUIRE_ISOLATION,
         "python": platform.python_version(), "platform": platform.platform(),
-        "packages": {p: version(p) for p in ("yara-x", "oletools", "pypdf", "msoffcrypto-tool", "defusedxml", "fastapi")},
+        "packages": {p: version(p) for p in ("oletools", "pypdf", "msoffcrypto-tool", "defusedxml", "fastapi")},
         "harness_peak_rss_mib": harness_peak_rss_mib,
         "worker_memory_measured": False,
     }

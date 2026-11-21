@@ -185,10 +185,10 @@ def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--trials", type=int, default=20)
     parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--engine", choices=["reference", "unified"], default="reference",
-                        help="reference: the four scanners /scan runs; unified: the custom engine candidate")
+    parser.add_argument("--engine", choices=["unified"], default="unified",
+                        help="the unified Security Engine (the reference engine was retired)")
     args = parser.parse_args(argv)
-    cmd = worker.command() + ["--engine=unified"] * (args.engine == "unified")
+    cmd = worker.command() + worker.ENGINE_ARGS[args.engine]
     results = [scan_case(c, args.trials, cmd) for c in cases()]
     env = environment(None) | {"platform": platform.platform(), "python": sys.version.split()[0],
                                "worker_command": cmd[3:], "trials": args.trials}

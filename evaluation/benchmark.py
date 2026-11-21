@@ -3,7 +3,7 @@
 Runs every sample of a prepared manifest (evaluation.prepare_samples) through the engine's
 /scan code path, repeated `--trials` times, with the existing harness's strict-isolation
 preflight and per-sample isolation check (evaluation.evaluate). For each sample it records, per
-scanner (YARA-X, PDF Analysis, Office Analysis, Custom): applicable or not, completed or failed,
+scanner (Signatures, PDF Analysis, Office Analysis, Custom): applicable or not, completed or failed,
 rule IDs and severities, coverage limits, and the scanner's own duration inside the isolated
 worker; plus the worker's total latency (engine duration_ms) and the harness wall-clock time.
 PDFiD (Didier Stevens, pinned and reviewed) is run as an independent reference on PDF samples,
@@ -39,18 +39,30 @@ from evaluation.evaluate import (
     load_manifest, make_client, post_scan, sha256_of, strict_preflight, write_status,
 )
 
-SCANNERS = ["yara-x", "pdf", "office", "custom"]
+# The format scanners (the retired reference roster had YARA-X where "signatures" now is). Results come
+# from the correlated unified response; what correlation removed is still each scanner's own detection,
+# and app.engine.correlate keeps it as "raw <scanner>:<rule> <SEVERITY>: ..." evidence (own_findings).
+SCANNERS = ["signatures", "pdf", "office", "custom"]
+RAW_LINE = re.compile(r"raw ([\w-]+):(\w+) ([A-Z]+): ")
+
+
+def own_findings(findings: list[dict], name: str) -> list[dict]:
+    """The scanner's findings in the response, plus those correlation merged or replaced."""
+    raw = [{"scanner": m[1], "rule_id": m[2], "severity": m[3], "category": "removed-by-correlation"}
+           for f in findings if f["rule_id"] == "ENGINE_CORRELATION"
+           for e in f.get("evidence", []) if (m := RAW_LINE.match(e))]
+    return [f for f in findings + raw if f["scanner"] == name]
 REFERENCE = "pdfid"
 # Which rule IDs count as a scanner identifying a feature. A scanner without an entry for a
 # feature was not designed to detect it ("—" in the tables), which is different from missing it.
 FEATURES = {
-    "pdf-javascript": {"yara-x": {"PDF_JavaScript_With_Automatic_Action"},
+    "pdf-javascript": {"signatures": {"ENGINE_PDF_JavaScript_With_Automatic_Trigger"},
                        "pdf": {"PDF_JAVASCRIPT", "PDF_AUTO_JAVASCRIPT", "PDF_JAVASCRIPT_EXPLOIT_API"}},
-    "pdf-auto-action": {"yara-x": {"PDF_JavaScript_With_Automatic_Action"}, "pdf": {"PDF_AUTO_JAVASCRIPT"}},
+    "pdf-auto-action": {"signatures": {"ENGINE_PDF_JavaScript_With_Automatic_Trigger"}, "pdf": {"PDF_AUTO_JAVASCRIPT"}},
     "pdf-name-obfuscation": {"custom": {"CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME", "CUSTOM_PDF_UNNECESSARY_NAME_ESCAPES"}},
-    "pdf-embedded-file": {"yara-x": {"PDF_Embedded_File"}, "pdf": {"PDF_EMBEDDED_FILE", "PDF_EMBEDDED_EXECUTABLE"}},
+    "pdf-embedded-file": {"signatures": {"PDF_Embedded_File"}, "pdf": {"PDF_EMBEDDED_FILE", "PDF_EMBEDDED_EXECUTABLE"}},
     "office-external-autoload": {"office": {"OFFICE_EXTERNAL_AUTOLOAD", "OFFICE_EXTERNAL_DANGEROUS_SCHEME"}},
-    "office-macro-project": {"yara-x": {"OOXML_VBA_Macros", "OLE_Office_VBA_Macros"},
+    "office-macro-project": {"signatures": {"OOXML_VBA_Macros", "OLE_Office_VBA_Macros"},
                              "office": {"OFFICE_MACROS_PRESENT", "OFFICE_VBA_UNPARSED"}},
     "office-macro-declaration-mismatch": {"custom": {"CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH"}},
     "eicar-test-string": {},  # no FilesMagic scanner has an EICAR rule, by design; the result is recorded as is
@@ -181,7 +193,7 @@ def sample_result(row: dict, trials: list[dict]) -> dict:
     scanners = {}
     for name in SCANNERS:
         status = next((s for s in first["scanners"] if s["name"] == name), {}) if first else {}
-        found = [f for f in first["findings"] if f["scanner"] == name] if first else []
+        found = own_findings(first["findings"], name) if first else []
         scanners[name] = {
             "status": status.get("status", "unknown"), "error_kind": status.get("error_kind"),
             "error_type": status.get("error_type"),
@@ -259,13 +271,13 @@ def comparisons(results: list[dict]) -> dict:
         by_control[group] = {"samples": len(rs), "verdicts": dict(Counter(r["verdict"] for r in rs)),
                              "non_info_findings": {n: sum(r["scanners"][n]["non_info_findings"] for r in rs) for n in SCANNERS}}
     only_custom = [(r["sample_id"], f) for r in results for f, cells in r["features"].items()
-                   if cells["custom"] == "yes" and not any(cells[n] == "yes" for n in ("yara-x", "pdf", "office"))]
+                   if cells["custom"] == "yes" and not any(cells[n] == "yes" for n in ("signatures", "pdf", "office"))]
     pdfs = [r for r in results if r["file_type"] == "pdf"]
-    disagreements = [(r["sample_id"], f, cells["yara-x"], cells["pdf"]) for r in pdfs for f, cells in r["features"].items()
-                     if {cells["yara-x"], cells["pdf"]} <= {"yes", "no"} and cells["yara-x"] != cells["pdf"]]
+    disagreements = [(r["sample_id"], f, cells["signatures"], cells["pdf"]) for r in pdfs for f, cells in r["features"].items()
+                     if {cells["signatures"], cells["pdf"]} <= {"yes", "no"} and cells["signatures"] != cells["pdf"]]
     return {
         "detection": detection_counts(results, SCANNERS + [REFERENCE]),
-        "yara_vs_pdf_disagreements": disagreements,
+        "signatures_vs_pdf_disagreements": disagreements,
         "detected_only_by_custom": only_custom,
         "clean_vs_indicator": by_control,
         "false_positive_candidates": [{"sample_id": r["sample_id"], "verdict": r["verdict"],
@@ -313,7 +325,7 @@ def report(results: list[dict], comp: dict, times: dict, env: dict, status: dict
         f"{status['trials']} trials; PDFiD reference: {env['pdfid']}", "",
         "Ground truth: generated documents are **BENIGN** (inert, the indicator is present by construction); EICAR is "
         "**SECURITY_TEST**. A detection here shows that a method recognises a *structure*, not that it detects malware.", "",
-        "## Samples", "", "| Sample | Source | Expected features | Verdict | YARA-X | PDF | Office | Custom |",
+        "## Samples", "", "| Sample | Source | Expected features | Verdict | Signatures | PDF | Office | Custom |",
         "|---|---|---|---|---|---|---|---|"]
     for r in results:
         cells = [", ".join(r["scanners"][n]["rule_ids"]) or {"not_applicable": "n/a", "completed": "no findings"}.get(
@@ -329,8 +341,8 @@ def report(results: list[dict], comp: dict, times: dict, env: dict, status: dict
                for n, m in methods.items()]
         lines.append(f"| {f} | " + " | ".join(row) + " |")
     lines += ["", "## Comparisons", "",
-              f"1. **YARA-X vs PDF Analysis** (PDF samples), disagreements: {comp['yara_vs_pdf_disagreements'] or 'none'}",
-              f"2. **YARA-X vs Office Analysis**: see the office-* rows above.",
+              f"1. **Signatures vs PDF Analysis** (PDF samples), disagreements: {comp['signatures_vs_pdf_disagreements'] or 'none'}",
+              f"2. **Signatures vs Office Analysis**: see the office-* rows above.",
               f"3. **Detected only by the custom scanner**: {comp['detected_only_by_custom'] or 'none'}",
               f"4. **Clean vs indicator-bearing**: {json.dumps(comp['clean_vs_indicator'])}",
               f"- Negative controls with non-INFO findings (false-positive candidates): {comp['false_positive_candidates'] or 'none'}",

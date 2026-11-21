@@ -27,9 +27,8 @@ from pathlib import Path
 from evaluation.cases import cases
 from tests import custom_fixtures as fx
 
-ENGINES = ["reference", "unified"]
-EXPECTED_SCANNERS = {"reference": ["yara-x", "office", "pdf", "custom"],
-                     "unified": ["signatures", "office", "pdf", "custom", "pdf-chains", "vba-chains",
+ENGINES = ["unified"]  # the reference engine was retired (docs/custom-detection-rebuild)
+EXPECTED_SCANNERS = {"unified": ["signatures", "office", "pdf", "custom", "pdf-chains", "vba-chains",
                                  "ooxml-links", "word-fields", "pdf-integrity"]}
 # Extra cases: (id, data, expected verdict) - formats and a fail-closed parse failure.
 EXTRA = [
@@ -169,7 +168,7 @@ def failure_rows(lab: str, api: str, health: dict) -> list[dict]:
     # The engine refuses on Content-Length and closes the connection, so send only the headers and
     # read the answer before any body byte (a client still sending 10 MB would see a reset instead).
     status, issued = token(lab, b"x")
-    offered = health.get("engines") or ["reference"]
+    offered = health.get("engines") or ["unified"]
     url, auth = f"{api}/scan?engine={offered[0]}", {"Authorization": f"Bearer {issued.get('token', '')}", "Origin": lab}
     try:
         s = headers_only_status(url, MAX_UPLOAD_BYTES + 1, auth)

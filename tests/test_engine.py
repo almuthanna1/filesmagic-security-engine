@@ -18,18 +18,18 @@ def test_health():
     r = client.get("/health")
     assert r.status_code == 200
     assert r.json()["status"] == "ok"
-    assert r.json()["scanners_registered"] == len(main.SCANNERS) == 4  # YARA-X, Office, PDF, custom
-    assert r.json()["scanners_ready"] == 4
+    assert r.json()["scanners_registered"] == len(main.unified_engine.SCANNERS) == 9  # the unified roster
+    assert r.json()["scanners_ready"] == 9
 
 
 def test_health_counts_registered_scanners(monkeypatch):
-    monkeypatch.setattr(main, "SCANNERS", [])
+    monkeypatch.setattr(main.unified_engine, "SCANNERS", [])
     body = client.get("/health").json()
     assert body["scanners_registered"] == body["scanners_ready"] == 0
 
 
 def test_scan_without_scanners_is_not_safe(monkeypatch):
-    monkeypatch.setattr(main, "SCANNERS", [])
+    monkeypatch.setattr(main.unified_engine, "SCANNERS", [])
     r = post_scan(client, b"hello world", "hello.txt")
     assert r.status_code == 200
     body = r.json()
@@ -65,11 +65,11 @@ def test_scan_combines_scanner_results(monkeypatch):
     def post():
         return post_scan(client, b"x", "a.bin").json()["verdict"]
 
-    monkeypatch.setattr(main, "SCANNERS", [Clean()])
+    monkeypatch.setattr(main.unified_engine, "SCANNERS", [Clean()])
     assert post() == Verdict.SAFE
-    monkeypatch.setattr(main, "SCANNERS", [Clean(), Broken()])
+    monkeypatch.setattr(main.unified_engine, "SCANNERS", [Clean(), Broken()])
     assert post() == Verdict.UNABLE_TO_SCAN
-    monkeypatch.setattr(main, "SCANNERS", [Broken(), Flags()])
+    monkeypatch.setattr(main.unified_engine, "SCANNERS", [Broken(), Flags()])
     assert post() == Verdict.MALICIOUS
 
 
@@ -84,7 +84,7 @@ def test_oversized_upload_rejected_by_exact_check(monkeypatch):
 
 def test_oversized_upload_rejected_before_body_is_read(monkeypatch):
     monkeypatch.setattr(main, "MAX_UPLOAD_BYTES", 100)
-    monkeypatch.setattr(main, "SCANNERS", [])  # never reached
+    monkeypatch.setattr(main.unified_engine, "SCANNERS", [])  # never reached
     data = b"x" * 101
     r = client.post("/scan", content=data, headers=auth_headers(data) | {"Origin": "http://localhost:3000"})
     assert r.status_code == 413
@@ -94,7 +94,7 @@ def test_oversized_upload_rejected_before_body_is_read(monkeypatch):
 
 def test_upload_at_limit_is_accepted(monkeypatch):
     monkeypatch.setattr(main, "MAX_UPLOAD_BYTES", 100)
-    monkeypatch.setattr(main, "SCANNERS", [])
+    monkeypatch.setattr(main.unified_engine, "SCANNERS", [])
     assert post_scan(client, b"x" * 100).status_code == 200
 
 

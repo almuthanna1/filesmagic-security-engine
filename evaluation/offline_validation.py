@@ -31,7 +31,10 @@ from evaluation.benchmark import dependency_drift, host_network, research_checks
 from evaluation.evaluate import environment
 
 REPO = Path(__file__).resolve().parent.parent
-ENGINES = ("reference", "unified")
+ENGINES = ("reference", "unified")  # in the committed evidence
+# Engines run live. The reference engine was retired (docs/custom-detection-rebuild): claims about it
+# are checked against its committed results (frozen_reference), never re-run.
+LIVE_ENGINES = ("unified",)
 CONFINEMENT = "filesmagic-eval-python (enforce)"
 CORPUS = (REPO / "evaluation/benign_corpus/files", REPO / "evaluation/benign_corpus/independent")
 MANIFESTS = (REPO / "evaluation/benign_corpus/manifest.json", REPO / "evaluation/benign_corpus/independent/manifest.json")
@@ -158,10 +161,23 @@ def _has(results: dict, key: tuple[str, str, str], rule: str) -> bool:
     return any(f"{f['scanner']}:{f['rule_id']}".endswith(rule) for f in results[key]["findings"])
 
 
+def frozen_reference() -> dict[tuple[str, str, str], dict]:
+    """The retired reference engine's committed results, shaped like live results (for checks())."""
+    out = {}
+    for r in json.loads(EXPECTED["synthetic"]["reference"].read_text(encoding="utf-8"))["results"]:
+        out["synthetic", r["id"], "reference"] = {"verdicts": r["verdicts"], "findings": r["findings"]}
+    for path in EXPECTED["corpus"]:
+        for r in json.loads(path.read_text(encoding="utf-8")):
+            findings = [dict(zip(("scanner", "rule_id", "severity"), f.split(":"))) for f in r["reference"]["findings"]]
+            out["corpus", r["file"], "reference"] = {"verdicts": {"aggregate": r["reference"]["verdict"]},
+                                                     "findings": findings}
+    return out
+
+
 def _field_case_holds(by: dict, case: dict, info_only: bool = False) -> bool:
-    """Both engines give the expected verdict and report every expected rule; with info_only, C7
-    reports nothing above INFO."""
-    for engine in ENGINES:
+    """The unified engine gives the expected verdict and reports every expected rule; with
+    info_only, C7 reports nothing above INFO."""
+    for engine in LIVE_ENGINES:
         r, (verdict, required) = by["c7", case["id"], engine], case["expected"][engine]
         found = {f"{f['scanner']}:{f['rule_id']}" for f in r["findings"]}
         if r["verdicts"]["aggregate"] != verdict or not set(required) <= found:
@@ -173,13 +189,13 @@ def _field_case_holds(by: dict, case: dict, info_only: bool = False) -> bool:
 
 def checks(results: list[dict]) -> list[tuple[str, bool]]:
     """The contributions, each a claim evaluated from this run's results."""
-    by = {(r["set"], r["id"], r["engine"]): r for r in results}
+    by = frozen_reference() | {(r["set"], r["id"], r["engine"]): r for r in results}
     fields = {c["id"]: c for c in synthetic.field_cases()}
     v = lambda s, i, e: by[s, i, e]["verdicts"]["aggregate"]  # noqa: E731
     syn, cor = "synthetic", "corpus"
     auto = ("2c-pdf-open-at-page-page-open-js", "5a-pdf-auto-js-unrelated-attachment", "5b-pdf-auto-js-exports-attachment")
     return [
-        ("5a: unified SUSPICIOUS (the attachment is not on the automatic chain); reference MALICIOUS",
+        ("5a: unified SUSPICIOUS (the attachment is not on the automatic chain); reference MALICIOUS (frozen)",
          v(syn, "5a-pdf-auto-js-unrelated-attachment", "unified") == "SUSPICIOUS"
          and v(syn, "5a-pdf-auto-js-unrelated-attachment", "reference") == "MALICIOUS"),
         ("5b: unified MALICIOUS with ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT",
@@ -190,7 +206,7 @@ def checks(results: list[dict]) -> list[tuple[str, bool]]:
          all(_has(by, (syn, c, "unified"), "signatures:ENGINE_PDF_JavaScript_With_Automatic_Trigger")
              or any(f["rule_id"] == "ENGINE_CORRELATION" and "merged ENGINE_PDF_JavaScript_With_Automatic_Trigger"
                     in f.get("description", "") for f in by[syn, c, "unified"]["findings"]) for c in auto)),
-        ("refined YARA-X rule is silent on the user-triggered cases (2, 2b), which the reference rule flags",
+        ("refined signature is silent on the user-triggered cases (2, 2b), which the reference rule flagged (frozen)",
          all(not _has(by, (syn, c, "unified"), ":ENGINE_PDF_JavaScript_With_Automatic_Trigger")
              and _has(by, (syn, c, "reference"), "yara-x:PDF_JavaScript_With_Automatic_Action")
              for c in ("2-pdf-form-keystroke-js", "2b-pdf-open-at-page-click-js"))),
@@ -204,7 +220,7 @@ def checks(results: list[dict]) -> list[tuple[str, bool]]:
          and _has(by, (syn, "6e-docx-embedded-object-displayed", "unified"), ":ENGINE_OFFICE_EMBEDDED_OBJECT_DISPLAYED")
          and _has(by, (syn, "6f-docx-embedded-object-not-displayed", "unified"), ":ENGINE_OFFICE_EMBEDDED_OBJECT_NOT_DISPLAYED")),
         ("false-positive corrections: docx-04, xlsx-04 (local targets) and pdf-07 (verified attachment) SAFE in "
-         "unified, SUSPICIOUS in reference",
+         "unified, SUSPICIOUS in reference (frozen)",
          all(v(cor, f, "unified") == "SAFE" and v(cor, f, "reference") == "SUSPICIOUS" and _has(by, (cor, f, "unified"), rule)
              for f, rule in (("docx-04-word-linked-picture.docx", ":ENGINE_OFFICE_LOCAL_FILE_TARGETS"),
                              ("xlsx-04-excel-external-workbook-link.xlsx", ":ENGINE_OFFICE_LOCAL_FILE_TARGETS"),
@@ -213,15 +229,16 @@ def checks(results: list[dict]) -> list[tuple[str, bool]]:
          v(cor, "docx-05-word-custom-template.docx", "unified") == "SUSPICIOUS"
          and _has(by, (cor, "docx-05-word-custom-template.docx", "unified"), ":ENGINE_OFFICE_LOCAL_TEMPLATE")),
         ("C7 positives: c7a nested DDEAUTO MALICIOUS, c7c remote INCLUDETEXT and c7d file-share INCLUDEPICTURE "
-         "SUSPICIOUS (reference SAFE on all three), each with its C7 rule; c7b keeps OFFICE_DDEAUTO_FIELD",
+         "SUSPICIOUS, each with its C7 rule; c7b keeps OFFICE_DDEAUTO_FIELD",
          all(_field_case_holds(by, fields[i]) for i in ("c7a-docx-nested-ddeauto", "c7b-docx-ddeauto-cmd",
                                                         "c7c-docx-remote-includetext", "c7d-docx-remote-includepicture"))),
-        ("C7 negatives: c7e DDEAUTO only in a tracked deletion and c7f ordinary fields SAFE in both engines, "
+        ("C7 negatives: c7e DDEAUTO only in a tracked deletion and c7f ordinary fields SAFE, "
          "C7 evidence INFO only",
          all(_field_case_holds(by, fields[i], info_only=True) for i in ("c7e-docx-deleted-ddeauto",
                                                                          "c7f-docx-ordinary-fields"))),
-        ("corrupted documents fail closed (UNABLE_TO_SCAN) in both engines",
-         all(v("corrupt", c, e) == FAIL_CLOSED for c in ("corrupt-truncated-pdf", "corrupt-truncated-docx") for e in ENGINES)),
+        ("corrupted documents fail closed (UNABLE_TO_SCAN)",
+         all(v("corrupt", c, e) == FAIL_CLOSED for c in ("corrupt-truncated-pdf", "corrupt-truncated-docx")
+             for e in LIVE_ENGINES)),
     ]
 
 
@@ -292,7 +309,7 @@ def main_(argv=None) -> int:
     sets = [("synthetic", synthetic.cases(), args.trials), ("corpus", corpus, args.corpus_trials),
             ("corrupt", corrupt_items(), args.corpus_trials), ("c7", synthetic.field_cases(), args.trials)]
     if not status["problems"]:
-        for engine in ENGINES:  # preflight: an empty input, so nothing is parsed if isolation is not complete
+        for engine in LIVE_ENGINES:  # preflight: an empty input, so nothing is parsed if isolation is not complete
             probe = synthetic.scan_case({"id": "preflight", "ground_truth": "-", "indicator": "-", "data": b""}, 1,
                                         worker.command() + worker.ENGINE_ARGS[engine])
             preflight[engine] = {"isolation_missing": probe["isolation_missing"], "status": probe["status"]}
@@ -301,7 +318,7 @@ def main_(argv=None) -> int:
     if not status["problems"]:
         for name, items, trials in sets:
             for item in items:
-                for engine in ENGINES:
+                for engine in LIVE_ENGINES:
                     r = synthetic.scan_case(item, trials, worker.command() + worker.ENGINE_ARGS[engine])
                     results.append({"set": name, "engine": engine, **r})
                     print(f"{name:9} {r['id']:45} {engine:9} {r['verdicts']['aggregate']:14} "

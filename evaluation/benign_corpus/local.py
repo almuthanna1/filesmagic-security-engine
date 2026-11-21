@@ -35,9 +35,9 @@ def main_(argv=None) -> int:
     for f in sorted(p for p in args.dir.iterdir() if p.name != "manifest.json"):
         data = f.read_bytes()
         row = {"file": f.name, "detected_format": main.detect_format(data)}
-        row |= {e: scan(data, e) for e in ("reference", "unified")}
+        row |= {e: scan(data, e) for e in worker.ENGINE_ARGS}  # unified only since the rebuild
         rows.append(row)
-        print(f"{f.name:45} {row['detected_format']:5} {row['reference']['verdict']:14} {row['unified']['verdict']:14} "
+        print(f"{f.name:45} {row['detected_format']:5} {row['unified']['verdict']:14} "
               f"{'; '.join(x for x in row['unified']['findings'] if not x.endswith(':INFO'))[:120]}")
     args.out.write_text(json.dumps(rows, indent=2) + "\n")
     return 0

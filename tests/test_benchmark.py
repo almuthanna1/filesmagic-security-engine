@@ -185,7 +185,7 @@ def test_launch_options_of_make_pdf_embedded_are_refused(tmp_path, flag):
 
 
 def test_worker_reports_each_scanners_duration():
-    from app.scanners import SCANNERS
+    from app.engine import SCANNERS
 
     report = worker.analyse(SCANNERS, obfuscated_javascript_pdf())
     assert all(s.duration_ms is not None and s.duration_ms >= 0 for s in report.scanners)
@@ -197,7 +197,7 @@ def test_benchmark_records_per_scanner_findings_features_and_timing(prepared, tm
     results = {r["sample_id"]: r for r in json.loads((tmp_path / "run" / "results.json").read_text())["samples"]}
 
     obfuscated = results["pdf-js-obfuscated-local"]["features"]
-    assert obfuscated["pdf-javascript"] == {"yara-x": "no", "pdf": "yes", "office": "—", "custom": "—"}
+    assert obfuscated["pdf-javascript"] == {"signatures": "no", "pdf": "yes", "office": "—", "custom": "—"}
     assert obfuscated["pdf-name-obfuscation"]["custom"] == "yes"
     template = results["docx-external-template-local"]["features"]["office-external-autoload"]
     assert template["office"] == "yes" and template["pdf"] == "—"

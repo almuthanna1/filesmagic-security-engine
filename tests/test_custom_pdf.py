@@ -190,22 +190,23 @@ def status(body: dict, name: str = "custom") -> dict:
 
 
 def test_custom_scanner_is_registered_and_ready():
-    assert isinstance(main.SCANNERS[-1], CustomScanner)
+    assert any(isinstance(s, CustomScanner) for s in main.unified_engine.SCANNERS)
     health = client.get("/health").json()
-    assert health["scanners_registered"] == health["scanners_ready"] == 4
+    assert health["scanners_registered"] == health["scanners_ready"] == len(main.unified_engine.SCANNERS)
 
 
 def test_api_reports_c1_alongside_the_other_scanners_with_independent_attribution():
     body = post_scan(client, fx.obfuscated_javascript_pdf()).json()
     assert body["verdict"] == Verdict.SUSPICIOUS  # MEDIUM findings, existing severity policy
     assert status(body)["status"] == "completed"
-    assert body["message"].startswith("Analysed by 3 of 4 scanners (1 not applicable")
+    assert body["message"].startswith("Analysed by 5 of 9 scanners (4 not applicable")
     by_scanner = {}
     for f in body["findings"]:
         by_scanner.setdefault(f["scanner"], set()).add(f["rule_id"])
     assert by_scanner["custom"] == {"CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME"}
-    assert "yara-x" not in by_scanner  # the escaped names defeat the byte signatures
-    assert {"PDF_JAVASCRIPT", "PDF_AUTO_JAVASCRIPT"} <= by_scanner["pdf"]  # pypdf still sees JavaScript
+    assert "signatures" not in by_scanner  # the escaped names defeat the byte signatures
+    assert "PDF_JAVASCRIPT" in by_scanner["pdf"]  # pypdf still sees JavaScript; its automatic part is
+    assert "ENGINE_PDF_AUTO_CHAIN_SCRIPT" in by_scanner["pdf-chains"]  # reported by the chain rules
 
 
 def test_api_clean_pdf_is_safe_with_four_scanners():

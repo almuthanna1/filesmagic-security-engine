@@ -22,21 +22,20 @@ from app.scanners import office
 from evaluation.cases import cases
 from evaluation.offline_validation import unified_expected
 from tests import custom_fixtures as fx
-from tests.scan_client import auth_headers, post_scan
+from tests.scan_client import FORMAT_ONLY, auth_headers, post_scan
 from tests.test_vba_chains import RELATED, SourceOnlyOfficeParser
 from tests.pdf_fixtures import make_pdf
 
 client = TestClient(main.app)
 CASE = {c["id"]: c["data"] for c in cases()}
 FROZEN = Path(__file__).resolve().parent.parent / "docs/evidence/custom-engine-fp-fixes"
-REFERENCE_SCANNERS = ["yara-x", "office", "pdf", "custom"]
 UNIFIED_SCANNERS = ["signatures", "office", "pdf", "custom", "pdf-chains", "pdf-integrity", "vba-chains", "ooxml-links", "word-fields"]
 CORRUPT_PDF = b"%PDF-1.7\n1 0 obj\n<< /Length 10 >>\nstream\nno end marker follows"
 
 
 @pytest.fixture
-def research(monkeypatch):
-    monkeypatch.setattr(main, "RESEARCH_ENGINES", True)
+def research():
+    """Formerly enabled the research engines; the unified engine is now the only one, always on."""
 
 
 def scan(data: bytes, engine: str | None = None, filename: str = "upload", **kw):
@@ -61,67 +60,39 @@ def rules(body: dict) -> list[str]:
 # ----------------------------------------------------------------------------- selection
 
 
-def test_the_default_engine_is_the_original_four_scanners(research):
+def test_the_default_engine_is_the_unified_engine():
     body = post_scan(client, CASE["1-pdf-clean"]).json()
-    assert body["engine"] == "reference" and [s["name"] for s in body["scanners"]] == REFERENCE_SCANNERS
-
-
-def test_the_unified_engine_runs_when_selected(research):
-    body = scan(CASE["1-pdf-clean"], "unified").json()
     assert body["engine"] == "unified" and [s["name"] for s in body["scanners"]] == UNIFIED_SCANNERS
     assert body["versions"]["commit"] and len(body["versions"]["engine_ruleset_sha256"]) == 64
+    assert body["versions"]["ruleset_sha256"] == body["versions"]["engine_ruleset_sha256"]  # one ruleset
+    assert "yara-x" not in body["versions"]
 
 
-def test_unified_is_refused_unless_research_engines_are_enabled_and_the_token_survives():
+def test_the_retired_reference_engine_is_refused_and_the_token_survives():
     data = CASE["1-pdf-clean"]
     headers = auth_headers(data)
-    refused = client.post("/scan", content=data, headers=headers, params={"engine": "unified"})
-    assert refused.status_code == 403 and "research-only" in refused.json()["detail"]
+    refused = client.post("/scan", content=data, headers=headers, params={"engine": "reference"})
+    assert refused.status_code == 410 and refused.json()["code"] == "ENGINE_RETIRED"
     # Refused before the token was checked: the same single-use token still works once.
-    assert client.post("/scan", content=data, headers=headers).json()["engine"] == "reference"
+    assert client.post("/scan", content=data, headers=headers).json()["engine"] == "unified"
 
 
-def test_an_unknown_engine_is_refused(research):
+def test_an_unknown_engine_is_refused():
     response = scan(CASE["1-pdf-clean"], "fastest")
     assert response.status_code == 400 and "Unknown engine" in response.json()["detail"]
 
 
-def test_health_lists_the_engines_this_deployment_accepts(monkeypatch):
-    assert client.get("/health").json()["engines"] == ["reference"]
-    monkeypatch.setattr(main, "RESEARCH_ENGINES", True)
-    health = client.get("/health").json()
-    assert health["engines"] == ["reference", "unified"] and health["default_engine"] == "reference"
-
-
-def test_public_research_lab_offers_only_the_unified_engine(research, monkeypatch):
-    # The four reference scanners remain in the unified engine, but are not
-    # separately selectable on the public research API.
-    monkeypatch.setattr(main, "PUBLIC_UNIFIED_ONLY", True)
-    monkeypatch.setattr(main, "DEFAULT_ENGINE", "unified")
+def test_health_lists_only_the_unified_engine():
     health = client.get("/health").json()
     assert health["engines"] == ["unified"] and health["default_engine"] == "unified"
-    data = CASE["1-pdf-clean"]
-    rejected = scan(data, "reference")
-    assert rejected.status_code == 403
-    assert "only the unified engine" in rejected.json()["detail"]
-    default_result = scan(data).json()
-    assert default_result["engine"] == "unified"
-    assert [s["name"] for s in default_result["scanners"]] == UNIFIED_SCANNERS
-
-
-def test_public_unified_mode_fails_closed_if_research_not_enabled(monkeypatch):
-    monkeypatch.setattr(main, "PUBLIC_UNIFIED_ONLY", True)
-    monkeypatch.setattr(main, "DEFAULT_ENGINE", "unified")
-    monkeypatch.setattr(main, "RESEARCH_ENGINES", False)
-    assert client.get("/health").json()["engines"] == []
-    assert scan(CASE["1-pdf-clean"]).status_code == 403
+    assert health["scanners_registered"] == len(UNIFIED_SCANNERS)
 
 
 # ----------------------------------------------------------------------------- acceptance
 
 
 # (Not named "engine": tests/conftest.py has an autouse fixture of that name.)
-@pytest.mark.parametrize("engine_name", ["reference", "unified"])
+@pytest.mark.parametrize("engine_name", ["unified"])  # the reference engine's frozen run: not reproducible
 @pytest.mark.parametrize("case", sorted(CASE))
 def test_every_frozen_case_reproduces_through_the_api(research, engine_name, case):
     frozen = {r["id"]: r for r in json.loads((FROZEN / engine_name / "results.json").read_text())["results"]}[case]
@@ -165,9 +136,9 @@ def test_security_evidence_still_wins_over_incomplete_coverage(research):
 
 
 @pytest.mark.parametrize("kind", ["docx", "xlsx", "pptx"])
-def test_word_excel_and_powerpoint_documents_scan_clean_in_both_engines(research, kind):
+def test_word_excel_and_powerpoint_documents_scan_clean(research, kind):
     data = fx.office_package(kind)
-    for engine_name, names in (("reference", REFERENCE_SCANNERS), ("unified", UNIFIED_SCANNERS)):
+    for engine_name, names in (("unified", UNIFIED_SCANNERS),):
         body = scan(data, engine_name).json()
         assert body["verdict"] == "SAFE" and body["complete"] and [s["name"] for s in body["scanners"]] == names
         assert body["detected_format"] == "zip"
@@ -214,7 +185,7 @@ def test_oversized_uploads_are_refused_for_the_unified_engine(research):
 
 
 def test_a_crashed_worker_fails_the_unified_scan_closed(research, monkeypatch):
-    async def crashed(data, engine="reference"):
+    async def crashed(data, engine="unified"):
         raise worker.WorkerError("scan worker exited abnormally (status 1)")
     monkeypatch.setattr(main, "run_scan", crashed)
     body = scan(CASE["5b-pdf-auto-js-exports-attachment"], "unified").json()
@@ -224,8 +195,8 @@ def test_a_crashed_worker_fails_the_unified_scan_closed(research, monkeypatch):
 
 
 def test_a_worker_that_ran_the_other_engine_is_not_accepted(research, monkeypatch):
-    async def wrong_engine(data, engine="reference"):  # ignores the selection: answers with the reference set
-        return worker.analyse(main.SCANNERS, data)
+    async def wrong_engine(data, engine="unified"):  # a stale worker: answers with the retired roster
+        return worker.analyse(FORMAT_ONLY, data)
     monkeypatch.setattr(main, "run_scan", wrong_engine)
     body = scan(CASE["5b-pdf-auto-js-exports-attachment"], "unified").json()
     assert body["verdict"] == "UNABLE_TO_SCAN" and body["findings"] == []
@@ -238,8 +209,8 @@ def test_a_worker_that_ran_the_other_engine_is_not_accepted(research, monkeypatc
 def test_real_worker_runs_each_engine_and_reports_scanner_durations(research, monkeypatch):
     monkeypatch.setattr(main, "run_scan", worker.run)
     data = CASE["5a-pdf-auto-js-unrelated-attachment"]
-    reference, unified = scan(data, "reference").json(), scan(data, "unified").json()
-    assert (reference["verdict"], unified["verdict"]) == ("MALICIOUS", "SUSPICIOUS")
+    unified = scan(data, "unified").json()
+    assert unified["verdict"] == "SUSPICIOUS"  # the frozen reference run said MALICIOUS: unrelated attachment
     assert [s["name"] for s in unified["scanners"]] == UNIFIED_SCANNERS
     assert all(s["duration_ms"] is not None for s in unified["scanners"])
     assert unified["isolation"]["process"] is True and unified["isolation"]["audit_hook"] is True
@@ -263,6 +234,24 @@ def test_real_worker_strict_isolation_for_the_unified_engine(research, monkeypat
         assert report.findings == []
 
 
-def test_engine_scanner_lists_match_the_engines():
-    assert main.engine_scanners("reference") == REFERENCE_SCANNERS
-    assert main.engine_scanners("unified") == [s.name for s in unified_engine.SCANNERS] == UNIFIED_SCANNERS
+def test_engine_scanner_lists_match_the_engine():
+    assert main.engine_scanners() == [s.name for s in unified_engine.SCANNERS] == UNIFIED_SCANNERS
+
+
+def test_the_service_never_imports_a_retired_detection_dependency():
+    # yara-x is development-only (signature parity tests); olevba's heuristics are not used either.
+    import subprocess
+    import sys
+    code = ("import sys, app.main, app.worker, app.engine; from app import engine; "
+            "app.worker.analyse(engine.SCANNERS, b'%PDF-1.7 /OpenAction /JavaScript'); "
+            "assert 'yara_x' not in sys.modules, 'yara_x imported'")
+    subprocess.run([sys.executable, "-c", code], check=True, cwd=Path(__file__).resolve().parent.parent)
+    from app.engine import vba_analysis, vba_chains
+    from app.scanners import office
+    import ast
+    for module in (vba_analysis, vba_chains, office):  # only the extractor is imported from olevba
+        tree = ast.parse(Path(module.__file__).read_text(encoding="utf-8"))
+        imported = {(n.module, a.name) for n in ast.walk(tree) if isinstance(n, ast.ImportFrom) for a in n.names}
+        assert {name for mod, name in imported if mod == "oletools.olevba"} <= {"VBA_Parser"}, module
+        calls = {n.attr for n in ast.walk(tree) if isinstance(n, ast.Attribute)}
+        assert not calls & {"analyze_macros", "VBA_Scanner"}, module

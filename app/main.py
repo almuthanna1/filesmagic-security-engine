@@ -18,8 +18,6 @@ from app import auth, receipts, worker
 from app import engine as unified_engine
 from app.decision import classify, decide
 from app.models import ScannerStatus, ScanResult, Verdict, WorkerReport
-from app.scanners import SCANNERS
-from app.scanners.yarax import RULES_DIR
 
 logger = logging.getLogger(__name__)
 # uvicorn only configures its own loggers; without this the per-scan audit lines are dropped.
@@ -40,22 +38,22 @@ MAX_CONCURRENT_SCANS = int(os.environ.get("SECURITY_ENGINE_MAX_CONCURRENT_SCANS"
 run_scan = worker.run
 _active_scans = 0
 
-# The production/default API remains on the reference baseline. Research staging may opt
-# into a public unified-only mode without deleting the reference implementation or its data.
-# Misconfiguration fails closed: PUBLIC_UNIFIED_ONLY without RESEARCH_ENGINES offers no scanner.
-RESEARCH_ENGINES = os.environ.get("SECURITY_ENGINE_RESEARCH_ENGINES") == "1"
-PUBLIC_UNIFIED_ONLY = os.environ.get("SECURITY_ENGINE_PUBLIC_UNIFIED_ONLY") == "1"
-DEFAULT_ENGINE = "unified" if PUBLIC_UNIFIED_ONLY else "reference"
+# One engine: the unified Security Engine (app.engine). The reference runtime (YARA-X and
+# olevba's heuristics, app.scanners' original roster) was retired by the custom detection
+# rebuild (docs/custom-detection-rebuild); a request for it is refused with ENGINE_RETIRED,
+# never answered by another engine.
+DEFAULT_ENGINE = "unified"
+RETIRED_ENGINES = {"reference"}
 
 
-def engine_scanners(engine: str) -> list[str]:
-    """Names the worker must report for `engine`, read at call time (tests replace SCANNERS)."""
-    return [s.name for s in (SCANNERS if engine == "reference" else unified_engine.SCANNERS)]
+def engine_scanners(engine: str = DEFAULT_ENGINE) -> list[str]:
+    """Names the worker must report, read at call time (tests replace the roster)."""
+    return [s.name for s in unified_engine.SCANNERS]
 
 
-def engine_ready(engine: str) -> bool:
-    """Every scanner of `engine` loaded in this process (the worker loads the same code and rules)."""
-    return all(getattr(s, "ready", True) for s in (SCANNERS if engine == "reference" else unified_engine.SCANNERS))
+def engine_ready(engine: str = DEFAULT_ENGINE) -> bool:
+    """Every scanner loaded in this process (the worker loads the same code and rules)."""
+    return all(getattr(s, "ready", True) for s in unified_engine.SCANNERS)
 
 
 class ApiError(HTTPException):
@@ -67,9 +65,7 @@ class ApiError(HTTPException):
 
 
 def available_engines() -> list[str]:
-    if PUBLIC_UNIFIED_ONLY:
-        return ["unified"] if RESEARCH_ENGINES else []
-    return ["reference", "unified"] if RESEARCH_ENGINES else ["reference"]
+    return [DEFAULT_ENGINE]
 
 
 def source_commit() -> str:
@@ -105,27 +101,17 @@ def parse_cors_origins(value: str) -> list[str]:
     return origins
 
 
-def ruleset_hash(rules_dir: Path = RULES_DIR) -> str:
-    """Version identifier of the rule set. Line endings are normalised (CRLF/CR -> LF) so a
-    Windows checkout and the Linux image report the same hash for identical rules; the rules
-    YARA-X compiles are not changed by this."""
-    h = hashlib.sha256()
-    for path in sorted(rules_dir.glob("*.yar")):
-        text = path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
-        h.update(path.name.encode() + b"\0" + text)
-    return h.hexdigest()
-
-
 app = FastAPI(
     title="FilesMagic Security Engine",
     description="Pre-conversion file security analysis service for FilesMagic.",
     version="0.2.0",
 )
 
-VERSIONS = {"engine": app.version, "commit": source_commit(), "ruleset_sha256": ruleset_hash(),
-            "engine_ruleset_sha256": unified_engine.ruleset_hash()} | {
-    pkg: metadata.version(pkg) for pkg in ("yara-x", "oletools", "olefile", "pypdf")
-}
+# Parsing libraries whose versions the receipt records (none decides a finding). Both ruleset keys
+# stay in the receipt contract; since the rebuild there is one ruleset, so they carry the same hash.
+PARSERS = ("oletools", "olefile", "pypdf")
+VERSIONS = {"engine": app.version, "commit": source_commit(), "ruleset_sha256": unified_engine.ruleset_hash(),
+            "engine_ruleset_sha256": unified_engine.ruleset_hash()} | {pkg: metadata.version(pkg) for pkg in PARSERS}
 
 @app.exception_handler(ApiError)
 async def scan_error(request: Request, exc: ApiError) -> JSONResponse:
@@ -144,13 +130,13 @@ app.add_middleware(
 @app.get("/health")
 async def health():
     # "ok" means the API process is up. scanners_ready counts registered scanners that
-    # loaded successfully (e.g. YARA-X rules compiled); a scanner without a `ready`
+    # loaded successfully (e.g. signature rules validated); a scanner without a `ready`
     # attribute is counted as ready. A not-ready scanner makes /scan UNABLE_TO_SCAN.
     return {
         "status": "ok",
         "service": "filesmagic-security-engine",
-        "scanners_registered": len(SCANNERS),
-        "scanners_ready": sum(1 for s in SCANNERS if getattr(s, "ready", True)),
+        "scanners_registered": len(unified_engine.SCANNERS),
+        "scanners_ready": sum(1 for s in unified_engine.SCANNERS if getattr(s, "ready", True)),
         "auth_configured": auth.PUBLIC_KEY is not None,
         "engines": available_engines(),
         "default_engine": DEFAULT_ENGINE,
@@ -217,24 +203,17 @@ async def scan_file(request: Request) -> ScanResult:
                         headers={"Retry-After": "60"})
     # Checked before the token, so a refused engine does not use up the single-use token.
     engine = request.query_params.get("engine", DEFAULT_ENGINE)
-    if engine not in worker.ENGINE_ARGS:
-        raise ApiError(400, "ENGINE_UNKNOWN", f"Unknown engine; use one of: {', '.join(worker.ENGINE_ARGS)}.")
+    if engine in RETIRED_ENGINES:
+        raise ApiError(410, "ENGINE_RETIRED", f"The {engine} engine was retired; omit engine or use engine=unified.")
     if engine not in available_engines():
-        raise ApiError(403, "ENGINE_NOT_ENABLED", (
-            "This deployment accepts only the unified engine." if PUBLIC_UNIFIED_ONLY else
-            "The unified engine is research-only and is not enabled on this deployment "
-            "(SECURITY_ENGINE_RESEARCH_ENGINES=1)."
-        ))
-    expected = engine_scanners(engine)
+        raise ApiError(400, "ENGINE_UNKNOWN", f"Unknown engine; use one of: {', '.join(available_engines())}.")
+    expected = engine_scanners()
     try:
         claims = auth.verify(request.headers.get("authorization", ""))
     except auth.AuthError as e:
         auth.record_failure(client)
         logger.warning("scan rejected request_id=%s code=%s", request_id, e.code)
         raise ApiError(401, e.code, str(e), headers={"WWW-Authenticate": "Bearer"}) from None
-    # The Conversion Engine may only be answered by the engine validated for production.
-    if claims["issuer"] == "conversion" and engine != "unified":
-        raise ApiError(403, "ENGINE_NOT_APPROVED", "Conversion scans must use the unified engine (engine=unified).")
 
     length = request.headers.get("content-length", "")
     if length.isdigit() and int(length) > MAX_UPLOAD_BYTES:
@@ -250,7 +229,7 @@ async def scan_file(request: Request) -> ScanResult:
         if sha256 != claims["sha256"] or len(data) != claims["size"]:
             raise ApiError(403, "TOKEN_FILE_MISMATCH", "The uploaded file does not match the scan token.")
         start = time.perf_counter()
-        operational = [] if engine_ready(engine) else ["SCANNER_NOT_READY"]
+        operational = [] if engine_ready() else ["SCANNER_NOT_READY"]
         try:
             report = await run_scan(data, engine=engine)
             # The selected engine's scanners, exactly: a worker that ran the other engine (or lost
@@ -281,9 +260,9 @@ async def scan_file(request: Request) -> ScanResult:
     not_applicable = sum(s.status == "not_applicable" for s in report.scanners)
     # Not-applicable scanners neither count as analysis nor as failure.
     applicable = len(expected) - not_applicable
-    coverage_complete = report.coverage_complete if engine == "unified" else True
+    coverage_complete = report.coverage_complete
     verdict = decide(findings, scanners_run=applicable, scanners_failed=failed, coverage_complete=coverage_complete)
-    coverage_issues = report.coverage_issues if engine == "unified" else []
+    coverage_issues = report.coverage_issues
     if applicable == 0:
         operational.append("UNSUPPORTED_FILE_TYPE")
     reasons, authorization, explanation = classify(verdict, report.scanners, coverage_issues, operational)
@@ -293,14 +272,14 @@ async def scan_file(request: Request) -> ScanResult:
     # A receipt only for a validated outcome, only to the Conversion Engine, only from the
     # production engine: never with an operational reason (which includes unverified isolation).
     receipt = None
-    if claims["issuer"] == "conversion" and engine == "unified" and isolation_verified and not any(
+    if claims["issuer"] == "conversion" and isolation_verified and not any(
             r.category == "operational" for r in reasons):
         receipt = receipts.sign({
             "scan_request_id": request_id, "token_jti": claims["jti"],
             "sha256": sha256, "size": claims["size"], "detected_format": detected_format,
             "engine": engine, "engine_version": VERSIONS["engine"], "commit": VERSIONS["commit"],
             "ruleset_sha256": VERSIONS["ruleset_sha256"], "engine_ruleset_sha256": VERSIONS["engine_ruleset_sha256"],
-            "scanner_versions": {k: VERSIONS[k] for k in ("yara-x", "oletools", "olefile", "pypdf")},
+            "scanner_versions": {k: VERSIONS[k] for k in PARSERS},
             "scanners": sorted(expected),
             "verdict": verdict.value, "authorization": authorization,
             "complete": complete, "coverage_complete": coverage_complete, "isolation_verified": isolation_verified,

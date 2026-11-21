@@ -72,7 +72,6 @@ def test_legacy_doc_with_a_macros_storage():
 
 @pytest.mark.parametrize("modules, verdict", [(AUTO_SHELL, "MALICIOUS"), (BENIGN, "SUSPICIOUS")])
 def test_through_the_isolated_worker(monkeypatch, modules, verdict):
-    monkeypatch.setattr(main, "RESEARCH_ENGINES", True)
     monkeypatch.setattr(main, "run_scan", worker.run)
     data = docm(modules)
     body = client.post("/scan", content=data, headers=auth_headers(data, "f.docm"), params={"engine": "unified"}).json()

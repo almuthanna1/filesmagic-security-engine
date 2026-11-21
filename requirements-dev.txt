@@ -9,3 +9,7 @@ packaging==26.3
 pluggy==1.6.0
 Pygments==2.21.0
 pytest==9.1.1
+
+# Parity oracle only: tests/test_signatures.py compares app.engine.signatures with YARA-X on the
+# original rules (tests/signature_parity). Never imported by the service.
+yara-x==1.21.0

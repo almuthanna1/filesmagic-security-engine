@@ -44,12 +44,13 @@ def test_corrupt_documents_must_fail_closed():
     assert ok["same"] and not bad["same"]
 
 
-def test_a_scan_without_isolation_or_with_the_other_engine_is_not_evidence():
-    scanners = {n: "completed" for n in ov.main.engine_scanners("reference")}
-    assert ov.scan_problem(result("s", "x", "reference", "SAFE", status=scanners), "reference") == ""
-    assert ov.scan_problem(result("s", "x", "reference", "SAFE", missing=["capabilities_dropped"], status=scanners),
-                           "reference")
-    assert ov.scan_problem(result("s", "x", "unified", "SAFE", status=scanners), "unified")
+def test_a_scan_without_isolation_or_with_another_roster_is_not_evidence():
+    scanners = {n: "completed" for n in ov.main.engine_scanners()}
+    assert ov.scan_problem(result("s", "x", "unified", "SAFE", status=scanners), "unified") == ""
+    assert ov.scan_problem(result("s", "x", "unified", "SAFE", missing=["capabilities_dropped"], status=scanners),
+                           "unified")
+    retired = {n: "completed" for n in ("yara-x", "office", "pdf", "custom")}
+    assert ov.scan_problem(result("s", "x", "unified", "SAFE", status=retired), "unified")
 
 
 def test_the_committed_windows_evidence_is_readable():
@@ -71,7 +72,6 @@ def test_every_claim_and_expected_result_holds_in_process():
     # The same sets, engines, comparison and claims as the VM run, without the worker subprocess:
     # a regression check on every commit (Windows and Linux CI) that no classification moved.
     from app import engine, worker
-    from app.scanners import SCANNERS
     from evaluation.cases import cases, field_cases, verdicts
 
     corpus, _ = ov.corpus_items()
@@ -79,13 +79,12 @@ def test_every_claim_and_expected_result_holds_in_process():
     for name, items in (("synthetic", cases()), ("corpus", corpus), ("corrupt", ov.corrupt_items()),
                         ("c7", field_cases())):
         for item in items:
-            for name_ in ov.ENGINES:
-                report = (worker.analyse(SCANNERS, item["data"]) if name_ == "reference"
-                          else engine.correlate(worker.analyse(engine.SCANNERS, item["data"])))
+            for name_ in ov.LIVE_ENGINES:
+                report = engine.correlate(worker.analyse(engine.SCANNERS, item["data"]))
                 results.append({"set": name, "id": item["id"], "engine": name_, "verdicts": verdicts(report),
                                 "status": {s.name: s.status for s in report.scanners},
                                 "findings": [{"scanner": f.scanner, "rule_id": f.rule_id, "severity": f.severity.value,
                                               "description": f.description} for f in report.findings]})
-    assert len(results) == 2 * (16 + 33 + 2 + 6)
+    assert len(results) == 16 + 33 + 2 + 6
     assert [r for r in ov.compare(results, ov.expectations()) if not r["same"]] == []
     assert [claim for claim, ok in ov.checks(results) if not ok] == []

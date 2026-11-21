@@ -24,7 +24,8 @@ What exists:
 - Deterministic decision engine (`app/decision/`) that combines findings into a verdict
 - Security Lab web interface (`frontend/`) for uploading test files to `POST /scan`
 - Deployment configuration: `Dockerfile` and `render.yaml` (API on Render), `frontend/` on Vercel
-- YARA-X scanner (`app/scanners/yarax.py`) with a small curated rule set (`app/rules/`)
+- Signature matcher (`app/engine/signatures.py`, our own) with a small curated rule set
+  (`app/engine/signature_rules.py`); it replaced YARA-X (docs/custom-detection-rebuild)
 - Office scanner (`app/scanners/office.py`): structural analysis of OLE and OOXML documents
 - PDF scanner (`app/scanners/pdf.py`): structural analysis of PDF documents
 - 10 MB upload limit on `POST /scan`
@@ -44,8 +45,8 @@ combines them into one verdict.
 
 | Layer | Tool | Status |
 |-------|------|--------|
-| 1 | YARA-X: curated rules for risky byte patterns in supported file types | **Implemented** |
-| 2 | Office analysis: oletools + OOXML ZIP/XML structure (macros, auto-exec, embedded objects, external relationships, ActiveX, DDE, encryption, package abuse) | **Implemented** |
+| 1 | Signatures (own matcher): curated rules for risky byte patterns in supported file types | **Implemented** |
+| 2 | Office analysis: oletools/olefile parsing + own VBA analysis (`app/engine/vba_analysis.py`) + OOXML ZIP/XML structure (macros, auto-exec, embedded objects, external relationships, ActiveX, DDE, encryption, package abuse) | **Implemented** |
 | 3 | PDF analysis: pypdf + structural walk (JavaScript, automatic actions, launch actions, embedded files, URIs, forms, encryption) | **Implemented** |
 | 4 | General structural protections (type/signature validation, archive safety, size/resource limits) | Partly (upload limit) |
 
@@ -56,7 +57,7 @@ engine. It may be used separately in the isolated test VM as a reference baselin
 
 The layers complement each other:
 
-- **YARA-X**: rule/pattern matching on raw bytes of any file, including formats no
+- **Signatures**: rule/pattern matching on raw bytes of any file, including formats no
   structural analyser understands (RTF, SVG, executables).
 - **Office scanner**: semantic/structural analysis of Office documents (compressed
   XML parts, relationship targets, macro behaviour).
@@ -85,24 +86,22 @@ as analysis nor as failure; a file that **no** scanner handles is `UNABLE_TO_SCA
 `app/scanners/__init__.py`. `POST /scan` runs every registered scanner and passes
 the combined findings to `decide()`.
 
-### YARA-X scanner
+### Signature matcher
 
-- Rules: every `app/rules/*.yar` file, compiled once at startup with the `yara-x`
-  Python package (Rust engine, prebuilt wheels, no system packages needed).
-- Each rule **must** declare `description`, `category` (kebab-case) and `severity`
-  (`INFO`/`LOW`/`MEDIUM`/`HIGH`/`CRITICAL`); the compiler rejects rules without them.
-  A match becomes a `Finding` with `scanner = "yara-x"` and `rule_id` = rule name.
-- Bytes are scanned in memory; files are never executed. Each scan has a 10 s
-  timeout and tracks at most 1000 matches per pattern (bounds memory).
-- If rules cannot be loaded (package missing, syntax error, missing metadata), the
-  scanner stays registered but **not ready**, and scans are `UNABLE_TO_SCAN`.
-
-Initial rules (`app/rules/filesmagic.yar`):
+- Our own matcher (`app/engine/signatures.py`); YARA-X was retired as a detection dependency. It
+  keeps YARA-X's semantics where the rules rely on them: overlapping matches counted by start
+  offset, `nocase` (ASCII) and `wide` (UTF-16LE) strings, inclusive offset ranges, integers read
+  outside the file are undefined, a regex match extends at most 4095 bytes, counts saturate at
+  1000 per pattern, and a 10 s deadline. `tests/test_signatures.py` compares it with YARA-X on
+  more than 5,000 inputs (YARA-X is a development-only dependency for that comparison).
+- Rules (`app/engine/signature_rules.py`) are Python data with `description`, `category` and
+  `severity`; `validate()` rejects incomplete rules, the scanner is then **not ready** and every
+  scan is `UNABLE_TO_SCAN`. A match becomes a `Finding` with `scanner = "signatures"`.
 
 | Rule | Severity | Detects |
 |------|----------|---------|
 | `PDF_Launch_Action` | HIGH | PDF `/Launch` action (can start programs) |
-| `PDF_JavaScript_With_Automatic_Action` | MEDIUM | PDF JavaScript plus `/OpenAction` or `/AA` |
+| `ENGINE_PDF_JavaScript_With_Automatic_Trigger` | MEDIUM | PDF JavaScript with an automatic `/OpenAction` or `/AA` trigger |
 | `PDF_Embedded_File` | LOW | PDF file attachment |
 | `OLE_Office_VBA_Macros` | MEDIUM | Legacy Office file with a VBA project |
 | `OOXML_VBA_Macros` | MEDIUM | `.docm`/`.xlsm`-style file containing `vbaProject.bin` |
@@ -115,9 +114,8 @@ Rules match raw bytes only: content in compressed PDF streams or compressed OOXM
 parts, and obfuscated PDF names (`/J#61vaScript`), are invisible to them. The Office
 and PDF scanners parse those structures. The macro and PDF rules overlap with the
 structural scanners on purpose: they are an independent second signal and still fire
-when a structural parser does not recognise or cannot parse a file. To add a rule, put it in
-`app/rules/` with the three metadata fields and add a trigger and a benign case to
-`tests/test_yarax.py`.
+when a structural parser does not recognise or cannot parse a file. To add a rule, add it to
+`app/engine/signature_rules.py` and a trigger and a benign case to `tests/test_signatures.py`.
 
 ### Office scanner
 
@@ -375,9 +373,8 @@ Never commit `.env.local` or any real `.env` file.
 **Run both services locally** (two terminals):
 
 ```bash
-# Terminal 1, repo root, venv active. SECURITY_ENGINE_RESEARCH_ENGINES=1 lets /scan run the
-# custom unified engine as well as the original one (research only; leave unset in production).
-SECURITY_ENGINE_RESEARCH_ENGINES=1 uvicorn app.main:app --reload --port 8000
+# Terminal 1, repo root, venv active.
+uvicorn app.main:app --reload --port 8000
 
 # Terminal 2
 cd frontend
@@ -392,11 +389,10 @@ npm run dev
 
 Other frontend commands: `npm run lint`, `npx tsc --noEmit`, `npm test`, `npm run build`.
 
-**Engine selection.** `POST /scan?engine=reference|unified`. `reference` (default) is the original
-four-scanner engine the FilesMagic pipeline uses. `unified` runs the custom engine in the same
-isolated worker and is accepted only when the API runs with `SECURITY_ENGINE_RESEARCH_ENGINES=1`;
-otherwise it is refused with HTTP 403, never answered by the other engine. The API requires the
-worker to report exactly the selected engine's scanners, and every response names its `engine`
+**Engine selection.** One engine: the unified Security Engine (`engine=unified`, the default). The
+reference engine was retired by the custom detection rebuild; `engine=reference` is refused with
+HTTP 410 `ENGINE_RETIRED`, never answered by another engine. The API requires the worker to report
+exactly the engine's scanners, and every response names its `engine`
 and source `commit` (`versions.commit`, from `SECURITY_ENGINE_COMMIT`, Render's
 `RENDER_GIT_COMMIT` or the git checkout). `/health` lists the accepted `engines`.
 
@@ -489,7 +485,6 @@ detects Next.js; no `vercel.json` is needed.
 | `SECURITY_ENGINE_WORKER_MEMORY_MB` | Render (optional) | Writable memory per worker, default `320`. |
 | `SECURITY_ENGINE_WORKER_TIMEOUT_SECONDS` | Render (optional) | Default `30`. |
 | `SECURITY_ENGINE_REQUIRE_ISOLATION` | Render (optional) | `1` = refuse to scan without every isolation control. Required for real malware. |
-| `SECURITY_ENGINE_RESEARCH_ENGINES` | Render research staging; also the FilesMagic integration, which uses the unified engine (docs/security-integration-v1.md §12) | `1` = `/scan?engine=unified` runs the custom unified engine. Unset: only the original engine; `unified` is refused (403). |
 | `SECURITY_ENGINE_COMMIT` | Render (optional) | Source commit reported in every result; Render's own `RENDER_GIT_COMMIT` is used when unset. |
 | `SECURITY_ENGINE_NET_DIAGNOSTICS` | Render staging only (optional) | `1` = the worker describes its network namespace (interface names, flags, address and route counts; no addresses) and the API logs it per request ID. Never returned in responses. Diagnostic only: it never changes an isolation result. Leave unset elsewhere. |
 | `NEXT_PUBLIC_SECURITY_ENGINE_URL` | Vercel (Production) | The Render service URL, e.g. `https://<service>.onrender.com`. Inlined at build time, so **redeploy** the frontend after changing it. Public by design: never put secrets in `NEXT_PUBLIC_` variables. |

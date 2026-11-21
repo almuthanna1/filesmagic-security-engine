@@ -8,7 +8,7 @@ import pytest
 from app import engine, worker
 from app.engine import word_fields as wf
 from app.engine.word_fields import NESTED, Field, classify, fields, tokens
-from app.scanners import SCANNERS
+from tests.scan_client import FORMAT_ONLY as SCANNERS  # the retired reference roster's equivalent
 from evaluation.cases import cases, verdicts
 from tests import custom_fixtures as fx
 

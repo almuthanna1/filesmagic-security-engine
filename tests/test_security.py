@@ -131,7 +131,7 @@ def test_concurrent_scans_are_limited(monkeypatch):
 
 
 def test_scan_slot_is_released_after_failures(monkeypatch):
-    async def explode(data, engine="reference"):
+    async def explode(data, engine="unified"):
         raise RuntimeError("unexpected")
 
     monkeypatch.setattr(main, "run_scan", explode)
@@ -175,9 +175,9 @@ def run_fake(mode, timeout=10.0):
 def test_real_worker_scans_benign_documents():
     for data in (make_ooxml({}), make_pdf(), DATA):
         report = asyncio.run(worker.run(data))
-        assert {s.name for s in report.scanners} == {"yara-x", "office", "pdf", "custom"}
+        assert [s.name for s in report.scanners] == [s.name for s in main.unified_engine.SCANNERS]
         assert all(s.status != "failed" for s in report.scanners)
-        assert report.findings == []
+        assert [f for f in report.findings if f.severity != "INFO"] == []
         assert report.isolation["process"] and report.isolation["audit_hook"]
 
 
@@ -187,14 +187,16 @@ def test_real_worker_detects_through_the_api(monkeypatch):
     assert body["verdict"] == Verdict.MALICIOUS and body["complete"]
     assert body["detected_format"] == "pdf" and body["isolation"]["process"]
     assert body["sha256"] == hashlib.sha256(make_pdf("/OpenAction << /S /Launch /F (calc.exe) >>")).hexdigest()
-    assert body["versions"]["ruleset_sha256"] == main.ruleset_hash()
+    assert body["versions"]["ruleset_sha256"] == main.unified_engine.ruleset_hash()
 
 
 def test_real_worker_reports_failure_classification():
     report = asyncio.run(worker.run(b"%PDF-1.4\nnot really a PDF\n"))
     status = {s.name: s for s in report.scanners}["pdf"]
     assert status.status == "failed" and status.error_kind == "malformed_input" and status.error_type
-    assert report.traces == {}  # traces are only kept for unexpected failures
+    # Traces are only kept for unexpected failures: pdf-integrity reports pypdf's rejection as one
+    # (docs/security-integration-v1-readiness.md, "Also found and fixed"; fail-closed either way).
+    assert set(report.traces) <= {"pdf-integrity"}
 
 
 def test_worker_timeout_is_enforced():
@@ -224,7 +226,7 @@ def test_worker_failure_is_unable_to_scan_not_an_api_crash(monkeypatch, mode):
 
 
 def test_worker_reporting_unexpected_scanners_is_rejected(monkeypatch):
-    async def liar(data, engine="reference"):
+    async def liar(data, engine="unified"):
         return worker.WorkerReport(scanners=[], findings=[])  # "nothing applied", hiding every scanner
 
     monkeypatch.setattr(main, "run_scan", liar)
@@ -293,7 +295,7 @@ def test_scanner_errors_do_not_leak_paths_or_tracebacks(monkeypatch):
         def scan(self, filename, data):
             raise FileNotFoundError(r"/srv/app/secrets/config.py and C:\Users\dev\key.pem missing")
 
-    monkeypatch.setattr(main, "SCANNERS", [Leaky()])
+    monkeypatch.setattr(main.unified_engine, "SCANNERS", [Leaky()])
     body = post_scan(client, DATA).json()
     error = body["scanners"][0]["error"]
     assert "/srv" not in error and "Users" not in error and "<path>" in error
@@ -341,15 +343,11 @@ def test_ruleset_hash_ignores_line_endings(tmp_path):
     rules = b'rule a { condition: true }\nrule b { condition: false }\n'
     hashes = []
     for name, content in [("lf", rules), ("crlf", rules.replace(b"\n", b"\r\n")), ("cr", rules.replace(b"\n", b"\r"))]:
-        d = tmp_path / name
-        d.mkdir()
-        (d / "r.yar").write_bytes(content)
-        hashes.append(main.ruleset_hash(d))
+        (tmp_path / name).write_bytes(content)
+        hashes.append(main.unified_engine.ruleset_hash(tmp_path / name))
     assert len(set(hashes)) == 1
-    changed = tmp_path / "changed"
-    changed.mkdir()
-    (changed / "r.yar").write_bytes(rules.replace(b"true", b"false"))
-    assert main.ruleset_hash(changed) != hashes[0]
+    (tmp_path / "changed").write_bytes(rules.replace(b"true", b"false"))
+    assert main.unified_engine.ruleset_hash(tmp_path / "changed") != hashes[0]
 
 
 # --------------------------------------------------------------------- network isolation verification (Phase C5)

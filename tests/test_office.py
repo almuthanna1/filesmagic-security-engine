@@ -19,7 +19,7 @@ from app.models import Severity, Verdict
 from app.engine import vba_analysis
 from app.scanners import office
 from app.scanners.office import OfficeScanError, OfficeScanner
-from app.scanners.yarax import YaraXScanner
+from app.engine.signatures import SignatureScanner
 from tests.office_fixtures import make_ole, make_ooxml, ole10native, rels, word_body, word_document_stream
 from tests.scan_client import post_scan
 
@@ -445,7 +445,7 @@ client = TestClient(main.app)
 
 
 def post(monkeypatch, data, scanners=None):
-    monkeypatch.setattr(main, "SCANNERS", scanners or [YaraXScanner(), OfficeScanner()])
+    monkeypatch.setattr(main.unified_engine, "SCANNERS", scanners or [SignatureScanner(), OfficeScanner()])
     r = post_scan(client, data)
     assert r.status_code == 200
     return r.json()
@@ -479,7 +479,7 @@ def test_api_macro_document_is_suspicious_with_both_layers(monkeypatch):
     body = post(monkeypatch, DOCM)
     assert body["verdict"] == Verdict.SUSPICIOUS
     scanners = {f["scanner"] for f in body["findings"]}
-    assert scanners == {"yara-x", "office"}  # YARA-X OOXML_VBA_Macros + structural findings
+    assert scanners == {"signatures", "office"}  # OOXML_VBA_Macros signature + structural findings
 
 
 def test_api_autoexec_command_macro_is_malicious(monkeypatch):
@@ -494,16 +494,16 @@ def test_api_office_parse_failure_is_unable_to_scan(monkeypatch):
 
 
 def test_api_evidence_wins_over_office_failure(monkeypatch):
-    # YARA-X finds a Launch action, Office scanner fails: still MALICIOUS.
+    # The signature matcher finds a Launch action, Office scanner fails: still MALICIOUS.
     class Broken:
         name = "office"
 
         def scan(self, filename, data):
             raise RuntimeError("boom")
 
-    body = post(monkeypatch, b"%PDF-1.7 /Launch", scanners=[YaraXScanner(), Broken()])
+    body = post(monkeypatch, b"%PDF-1.7 /Launch", scanners=[SignatureScanner(), Broken()])
     assert body["verdict"] == Verdict.MALICIOUS
 
 
-def test_default_registry_includes_yara_and_office():
-    assert {"yara-x", "office"} <= {s.name for s in main.SCANNERS}
+def test_default_registry_includes_signatures_and_office():
+    assert {"signatures", "office"} <= {s.name for s in main.unified_engine.SCANNERS}

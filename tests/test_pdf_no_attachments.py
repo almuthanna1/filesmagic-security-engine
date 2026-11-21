@@ -9,7 +9,7 @@ from app import engine, worker
 from app.engine.correlate import ACCOUNTS, correlate
 from app.engine.correlate import finding as engine_finding
 from app.models import Finding, ScannerStatus, Severity, WorkerReport
-from app.scanners import SCANNERS
+from tests.scan_client import FORMAT_ONLY as SCANNERS  # the retired reference roster's equivalent
 from evaluation.cases import verdicts
 from evaluation.pdf_accuracy import REQUIRED, synthetic
 from tests.pdf_fixtures import make_pdf

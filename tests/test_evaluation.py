@@ -319,7 +319,9 @@ def test_strict_run_records_isolation_and_keeps_malformed_documents(monkeypatch,
         assert all(r["isolation"][k] is True for k in worker.REQUIRED_CONTROLS), r
         assert r["request_id"] and r["ruleset_sha256"] == main.VERSIONS["ruleset_sha256"]
     # A malformed document is a legitimate UNABLE_TO_SCAN, not an isolation failure; the run goes on.
-    assert per_sample["M4"]["outcome"] == "UNABLE_TO_SCAN" and per_sample["M4"]["failure_reason"] == "parser_failure"
+    # pdf-integrity reports pypdf's rejection as "unexpected" (scanner_error), deliberately left as is:
+    # docs/security-integration-v1-readiness.md, "Also found and fixed". Still fail-closed.
+    assert per_sample["M4"]["outcome"] == "UNABLE_TO_SCAN" and per_sample["M4"]["failure_reason"] == "scanner_error"
     assert "pdf=failed:malformed_input" in per_sample["M4"]["scanner_status"]
     assert per_sample["M4"]["complete"] == "False" and per_sample["B1"]["complete"] == "True"
     assert "capabilities_dropped=True" in per_sample["B1"]["isolation"]
@@ -327,7 +329,7 @@ def test_strict_run_records_isolation_and_keeps_malformed_documents(monkeypatch,
     block = summary["views"]["block"]
     assert (block["TP"], block["FN"], block["FP"], block["TN"]) == (2, 1, 1, 3)
     assert summary["isolation"]["samples_with_verified_isolation"] == len(scanned)
-    assert summary["failure_reasons"]["MALICIOUS"] == {"parser_failure": 1}
+    assert summary["failure_reasons"]["MALICIOUS"] == {"scanner_error": 1}
     env = saved["environment"]
     assert env["strict_isolation_configured"] is True and env["worker_memory_measured"] is False
     assert "peak_rss_mib" not in env and "harness_peak_rss_mib" in env

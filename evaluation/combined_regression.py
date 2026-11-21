@@ -31,7 +31,7 @@ from evaluation import c2pa_accuracy, pdf_accuracy
 from evaluation.pdf_accuracy import BENIGN, REQUIRED, outcome, rules
 
 ROOT = Path(__file__).resolve().parents[1]
-ENGINES = ("reference", "unified")
+ENGINES = ("reference", "unified")  # a tree after the rebuild has unified only
 RANK = {"SAFE": 0, "UNABLE_TO_SCAN": 1, "SUSPICIOUS": 2, "MALICIOUS": 3}
 POSITIVE = {c for c, v in REQUIRED.items() if v != "SAFE"}
 NEGATIVE = BENIGN | {c for c, v in REQUIRED.items() if v == "SAFE"}
@@ -60,7 +60,7 @@ def api_verdict(report, engine):
 
 for path in json.load(sys.stdin):
     data, row = open(path, "rb").read(), {}
-    for engine in ("reference", "unified"):
+    for engine in [e for e in ("reference", "unified") if e in worker.ENGINE_ARGS]:  # what the tree offers
         runs, errors = [], []
         for _ in range(trials):
             start = time.perf_counter()
@@ -178,7 +178,7 @@ def measure(rows: list[dict], tag: str, cases: dict[str, str]) -> dict:
     walls = [statistics.median(x["wall_ms"]) for x in u if x["wall_ms"]]
     out = {
         "samples": len(rows),
-        "verdicts": {e: dict(Counter(r[tag][e]["verdict"] for r in rows)) for e in ENGINES},
+        "verdicts": {e: dict(Counter(r[tag][e]["verdict"] for r in rows)) for e in ENGINES if all(e in r[tag] for r in rows)},
         "by_class": {c: dict(Counter(r[tag]["unified"]["verdict"] for r in rows if r["cls"] == c))
                      for c in sorted({r["cls"] for r in rows})},
         "detection (SUSPICIOUS or MALICIOUS)": binary(rows, tag, {"SUSPICIOUS", "MALICIOUS"}),
@@ -190,8 +190,7 @@ def measure(rows: list[dict], tag: str, cases: dict[str, str]) -> dict:
         "worker_errors": sorted({(r["id"], c) for r in rows for c in r[tag]["unified"]["worker_errors"]}),
         "incomplete_coverage": {"samples": sum(not x["coverage_complete"] for x in u),
                                 "codes": dict(Counter(c for x in u for c in x["coverage_codes"]))},
-        "not_deterministic": [r["id"] for r in rows if not (r[tag]["unified"]["deterministic"]
-                                                            and r[tag]["reference"]["deterministic"])],
+        "not_deterministic": [r["id"] for r in rows if not all(x["deterministic"] for x in r[tag].values())],
         "unified_latency_ms (per-sample median of trials, incl. worker start)": {
             "median": round(statistics.median(walls), 1), "p95": pct(walls, 0.95), "max": round(max(walls), 1)},
     }
@@ -209,7 +208,7 @@ def compare(rows: list[dict], base: str, cand: str) -> dict:
                 "after": r[cand][e]["verdict"],
                 "removed": sorted(set(rules(r[base][e])) - set(rules(r[cand][e]))),
                 "added": sorted(set(rules(r[cand][e])) - set(rules(r[base][e])))}
-               for r in rows for e in ENGINES
+               for r in rows for e in ENGINES if e in r[base] and e in r[cand]
                if r[base][e]["verdict"] != r[cand][e]["verdict"] or rules(r[base][e]) != rules(r[cand][e])]
     weaker = [c for c in changes if c["engine"] == "unified" and RANK[c["after"]] < RANK[c["before"]]]
     return {"changed": changes, "unified_weaker_verdicts": weaker,

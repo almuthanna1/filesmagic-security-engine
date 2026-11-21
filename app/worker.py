@@ -103,10 +103,9 @@ class WorkerError(RuntimeError):
 # ----------------------------------------------------------------------------- parent side
 
 
-# Worker arguments that select the scanner set: the reference scanners (app.scanners) or the
-# custom unified engine (app.engine). The API checks the reported scanner names against the
-# engine it asked for, so a worker that ran the other set fails the scan instead of passing.
-ENGINE_ARGS = {"reference": [], "unified": ["--engine=unified"]}
+# The worker runs the unified engine (app.engine) only; the reference roster was retired. The
+# API still checks the reported scanner names, so a stale worker build fails the scan closed.
+ENGINE_ARGS = {"unified": ["--engine=unified"]}
 
 
 def command() -> list[str]:
@@ -149,7 +148,7 @@ async def _exchange(proc: asyncio.subprocess.Process, data: bytes) -> bytes:
 
 
 async def run(data: bytes, cmd: list[str] | None = None, timeout: float | None = None,
-              engine: str = "reference") -> WorkerReport:
+              engine: str = "unified") -> WorkerReport:
     """Scan `data` in a fresh worker process with the scanners of `engine` (ENGINE_ARGS).
     Raises WorkerError if no valid report comes back."""
     timeout = TIMEOUT_SECONDS if timeout is None else timeout
@@ -522,12 +521,8 @@ def _audit_hook(event: str, args: tuple) -> None:
 
 def main(argv: list[str]) -> int:
     # Rules and parsers load first (trusted files), before any containment that would block them.
-    # --engine=unified: the custom engine candidate (evaluation only; the API never passes it).
-    unified = "--engine=unified" in argv
-    if unified:
-        from app.engine import SCANNERS, correlate
-    else:
-        from app.scanners import SCANNERS
+    # Always the unified engine (--engine=unified is still passed, and accepted, for older callers).
+    from app.engine import SCANNERS, correlate
 
     isolation = dict.fromkeys(ISOLATION_CONTROLS, False)
     isolation["process"] = True
@@ -538,7 +533,7 @@ def main(argv: list[str]) -> int:
         isolation["capabilities_dropped"] = POSIX and drop_capabilities()
     except (OSError, AttributeError, TypeError):  # no prctl/capset here: stays False
         pass
-    for scanner in SCANNERS:  # warm-up: lets YARA-X start its timeout thread before RLIMIT_NPROC
+    for scanner in SCANNERS:  # warm-up: lazy imports and caches load before the rlimits and the audit hook
         try:
             scanner.scan("", b"")
         except Exception:
@@ -559,9 +554,7 @@ def main(argv: list[str]) -> int:
         data = sys.stdin.buffer.read(MAX_INPUT_BYTES + 1)
         if len(data) > MAX_INPUT_BYTES:
             return 3
-        report = analyse(SCANNERS, data, isolation)
-        if unified:
-            report = correlate(report)
+        report = correlate(analyse(SCANNERS, data, isolation))
     report.diagnostics = diagnostics
     sys.stdout.buffer.write(report.model_dump_json().encode())
     sys.stdout.flush()

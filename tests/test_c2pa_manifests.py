@@ -10,7 +10,7 @@ from app import engine, worker
 from app.engine import c2pa
 from app.engine.correlate import ACCOUNTS
 from app.models import Severity
-from app.scanners import SCANNERS
+from tests.scan_client import FORMAT_ONLY as SCANNERS  # the retired reference roster's equivalent
 from evaluation.c2pa_accuracy import (
     ICON, NS, SPEC, assertion, box, c2, c2pa_pdf, cbor, embedded, jpeg, png, store, stream, superbox, synthetic,
 )

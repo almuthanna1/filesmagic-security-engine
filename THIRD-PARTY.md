@@ -1,6 +1,6 @@
 # Third-party software in the Security Engine
 
-The Security Engine's own code and YARA rules (`app/rules/filesmagic.yar`, `app/engine/rules/pdf.yar`)
+The Security Engine's own code and signature rules (`app/engine/signature_rules.py`)
 are FilesMagic's, under [LICENSE](LICENSE). The production image installs exactly the packages pinned
 in [`requirements.txt`](requirements.txt), from PyPI, on `python:3.11-slim` (Debian). Licenses below
 are from each package's own metadata at the pinned version.
@@ -40,7 +40,7 @@ are from each package's own metadata at the pinned version.
 | watchfiles | 1.3.0 | MIT |
 | websockets | 17.2 | BSD-3-Clause |
 | win_unicode_console | 0.5 | MIT (Windows only; not in the production image) |
-| yara-x | 1.21.0 | BSD-3-Clause |
+| yara-x (development only: signature parity tests) | 1.21.0 | BSD-3-Clause |
 
 ## pcodedmp (GPL-3.0)
 
