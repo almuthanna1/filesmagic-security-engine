@@ -420,8 +420,16 @@ def correlate(report: WorkerReport) -> WorkerReport:
     if chains_ok and status.get("pdf") == "completed" and (found := rules & STRUCTURAL):
         drop |= dict.fromkeys(found, NAME)
         note(NAME, f"replaced {', '.join(sorted(r for _, r in found))} (PDF scanner) by the action-chain rules")
-    if chains_ok and REFINED_SIGNATURE in rules and not any(s == NAME and r in SCRIPT_RULES for s, r in rules):
-        note(NAME, f"{REFINED_SIGNATURE[1]} ({SIGNATURES}) kept but not confirmed: no automatic action chain runs a script")
+    if chains_ok and REFINED_SIGNATURE in rules:
+        if confirmed := sorted(r for s, r in rules if s == NAME and r in SCRIPT_RULES):
+            # The same automatic script, seen in the bytes and on the parsed chain: counted once. The
+            # chain rule is MEDIUM or HIGH, so the verdict cannot drop; the raw finding stays below.
+            drop[REFINED_SIGNATURE] = NAME
+            note(NAME, f"merged {REFINED_SIGNATURE[1]} ({SIGNATURES}) into {', '.join(confirmed)}: "
+                       "the same automatic script, counted once")
+        else:
+            note(NAME, f"{REFINED_SIGNATURE[1]} ({SIGNATURES}) kept but not confirmed: no automatic action chain "
+                       "runs a script")
 
     # Accounting: an engine finding that re-listed and examined everything behind a reference
     # finding replaces it, keeping the reference scanner's name in its evidence. Both scanners must

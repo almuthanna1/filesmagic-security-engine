@@ -84,8 +84,8 @@ def test_every_claim_and_expected_result_holds_in_process():
                           else engine.correlate(worker.analyse(engine.SCANNERS, item["data"])))
                 results.append({"set": name, "id": item["id"], "engine": name_, "verdicts": verdicts(report),
                                 "status": {s.name: s.status for s in report.scanners},
-                                "findings": [{"scanner": f.scanner, "rule_id": f.rule_id, "severity": f.severity.value}
-                                             for f in report.findings]})
+                                "findings": [{"scanner": f.scanner, "rule_id": f.rule_id, "severity": f.severity.value,
+                                              "description": f.description} for f in report.findings]})
     assert len(results) == 2 * (16 + 33 + 2 + 6)
     assert [r for r in ov.compare(results, ov.expectations()) if not r["same"]] == []
     assert [claim for claim, ok in ov.checks(results) if not ok] == []

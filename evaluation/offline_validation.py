@@ -103,12 +103,20 @@ RENAMED_SCANNERS = {"yara-x": "signatures", "yara-x-engine": "signatures"}
 RETIRED_FINDINGS = {"yara-x:PDF_JavaScript_With_Automatic_Action", "yara-x-engine:ENGINE_CORRELATION"}
 
 
+# Consolidation (Phase 4): where the action-chain scanner confirms an automatic script chain, the
+# refined signature for the same script is merged into that chain finding (counted once).
+MERGED_SIGNATURE = "signatures:ENGINE_PDF_JavaScript_With_Automatic_Trigger"
+CHAIN_SCRIPT_RULES = {"pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT", "pdf-chains:ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT"}
+
+
 def unified_expected(findings: list[str]) -> list[str]:
     out = []
     for f in findings:
         scanner, rule, severity = f.split(":")
         if f"{scanner}:{rule}" not in RETIRED_FINDINGS:
             out.append(f"{RENAMED_SCANNERS.get(scanner, scanner)}:{rule}:{severity}")
+    if any(f.rsplit(":", 1)[0] in CHAIN_SCRIPT_RULES for f in out):
+        out = [f for f in out if f.rsplit(":", 1)[0] != MERGED_SIGNATURE]
     return sorted(out)
 
 
@@ -177,8 +185,11 @@ def checks(results: list[dict]) -> list[tuple[str, bool]]:
         ("5b: unified MALICIOUS with ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT",
          v(syn, "5b-pdf-auto-js-exports-attachment", "unified") == "MALICIOUS"
          and _has(by, (syn, "5b-pdf-auto-js-exports-attachment", "unified"), ":ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT")),
-        ("refined YARA-X rule fires on every automatic page-open/OpenAction script case (2c, 5a, 5b)",
-         all(_has(by, (syn, c, "unified"), "signatures:ENGINE_PDF_JavaScript_With_Automatic_Trigger") for c in auto)),
+        ("refined signature fires on every automatic page-open/OpenAction script case (2c, 5a, 5b), reported or "
+         "merged into the chain finding for the same script",
+         all(_has(by, (syn, c, "unified"), "signatures:ENGINE_PDF_JavaScript_With_Automatic_Trigger")
+             or any(f["rule_id"] == "ENGINE_CORRELATION" and "merged ENGINE_PDF_JavaScript_With_Automatic_Trigger"
+                    in f.get("description", "") for f in by[syn, c, "unified"]["findings"]) for c in auto)),
         ("refined YARA-X rule is silent on the user-triggered cases (2, 2b), which the reference rule flags",
          all(not _has(by, (syn, c, "unified"), ":ENGINE_PDF_JavaScript_With_Automatic_Trigger")
              and _has(by, (syn, c, "reference"), "yara-x:PDF_JavaScript_With_Automatic_Action")

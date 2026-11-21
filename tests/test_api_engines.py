@@ -20,6 +20,7 @@ from app import main, worker
 from app.models import Severity
 from app.scanners import office
 from evaluation.cases import cases
+from evaluation.offline_validation import unified_expected
 from tests import custom_fixtures as fx
 from tests.scan_client import auth_headers, post_scan
 from tests.test_vba_chains import RELATED, SourceOnlyOfficeParser
@@ -129,7 +130,7 @@ def test_every_frozen_case_reproduces_through_the_api(research, engine_name, cas
     assert body["verdict"] == frozen["verdicts"]["aggregate"]
     status = {s["name"]: s["status"] for s in body["scanners"]}
     if engine_name == "unified":
-        frozen["rules"] = sorted(renamed(r) for r in frozen["rules"])
+        frozen["rules"] = unified_expected(frozen["rules"])  # renames and the Phase 4 merge
         frozen["status"] = {RENAMED.get(n, n): v for n, v in frozen["status"].items()}
         status.pop("word-fields")  # C7, added after the frozen run; its status: tests/test_word_fields.py
         status.pop("pdf-integrity")  # post-freeze coverage scanner; dedicated regressions below

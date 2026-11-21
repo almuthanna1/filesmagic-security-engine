@@ -28,9 +28,10 @@ def rules(report: WorkerReport) -> set[str]:
      {"PDF_AUTO_JAVASCRIPT", "ENGINE_PDF_AUTO_CHAIN_SCRIPT", "PDF_JavaScript_With_Automatic_Action",
       "ENGINE_PDF_JavaScript_With_Automatic_Trigger"}),
     # Over-correction guard: the page's own open trigger stays automatic.
-    ("2c-pdf-open-at-page-page-open-js", "SUSPICIOUS",
-     {"ENGINE_PDF_AUTO_CHAIN_SCRIPT", "ENGINE_PDF_JavaScript_With_Automatic_Trigger"},
-     {"PDF_JavaScript_With_Automatic_Action", "ENGINE_PDF_USER_TRIGGERED_SCRIPT"}),
+    # The refined signature for the same script is merged into the chain finding (counted once).
+    ("2c-pdf-open-at-page-page-open-js", "SUSPICIOUS", {"ENGINE_PDF_AUTO_CHAIN_SCRIPT"},
+     {"PDF_JavaScript_With_Automatic_Action", "ENGINE_PDF_USER_TRIGGERED_SCRIPT",
+      "ENGINE_PDF_JavaScript_With_Automatic_Trigger"}),
     ("3-pdf-escaped-openaction-js", "SUSPICIOUS", {"ENGINE_PDF_AUTO_CHAIN_SCRIPT", "CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME"},
      {"PDF_AUTO_JAVASCRIPT"}),
     # The reference engine says MALICIOUS here: an automatic script plus an attachment it never uses.
@@ -93,6 +94,32 @@ def test_coverage_issues_remain_bounded_when_correlation_adds_more():
     correlated = engine.correlate(report)
     assert len(correlated.coverage_issues) == MAX_COVERAGE_ISSUES
     assert not correlated.coverage_complete
+
+
+def signature_report(chain_status: str, *chain_rules: str) -> WorkerReport:
+    sig = Finding(scanner="signatures", category="pdf-javascript", severity=Severity.MEDIUM, description="bytes",
+                  rule_id="ENGINE_PDF_JavaScript_With_Automatic_Trigger")
+    chains = [Finding(scanner="pdf-chains", category="pdf-action-chain", severity=Severity.MEDIUM, description="x",
+                      rule_id=r) for r in chain_rules]
+    return WorkerReport(scanners=[ScannerStatus(name="signatures", status="completed"),
+                                  ScannerStatus(name="pdf-chains", status=chain_status)], findings=[sig, *chains])
+
+
+def test_a_signature_confirmed_by_an_automatic_chain_is_counted_once():
+    correlated = engine.correlate(signature_report("completed", "ENGINE_PDF_AUTO_CHAIN_SCRIPT"))
+    assert rules(correlated) == {"ENGINE_PDF_AUTO_CHAIN_SCRIPT", "ENGINE_CORRELATION"}
+    note = next(f for f in correlated.findings if f.rule_id == "ENGINE_CORRELATION")
+    assert "raw signatures:ENGINE_PDF_JavaScript_With_Automatic_Trigger MEDIUM: bytes" in note.evidence
+    assert decide(correlated.findings, 2) == Verdict.SUSPICIOUS
+
+
+@pytest.mark.parametrize("report", [
+    signature_report("failed", "ENGINE_PDF_AUTO_CHAIN_SCRIPT"),  # no complete chain view: the bytes stand
+    signature_report("completed", "ENGINE_PDF_AUTO_CHAIN_SCRIPT", "ENGINE_PDF_CHAINS_REPAIRED"),
+    signature_report("completed"),  # no chain confirms it: kept, marked unconfirmed
+])
+def test_a_signature_is_kept_without_a_complete_confirming_chain(report):
+    assert "ENGINE_PDF_JavaScript_With_Automatic_Trigger" in rules(engine.correlate(report))
 
 
 def reference_report(chain_status: str, chain_findings: list[Finding] = ()) -> WorkerReport:
