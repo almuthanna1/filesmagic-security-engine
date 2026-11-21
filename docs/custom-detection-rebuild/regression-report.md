@@ -133,6 +133,12 @@ corpora that are not present.
   was built to exercise one behaviour, so they show that the behaviour changed as intended, not
   how often it occurs in real documents. Before integration, a VBA-bearing benign corpus would be
   the most useful addition.
+- The VBA-case `.docm` files are minimal packages: `word/vbaProject.bin` has no content type and no
+  relationship. So every VBA case also carries `CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH` (MEDIUM),
+  `CUSTOM_OFFICE_UNDECLARED_PARTS` and `CUSTOM_OFFICE_CONCEALED_BINARY_PART` (LOW). They are
+  identical in both trees and never HIGH, so they do not affect the MALICIOUS/SUSPICIOUS
+  comparison. They do mean that no VBA case could have come out SAFE, whatever the VBA analysis
+  decided.
 - In v14 the verdict is lowered because the object type is unknown. A real `WScript.Shell` object
   obtained in a way the analysis cannot follow (for example `GetObject` or a parameter) would also
   be SUSPICIOUS, not MALICIOUS. That is a deliberate trade-off with a real consequence: a
