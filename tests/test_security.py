@@ -279,7 +279,9 @@ def test_isolation_can_be_required(monkeypatch):
     report = asyncio.run(worker.run(make_pdf("/OpenAction << /S /Launch /F (calc.exe) >>")))
     if not worker.missing_controls(report.isolation):
         assert all(s.status != "failed" for s in report.scanners)
-        assert {f.rule_id for f in report.findings} == {"PDF_Launch_Action", "PDF_LAUNCH_ACTION"}
+        # The worker runs the unified engine: the chain rule confirms the same /Launch.
+        assert {f.rule_id for f in report.findings} == {"PDF_Launch_Action", "PDF_LAUNCH_ACTION",
+                                                        "ENGINE_PDF_AUTO_CHAIN_LAUNCH"}
     else:
         assert all(s.status == "failed" and "required isolation unavailable" in s.error for s in report.scanners)
         assert report.findings == []

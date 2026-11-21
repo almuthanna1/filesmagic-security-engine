@@ -61,9 +61,11 @@ def wait_dead(pid: int, seconds: float = 5) -> bool:
 @pytest.mark.parametrize("data, expected", [
     (b"plain text", []),
     (make_pdf(), []),
-    (make_pdf("/OpenAction << /S /Launch /F (calc.exe) >>"), ["PDF_LAUNCH_ACTION", "PDF_Launch_Action"]),
+    (make_pdf("/OpenAction << /S /Launch /F (calc.exe) >>"),
+     ["PDF_LAUNCH_ACTION", "PDF_Launch_Action", "ENGINE_PDF_AUTO_CHAIN_LAUNCH"]),
+    # The HIGH scheme finding stands; ooxml-links adds that no element uses the relationship (INFO).
     (make_ooxml({"word/_rels/document.xml.rels": rels(("oleObject", "mhtml:https://example.test/x!", True))}),
-     ["OFFICE_EXTERNAL_DANGEROUS_SCHEME"]),
+     ["OFFICE_EXTERNAL_DANGEROUS_SCHEME", "ENGINE_OFFICE_EXTERNAL_NOT_ACTIVATED"]),
 ])
 def test_real_worker_scans_under_rlimits(data, expected):
     # Every scanner must still work with RLIMIT_NPROC=0, RLIMIT_DATA, no file writes and no
@@ -524,5 +526,7 @@ def test_evaluation_harness_runs_strictly_with_real_isolation(monkeypatch, tmp_p
         assert r["isolation"]["net_fallback_tunnel_inert"] is TUNNEL_EXPECTED, r
     assert records["B1"]["outcome"] == "SAFE" and records["B2"]["outcome"] == "SAFE"
     assert records["S1"]["outcome"] == "MALICIOUS"  # the engine's verdict on an inert indicator, not a label
-    assert records["B3"]["outcome"] == "UNABLE_TO_SCAN" and records["B3"]["failure_reason"] == "parser_failure"
+    # pdf-integrity classifies a PDF pypdf cannot open as unexpected (fail closed, deny), as in
+    # tests/test_evaluation.py; documented in docs/security-integration-v1-readiness.md.
+    assert records["B3"]["outcome"] == "UNABLE_TO_SCAN" and records["B3"]["failure_reason"] == "scanner_error"
 
