@@ -92,7 +92,7 @@ export default function QuickValidationScanner({ onFinished }: Props) {
       }
       // Reuse the main Lab's signed-token and strictly isolated backend.
       stage = "engine-request";
-      const scan = await scanFile(file, "unified");
+      const scan = await scanFile(file);
       stage = "response-validation";
       if (scan.sha256.toLowerCase() !== uploadHash.toLowerCase()) {
         throw new Error("File hash verification failed: the scanner reported a different SHA-256.");

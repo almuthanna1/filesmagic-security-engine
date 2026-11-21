@@ -5,7 +5,9 @@ process.env.NEXT_PUBLIC_SECURITY_ENGINE_URL = "https://engine.test/";
 const { engineHealth, HEALTH_RETRY_DELAYS_MS, ENGINES_ROUTE, relayHealth, watchEngineHealth, RECHECK_DELAY_MS, AUTO_RECHECKS } =
   await import("./api.ts");
 
-const ok = () => new Response(JSON.stringify({ engines: ["reference", "unified"], default_engine: "reference", commit: "abc" }));
+const ROSTER = ["signatures", "office", "pdf", "custom", "pdf-chains", "pdf-integrity", "vba-chains", "ooxml-links", "word-fields"];
+const ok = () => new Response(JSON.stringify({ engines: ["unified"], default_engine: "unified", commit: "abc",
+                                               engine_version: "0.2.0", scanners: ROSTER }));
 const status = (code: number) => () => new Response("{}", { status: code });
 const dropped = () => { throw new TypeError("Failed to fetch"); };
 
@@ -23,7 +25,7 @@ async function run(replies: Array<() => Response>) {
 
 test("a cold start (dropped connection, then 503) is retried until the engine answers", async () => {
   const { result, slept, retries } = await run([dropped, status(503), ok]);
-  assert.deepEqual(result, { engines: ["reference", "unified"], defaultEngine: "reference", commit: "abc" });
+  assert.deepEqual(result, { engines: ["unified"], commit: "abc", version: "0.2.0", scanners: ROSTER });
   assert.deepEqual(slept, [2000, 4000]);
   assert.deepEqual(retries, [2, 3]);
 });
@@ -33,6 +35,11 @@ test("retries are bounded and the genuine failure is reported", async () => {
   assert.equal(calls, HEALTH_RETRY_DELAYS_MS.length + 1);
   assert.deepEqual(slept, HEALTH_RETRY_DELAYS_MS);
   assert.ok("error" in result && result.error.includes("5 attempts") && result.error.includes("HTTP 502"));
+});
+
+test("an older engine without version or roster still reports what it has", async () => {
+  const { result } = await run([() => new Response(JSON.stringify({ engines: ["reference", "unified"], commit: "abc" }))]);
+  assert.deepEqual(result, { engines: ["unified"], commit: "abc", version: "unknown", scanners: [] });
 });
 
 test("a 4xx or a reply without engines is not a cold start: no retry", async () => {
@@ -49,7 +56,7 @@ test("the Lab route relays the API's /health, and a dropped connection becomes a
     return ok();
   });
   assert.equal(relayed.status, 200);
-  assert.deepEqual((await relayed.json()).engines, ["reference", "unified"]);
+  assert.deepEqual((await relayed.json()).engines, ["unified"]);
   assert.equal(relayed.headers.get("Cache-Control"), "no-store");
 
   assert.equal((await relayHealth("https://engine.test", async () => status(503)())).status, 503);
@@ -57,7 +64,7 @@ test("the Lab route relays the API's /health, and a dropped connection becomes a
 });
 
 const failed = { error: "the API did not answer after 5 attempts over about 30 s (last: HTTP 502)." };
-const healthy = { engines: ["reference", "unified"] as const, defaultEngine: "reference" as const, commit: "abc" };
+const healthy = { engines: ["unified"] as const, commit: "abc", version: "0.2.0", scanners: ROSTER };
 
 async function watch(results: Array<typeof failed | typeof healthy>, stopAfter = Infinity) {
   const seen: unknown[] = [], slept: number[] = [];
@@ -73,7 +80,7 @@ async function watch(results: Array<typeof failed | typeof healthy>, stopAfter =
   return { seen, slept, checks };
 }
 
-test("a failed connection recovers by itself: a later successful check reports both engines", async () => {
+test("a failed connection recovers by itself: a later successful check reports the engine", async () => {
   const { seen, slept, checks } = await watch([failed, failed, healthy]);
   assert.deepEqual(seen, [failed, failed, healthy]);
   assert.deepEqual(slept, [RECHECK_DELAY_MS, RECHECK_DELAY_MS]);

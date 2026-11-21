@@ -140,6 +140,8 @@ async def health():
         "auth_configured": auth.PUBLIC_KEY is not None,
         "engines": available_engines(),
         "default_engine": DEFAULT_ENGINE,
+        "engine_version": VERSIONS["engine"],
+        "scanners": [s.name for s in unified_engine.SCANNERS],  # the roster every scan response lists
         "commit": VERSIONS["commit"],
         # Integration contract v1: what the Conversion Engine needs before it sends a file.
         "conversion_auth_configured": auth.CONVERSION_PUBLIC_KEY is not None,

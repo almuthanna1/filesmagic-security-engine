@@ -210,27 +210,8 @@
   overflow-wrap: anywhere;
 }
 
-.compareSummary {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 16px;
-  padding: 14px 16px;
-  border: 1px solid var(--border-strong);
-  border-radius: 10px;
-  background: var(--surface-muted);
-}
 
-.compareSummary > div {
-  display: grid;
-  gap: 2px;
-}
 
-.compareVerdictNote {
-  width: 100%;
-  margin: 0;
-  font-weight: 600;
-}
 
 .changeadded td:first-child {
   box-shadow: inset 4px 0 0 var(--safe-border);
@@ -240,15 +221,7 @@
   box-shadow: inset 4px 0 0 var(--warn-border);
 }
 
-.compareGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
-  gap: 0 24px;
-}
 
-.compareGrid > * {
-  min-width: 0;
-}
 
 .ruleCell {
   font-family: var(--font-mono);

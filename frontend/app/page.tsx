@@ -8,8 +8,8 @@ import { ApiError, ENGINE_LABELS, scanFile, watchEngineHealth, type HealthResult
 import { addRecords, toRecord } from "@/lib/history";
 import styles from "./page.module.css";
 
-// The public research Lab offers only the unified engine. The four-scanner reference
-// baseline remains available to the research CLI and preserved evaluation artifacts.
+// The Lab runs the only engine there is: the Unified Security Engine. The retired reference engine's
+// results survive only in preserved evaluation artifacts and older browser history.
 export default function SecurityLabPage() {
   const [file, setFile] = useState<File | null>(null);
   const [health, setHealth] = useState<HealthResult | undefined>(undefined);
@@ -58,7 +58,7 @@ export default function SecurityLabPage() {
     setOutcome(null);
     try {
       setScanning(`Uploading and analysing with the ${ENGINE_LABELS.unified}…`);
-      const result = await scanFile(file, "unified");
+      const result = await scanFile(file);
       setOutcome(result);
       if (!addRecords([toRecord(result, "single")])) {
         setNotice("This browser refused to store the history; export results from the History page before leaving.");
@@ -76,7 +76,7 @@ export default function SecurityLabPage() {
         <p className={styles.eyebrow}>Standalone research demonstration</p>
         <h1>FilesMagic Security Lab</h1>
         <p className={styles.intro}>
-          Upload a document for static analysis by the unified FilesMagic Security Engine. Its four reference scanners and five additional modules report structured findings under strict isolation.
+          Upload a document for static analysis by the FilesMagic Unified Security Engine. Its nine scanners (our own signature matcher, VBA behaviour and call-path analysis, PDF action chains, OOXML and Word field analysis, and structural parsers) report structured findings under strict isolation.
         </p>
         <p className={styles.intro}>Research staging only: use benign or inert security-test files. Do not upload genuine malware or private documents. The public FilesMagic conversion pipeline is not connected to this research engine.</p>
         <LabNav />
@@ -91,13 +91,17 @@ export default function SecurityLabPage() {
           <div className={styles.engineOption}>
             <span>
               <strong>{ENGINE_LABELS.unified}</strong>
-              <span className={styles.status}>Nine analysis components with evidence correlation. No engine selection required.</span>
+              <span className={styles.status}>
+                {health && !("error" in health) && health.scanners.length > 0
+                  ? `${health.scanners.length} scanners with evidence correlation: ${health.scanners.join(", ")}.`
+                  : "Scanners with evidence correlation. No engine selection required."}
+              </span>
             </span>
           </div>
           <p className={styles.status} role="status">
             {health === undefined ? (waking ?? "Checking the unified engine's availability…") :
               "error" in health ? `Could not contact the Security Engine API: ${health.error}` :
-              unifiedAvailable ? `Unified engine available (commit ${health.commit.slice(0, 12)}).` :
+              unifiedAvailable ? `Unified engine available (version ${health.version}, commit ${health.commit.slice(0, 12)}).` :
                 "This API does not currently offer the unified engine. No scan will be submitted."}
           </p>
           {health !== undefined && (!unifiedAvailable) && (

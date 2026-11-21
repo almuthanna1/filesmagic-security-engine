@@ -2,15 +2,16 @@
 // timing), never file contents. Kept in this browser's localStorage until exported or cleared.
 
 import { useMemo, useSyncExternalStore } from "react";
-import type { CoverageIssue, Engine, Finding, ScanResult, ScannerStatus, Verdict } from "./api";
+import type { CoverageIssue, Finding, RecordedEngine, ScanResult, ScannerStatus, Verdict } from "./api";
 
 const STORAGE_KEY = "fm-scan-history-v1";
 const MAX_RECORDS = 500;
 
 export interface HistoryRecord {
   recorded_at: string;
+  // "compare" and engine "reference": records from before the rebuild, kept as evidence.
   mode: "single" | "compare";
-  engine: Engine;
+  engine: RecordedEngine;
   commit: string;
   request_id: string;
   filename: string;

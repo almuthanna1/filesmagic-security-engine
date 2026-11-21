@@ -86,6 +86,7 @@ def test_health_lists_only_the_unified_engine():
     health = client.get("/health").json()
     assert health["engines"] == ["unified"] and health["default_engine"] == "unified"
     assert health["scanners_registered"] == len(UNIFIED_SCANNERS)
+    assert health["scanners"] == UNIFIED_SCANNERS and health["engine_version"] == main.app.version
 
 
 # ----------------------------------------------------------------------------- acceptance

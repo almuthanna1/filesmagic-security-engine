@@ -6,13 +6,15 @@ export const SEVERITIES = ["INFO", "LOW", "MEDIUM", "HIGH", "CRITICAL"] as const
 export type Verdict = (typeof VERDICTS)[number];
 export type Severity = (typeof SEVERITIES)[number];
 
-// reference: the four original scanners (what FilesMagic uses); unified: the custom engine candidate,
-// accepted only by engines started with SECURITY_ENGINE_RESEARCH_ENGINES=1.
-export const ENGINES = ["reference", "unified"] as const;
+// The only engine the API runs: the Unified Security Engine (custom detection rebuild). The original
+// "reference" engine was retired; the API refuses it with HTTP 410 ENGINE_RETIRED.
+export const ENGINES = ["unified"] as const;
 export type Engine = (typeof ENGINES)[number];
-export const ENGINE_LABELS: Record<Engine, string> = {
-  reference: "Original Engine",
-  unified: "Custom Unified Engine",
+// Engines a stored result may name: "reference" appears only in history recorded before the rebuild.
+export type RecordedEngine = Engine | "reference";
+export const ENGINE_LABELS: Record<RecordedEngine, string> = {
+  unified: "Unified Security Engine",
+  reference: "Original Engine (retired)",
 };
 
 // Mirrors app/models.py in the engine.
@@ -149,8 +151,10 @@ async function scanToken(sha256: string, size: number): Promise<string> {
 
 export interface EngineHealth {
   engines: Engine[];
-  defaultEngine: Engine;
   commit: string;
+  // Reported by engines since the custom detection rebuild; older ones omit them.
+  version: string;
+  scanners: string[];
 }
 
 export type HealthResult = EngineHealth | { error: string };
@@ -184,8 +188,8 @@ export async function relayHealth(
   }
 }
 
-// Which engines this API accepts (GET /health, via ENGINES_ROUTE). On failure, the reason; the page
-// then offers the original engine only.
+// Which engine, build and scanner roster this API runs (GET /health, via ENGINES_ROUTE). On failure,
+// the reason; the page then submits nothing.
 export async function engineHealth(
   onRetry?: (attempt: number, attempts: number) => void,
   get: (url: string) => Promise<Response> = url => fetch(url, { cache: "no-store" }),
@@ -207,12 +211,14 @@ export async function engineHealth(
       last = "no response (network error or blocked request)";
       continue;
     }
-    const data = (await readJson(response)) as { engines?: unknown; default_engine?: unknown; commit?: unknown } | undefined;
+    const data = (await readJson(response)) as
+      { engines?: unknown; commit?: unknown; engine_version?: unknown; scanners?: unknown } | undefined;
     if (response.ok && Array.isArray(data?.engines)) {
       return {
         engines: data.engines.filter((e): e is Engine => ENGINES.includes(e as Engine)),
-        defaultEngine: data.default_engine === "unified" ? "unified" : "reference",
         commit: typeof data.commit === "string" ? data.commit : "unknown",
+        version: typeof data.engine_version === "string" ? data.engine_version : "unknown",
+        scanners: Array.isArray(data.scanners) ? data.scanners.filter((s): s is string => typeof s === "string") : [],
       };
     }
     if (response.ok) return { error: "the API's /health reports no engine list (an older engine version)." };
@@ -251,7 +257,8 @@ export function watchEngineHealth(
 // 1. Hash the file in the browser. 2. Ask the Lab (server-side, no login) for a
 // short-lived token bound to that hash and size. 3. Upload the raw file straight to the engine,
 // naming the engine to run. The file never passes through Vercel.
-export async function scanFile(file: File, engine: Engine = "reference"): Promise<ScanResult> {
+export async function scanFile(file: File): Promise<ScanResult> {
+  const engine: Engine = "unified";
   if (!API_URL) {
     throw new ApiError(
       "NEXT_PUBLIC_SECURITY_ENGINE_URL is not set. Configure frontend/.env.local and restart the dev server.",
