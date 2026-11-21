@@ -1,0 +1,197 @@
+[
+  {
+    "file": "f1040.pdf",
+    "detected_format": "pdf",
+    "reference": {
+      "verdict": "MALICIOUS",
+      "wall_ms": 723.1,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [
+        "pdf:PDF_ACROFORM:INFO",
+        "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+        "pdf:PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD:HIGH",
+        "pdf:PDF_EMBEDDED_FILE:LOW",
+        "pdf:PDF_JAVASCRIPT:MEDIUM",
+        "pdf:PDF_XFA_FORM:LOW",
+        "yara-x:PDF_Embedded_File:LOW"
+      ],
+      "scanner_ms": 53.65
+    },
+    "unified": {
+      "verdict": "SUSPICIOUS",
+      "wall_ms": 717.7,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "errors": {},
+      "findings": [
+        "pdf-chains:ENGINE_CORRELATION:INFO",
+        "pdf-chains:ENGINE_PDF_ATTACHMENTS_INCOMPLETE:INFO",
+        "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+        "pdf:PDF_ACROFORM:INFO",
+        "pdf:PDF_EMBEDDED_FILE:LOW",
+        "pdf:PDF_JAVASCRIPT:MEDIUM",
+        "pdf:PDF_XFA_FORM:LOW",
+        "yara-x:PDF_Embedded_File:LOW"
+      ],
+      "scanner_ms": 97.94
+    }
+  },
+  {
+    "file": "fw4.pdf",
+    "detected_format": "pdf",
+    "reference": {
+      "verdict": "MALICIOUS",
+      "wall_ms": 650.8,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [
+        "pdf:PDF_ACROFORM:INFO",
+        "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+        "pdf:PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD:HIGH",
+        "pdf:PDF_EMBEDDED_FILE:LOW",
+        "pdf:PDF_JAVASCRIPT:MEDIUM",
+        "pdf:PDF_XFA_FORM:LOW",
+        "yara-x:PDF_Embedded_File:LOW"
+      ],
+      "scanner_ms": 38.83
+    },
+    "unified": {
+      "verdict": "SUSPICIOUS",
+      "wall_ms": 683.5,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "errors": {},
+      "findings": [
+        "pdf-chains:ENGINE_CORRELATION:INFO",
+        "pdf-chains:ENGINE_PDF_ATTACHMENTS_INCOMPLETE:INFO",
+        "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+        "pdf:PDF_ACROFORM:INFO",
+        "pdf:PDF_EMBEDDED_FILE:LOW",
+        "pdf:PDF_JAVASCRIPT:MEDIUM",
+        "pdf:PDF_XFA_FORM:LOW",
+        "yara-x:PDF_Embedded_File:LOW"
+      ],
+      "scanner_ms": 69.4
+    }
+  },
+  {
+    "file": "fw9.pdf",
+    "detected_format": "pdf",
+    "reference": {
+      "verdict": "MALICIOUS",
+      "wall_ms": 616.4,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [
+        "pdf:PDF_ACROFORM:INFO",
+        "pdf:PDF_AUTO_JAVASCRIPT:MEDIUM",
+        "pdf:PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD:HIGH",
+        "pdf:PDF_EMBEDDED_FILE:LOW",
+        "pdf:PDF_JAVASCRIPT:MEDIUM",
+        "pdf:PDF_XFA_FORM:LOW",
+        "yara-x:PDF_Embedded_File:LOW"
+      ],
+      "scanner_ms": 22.56
+    },
+    "unified": {
+      "verdict": "SUSPICIOUS",
+      "wall_ms": 671.9,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "errors": {},
+      "findings": [
+        "pdf-chains:ENGINE_CORRELATION:INFO",
+        "pdf-chains:ENGINE_PDF_ATTACHMENTS_INCOMPLETE:INFO",
+        "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+        "pdf:PDF_ACROFORM:INFO",
+        "pdf:PDF_EMBEDDED_FILE:LOW",
+        "pdf:PDF_JAVASCRIPT:MEDIUM",
+        "pdf:PDF_XFA_FORM:LOW",
+        "yara-x:PDF_Embedded_File:LOW"
+      ],
+      "scanner_ms": 41.57
+    }
+  },
+  {
+    "file": "NST-EST2023-POP.xlsx",
+    "detected_format": "zip",
+    "reference": {
+      "verdict": "SAFE",
+      "wall_ms": 610.4,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 3.44
+    },
+    "unified": {
+      "verdict": "SAFE",
+      "wall_ms": 609.3,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "not_applicable"
+      },
+      "errors": {},
+      "findings": [],
+      "scanner_ms": 4.95
+    }
+  }
+]

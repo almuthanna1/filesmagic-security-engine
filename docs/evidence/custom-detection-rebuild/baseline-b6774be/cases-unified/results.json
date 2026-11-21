@@ -1,0 +1,3333 @@
+{
+  "environment": {
+    "timestamp_utc": "2026-11-21T02:20:01+00:00",
+    "engine_commit": "b6774bea199f13170a4dfb144048f7d63f59b859",
+    "working_tree_dirty": false,
+    "manifest_sha256": null,
+    "engine_version": "0.2.0",
+    "ruleset_sha256": "0be9918509e95e639f866291dc297c45c8e72812d602fb149fad3484435ae3b0",
+    "strict_isolation_configured": false,
+    "python": "3.14.3",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "packages": {
+      "yara-x": "1.21.0",
+      "oletools": "0.60.2",
+      "pypdf": "6.19.0",
+      "msoffcrypto-tool": "6.0.0",
+      "defusedxml": "0.7.1",
+      "fastapi": "0.142.4"
+    },
+    "harness_peak_rss_mib": null,
+    "worker_memory_measured": false,
+    "worker_command": [
+      "-s",
+      "-m",
+      "app.worker",
+      "--engine=unified"
+    ],
+    "trials": 3
+  },
+  "results": [
+    {
+      "id": "1-pdf-clean",
+      "ground_truth": "BENIGN",
+      "indicator": "none (negative control)",
+      "sha256": "d5784991fd896bc6b3c21c3c384d9a376a3b4b6009b83a25e0c5d8f77939011b",
+      "size_bytes": 465,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "n/a",
+        "pdf": "SAFE",
+        "custom": "SAFE",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "SAFE",
+        "pdf-integrity": "SAFE",
+        "vba-chains": "n/a",
+        "ooxml-links": "n/a",
+        "word-fields": "n/a",
+        "aggregate": "SAFE"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "rules": [],
+      "findings": [],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 710.7,
+          "median_ms": 664.35,
+          "p95_ms": 823.131,
+          "max_ms": 823.131,
+          "min_ms": 644.625
+        },
+        "yara-x": {
+          "n": 3,
+          "mean_ms": 0.4,
+          "median_ms": 0.4,
+          "p95_ms": 0.418,
+          "max_ms": 0.418,
+          "min_ms": 0.391
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.004
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.52,
+          "median_ms": 0.49,
+          "p95_ms": 0.607,
+          "max_ms": 0.607,
+          "min_ms": 0.465
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.08,
+          "median_ms": 0.08,
+          "p95_ms": 0.09,
+          "max_ms": 0.09,
+          "min_ms": 0.077
+        },
+        "yara-x-engine": {
+          "n": 3,
+          "mean_ms": 0.31,
+          "median_ms": 0.29,
+          "p95_ms": 0.372,
+          "max_ms": 0.372,
+          "min_ms": 0.278
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.36,
+          "median_ms": 0.35,
+          "p95_ms": 0.403,
+          "max_ms": 0.403,
+          "min_ms": 0.331
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.27,
+          "median_ms": 0.21,
+          "p95_ms": 0.383,
+          "max_ms": 0.383,
+          "min_ms": 0.209
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.003
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.002
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.001
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 823.131,
+          "scanner_ms": {
+            "yara-x": 0.418,
+            "office": 0.004,
+            "pdf": 0.607,
+            "custom": 0.09,
+            "yara-x-engine": 0.372,
+            "pdf-chains": 0.403,
+            "pdf-integrity": 0.383,
+            "vba-chains": 0.004,
+            "ooxml-links": 0.003,
+            "word-fields": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 664.352,
+          "scanner_ms": {
+            "yara-x": 0.401,
+            "office": 0.004,
+            "pdf": 0.489,
+            "custom": 0.078,
+            "yara-x-engine": 0.278,
+            "pdf-chains": 0.331,
+            "pdf-integrity": 0.209,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002,
+            "word-fields": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 644.625,
+          "scanner_ms": {
+            "yara-x": 0.391,
+            "office": 0.004,
+            "pdf": 0.465,
+            "custom": 0.077,
+            "yara-x-engine": 0.289,
+            "pdf-chains": 0.355,
+            "pdf-integrity": 0.209,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002,
+            "word-fields": 0.001
+          }
+        }
+      ]
+    },
+    {
+      "id": "2-pdf-form-keystroke-js",
+      "ground_truth": "BENIGN",
+      "indicator": "form-field keystroke JavaScript (user-triggered /AA /K)",
+      "sha256": "8fb92bebda2330b5f0bb6803db1da54f63a42a8cf28a34e49c0b621612263fd5",
+      "size_bytes": 704,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SAFE",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "SAFE",
+        "pdf-integrity": "SAFE",
+        "vba-chains": "n/a",
+        "ooxml-links": "n/a",
+        "word-fields": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "rules": [
+        "pdf:PDF_JAVASCRIPT:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 1 JavaScript action(s)."
+        },
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_ACROFORM",
+          "severity": "INFO",
+          "description": "PDF contains an interactive form (AcroForm)."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_PDF_USER_TRIGGERED_SCRIPT",
+          "severity": "INFO",
+          "description": "1 JavaScript action chain(s) run only on user interaction (a click, keystroke or form event), not automatically. Evidence: object 5 0 /AA /K: JavaScript (direct in object 5 0)."
+        },
+        {
+          "scanner": "yara-x-engine",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: replaced PDF_JavaScript_With_Automatic_Action (YARA-X) by ENGINE_PDF_JavaScript_With_Automatic_Trigger, which did not match: the bytes show every /OpenAction and /AA here is not automatic."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 668.81,
+          "median_ms": 678.58,
+          "p95_ms": 683.83,
+          "max_ms": 683.83,
+          "min_ms": 644.028
+        },
+        "yara-x": {
+          "n": 3,
+          "mean_ms": 0.5,
+          "median_ms": 0.5,
+          "p95_ms": 0.553,
+          "max_ms": 0.553,
+          "min_ms": 0.451
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.003
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.79,
+          "median_ms": 0.65,
+          "p95_ms": 1.066,
+          "max_ms": 1.066,
+          "min_ms": 0.647
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.12,
+          "median_ms": 0.11,
+          "p95_ms": 0.144,
+          "max_ms": 0.144,
+          "min_ms": 0.099
+        },
+        "yara-x-engine": {
+          "n": 3,
+          "mean_ms": 0.48,
+          "median_ms": 0.47,
+          "p95_ms": 0.509,
+          "max_ms": 0.509,
+          "min_ms": 0.455
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.81,
+          "median_ms": 0.82,
+          "p95_ms": 0.834,
+          "max_ms": 0.834,
+          "min_ms": 0.782
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.25,
+          "median_ms": 0.25,
+          "p95_ms": 0.269,
+          "max_ms": 0.269,
+          "min_ms": 0.246
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.003
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.002
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.001
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 644.028,
+          "scanner_ms": {
+            "yara-x": 0.553,
+            "office": 0.005,
+            "pdf": 0.647,
+            "custom": 0.144,
+            "yara-x-engine": 0.509,
+            "pdf-chains": 0.834,
+            "pdf-integrity": 0.247,
+            "vba-chains": 0.004,
+            "ooxml-links": 0.003,
+            "word-fields": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 678.582,
+          "scanner_ms": {
+            "yara-x": 0.451,
+            "office": 0.003,
+            "pdf": 0.65,
+            "custom": 0.099,
+            "yara-x-engine": 0.455,
+            "pdf-chains": 0.816,
+            "pdf-integrity": 0.246,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002,
+            "word-fields": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 683.83,
+          "scanner_ms": {
+            "yara-x": 0.497,
+            "office": 0.004,
+            "pdf": 1.066,
+            "custom": 0.111,
+            "yara-x-engine": 0.469,
+            "pdf-chains": 0.782,
+            "pdf-integrity": 0.269,
+            "vba-chains": 0.004,
+            "ooxml-links": 0.003,
+            "word-fields": 0.002
+          }
+        }
+      ]
+    },
+    {
+      "id": "2b-pdf-open-at-page-click-js",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction page destination + click-only link JavaScript",
+      "sha256": "09add801d7ce300528a624a753c79ebff0f1240905f2ffd0523c242f63572770",
+      "size_bytes": 651,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SAFE",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "SAFE",
+        "pdf-integrity": "SAFE",
+        "vba-chains": "n/a",
+        "ooxml-links": "n/a",
+        "word-fields": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "rules": [
+        "pdf:PDF_JAVASCRIPT:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 2 JavaScript action(s)."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_PDF_USER_TRIGGERED_SCRIPT",
+          "severity": "INFO",
+          "description": "1 JavaScript action chain(s) run only on user interaction (a click, keystroke or form event), not automatically. Evidence: object 5 0 /A: JavaScript (direct in object 5 0)."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: replaced PDF_AUTO_JAVASCRIPT (PDF scanner) by the action-chain rules."
+        },
+        {
+          "scanner": "yara-x-engine",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: replaced PDF_JavaScript_With_Automatic_Action (YARA-X) by ENGINE_PDF_JavaScript_With_Automatic_Trigger, which did not match: the bytes show every /OpenAction and /AA here is not automatic."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 697.93,
+          "median_ms": 697.18,
+          "p95_ms": 711.037,
+          "max_ms": 711.037,
+          "min_ms": 685.564
+        },
+        "yara-x": {
+          "n": 3,
+          "mean_ms": 0.59,
+          "median_ms": 0.6,
+          "p95_ms": 0.625,
+          "max_ms": 0.625,
+          "min_ms": 0.548
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 0.01,
+          "median_ms": 0.01,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.005
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.7,
+          "median_ms": 0.75,
+          "p95_ms": 0.753,
+          "max_ms": 0.753,
+          "min_ms": 0.615
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.11,
+          "median_ms": 0.1,
+          "p95_ms": 0.129,
+          "max_ms": 0.129,
+          "min_ms": 0.087
+        },
+        "yara-x-engine": {
+          "n": 3,
+          "mean_ms": 0.46,
+          "median_ms": 0.35,
+          "p95_ms": 0.714,
+          "max_ms": 0.714,
+          "min_ms": 0.304
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.58,
+          "median_ms": 0.57,
+          "p95_ms": 0.647,
+          "max_ms": 0.647,
+          "min_ms": 0.528
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.26,
+          "median_ms": 0.26,
+          "p95_ms": 0.259,
+          "max_ms": 0.259,
+          "min_ms": 0.252
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.003
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.002
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.001
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 697.179,
+          "scanner_ms": {
+            "yara-x": 0.625,
+            "office": 0.005,
+            "pdf": 0.615,
+            "custom": 0.087,
+            "yara-x-engine": 0.304,
+            "pdf-chains": 0.567,
+            "pdf-integrity": 0.257,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.003,
+            "word-fields": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 711.037,
+          "scanner_ms": {
+            "yara-x": 0.605,
+            "office": 0.005,
+            "pdf": 0.753,
+            "custom": 0.129,
+            "yara-x-engine": 0.714,
+            "pdf-chains": 0.647,
+            "pdf-integrity": 0.259,
+            "vba-chains": 0.004,
+            "ooxml-links": 0.003,
+            "word-fields": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 685.564,
+          "scanner_ms": {
+            "yara-x": 0.548,
+            "office": 0.005,
+            "pdf": 0.746,
+            "custom": 0.101,
+            "yara-x-engine": 0.353,
+            "pdf-chains": 0.528,
+            "pdf-integrity": 0.252,
+            "vba-chains": 0.004,
+            "ooxml-links": 0.002,
+            "word-fields": 0.001
+          }
+        }
+      ]
+    },
+    {
+      "id": "2c-pdf-open-at-page-page-open-js",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction page destination + that page's own open trigger /AA /O",
+      "sha256": "830dd24170f6ecf8eacb6136d7d9c8dba6ebef2fc90b804eedc46aae33b67599",
+      "size_bytes": 597,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SAFE",
+        "yara-x-engine": "SUSPICIOUS",
+        "pdf-chains": "SUSPICIOUS",
+        "pdf-integrity": "SAFE",
+        "vba-chains": "n/a",
+        "ooxml-links": "n/a",
+        "word-fields": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "rules": [
+        "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+        "pdf:PDF_JAVASCRIPT:MEDIUM",
+        "yara-x-engine:ENGINE_PDF_JavaScript_With_Automatic_Trigger:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 1 JavaScript action(s)."
+        },
+        {
+          "scanner": "yara-x-engine",
+          "rule_id": "ENGINE_PDF_JavaScript_With_Automatic_Trigger",
+          "severity": "MEDIUM",
+          "description": "PDF contains JavaScript and an automatic trigger: an /OpenAction that is not a page destination, or an /AA dictionary not shown to hold only user-interaction triggers."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_PDF_AUTO_CHAIN_SCRIPT",
+          "severity": "MEDIUM",
+          "description": "An automatic action chain runs JavaScript; no embedded file is used on that chain. Evidence: object 3 0 /AA /O: JavaScript (object 5 0). This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: replaced PDF_AUTO_JAVASCRIPT (PDF scanner) by the action-chain rules."
+        },
+        {
+          "scanner": "yara-x-engine",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: replaced PDF_JavaScript_With_Automatic_Action (YARA-X) by ENGINE_PDF_JavaScript_With_Automatic_Trigger, which also matched."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 704.82,
+          "median_ms": 704.8,
+          "p95_ms": 724.892,
+          "max_ms": 724.892,
+          "min_ms": 684.767
+        },
+        "yara-x": {
+          "n": 3,
+          "mean_ms": 0.57,
+          "median_ms": 0.52,
+          "p95_ms": 0.681,
+          "max_ms": 0.681,
+          "min_ms": 0.516
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 0.01,
+          "median_ms": 0.01,
+          "p95_ms": 0.006,
+          "max_ms": 0.006,
+          "min_ms": 0.004
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.61,
+          "median_ms": 0.6,
+          "p95_ms": 0.642,
+          "max_ms": 0.642,
+          "min_ms": 0.6
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.15,
+          "median_ms": 0.11,
+          "p95_ms": 0.244,
+          "max_ms": 0.244,
+          "min_ms": 0.102
+        },
+        "yara-x-engine": {
+          "n": 3,
+          "mean_ms": 0.58,
+          "median_ms": 0.6,
+          "p95_ms": 0.779,
+          "max_ms": 0.779,
+          "min_ms": 0.369
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.73,
+          "median_ms": 0.73,
+          "p95_ms": 0.884,
+          "max_ms": 0.884,
+          "min_ms": 0.563
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.26,
+          "median_ms": 0.27,
+          "p95_ms": 0.283,
+          "max_ms": 0.283,
+          "min_ms": 0.234
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.004
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.002
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.002
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 684.767,
+          "scanner_ms": {
+            "yara-x": 0.681,
+            "office": 0.006,
+            "pdf": 0.642,
+            "custom": 0.106,
+            "yara-x-engine": 0.369,
+            "pdf-chains": 0.563,
+            "pdf-integrity": 0.234,
+            "vba-chains": 0.004,
+            "ooxml-links": 0.002,
+            "word-fields": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 704.801,
+          "scanner_ms": {
+            "yara-x": 0.524,
+            "office": 0.005,
+            "pdf": 0.6,
+            "custom": 0.102,
+            "yara-x-engine": 0.779,
+            "pdf-chains": 0.735,
+            "pdf-integrity": 0.271,
+            "vba-chains": 0.004,
+            "ooxml-links": 0.003,
+            "word-fields": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 724.892,
+          "scanner_ms": {
+            "yara-x": 0.516,
+            "office": 0.004,
+            "pdf": 0.602,
+            "custom": 0.244,
+            "yara-x-engine": 0.602,
+            "pdf-chains": 0.884,
+            "pdf-integrity": 0.283,
+            "vba-chains": 0.004,
+            "ooxml-links": 0.003,
+            "word-fields": 0.002
+          }
+        }
+      ]
+    },
+    {
+      "id": "3-pdf-escaped-openaction-js",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction JavaScript written /J#61vaScript /J#53",
+      "sha256": "a1d1340bde10797020a3bf5fbf34f4d3a74dc5327b902c55268a0245b49e2a3c",
+      "size_bytes": 578,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SUSPICIOUS",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "SUSPICIOUS",
+        "pdf-integrity": "SAFE",
+        "vba-chains": "n/a",
+        "ooxml-links": "n/a",
+        "word-fields": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "rules": [
+        "custom:CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME:MEDIUM",
+        "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+        "pdf:PDF_JAVASCRIPT:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 1 JavaScript action(s)."
+        },
+        {
+          "scanner": "custom",
+          "rule_id": "CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME",
+          "severity": "MEDIUM",
+          "description": "PDF writes 2 active-content name(s) with unnecessary #-escapes, which hides them from plain-text inspection without changing their meaning. Evidence: '/J#61vaScript' decodes to /JavaScript (1x); '/J#53' decodes to /JS (1x). Location: object 5 0. This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_PDF_AUTO_CHAIN_SCRIPT",
+          "severity": "MEDIUM",
+          "description": "An automatic action chain runs JavaScript; no embedded file is used on that chain. Evidence: catalog /OpenAction: JavaScript (object 5 0). This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: replaced PDF_AUTO_JAVASCRIPT (PDF scanner) by the action-chain rules."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 710.89,
+          "median_ms": 722.86,
+          "p95_ms": 732.971,
+          "max_ms": 732.971,
+          "min_ms": 676.839
+        },
+        "yara-x": {
+          "n": 3,
+          "mean_ms": 0.45,
+          "median_ms": 0.45,
+          "p95_ms": 0.467,
+          "max_ms": 0.467,
+          "min_ms": 0.422
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.01,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.003
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.72,
+          "median_ms": 0.61,
+          "p95_ms": 0.956,
+          "max_ms": 0.956,
+          "min_ms": 0.589
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.21,
+          "median_ms": 0.22,
+          "p95_ms": 0.228,
+          "max_ms": 0.228,
+          "min_ms": 0.188
+        },
+        "yara-x-engine": {
+          "n": 3,
+          "mean_ms": 0.34,
+          "median_ms": 0.34,
+          "p95_ms": 0.392,
+          "max_ms": 0.392,
+          "min_ms": 0.304
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.48,
+          "median_ms": 0.48,
+          "p95_ms": 0.552,
+          "max_ms": 0.552,
+          "min_ms": 0.419
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.25,
+          "median_ms": 0.25,
+          "p95_ms": 0.266,
+          "max_ms": 0.266,
+          "min_ms": 0.235
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.002
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.002
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.001
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 676.839,
+          "scanner_ms": {
+            "yara-x": 0.454,
+            "office": 0.003,
+            "pdf": 0.589,
+            "custom": 0.188,
+            "yara-x-engine": 0.304,
+            "pdf-chains": 0.419,
+            "pdf-integrity": 0.235,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002,
+            "word-fields": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 732.971,
+          "scanner_ms": {
+            "yara-x": 0.422,
+            "office": 0.005,
+            "pdf": 0.611,
+            "custom": 0.228,
+            "yara-x-engine": 0.338,
+            "pdf-chains": 0.479,
+            "pdf-integrity": 0.248,
+            "vba-chains": 0.004,
+            "ooxml-links": 0.002,
+            "word-fields": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 722.858,
+          "scanner_ms": {
+            "yara-x": 0.467,
+            "office": 0.005,
+            "pdf": 0.956,
+            "custom": 0.216,
+            "yara-x-engine": 0.392,
+            "pdf-chains": 0.552,
+            "pdf-integrity": 0.266,
+            "vba-chains": 0.004,
+            "ooxml-links": 0.003,
+            "word-fields": 0.001
+          }
+        }
+      ]
+    },
+    {
+      "id": "4-pdf-objstm-escaped-js",
+      "ground_truth": "BENIGN",
+      "indicator": "the same action inside a FlateDecode object stream",
+      "sha256": "b256fc5452921634ec592f87184478ad91ccb9cd4167923cef881dbc0ca05cdd",
+      "size_bytes": 657,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SUSPICIOUS",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "SUSPICIOUS",
+        "pdf-integrity": "SAFE",
+        "vba-chains": "n/a",
+        "ooxml-links": "n/a",
+        "word-fields": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "rules": [
+        "custom:CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME:MEDIUM",
+        "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+        "pdf:PDF_JAVASCRIPT:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 1 JavaScript action(s)."
+        },
+        {
+          "scanner": "custom",
+          "rule_id": "CUSTOM_PDF_OBFUSCATED_ACTIVE_NAME",
+          "severity": "MEDIUM",
+          "description": "PDF writes 2 active-content name(s) with unnecessary #-escapes, which hides them from plain-text inspection without changing their meaning. Evidence: '/J#61vaScript' decodes to /JavaScript (1x); '/J#53' decodes to /JS (1x). Location: object stream of object 6 0. This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_PDF_AUTO_CHAIN_SCRIPT",
+          "severity": "MEDIUM",
+          "description": "An automatic action chain runs JavaScript; no embedded file is used on that chain. Evidence: catalog /OpenAction: JavaScript (object 5 0). This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: replaced PDF_AUTO_JAVASCRIPT (PDF scanner) by the action-chain rules."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 651.93,
+          "median_ms": 647.85,
+          "p95_ms": 663.729,
+          "max_ms": 663.729,
+          "min_ms": 644.199
+        },
+        "yara-x": {
+          "n": 3,
+          "mean_ms": 0.37,
+          "median_ms": 0.38,
+          "p95_ms": 0.39,
+          "max_ms": 0.39,
+          "min_ms": 0.337
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.003
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.75,
+          "median_ms": 0.72,
+          "p95_ms": 0.844,
+          "max_ms": 0.844,
+          "min_ms": 0.687
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.25,
+          "median_ms": 0.22,
+          "p95_ms": 0.299,
+          "max_ms": 0.299,
+          "min_ms": 0.22
+        },
+        "yara-x-engine": {
+          "n": 3,
+          "mean_ms": 0.32,
+          "median_ms": 0.33,
+          "p95_ms": 0.347,
+          "max_ms": 0.347,
+          "min_ms": 0.285
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.66,
+          "median_ms": 0.51,
+          "p95_ms": 0.981,
+          "max_ms": 0.981,
+          "min_ms": 0.503
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.28,
+          "median_ms": 0.24,
+          "p95_ms": 0.358,
+          "max_ms": 0.358,
+          "min_ms": 0.24
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.002
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.001
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.001,
+          "max_ms": 0.001,
+          "min_ms": 0.001
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 663.729,
+          "scanner_ms": {
+            "yara-x": 0.39,
+            "office": 0.004,
+            "pdf": 0.724,
+            "custom": 0.22,
+            "yara-x-engine": 0.285,
+            "pdf-chains": 0.503,
+            "pdf-integrity": 0.241,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.001,
+            "word-fields": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 644.199,
+          "scanner_ms": {
+            "yara-x": 0.383,
+            "office": 0.003,
+            "pdf": 0.844,
+            "custom": 0.299,
+            "yara-x-engine": 0.347,
+            "pdf-chains": 0.981,
+            "pdf-integrity": 0.358,
+            "vba-chains": 0.004,
+            "ooxml-links": 0.003,
+            "word-fields": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 647.854,
+          "scanner_ms": {
+            "yara-x": 0.337,
+            "office": 0.003,
+            "pdf": 0.687,
+            "custom": 0.223,
+            "yara-x-engine": 0.329,
+            "pdf-chains": 0.509,
+            "pdf-integrity": 0.24,
+            "vba-chains": 0.002,
+            "ooxml-links": 0.002,
+            "word-fields": 0.001
+          }
+        }
+      ]
+    },
+    {
+      "id": "5a-pdf-auto-js-unrelated-attachment",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction JavaScript + a text attachment it never references",
+      "sha256": "48ac8dc02c326363f7d91d947c4fbb2b8b077d1a7ec7c310c801f1fadcc382c8",
+      "size_bytes": 866,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SAFE",
+        "yara-x-engine": "SUSPICIOUS",
+        "pdf-chains": "SUSPICIOUS",
+        "pdf-integrity": "SAFE",
+        "vba-chains": "n/a",
+        "ooxml-links": "n/a",
+        "word-fields": "n/a",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "rules": [
+        "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+        "pdf-chains:ENGINE_PDF_AUTO_CHAIN_SCRIPT:MEDIUM",
+        "pdf:PDF_JAVASCRIPT:MEDIUM",
+        "yara-x-engine:ENGINE_PDF_JavaScript_With_Automatic_Trigger:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 1 JavaScript action(s)."
+        },
+        {
+          "scanner": "yara-x-engine",
+          "rule_id": "ENGINE_PDF_JavaScript_With_Automatic_Trigger",
+          "severity": "MEDIUM",
+          "description": "PDF contains JavaScript and an automatic trigger: an /OpenAction that is not a page destination, or an /AA dictionary not shown to hold only user-interaction triggers."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_PDF_AUTO_CHAIN_SCRIPT",
+          "severity": "MEDIUM",
+          "description": "An automatic action chain runs JavaScript; no embedded file is used on that chain. Evidence: catalog /OpenAction: JavaScript (object 7 0). This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+          "severity": "LOW",
+          "description": "The PDF carries attachments that could not be verified as content without code. Evidence: notes.txt: not verified: not an OpenDocument package (no mimetype member at the start); actions that could use an attachment: catalog /OpenAction: JavaScript (object 7 0). This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: replaced PDF_AUTO_JAVASCRIPT, PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD (PDF scanner) by the action-chain rules; merged PDF_EMBEDDED_FILE (pdf) into ENGINE_PDF_ATTACHMENTS_UNVERIFIED: the same evidence, counted once; merged PDF_Embedded_File (yara-x) into ENGINE_PDF_ATTACHMENTS_UNVERIFIED: the same evidence, counted once."
+        },
+        {
+          "scanner": "yara-x-engine",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: replaced PDF_JavaScript_With_Automatic_Action (YARA-X) by ENGINE_PDF_JavaScript_With_Automatic_Trigger, which also matched."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 649.95,
+          "median_ms": 639.26,
+          "p95_ms": 682.898,
+          "max_ms": 682.898,
+          "min_ms": 627.69
+        },
+        "yara-x": {
+          "n": 3,
+          "mean_ms": 0.55,
+          "median_ms": 0.5,
+          "p95_ms": 0.706,
+          "max_ms": 0.706,
+          "min_ms": 0.433
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.003
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.75,
+          "median_ms": 0.75,
+          "p95_ms": 0.8,
+          "max_ms": 0.8,
+          "min_ms": 0.705
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.13,
+          "median_ms": 0.13,
+          "p95_ms": 0.144,
+          "max_ms": 0.144,
+          "min_ms": 0.124
+        },
+        "yara-x-engine": {
+          "n": 3,
+          "mean_ms": 0.36,
+          "median_ms": 0.38,
+          "p95_ms": 0.403,
+          "max_ms": 0.403,
+          "min_ms": 0.306
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.7,
+          "median_ms": 0.73,
+          "p95_ms": 0.8,
+          "max_ms": 0.8,
+          "min_ms": 0.575
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.37,
+          "median_ms": 0.27,
+          "p95_ms": 0.595,
+          "max_ms": 0.595,
+          "min_ms": 0.234
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.003
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.002
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.001
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 627.69,
+          "scanner_ms": {
+            "yara-x": 0.501,
+            "office": 0.004,
+            "pdf": 0.705,
+            "custom": 0.124,
+            "yara-x-engine": 0.306,
+            "pdf-chains": 0.575,
+            "pdf-integrity": 0.234,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002,
+            "word-fields": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 682.898,
+          "scanner_ms": {
+            "yara-x": 0.433,
+            "office": 0.003,
+            "pdf": 0.75,
+            "custom": 0.133,
+            "yara-x-engine": 0.403,
+            "pdf-chains": 0.8,
+            "pdf-integrity": 0.595,
+            "vba-chains": 0.004,
+            "ooxml-links": 0.003,
+            "word-fields": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 639.258,
+          "scanner_ms": {
+            "yara-x": 0.706,
+            "office": 0.005,
+            "pdf": 0.8,
+            "custom": 0.144,
+            "yara-x-engine": 0.378,
+            "pdf-chains": 0.727,
+            "pdf-integrity": 0.271,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.003,
+            "word-fields": 0.002
+          }
+        }
+      ]
+    },
+    {
+      "id": "5b-pdf-auto-js-exports-attachment",
+      "ground_truth": "BENIGN",
+      "indicator": "/OpenAction JavaScript that exports the attachment (nLaunch 0)",
+      "sha256": "f55c21380da9580df93ba96674baa1f865aaed4d6675d3a16a5d463d3d69dec4",
+      "size_bytes": 903,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "n/a",
+        "pdf": "SUSPICIOUS",
+        "custom": "SAFE",
+        "yara-x-engine": "SUSPICIOUS",
+        "pdf-chains": "MALICIOUS",
+        "pdf-integrity": "SAFE",
+        "vba-chains": "n/a",
+        "ooxml-links": "n/a",
+        "word-fields": "n/a",
+        "aggregate": "MALICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "not_applicable",
+        "pdf": "completed",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "completed",
+        "pdf-integrity": "completed",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "not_applicable",
+        "word-fields": "not_applicable"
+      },
+      "rules": [
+        "pdf-chains:ENGINE_PDF_ATTACHMENTS_UNVERIFIED:LOW",
+        "pdf-chains:ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT:HIGH",
+        "pdf:PDF_JAVASCRIPT:MEDIUM",
+        "yara-x-engine:ENGINE_PDF_JavaScript_With_Automatic_Trigger:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "pdf",
+          "rule_id": "PDF_JAVASCRIPT",
+          "severity": "MEDIUM",
+          "description": "PDF contains 1 JavaScript action(s)."
+        },
+        {
+          "scanner": "yara-x-engine",
+          "rule_id": "ENGINE_PDF_JavaScript_With_Automatic_Trigger",
+          "severity": "MEDIUM",
+          "description": "PDF contains JavaScript and an automatic trigger: an /OpenAction that is not a page destination, or an /AA dictionary not shown to hold only user-interaction triggers."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_PDF_AUTO_CHAIN_DELIVERS_ATTACHMENT",
+          "severity": "HIGH",
+          "description": "An automatic action chain launches or exports a file embedded in this PDF. Evidence: catalog /OpenAction: JavaScript (object 7 0) (exports 'f'). This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_PDF_ATTACHMENTS_UNVERIFIED",
+          "severity": "LOW",
+          "description": "The PDF carries attachments that could not be verified as content without code. Evidence: notes.txt: not verified: not an OpenDocument package (no mimetype member at the start); actions that could use an attachment: catalog /OpenAction: JavaScript (object 7 0). This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "pdf-chains",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: replaced PDF_AUTO_JAVASCRIPT, PDF_AUTO_JAVASCRIPT_WITH_PAYLOAD (PDF scanner) by the action-chain rules; merged PDF_EMBEDDED_FILE (pdf) into ENGINE_PDF_ATTACHMENTS_UNVERIFIED: the same evidence, counted once; merged PDF_Embedded_File (yara-x) into ENGINE_PDF_ATTACHMENTS_UNVERIFIED: the same evidence, counted once."
+        },
+        {
+          "scanner": "yara-x-engine",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: replaced PDF_JavaScript_With_Automatic_Action (YARA-X) by ENGINE_PDF_JavaScript_With_Automatic_Trigger, which also matched."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 709.99,
+          "median_ms": 717.22,
+          "p95_ms": 756.592,
+          "max_ms": 756.592,
+          "min_ms": 656.162
+        },
+        "yara-x": {
+          "n": 3,
+          "mean_ms": 0.6,
+          "median_ms": 0.68,
+          "p95_ms": 0.739,
+          "max_ms": 0.739,
+          "min_ms": 0.384
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 0.01,
+          "median_ms": 0.01,
+          "p95_ms": 0.007,
+          "max_ms": 0.007,
+          "min_ms": 0.003
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 1.01,
+          "median_ms": 0.81,
+          "p95_ms": 1.462,
+          "max_ms": 1.462,
+          "min_ms": 0.75
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.14,
+          "median_ms": 0.14,
+          "p95_ms": 0.15,
+          "max_ms": 0.15,
+          "min_ms": 0.136
+        },
+        "yara-x-engine": {
+          "n": 3,
+          "mean_ms": 0.39,
+          "median_ms": 0.39,
+          "p95_ms": 0.422,
+          "max_ms": 0.422,
+          "min_ms": 0.356
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.74,
+          "median_ms": 0.67,
+          "p95_ms": 0.892,
+          "max_ms": 0.892,
+          "min_ms": 0.655
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.27,
+          "median_ms": 0.29,
+          "p95_ms": 0.29,
+          "max_ms": 0.29,
+          "min_ms": 0.235
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.003
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.002
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.001
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 656.162,
+          "scanner_ms": {
+            "yara-x": 0.384,
+            "office": 0.003,
+            "pdf": 0.75,
+            "custom": 0.136,
+            "yara-x-engine": 0.356,
+            "pdf-chains": 0.673,
+            "pdf-integrity": 0.235,
+            "vba-chains": 0.003,
+            "ooxml-links": 0.002,
+            "word-fields": 0.001
+          }
+        },
+        {
+          "harness_wall_ms": 717.224,
+          "scanner_ms": {
+            "yara-x": 0.739,
+            "office": 0.007,
+            "pdf": 1.462,
+            "custom": 0.15,
+            "yara-x-engine": 0.422,
+            "pdf-chains": 0.892,
+            "pdf-integrity": 0.29,
+            "vba-chains": 0.004,
+            "ooxml-links": 0.003,
+            "word-fields": 0.002
+          }
+        },
+        {
+          "harness_wall_ms": 756.592,
+          "scanner_ms": {
+            "yara-x": 0.677,
+            "office": 0.005,
+            "pdf": 0.812,
+            "custom": 0.144,
+            "yara-x-engine": 0.391,
+            "pdf-chains": 0.655,
+            "pdf-integrity": 0.288,
+            "vba-chains": 0.005,
+            "ooxml-links": 0.003,
+            "word-fields": 0.002
+          }
+        }
+      ]
+    },
+    {
+      "id": "6a-docx-hyperlink",
+      "ground_truth": "BENIGN",
+      "indicator": "ordinary external hyperlink (negative control)",
+      "sha256": "7a0db7d17fdf8541df4177df056be5629cd37e37b262238532653068a1913ff0",
+      "size_bytes": 1713,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SAFE",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "n/a",
+        "pdf-integrity": "n/a",
+        "vba-chains": "n/a",
+        "ooxml-links": "SAFE",
+        "word-fields": "SAFE",
+        "aggregate": "SAFE"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "rules": [],
+      "findings": [
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_OFFICE_EXTERNAL_NOT_ACTIVATED",
+          "severity": "INFO",
+          "description": "External relationships are declared, but nothing shows that Office uses them. Evidence: rId9 -> https://example.com/: no element in word/document.xml references 'rId9'."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 691.24,
+          "median_ms": 712.16,
+          "p95_ms": 738.814,
+          "max_ms": 738.814,
+          "min_ms": 622.755
+        },
+        "yara-x": {
+          "n": 3,
+          "mean_ms": 0.43,
+          "median_ms": 0.47,
+          "p95_ms": 0.48,
+          "max_ms": 0.48,
+          "min_ms": 0.329
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 2.27,
+          "median_ms": 2.32,
+          "p95_ms": 2.515,
+          "max_ms": 2.515,
+          "min_ms": 1.969
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.004
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.67,
+          "median_ms": 0.56,
+          "p95_ms": 0.902,
+          "max_ms": 0.902,
+          "min_ms": 0.557
+        },
+        "yara-x-engine": {
+          "n": 3,
+          "mean_ms": 0.36,
+          "median_ms": 0.35,
+          "p95_ms": 0.386,
+          "max_ms": 0.386,
+          "min_ms": 0.334
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.004
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.002
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.07,
+          "median_ms": 0.06,
+          "p95_ms": 0.076,
+          "max_ms": 0.076,
+          "min_ms": 0.06
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.62,
+          "median_ms": 0.63,
+          "p95_ms": 0.651,
+          "max_ms": 0.651,
+          "min_ms": 0.593
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.36,
+          "median_ms": 0.38,
+          "p95_ms": 0.387,
+          "max_ms": 0.387,
+          "min_ms": 0.331
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 712.159,
+          "scanner_ms": {
+            "yara-x": 0.472,
+            "office": 1.969,
+            "pdf": 0.005,
+            "custom": 0.902,
+            "yara-x-engine": 0.386,
+            "pdf-chains": 0.005,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.076,
+            "ooxml-links": 0.651,
+            "word-fields": 0.387
+          }
+        },
+        {
+          "harness_wall_ms": 738.814,
+          "scanner_ms": {
+            "yara-x": 0.48,
+            "office": 2.515,
+            "pdf": 0.004,
+            "custom": 0.558,
+            "yara-x-engine": 0.334,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.06,
+            "ooxml-links": 0.627,
+            "word-fields": 0.331
+          }
+        },
+        {
+          "harness_wall_ms": 622.755,
+          "scanner_ms": {
+            "yara-x": 0.329,
+            "office": 2.32,
+            "pdf": 0.004,
+            "custom": 0.557,
+            "yara-x-engine": 0.35,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.06,
+            "ooxml-links": 0.593,
+            "word-fields": 0.375
+          }
+        }
+      ]
+    },
+    {
+      "id": "6b-docx-external-template",
+      "ground_truth": "BENIGN",
+      "indicator": "external attachedTemplate https://template.example.invalid/normal.dotm (never fetched)",
+      "sha256": "1930d78d93347a087551bf547bba07dbcdc4fe7d1b79d00cc12960e3b962ab9e",
+      "size_bytes": 1731,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "n/a",
+        "pdf-integrity": "n/a",
+        "vba-chains": "n/a",
+        "ooxml-links": "SAFE",
+        "word-fields": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "rules": [
+        "office:OFFICE_EXTERNAL_AUTOLOAD:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_EXTERNAL_AUTOLOAD",
+          "severity": "MEDIUM",
+          "description": "An external 'attachedTemplate' relationship loads external content when the document is opened (e.g. 'https://template.example.invalid/normal.dotm')."
+        },
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_OFFICE_EXTERNAL_NOT_ACTIVATED",
+          "severity": "INFO",
+          "description": "External relationships are declared, but nothing shows that Office uses them. Evidence: rId9 -> https://template.example.invalid/normal.dotm: no element in word/document.xml references 'rId9'."
+        },
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: OFFICE_EXTERNAL_AUTOLOAD (Office scanner) kept although no part Office loads references it: its use is not demonstrated."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 624.98,
+          "median_ms": 619.38,
+          "p95_ms": 639.576,
+          "max_ms": 639.576,
+          "min_ms": 615.975
+        },
+        "yara-x": {
+          "n": 3,
+          "mean_ms": 0.38,
+          "median_ms": 0.37,
+          "p95_ms": 0.4,
+          "max_ms": 0.4,
+          "min_ms": 0.359
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 1.89,
+          "median_ms": 1.93,
+          "p95_ms": 1.945,
+          "max_ms": 1.945,
+          "min_ms": 1.803
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.004
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.62,
+          "median_ms": 0.55,
+          "p95_ms": 0.748,
+          "max_ms": 0.748,
+          "min_ms": 0.548
+        },
+        "yara-x-engine": {
+          "n": 3,
+          "mean_ms": 0.32,
+          "median_ms": 0.32,
+          "p95_ms": 0.338,
+          "max_ms": 0.338,
+          "min_ms": 0.31
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.004
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.002
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.06,
+          "median_ms": 0.06,
+          "p95_ms": 0.067,
+          "max_ms": 0.067,
+          "min_ms": 0.058
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.58,
+          "median_ms": 0.59,
+          "p95_ms": 0.589,
+          "max_ms": 0.589,
+          "min_ms": 0.576
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.38,
+          "median_ms": 0.34,
+          "p95_ms": 0.488,
+          "max_ms": 0.488,
+          "min_ms": 0.323
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 615.975,
+          "scanner_ms": {
+            "yara-x": 0.4,
+            "office": 1.803,
+            "pdf": 0.004,
+            "custom": 0.552,
+            "yara-x-engine": 0.31,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.058,
+            "ooxml-links": 0.576,
+            "word-fields": 0.323
+          }
+        },
+        {
+          "harness_wall_ms": 619.385,
+          "scanner_ms": {
+            "yara-x": 0.359,
+            "office": 1.945,
+            "pdf": 0.004,
+            "custom": 0.548,
+            "yara-x-engine": 0.317,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.062,
+            "ooxml-links": 0.589,
+            "word-fields": 0.34
+          }
+        },
+        {
+          "harness_wall_ms": 639.576,
+          "scanner_ms": {
+            "yara-x": 0.369,
+            "office": 1.933,
+            "pdf": 0.005,
+            "custom": 0.748,
+            "yara-x-engine": 0.338,
+            "pdf-chains": 0.005,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.067,
+            "ooxml-links": 0.587,
+            "word-fields": 0.488
+          }
+        }
+      ]
+    },
+    {
+      "id": "6c-docx-template-referenced-by-settings",
+      "ground_truth": "BENIGN",
+      "indicator": "the same template, referenced by w:attachedTemplate in the settings part, as Word writes it",
+      "sha256": "1f6250ac26083ce3d033715f2a5e48ec6b955199f0ed4c42e33d420ad65d9a8f",
+      "size_bytes": 2412,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SAFE",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "n/a",
+        "pdf-integrity": "n/a",
+        "vba-chains": "n/a",
+        "ooxml-links": "SUSPICIOUS",
+        "word-fields": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "rules": [
+        "ooxml-links:ENGINE_OFFICE_EXTERNAL_ON_OPEN:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_OFFICE_EXTERNAL_ON_OPEN",
+          "severity": "MEDIUM",
+          "description": "A part Office loads references an external target the document asks for when it opens (fetched unless the application blocks external content). Evidence: package -> word/document.xml (officedocument) -> word/settings.xml (settings) -> attachedTemplate id='rId1' -> attachedtemplate https://template.example.invalid/normal.dotm (w:attachedTemplate: the template is attached when the document op\u2026. This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: merged OFFICE_EXTERNAL_AUTOLOAD (office) into ENGINE_OFFICE_EXTERNAL_ON_OPEN: the same evidence, counted once."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 629.2,
+          "median_ms": 633.0,
+          "p95_ms": 639.065,
+          "max_ms": 639.065,
+          "min_ms": 615.528
+        },
+        "yara-x": {
+          "n": 3,
+          "mean_ms": 0.4,
+          "median_ms": 0.41,
+          "p95_ms": 0.441,
+          "max_ms": 0.441,
+          "min_ms": 0.361
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 1.93,
+          "median_ms": 1.92,
+          "p95_ms": 2.032,
+          "max_ms": 2.032,
+          "min_ms": 1.843
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.004
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.79,
+          "median_ms": 0.71,
+          "p95_ms": 1.026,
+          "max_ms": 1.026,
+          "min_ms": 0.644
+        },
+        "yara-x-engine": {
+          "n": 3,
+          "mean_ms": 0.34,
+          "median_ms": 0.31,
+          "p95_ms": 0.405,
+          "max_ms": 0.405,
+          "min_ms": 0.303
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.006,
+          "max_ms": 0.006,
+          "min_ms": 0.004
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.002
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.08,
+          "median_ms": 0.08,
+          "p95_ms": 0.09,
+          "max_ms": 0.09,
+          "min_ms": 0.068
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.68,
+          "median_ms": 0.66,
+          "p95_ms": 0.754,
+          "max_ms": 0.754,
+          "min_ms": 0.633
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.49,
+          "median_ms": 0.43,
+          "p95_ms": 0.619,
+          "max_ms": 0.619,
+          "min_ms": 0.422
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 639.065,
+          "scanner_ms": {
+            "yara-x": 0.441,
+            "office": 1.921,
+            "pdf": 0.004,
+            "custom": 1.026,
+            "yara-x-engine": 0.405,
+            "pdf-chains": 0.006,
+            "pdf-integrity": 0.003,
+            "vba-chains": 0.09,
+            "ooxml-links": 0.754,
+            "word-fields": 0.619
+          }
+        },
+        {
+          "harness_wall_ms": 633.004,
+          "scanner_ms": {
+            "yara-x": 0.361,
+            "office": 2.032,
+            "pdf": 0.004,
+            "custom": 0.706,
+            "yara-x-engine": 0.31,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.068,
+            "ooxml-links": 0.633,
+            "word-fields": 0.429
+          }
+        },
+        {
+          "harness_wall_ms": 615.528,
+          "scanner_ms": {
+            "yara-x": 0.408,
+            "office": 1.843,
+            "pdf": 0.004,
+            "custom": 0.644,
+            "yara-x-engine": 0.303,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.076,
+            "ooxml-links": 0.656,
+            "word-fields": 0.422
+          }
+        }
+      ]
+    },
+    {
+      "id": "6d-docx-linked-picture",
+      "ground_truth": "BENIGN",
+      "indicator": "a picture shown from https://images.example.invalid/pixel.png (a:blip r:link; never fetched)",
+      "sha256": "2c123328e344f3bd2eb978d92683eb52ba5a3b4319226f3269b02609ec2e5113",
+      "size_bytes": 1768,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SAFE",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "n/a",
+        "pdf-integrity": "n/a",
+        "vba-chains": "n/a",
+        "ooxml-links": "SAFE",
+        "word-fields": "SAFE",
+        "aggregate": "SAFE"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "rules": [],
+      "findings": [
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_EXTERNAL_RESOURCE",
+          "severity": "INFO",
+          "description": "An external 'image' relationship references an external resource (e.g. 'https://images.example.invalid/pixel.png')."
+        },
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_OFFICE_LINKED_PICTURE",
+          "severity": "INFO",
+          "description": "The document shows a picture stored outside the file; it is fetched only if the application loads external content, and then tells that server the document was opened. Evidence: package -> word/document.xml (officedocument) -> blip link='rId9' -> image https://images.example.invalid/pixel.png (blip link: a picture stored outside the file)."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 631.09,
+          "median_ms": 631.4,
+          "p95_ms": 640.997,
+          "max_ms": 640.997,
+          "min_ms": 620.856
+        },
+        "yara-x": {
+          "n": 3,
+          "mean_ms": 0.45,
+          "median_ms": 0.39,
+          "p95_ms": 0.572,
+          "max_ms": 0.572,
+          "min_ms": 0.374
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 1.91,
+          "median_ms": 1.95,
+          "p95_ms": 1.997,
+          "max_ms": 1.997,
+          "min_ms": 1.779
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.004
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.56,
+          "median_ms": 0.56,
+          "p95_ms": 0.593,
+          "max_ms": 0.593,
+          "min_ms": 0.54
+        },
+        "yara-x-engine": {
+          "n": 3,
+          "mean_ms": 0.32,
+          "median_ms": 0.31,
+          "p95_ms": 0.335,
+          "max_ms": 0.335,
+          "min_ms": 0.308
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.004
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.002
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.06,
+          "median_ms": 0.06,
+          "p95_ms": 0.069,
+          "max_ms": 0.069,
+          "min_ms": 0.06
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.59,
+          "median_ms": 0.6,
+          "p95_ms": 0.602,
+          "max_ms": 0.602,
+          "min_ms": 0.569
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.34,
+          "median_ms": 0.34,
+          "p95_ms": 0.356,
+          "max_ms": 0.356,
+          "min_ms": 0.334
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 620.856,
+          "scanner_ms": {
+            "yara-x": 0.39,
+            "office": 1.779,
+            "pdf": 0.004,
+            "custom": 0.54,
+            "yara-x-engine": 0.311,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.064,
+            "ooxml-links": 0.569,
+            "word-fields": 0.339
+          }
+        },
+        {
+          "harness_wall_ms": 631.404,
+          "scanner_ms": {
+            "yara-x": 0.572,
+            "office": 1.953,
+            "pdf": 0.004,
+            "custom": 0.555,
+            "yara-x-engine": 0.308,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.06,
+            "ooxml-links": 0.602,
+            "word-fields": 0.356
+          }
+        },
+        {
+          "harness_wall_ms": 640.997,
+          "scanner_ms": {
+            "yara-x": 0.374,
+            "office": 1.997,
+            "pdf": 0.004,
+            "custom": 0.593,
+            "yara-x-engine": 0.335,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.069,
+            "ooxml-links": 0.6,
+            "word-fields": 0.334
+          }
+        }
+      ]
+    },
+    {
+      "id": "6g-docx-linked-picture-file-share",
+      "ground_truth": "BENIGN",
+      "indicator": "the same picture on a file share file://fileserver.invalid/share/pixel.png (never fetched)",
+      "sha256": "bdacf5acdcdd555fea3e6bd01827087899a55e42e16561664b16a26548bbc355",
+      "size_bytes": 1772,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "n/a",
+        "pdf-integrity": "n/a",
+        "vba-chains": "n/a",
+        "ooxml-links": "SAFE",
+        "word-fields": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "rules": [
+        "office:OFFICE_EXTERNAL_NETWORK_PATH:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_EXTERNAL_NETWORK_PATH",
+          "severity": "MEDIUM",
+          "description": "An external 'image' relationship points to a network/file path; opening it can leak Windows credentials (e.g. 'file://fileserver.invalid/share/pixel.png')."
+        },
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_OFFICE_LINKED_PICTURE",
+          "severity": "INFO",
+          "description": "The document shows a picture stored outside the file; it is fetched only if the application loads external content, and then tells that server the document was opened. Evidence: package -> word/document.xml (officedocument) -> blip link='rId9' -> image file://fileserver.invalid/share/pixel.png (blip link: a picture stored outside the file)."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 632.23,
+          "median_ms": 623.5,
+          "p95_ms": 650.743,
+          "max_ms": 650.743,
+          "min_ms": 622.442
+        },
+        "yara-x": {
+          "n": 3,
+          "mean_ms": 0.37,
+          "median_ms": 0.37,
+          "p95_ms": 0.388,
+          "max_ms": 0.388,
+          "min_ms": 0.361
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 1.84,
+          "median_ms": 1.82,
+          "p95_ms": 1.915,
+          "max_ms": 1.915,
+          "min_ms": 1.788
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.003
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.61,
+          "median_ms": 0.58,
+          "p95_ms": 0.684,
+          "max_ms": 0.684,
+          "min_ms": 0.565
+        },
+        "yara-x-engine": {
+          "n": 3,
+          "mean_ms": 0.33,
+          "median_ms": 0.33,
+          "p95_ms": 0.339,
+          "max_ms": 0.339,
+          "min_ms": 0.303
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.004
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.002
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.06,
+          "median_ms": 0.06,
+          "p95_ms": 0.065,
+          "max_ms": 0.065,
+          "min_ms": 0.06
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.58,
+          "median_ms": 0.58,
+          "p95_ms": 0.597,
+          "max_ms": 0.597,
+          "min_ms": 0.571
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.39,
+          "median_ms": 0.38,
+          "p95_ms": 0.403,
+          "max_ms": 0.403,
+          "min_ms": 0.381
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 650.743,
+          "scanner_ms": {
+            "yara-x": 0.37,
+            "office": 1.788,
+            "pdf": 0.003,
+            "custom": 0.684,
+            "yara-x-engine": 0.339,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.065,
+            "ooxml-links": 0.597,
+            "word-fields": 0.403
+          }
+        },
+        {
+          "harness_wall_ms": 622.442,
+          "scanner_ms": {
+            "yara-x": 0.388,
+            "office": 1.915,
+            "pdf": 0.003,
+            "custom": 0.565,
+            "yara-x-engine": 0.333,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.064,
+            "ooxml-links": 0.571,
+            "word-fields": 0.381
+          }
+        },
+        {
+          "harness_wall_ms": 623.501,
+          "scanner_ms": {
+            "yara-x": 0.361,
+            "office": 1.816,
+            "pdf": 0.004,
+            "custom": 0.577,
+            "yara-x-engine": 0.303,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.06,
+            "ooxml-links": 0.584,
+            "word-fields": 0.381
+          }
+        }
+      ]
+    },
+    {
+      "id": "6e-docx-embedded-object-displayed",
+      "ground_truth": "BENIGN",
+      "indicator": "an inert OLE container shown by o:OLEObject Type=Embed",
+      "sha256": "f1202a9729ef09a77d8388da9a7d0e11dd705631bcfc45b434bd0d394469fbab",
+      "size_bytes": 2104,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "n/a",
+        "pdf-integrity": "n/a",
+        "vba-chains": "n/a",
+        "ooxml-links": "SAFE",
+        "word-fields": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "rules": [
+        "office:OFFICE_EMBEDDED_OLE:LOW"
+      ],
+      "findings": [
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_EMBEDDED_OLE",
+          "severity": "LOW",
+          "description": "Document contains an embedded OLE object."
+        },
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_OFFICE_EMBEDDED_OBJECT_DISPLAYED",
+          "severity": "INFO",
+          "description": "Embedded objects are shown in the document; they run only when activated. Evidence: package -> word/document.xml (officedocument) -> OLEObject id='rId10' -> oleobject word/embeddings/oleObject1.bin (OLEObject shows it in the document)."
+        },
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: OFFICE_EMBEDDED_OLE (Office scanner) kept; the object is shown in the document and runs only when activated."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 625.98,
+          "median_ms": 627.83,
+          "p95_ms": 637.473,
+          "max_ms": 637.473,
+          "min_ms": 612.619
+        },
+        "yara-x": {
+          "n": 3,
+          "mean_ms": 0.38,
+          "median_ms": 0.35,
+          "p95_ms": 0.417,
+          "max_ms": 0.417,
+          "min_ms": 0.353
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 2.61,
+          "median_ms": 2.54,
+          "p95_ms": 2.845,
+          "max_ms": 2.845,
+          "min_ms": 2.444
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.004,
+          "max_ms": 0.004,
+          "min_ms": 0.004
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.6,
+          "median_ms": 0.6,
+          "p95_ms": 0.635,
+          "max_ms": 0.635,
+          "min_ms": 0.58
+        },
+        "yara-x-engine": {
+          "n": 3,
+          "mean_ms": 0.38,
+          "median_ms": 0.34,
+          "p95_ms": 0.488,
+          "max_ms": 0.488,
+          "min_ms": 0.321
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.004
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.002,
+          "max_ms": 0.002,
+          "min_ms": 0.002
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.08,
+          "median_ms": 0.07,
+          "p95_ms": 0.087,
+          "max_ms": 0.087,
+          "min_ms": 0.07
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.58,
+          "median_ms": 0.58,
+          "p95_ms": 0.595,
+          "max_ms": 0.595,
+          "min_ms": 0.546
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.35,
+          "median_ms": 0.35,
+          "p95_ms": 0.347,
+          "max_ms": 0.347,
+          "min_ms": 0.345
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 627.834,
+          "scanner_ms": {
+            "yara-x": 0.417,
+            "office": 2.444,
+            "pdf": 0.004,
+            "custom": 0.6,
+            "yara-x-engine": 0.321,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.07,
+            "ooxml-links": 0.546,
+            "word-fields": 0.345
+          }
+        },
+        {
+          "harness_wall_ms": 637.473,
+          "scanner_ms": {
+            "yara-x": 0.353,
+            "office": 2.845,
+            "pdf": 0.004,
+            "custom": 0.58,
+            "yara-x-engine": 0.345,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.075,
+            "ooxml-links": 0.585,
+            "word-fields": 0.346
+          }
+        },
+        {
+          "harness_wall_ms": 612.619,
+          "scanner_ms": {
+            "yara-x": 0.355,
+            "office": 2.545,
+            "pdf": 0.004,
+            "custom": 0.635,
+            "yara-x-engine": 0.488,
+            "pdf-chains": 0.005,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.087,
+            "ooxml-links": 0.595,
+            "word-fields": 0.347
+          }
+        }
+      ]
+    },
+    {
+      "id": "6f-docx-embedded-object-not-displayed",
+      "ground_truth": "BENIGN",
+      "indicator": "the same object with its relationship but no element",
+      "sha256": "e24251266152ceb67bd3e8d0ae646176ccda7c6015957c3e2202d7bdaaec1820",
+      "size_bytes": 2067,
+      "verdicts": {
+        "yara-x": "SAFE",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "SAFE",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "n/a",
+        "pdf-integrity": "n/a",
+        "vba-chains": "n/a",
+        "ooxml-links": "SAFE",
+        "word-fields": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "not_applicable",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "rules": [
+        "office:OFFICE_EMBEDDED_OLE:LOW"
+      ],
+      "findings": [
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_EMBEDDED_OLE",
+          "severity": "LOW",
+          "description": "Document contains an embedded OLE object."
+        },
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_OFFICE_EMBEDDED_OBJECT_NOT_DISPLAYED",
+          "severity": "INFO",
+          "description": "Embedded object parts are present, but no element shows them in the document. Evidence: embeddings/oleObject1.bin: no element in word/document.xml references 'rId10'."
+        },
+        {
+          "scanner": "ooxml-links",
+          "rule_id": "ENGINE_CORRELATION",
+          "severity": "INFO",
+          "description": "Evidence correlation: OFFICE_EMBEDDED_OLE (Office scanner) kept; no element shows the object in the document."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 629.46,
+          "median_ms": 626.85,
+          "p95_ms": 634.696,
+          "max_ms": 634.696,
+          "min_ms": 626.836
+        },
+        "yara-x": {
+          "n": 3,
+          "mean_ms": 0.45,
+          "median_ms": 0.39,
+          "p95_ms": 0.592,
+          "max_ms": 0.592,
+          "min_ms": 0.364
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 3.05,
+          "median_ms": 3.09,
+          "p95_ms": 3.264,
+          "max_ms": 3.264,
+          "min_ms": 2.814
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.01,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.004
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.8,
+          "median_ms": 0.78,
+          "p95_ms": 0.857,
+          "max_ms": 0.857,
+          "min_ms": 0.769
+        },
+        "yara-x-engine": {
+          "n": 3,
+          "mean_ms": 0.37,
+          "median_ms": 0.37,
+          "p95_ms": 0.402,
+          "max_ms": 0.402,
+          "min_ms": 0.336
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.01,
+          "median_ms": 0.01,
+          "p95_ms": 0.005,
+          "max_ms": 0.005,
+          "min_ms": 0.005
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.002
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.08,
+          "median_ms": 0.07,
+          "p95_ms": 0.083,
+          "max_ms": 0.083,
+          "min_ms": 0.071
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.62,
+          "median_ms": 0.62,
+          "p95_ms": 0.664,
+          "max_ms": 0.664,
+          "min_ms": 0.574
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.42,
+          "median_ms": 0.38,
+          "p95_ms": 0.536,
+          "max_ms": 0.536,
+          "min_ms": 0.356
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 634.696,
+          "scanner_ms": {
+            "yara-x": 0.592,
+            "office": 3.264,
+            "pdf": 0.005,
+            "custom": 0.769,
+            "yara-x-engine": 0.402,
+            "pdf-chains": 0.005,
+            "pdf-integrity": 0.003,
+            "vba-chains": 0.075,
+            "ooxml-links": 0.621,
+            "word-fields": 0.536
+          }
+        },
+        {
+          "harness_wall_ms": 626.848,
+          "scanner_ms": {
+            "yara-x": 0.393,
+            "office": 2.814,
+            "pdf": 0.005,
+            "custom": 0.782,
+            "yara-x-engine": 0.366,
+            "pdf-chains": 0.005,
+            "pdf-integrity": 0.003,
+            "vba-chains": 0.083,
+            "ooxml-links": 0.664,
+            "word-fields": 0.356
+          }
+        },
+        {
+          "harness_wall_ms": 626.836,
+          "scanner_ms": {
+            "yara-x": 0.364,
+            "office": 3.086,
+            "pdf": 0.004,
+            "custom": 0.857,
+            "yara-x-engine": 0.336,
+            "pdf-chains": 0.005,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.071,
+            "ooxml-links": 0.574,
+            "word-fields": 0.377
+          }
+        }
+      ]
+    },
+    {
+      "id": "7-docx-macro-declaration-mismatch",
+      "ground_truth": "BENIGN",
+      "indicator": "macro-free DOCX declaration with a vbaProject.bin placeholder",
+      "sha256": "298b3823825cc1fd82f19edfaa811cb5630b2f35b8e42f05cb986b8868b0ea3d",
+      "size_bytes": 1885,
+      "verdicts": {
+        "yara-x": "SUSPICIOUS",
+        "office": "SUSPICIOUS",
+        "pdf": "n/a",
+        "custom": "SUSPICIOUS",
+        "yara-x-engine": "SAFE",
+        "pdf-chains": "n/a",
+        "pdf-integrity": "n/a",
+        "vba-chains": "SAFE",
+        "ooxml-links": "SAFE",
+        "word-fields": "SAFE",
+        "aggregate": "SUSPICIOUS"
+      },
+      "deterministic": true,
+      "status": {
+        "yara-x": "completed",
+        "office": "completed",
+        "pdf": "not_applicable",
+        "custom": "completed",
+        "yara-x-engine": "completed",
+        "pdf-chains": "not_applicable",
+        "pdf-integrity": "not_applicable",
+        "vba-chains": "completed",
+        "ooxml-links": "completed",
+        "word-fields": "completed"
+      },
+      "rules": [
+        "custom:CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH:MEDIUM",
+        "office:OFFICE_VBA_UNPARSED:LOW",
+        "yara-x:OOXML_VBA_Macros:MEDIUM"
+      ],
+      "findings": [
+        {
+          "scanner": "yara-x",
+          "rule_id": "OOXML_VBA_Macros",
+          "severity": "MEDIUM",
+          "description": "Office Open XML (ZIP-based) document contains a VBA macro project (vbaProject.bin)."
+        },
+        {
+          "scanner": "office",
+          "rule_id": "OFFICE_VBA_UNPARSED",
+          "severity": "LOW",
+          "description": "Document contains a VBA project storage that could not be parsed."
+        },
+        {
+          "scanner": "custom",
+          "rule_id": "CUSTOM_OFFICE_MACRO_DECLARATION_MISMATCH",
+          "severity": "MEDIUM",
+          "description": "The package is declared as a macro-free Word document but contains macro code or macro sheets, so its declared type misrepresents what it carries. Evidence: declared main type 'application/vnd.openxmlformats-officedocument.wordprocessin\u2026'; macro part 'word/vbaProject.bin'; relationship 'rId3' of type vbaProject in 'word/_rels/document.xml.rels'. Location: [Content_Types].xml; _rels/.rels. This is a structural indicator, not proof that the file is malicious."
+        },
+        {
+          "scanner": "vba-chains",
+          "rule_id": "ENGINE_VBA_CALL_PATH_UNDETERMINED",
+          "severity": "INFO",
+          "description": "Whether automatically running macro code reaches a dangerous operation could not be determined. Evidence: word/vbaProject.bin is not an OLE VBA project."
+        }
+      ],
+      "isolation_missing": [
+        "capabilities_dropped",
+        "net_interfaces_safe",
+        "net_ipv4_no_route",
+        "net_ipv4_unreachable",
+        "net_ipv6_no_route",
+        "net_ipv6_unreachable",
+        "network_namespace",
+        "network_verified",
+        "rlimits"
+      ],
+      "timing_ms": {
+        "harness_wall": {
+          "n": 3,
+          "mean_ms": 665.27,
+          "median_ms": 673.55,
+          "p95_ms": 692.794,
+          "max_ms": 692.794,
+          "min_ms": 629.465
+        },
+        "yara-x": {
+          "n": 3,
+          "mean_ms": 0.48,
+          "median_ms": 0.47,
+          "p95_ms": 0.482,
+          "max_ms": 0.482,
+          "min_ms": 0.473
+        },
+        "office": {
+          "n": 3,
+          "mean_ms": 2.09,
+          "median_ms": 2.17,
+          "p95_ms": 2.234,
+          "max_ms": 2.234,
+          "min_ms": 1.875
+        },
+        "pdf": {
+          "n": 3,
+          "mean_ms": 0.01,
+          "median_ms": 0.0,
+          "p95_ms": 0.008,
+          "max_ms": 0.008,
+          "min_ms": 0.004
+        },
+        "custom": {
+          "n": 3,
+          "mean_ms": 0.79,
+          "median_ms": 0.81,
+          "p95_ms": 0.937,
+          "max_ms": 0.937,
+          "min_ms": 0.629
+        },
+        "yara-x-engine": {
+          "n": 3,
+          "mean_ms": 0.37,
+          "median_ms": 0.34,
+          "p95_ms": 0.438,
+          "max_ms": 0.438,
+          "min_ms": 0.34
+        },
+        "pdf-chains": {
+          "n": 3,
+          "mean_ms": 0.01,
+          "median_ms": 0.01,
+          "p95_ms": 0.006,
+          "max_ms": 0.006,
+          "min_ms": 0.004
+        },
+        "pdf-integrity": {
+          "n": 3,
+          "mean_ms": 0.0,
+          "median_ms": 0.0,
+          "p95_ms": 0.003,
+          "max_ms": 0.003,
+          "min_ms": 0.002
+        },
+        "vba-chains": {
+          "n": 3,
+          "mean_ms": 0.17,
+          "median_ms": 0.17,
+          "p95_ms": 0.196,
+          "max_ms": 0.196,
+          "min_ms": 0.152
+        },
+        "ooxml-links": {
+          "n": 3,
+          "mean_ms": 0.49,
+          "median_ms": 0.51,
+          "p95_ms": 0.522,
+          "max_ms": 0.522,
+          "min_ms": 0.444
+        },
+        "word-fields": {
+          "n": 3,
+          "mean_ms": 0.36,
+          "median_ms": 0.36,
+          "p95_ms": 0.371,
+          "max_ms": 0.371,
+          "min_ms": 0.354
+        }
+      },
+      "trials": [
+        {
+          "harness_wall_ms": 629.465,
+          "scanner_ms": {
+            "yara-x": 0.475,
+            "office": 1.875,
+            "pdf": 0.004,
+            "custom": 0.629,
+            "yara-x-engine": 0.34,
+            "pdf-chains": 0.005,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.152,
+            "ooxml-links": 0.444,
+            "word-fields": 0.354
+          }
+        },
+        {
+          "harness_wall_ms": 692.794,
+          "scanner_ms": {
+            "yara-x": 0.482,
+            "office": 2.171,
+            "pdf": 0.008,
+            "custom": 0.937,
+            "yara-x-engine": 0.438,
+            "pdf-chains": 0.006,
+            "pdf-integrity": 0.003,
+            "vba-chains": 0.196,
+            "ooxml-links": 0.522,
+            "word-fields": 0.364
+          }
+        },
+        {
+          "harness_wall_ms": 673.555,
+          "scanner_ms": {
+            "yara-x": 0.473,
+            "office": 2.234,
+            "pdf": 0.004,
+            "custom": 0.81,
+            "yara-x-engine": 0.34,
+            "pdf-chains": 0.004,
+            "pdf-integrity": 0.002,
+            "vba-chains": 0.167,
+            "ooxml-links": 0.505,
+            "word-fields": 0.371
+          }
+        }
+      ]
+    }
+  ]
+}
