@@ -23,7 +23,6 @@ import msoffcrypto
 import olefile
 from defusedxml.common import DefusedXmlException
 from oletools.oleobj import OleNativeStream
-from oletools.olevba import VBA_Parser
 
 from app.models import Finding, Severity
 from app.scanners.base import ScanError
@@ -53,10 +52,6 @@ AUTO_LOAD_RELATIONSHIPS = {"oleObject", "attachedTemplate", "frame", "subDocumen
 DDE_SERVICES_RUNNING_COMMANDS = {
     "cmd", "powershell", "pwsh", "mshta", "rundll32", "regsvr32", "wscript", "cscript", "msiexec", "certutil",
 }
-# olevba "Suspicious" descriptions that mean code execution or download, not just file I/O.
-STRONG_VBA_BEHAVIOUR = re.compile(
-    r"run an executable|powershell|download files|inject code|shellcode|through WMI|VBA Stomping", re.IGNORECASE
-)
 WORD_FIELD_PARTS = re.compile(r"^word/(document|header\d*|footer\d*|footnotes|endnotes)\.xml$", re.IGNORECASE)
 
 
@@ -73,8 +68,9 @@ def clean(text: str, limit: int = 100) -> str:
     return text if len(text) <= limit else text[: limit - 1] + "…"
 
 
-def finding(category: str, severity: Severity, description: str, rule_id: str) -> Finding:
-    return Finding(scanner=NAME, category=category, severity=severity, description=description, rule_id=rule_id)
+def finding(category: str, severity: Severity, description: str, rule_id: str, evidence: list[str] = ()) -> Finding:
+    return Finding(scanner=NAME, category=category, severity=severity, description=description, rule_id=rule_id,
+                   evidence=[clean(e, 300) for e in list(evidence)[:50]])
 
 
 def identify(data: bytes) -> str | None:
@@ -112,47 +108,69 @@ class OfficeScanner:
 
 
 def vba_findings(ole_data: bytes, label: str, has_vba_storage: bool) -> list[Finding]:
-    """olevba on an OLE blob (whole legacy file, or vbaProject.bin from OOXML).
+    """Macro findings for one OLE blob (whole legacy file, or vbaProject.bin from OOXML).
 
-    has_vba_storage: the container structurally holds a VBA project. If olevba then
-    finds no macros, the project is damaged or tampered with; report it, don't pass it.
+    Source is extracted with oletools (decompression only); what it does is decided by the
+    engine's own analysis (app.engine.vba_analysis, app.engine.vba_chains). has_vba_storage: the
+    container structurally holds a VBA project. If no macro is then found, the project is damaged
+    or tampered with; report it, don't pass it.
     """
+    from app.engine import vba_analysis as va, vba_chains  # the engine imports this module
+
     unparsed = [finding("office-macro", Severity.LOW,
                         "Document contains a VBA project storage that could not be parsed.", "OFFICE_VBA_UNPARSED")]
     if has_vba_storage and not ole_data.startswith(OLE_MAGIC):
-        return unparsed  # a VBA project is always OLE; olevba would misread other data as VBA text
-    parser = VBA_Parser(label, data=ole_data)
-    try:
-        if not parser.detect_macros():
-            return unparsed if has_vba_storage else []
-        results = parser.analyze_macros()
-    finally:
-        parser.close()
+        return unparsed  # a VBA project is always OLE; the extractor would misread other data as VBA text
+    extracted = va.extract(ole_data, label)
+    if extracted.error is not None:
+        raise extracted.error  # OfficeScanner.scan wraps it: an extraction failure fails the scan
+    if extracted.too_large:
+        raise OfficeScanError(f"VBA source exceeds {va.MAX_SOURCE_BYTES} bytes")
+    if not (extracted.vba or extracted.xlm):
+        return unparsed if has_vba_storage else []
+    vba = tuple(m for m in extracted.modules if m[0] != va.XLM_MODULE)
+    result = vba_chains.analyse_cached(vba)
+    xlm_entries, xlm_caps = va.analyse_xlm("\n".join(code for m, code in extracted.modules if m == va.XLM_MODULE))
+    return macro_findings(result, xlm_entries, xlm_caps)
 
-    autoexec = sorted({clean(kw, 40) for kind, kw, _ in results if kind == "AutoExec"})
-    suspicious = {clean(desc, 90) for kind, _, desc in results if kind == "Suspicious"}
-    strong = sorted(d for d in suspicious if STRONG_VBA_BEHAVIOUR.search(d))
-    weak = sorted(suspicious - set(strong))
-    obfuscation = sorted({kind for kind, _, _ in results if kind in ("Hex String", "Base64 String", "Dridex String", "VBA obfuscated Strings")})
 
-    found = [finding("office-macro", Severity.LOW, "Document contains a VBA/XLM macro project.", "OFFICE_MACROS_PRESENT")]
-    if autoexec:
+def macro_findings(result, xlm_entries: list[str], xlm_caps: list) -> list[Finding]:
+    """The Office scanner's macro rules over the engine's VBA analysis (fixed severities)."""
+    from app.engine import vba_analysis as va
+
+    triggers = [f"{clean(e.entry, 60)} ({e.trigger})" for e in result.entries]
+    triggers += [f"{clean(name, 40)} (Excel 4.0 macro name, {va.AUTOMATIC})" for name in xlm_entries]
+    caps = [(where, c) for where, c in result.capabilities] + [("Excel 4.0 macro sheet", c) for c in xlm_caps]
+    strong = [f"{clean(where, 60)}: {c.text()}" for where, c in caps if c.strong and c.status == va.DEMONSTRATED]
+    weak = [f"{clean(where, 60)}: {c.text()}{'' if c.status == va.DEMONSTRATED else ' [possible only]'}"
+            for where, c in caps if not (c.strong and c.status == va.DEMONSTRATED)]
+    decoded = [f"{clean(where, 60)}: {d.text()}" for where, d in result.decoded]
+    modules = [clean(m, 40) for m, _ in result.sources]
+
+    found = [finding("office-macro", Severity.LOW, "Document contains a VBA/XLM macro project.", "OFFICE_MACROS_PRESENT",
+                     [f"{len(modules)} VBA module(s): {', '.join(modules[:8])}"] if modules else [])]
+    if triggers:
         found.append(finding("office-macro-autoexec", Severity.MEDIUM,
-                             f"Macro code runs automatically via: {', '.join(autoexec[:5])}.", "OFFICE_MACRO_AUTOEXEC"))
+                             f"Macro code runs without being started by name: {', '.join(triggers[:5])}.",
+                             "OFFICE_MACRO_AUTOEXEC", triggers))
     if strong:
+        kinds = sorted({c.kind for _, c in caps if c.strong and c.status == va.DEMONSTRATED})
         found.append(finding("office-macro-suspicious", Severity.MEDIUM,
-                             f"Macro code {'; '.join(strong[:4])}.", "OFFICE_MACRO_DANGEROUS_CAPABILITY"))
+                             f"Macro code can {', '.join(kinds)} (operations recognised in context). "
+                             f"Evidence: {'; '.join(strong[:3])}.", "OFFICE_MACRO_DANGEROUS_CAPABILITY", strong))
     if weak:
         found.append(finding("office-macro-suspicious", Severity.LOW,
-                             f"Macro code {'; '.join(weak[:4])}.", "OFFICE_MACRO_SUSPICIOUS_KEYWORDS"))
-    if obfuscation:
+                             f"Macro code uses operations that are risky in context or could not be resolved: "
+                             f"{'; '.join(weak[:3])}.", "OFFICE_MACRO_SUSPICIOUS_KEYWORDS", weak))
+    if decoded:
         found.append(finding("office-macro-obfuscation", Severity.LOW,
-                             f"Macro code contains encoded or obfuscated strings ({', '.join(obfuscation)}).",
-                             "OFFICE_MACRO_OBFUSCATION"))
-    if autoexec and strong:
+                             f"Macro code builds or encodes strings in a way that hides their text. Decoded statically, "
+                             f"never executed: {'; '.join(decoded[:2])}.", "OFFICE_MACRO_OBFUSCATION", decoded))
+    if triggers and strong:
         found.append(finding("office-macro-autoexec", Severity.HIGH,
-                             "Macro code runs automatically on open and can execute commands or download files.",
-                             "OFFICE_MACRO_AUTOEXEC_EXECUTION"))
+                             "Macro code runs without being started by name, and the same project can execute commands, "
+                             "download files, inject code or persist. Whether the automatic code reaches that operation "
+                             "is the vba-chains analysis.", "OFFICE_MACRO_AUTOEXEC_EXECUTION", triggers + strong))
     return found
 
 

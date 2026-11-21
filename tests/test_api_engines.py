@@ -193,15 +193,14 @@ def test_the_refined_signature_replaces_the_reference_match(research):
 
 def test_vba_call_paths_reach_the_response(research, monkeypatch):
     # Container parsing replaced by inert source strings (no VBA project is built); see test_vba_chains.
-    from app.engine import vba_chains
+    from app.engine import vba_analysis
     monkeypatch.setattr(SourceOnlyOfficeParser, "modules", [("Module1", RELATED)])
-    monkeypatch.setattr(office, "VBA_Parser", SourceOnlyOfficeParser)
-    monkeypatch.setattr(vba_chains, "VBA_Parser", SourceOnlyOfficeParser)
+    monkeypatch.setattr(vba_analysis, "VBA_Parser", SourceOnlyOfficeParser)
     from tests.test_vba_chains import DOCM
     body = scan(DOCM, "unified").json()
     path = next(f for f in body["findings"] if f["rule_id"] == "ENGINE_VBA_AUTOEXEC_REACHES_CAPABILITY")
     assert path["evidence"] == ["Module1.AutoOpen -> Module1.Prepare -> Module1.RunTool "
-                                "(May run an executable file or a system command (shell))"]
+                                "(execute: Shell starts a program (line 8, command 'placeholder'))"]
     assert body["verdict"] == "MALICIOUS" and path["severity"] == Severity.HIGH.value
 
 

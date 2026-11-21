@@ -1,13 +1,13 @@
 """VBA call graphs on inert source strings.
 
 Every module below is a Python string that never becomes a document or a VBA project. The
-"dangerous" lines only carry a keyword olevba recognises, with placeholder arguments
+"dangerous" lines only carry an operation the engine recognises, with placeholder arguments
 (Shell "placeholder"), so nothing here could run anything even if typed into an editor.
 """
 
 import pytest
 
-from app.engine import vba_chains
+from app.engine import vba_analysis, vba_chains
 from app.engine.vba_chains import LINKED, NO_PATH, UNDETERMINED, VbaChainError, analyse
 from tests.office_fixtures import make_ole, make_ooxml
 
@@ -71,12 +71,12 @@ def test_dynamic_calls_on_the_reachable_part_make_the_path_undetermined(call, re
 
 
 def test_run_with_a_computed_name_is_unresolved_not_an_execution():
-    # olevba lists "Run" under "May run an executable file or a system command", but
-    # Application.Run starts a macro whose name is computed here: nothing is demonstrated.
+    # Application.Run starts a macro (the Office Application object is the receiver), whose name is
+    # computed here: no execution capability at all, but an unresolved call.
     overall, _, result = outcome("Sub AutoOpen()\n    Application.Run procName\nEnd Sub\n")
     reasons = " | ".join(result.entries[0].reasons)
     assert overall == UNDETERMINED
-    assert "only run: Run also starts macros" in reasons and "calls Run with a name that is not a known" in reasons
+    assert "calls Run with a name that is not a known" in reasons and "execute" not in reasons
 
 
 # ----------------------------------------------------------------------------- demonstrated vs possible
@@ -123,20 +123,29 @@ def test_demonstrated_calls_still_link(call):
     assert outcome(f"Sub AutoOpen()\n    {call}\nEnd Sub\n" + TOOL)[0] == LINKED
 
 
-@pytest.mark.parametrize("body, only", [
-    ("style = vbHide", "only vbhide: a window-style constant is an argument"),
-    ('Set o = CreateObject("WScript.Shell")\n    p = o.SpecialFolders("Desktop")', "only shell, wscript.shell"),
-    ("x = obj.Create(1)", "only create: Create is a common method name"),
-    ('Set a = CreateObject("Shell.Application")\n    MsgBox a.Namespace(0).Title', "only shell"),
+@pytest.mark.parametrize("body", [
+    "style = vbHide",  # a window-style constant is a value, not a call (olevba listed it as execution)
+    "x = obj.Create(1)",  # Create is a common method name; no Win32_Process anywhere
+    'Application.Run "Macro1"',  # Office's Run starts a macro, not a program
 ])
-def test_an_ambiguous_keyword_is_only_a_possible_capability(body, only):
-    assert only in reasons(f"Sub AutoOpen()\n    {body}\nEnd Sub\n")
+def test_former_keyword_matches_without_an_operation_are_no_capability(body):
+    assert outcome(f"Sub AutoOpen()\n    {body}\nEnd Sub\nSub Macro1()\nEnd Sub\n")[0] == NO_PATH
+
+
+@pytest.mark.parametrize("body, why", [
+    ('Set o = CreateObject("WScript.Shell")\n    p = o.SpecialFolders("Desktop")', "creates wscript.shell"),
+    ('Set a = CreateObject("Shell.Application")\n    MsgBox a.Namespace(0).Title', "creates shell.application"),
+    ("x = obj.Run(1)", "Run on an object of unknown type"),
+])
+def test_an_execution_object_or_method_without_a_resolved_call_is_only_possible(body, why):
+    assert why in reasons(f"Sub AutoOpen()\n    {body}\nEnd Sub\n")
 
 
 def test_a_shell32_declaration_alone_is_not_an_execution():
+    # SHGetFolderPathA is a harmless shell32 function: the API, not the library, decides.
     src = ('Private Declare PtrSafe Function GetFolder Lib "shell32" Alias "SHGetFolderPathA" (ByVal h As LongPtr) As Long\n'
            "Sub AutoOpen()\n    GetFolder 0\nEnd Sub\n")
-    assert "only shell32" in reasons(src)
+    assert outcome(src)[0] == NO_PATH
 
 
 @pytest.mark.parametrize("body", [
@@ -175,7 +184,7 @@ def test_an_aliased_library_declaration_links_a_harmless_looking_call():
     ('Const TOOL_CMD = "placeholder"\nPublic x As Object\nSub AutoOpen()\n    MsgBox "x"\nEnd Sub\n'
      'Sub Helper()\nEnd Sub\nEnd Sub\n', "End without a procedure"),
     ('Dim s As Object: Set s = CreateObject("WScript.Shell")\nSub AutoOpen()\n    MsgBox "x"\nEnd Sub\n',
-     "dangerous keywords outside any procedure"),
+     "dangerous operations outside any procedure"),
     ("Sub Main()\n    Call AutoOpen\nEnd Sub\n" + TOOL, "automatic-entry keyword 'AutoOpen'"),
 ])
 def test_incomplete_call_graphs_are_undetermined(src, problem):
@@ -198,7 +207,7 @@ def test_no_entry_means_nothing_runs_automatically():
 
 class SourceOnlyParser:
     """Stands in for olevba.VBA_Parser's container parsing only: it hands over inert source
-    strings. No VBA project is built; keyword analysis stays real olevba."""
+    strings. No VBA project is built; all analysis is the engine's own."""
 
     modules: list[tuple[str, str]] = []
     fail = False
@@ -222,9 +231,18 @@ class SourceOnlyParser:
         pass
 
 
+@pytest.fixture(autouse=True)
+def fresh_caches():
+    vba_analysis.extract.cache_clear()
+    vba_chains.analyse_cached.cache_clear()
+    yield
+    vba_analysis.extract.cache_clear()
+    vba_chains.analyse_cached.cache_clear()
+
+
 @pytest.fixture
 def parser(monkeypatch):
-    monkeypatch.setattr(vba_chains, "VBA_Parser", SourceOnlyParser)
+    monkeypatch.setattr(vba_analysis, "VBA_Parser", SourceOnlyParser)
     monkeypatch.setattr(SourceOnlyParser, "fail", False)
     return SourceOnlyParser
 
@@ -264,15 +282,7 @@ def test_a_broken_package_fails_closed_as_malformed_input():
 
 
 class SourceOnlyOfficeParser(SourceOnlyParser):
-    """Also stands in for the Office scanner's olevba calls; its keyword analysis is real olevba
-    (VBA_Scanner) over the same inert source."""
-
-    def detect_macros(self):
-        return bool(self.modules)
-
-    def analyze_macros(self):
-        from oletools.olevba import VBA_Scanner
-        return VBA_Scanner("\n".join(code for _, code in self.modules)).scan()
+    """The same stand-in, shared by the Office scanner and the call graph (one extraction)."""
 
 
 RELATED = "Sub AutoOpen()\n    Prepare\nEnd Sub\nSub Prepare()\n    RunTool\nEnd Sub\n" + TOOL
@@ -291,8 +301,7 @@ def test_the_reference_macro_verdict_is_qualified_never_lowered(monkeypatch, sou
     from evaluation.cases import verdicts
 
     monkeypatch.setattr(SourceOnlyOfficeParser, "modules", [("Module1", source)])
-    monkeypatch.setattr(office, "VBA_Parser", SourceOnlyOfficeParser)
-    monkeypatch.setattr(vba_chains, "VBA_Parser", SourceOnlyOfficeParser)
+    monkeypatch.setattr(vba_analysis, "VBA_Parser", SourceOnlyOfficeParser)
     reference = worker.analyse(SCANNERS, DOCM)
     unified = engine.correlate(worker.analyse(engine.SCANNERS, DOCM))
     rules = {f.rule_id for f in unified.findings}

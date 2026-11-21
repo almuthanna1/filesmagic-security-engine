@@ -2,8 +2,9 @@
 
 All inputs are inert synthetic fixtures built by tests/office_fixtures.py. OLE files
 are real compound files parsed by the real olefile/msoffcrypto/oleobj code; only the
-olevba macro analysis is replaced by a fake, because a valid compressed VBA project
-cannot be built without real macro tooling.
+olevba source extractor is replaced by a fake that hands over inert VBA source, because a
+valid compressed VBA project cannot be built without real macro tooling. The analysis of that
+source is the engine's own (app.engine.vba_analysis), never stubbed.
 """
 
 import io
@@ -15,6 +16,7 @@ from fastapi.testclient import TestClient
 
 from app import main
 from app.models import Severity, Verdict
+from app.engine import vba_analysis
 from app.scanners import office
 from app.scanners.office import OfficeScanError, OfficeScanner
 from app.scanners.yarax import YaraXScanner
@@ -45,36 +47,43 @@ def field(instr_runs):
 
 
 class FakeVBAParser:
-    """Stands in for olevba.VBA_Parser; returns canned analyze_macros() results."""
+    """Stands in for olevba.VBA_Parser's extractor: hands over inert source modules."""
 
-    def __init__(self, results=(), macros=True, raises=None):
-        self.results, self.macros, self.raises, self.closed = list(results), macros, raises, False
+    def __init__(self, modules=(), raises=None):
+        self.modules, self.raises, self.closed = list(modules), raises, False
 
-    def __call__(self, label, data):
+    def __call__(self, label, data=None):
         if self.raises:
             raise self.raises
         return self
 
-    def detect_macros(self):
-        return self.macros
+    def detect_xlm_macros(self):
+        return False
 
-    def analyze_macros(self):
-        return self.results
+    def detect_vba_macros(self):
+        return bool(self.modules)
+
+    def extract_macros(self):
+        for name, code in self.modules:
+            yield "vbaProject.bin", "VBA/" + name, name, code
 
     def close(self):
         self.closed = True
 
 
-def fake_vba(monkeypatch, **kwargs):
-    fake = FakeVBAParser(**kwargs)
-    monkeypatch.setattr(office, "VBA_Parser", fake)
+def fake_vba(monkeypatch, *sources, **kwargs):
+    fake = FakeVBAParser(modules=[(f"Module{i}", src) for i, src in enumerate(sources, 1)], **kwargs)
+    monkeypatch.setattr(vba_analysis, "VBA_Parser", fake)
     return fake
 
 
 DOCM = make_ooxml({"word/vbaProject.bin": make_ole({"VBA/dir": b"x"})})
-AUTOEXEC = ("AutoExec", "Document_Open", "Runs when the Word document is opened")
-SHELL = ("Suspicious", "Shell", "May run an executable file or a system command")
-OPEN = ("Suspicious", "Open", "May open a file")
+# Inert sources: placeholder arguments, never run.
+EMPTY = "Sub Helper()\nEnd Sub\n"
+AUTOEXEC = 'Sub Document_Open()\n    MsgBox "hello"\nEnd Sub\n'
+SHELL = 'Sub Tool()\n    Shell "placeholder"\nEnd Sub\n'
+OPEN = 'Sub Save()\n    Open "out.txt" For Output As #1\nEnd Sub\n'
+HIDDEN = 'Sub Helper()\n    s = StrReverse("llehs.tpircsw")\nEnd Sub\n'
 
 
 # --------------------------------------------------------------------- format identification
@@ -133,7 +142,7 @@ def test_ordinary_hyperlink_and_chart_embedding_are_not_flagged():
 
 
 def test_macro_project_presence_is_low(monkeypatch):
-    fake = fake_vba(monkeypatch, results=[])
+    fake = fake_vba(monkeypatch, EMPTY)
     findings = scan(DOCM)
     assert rule_ids(findings) == ["OFFICE_MACROS_PRESENT"]
     assert findings[0].severity == Severity.LOW
@@ -141,45 +150,56 @@ def test_macro_project_presence_is_low(monkeypatch):
 
 
 def test_autoexec_is_medium(monkeypatch):
-    fake_vba(monkeypatch, results=[AUTOEXEC])
+    fake_vba(monkeypatch, AUTOEXEC)
     findings = {f.rule_id: f for f in scan(DOCM)}
     assert findings["OFFICE_MACRO_AUTOEXEC"].severity == Severity.MEDIUM
     assert "Document_Open" in findings["OFFICE_MACRO_AUTOEXEC"].description
 
 
 def test_dangerous_capability_without_autoexec_is_medium(monkeypatch):
-    fake_vba(monkeypatch, results=[SHELL])
+    fake_vba(monkeypatch, SHELL)
     assert worst(scan(DOCM)) == Severity.MEDIUM
 
 
 def test_weak_keywords_are_low(monkeypatch):
-    fake_vba(monkeypatch, results=[OPEN])
+    fake_vba(monkeypatch, OPEN)
     findings = {f.rule_id: f for f in scan(DOCM)}
     assert findings["OFFICE_MACRO_SUSPICIOUS_KEYWORDS"].severity == Severity.LOW
 
 
 def test_obfuscated_strings_are_low(monkeypatch):
-    fake_vba(monkeypatch, results=[("Base64 String", "aGVsbG8=", "hello")])
-    assert "OFFICE_MACRO_OBFUSCATION" in rule_ids(scan(DOCM))
+    fake_vba(monkeypatch, HIDDEN)
+    findings = {f.rule_id: f for f in scan(DOCM)}
+    assert findings["OFFICE_MACRO_OBFUSCATION"].severity == Severity.LOW
+    assert "'wscript.shell'" in findings["OFFICE_MACRO_OBFUSCATION"].description
 
 
 def test_autoexec_plus_command_execution_is_high(monkeypatch):
-    fake_vba(monkeypatch, results=[AUTOEXEC, SHELL])
+    fake_vba(monkeypatch, AUTOEXEC, SHELL)
     findings = scan(DOCM)
     assert "OFFICE_MACRO_AUTOEXEC_EXECUTION" in rule_ids(findings)
     assert worst(findings) == Severity.HIGH
 
 
-def test_vba_stomping_counts_as_strong(monkeypatch):
-    stomping = ("Suspicious", "VBA Stomping", "VBA Stomping was detected: the VBA source code and P-code are different")
-    fake_vba(monkeypatch, results=[AUTOEXEC, stomping])
-    assert "OFFICE_MACRO_AUTOEXEC_EXECUTION" in rule_ids(scan(DOCM))
+def test_an_entry_alone_is_never_high(monkeypatch):
+    # The baseline HIGH rule fired on any entry keyword plus any "executable" keyword (Run, vbHide)
+    # anywhere in the project. Now the operation must be recognised in context.
+    fake_vba(monkeypatch, AUTOEXEC + 'Sub B()\n    style = vbHide\n    Application.Run "B"\nEnd Sub\n')
+    assert worst(scan(DOCM)) == Severity.MEDIUM
 
 
-def test_macro_keywords_are_sanitised(monkeypatch):
-    fake_vba(monkeypatch, results=[("AutoExec", "Auto\x00Open\n" + "A" * 200, "x")])
+def test_vba_stomping_is_not_claimed_either_way(monkeypatch):
+    # olevba detects stomping only on files on disk; the isolated worker writes none, so the
+    # baseline rule for it was unreachable. Harmless source never makes a project SAFE either:
+    # macros present is always at least LOW (SUSPICIOUS), see test_macro_project_presence_is_low.
+    fake_vba(monkeypatch, EMPTY)
+    assert all("stomp" not in f.description.lower() for f in scan(DOCM))
+
+
+def test_macro_names_are_sanitised(monkeypatch):
+    fake_vba(monkeypatch, "Sub Auto_Open" + "A" * 200 + "()\nEnd Sub\n")
     description = next(f.description for f in scan(DOCM) if f.rule_id == "OFFICE_MACRO_AUTOEXEC")
-    assert "\x00" not in description and "\n" not in description and len(description) < 120
+    assert "\x00" not in description and "\n" not in description and len(description) < 160
 
 
 def test_unparseable_vba_storage_is_reported_not_passed():
@@ -187,8 +207,8 @@ def test_unparseable_vba_storage_is_reported_not_passed():
     assert rule_ids(scan(DOCM)) == ["OFFICE_VBA_UNPARSED"]
 
 
-def test_legacy_doc_macros_use_olevba(monkeypatch):
-    fake_vba(monkeypatch, results=[AUTOEXEC])
+def test_legacy_doc_macros_are_extracted(monkeypatch):
+    fake_vba(monkeypatch, AUTOEXEC)
     doc = make_ole({"WordDocument": word_document_stream(), "Macros/VBA/dir": b"x"})
     assert "OFFICE_MACRO_AUTOEXEC" in rule_ids(scan(doc))
 
@@ -200,7 +220,7 @@ def test_xlm_macrosheet_is_medium():
 
 
 def test_vba_parser_failure_raises(monkeypatch):
-    fake_vba(monkeypatch, raises=RuntimeError("olevba crashed"))
+    fake_vba(monkeypatch, AUTOEXEC, raises=RuntimeError("olevba crashed"))
     with pytest.raises(OfficeScanError, match="olevba crashed"):
         scan(DOCM)
 
@@ -455,7 +475,7 @@ def test_api_dangerous_external_relationship_is_malicious(monkeypatch):
 
 
 def test_api_macro_document_is_suspicious_with_both_layers(monkeypatch):
-    fake_vba(monkeypatch, results=[AUTOEXEC])
+    fake_vba(monkeypatch, AUTOEXEC)
     body = post(monkeypatch, DOCM)
     assert body["verdict"] == Verdict.SUSPICIOUS
     scanners = {f["scanner"] for f in body["findings"]}
@@ -463,7 +483,7 @@ def test_api_macro_document_is_suspicious_with_both_layers(monkeypatch):
 
 
 def test_api_autoexec_command_macro_is_malicious(monkeypatch):
-    fake_vba(monkeypatch, results=[AUTOEXEC, SHELL])
+    fake_vba(monkeypatch, AUTOEXEC, SHELL)
     assert post(monkeypatch, DOCM)["verdict"] == Verdict.MALICIOUS
 
 

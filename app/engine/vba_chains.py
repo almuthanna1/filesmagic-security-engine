@@ -1,19 +1,10 @@
 """VBA call graphs: is there a demonstrated path from an automatic procedure to a dangerous operation?
 
-The custom engine's own analysis (FilesMagic capstone). Reused from oletools/olevba (0.60.2):
-source extraction (VBA_Parser.extract_macros), line-continuation handling
-(vba_collapse_long_lines), the definition of automatic entry points (AUTOEXEC_KEYWORDS,
-AUTOEXEC_KEYWORDS_REGEX) and keyword analysis (VBA_Scanner). Reused from the Office scanner: what
-counts as a dangerous capability (STRONG_VBA_BEHAVIOUR), format identification and ZIP limits.
-
-New here: procedures, a call graph whose edges and capabilities are each either DEMONSTRATED or
-only POSSIBLE, and a search from every entry point.
-
-Capabilities are olevba's strong keyword findings on the procedure's code without comments.
-Demonstrated: at least one triggering keyword is specific (Shell, ShellExecuteA, InvokeVerb, ...),
-or an ambiguous one is confirmed by its context in the same procedure (WScript.Shell with .Run or
-.Exec; Create with Win32_Process). Possible: only AMBIGUOUS keywords (Application.Run starts
-macros, shell32 is a library name, vbHide is an argument, Create and DoIt are common names, ...).
+The custom engine's own analysis (FilesMagic capstone). Source comes from oletools' extractor
+(app.engine.vba_analysis.extract: decompression only). Which procedures Office runs on its own
+(entry points), and which operations a procedure performs (capabilities, each DEMONSTRATED or
+only POSSIBLE, in context), are decided by app.engine.vba_analysis. New here: procedures, a call
+graph whose edges are each either DEMONSTRATED or only POSSIBLE, and a search from every entry.
 
 An occurrence of a procedure's name is a demonstrated call when it is a statement or `Call`
 target, a function call in an expression, `Module.Name` with a known module, `AddressOf Name`, or
@@ -29,50 +20,32 @@ Per entry, one of three outcomes:
   undetermined  anything else: a path that needs a possible call or ends in a possible
                 capability, a dynamic call (OnKey with a computed name, CallByName, Evaluate,
                 self-modifying code) on the reachable part, unbalanced procedure blocks, a
-                capability outside any procedure, a capability or entry keyword olevba reports
-                that no procedure accounts for, XLM macros, or a VBA project that could not be read
+                dangerous operation outside any procedure or one only the whole module's text
+                shows, an entry name used but never defined, XLM macros, or a VBA project that
+                could not be read
 
 "no-path" is a statement about the source only. Office may execute the compiled P-code instead,
-and VBA stomping replaces the source while keeping malicious P-code. olevba checks that only for
-files on disk (VBA_Parser.detect_vba_stomping); the isolated worker never writes files. So
-app.engine.correlate never lowers a reference finding on "no-path"; it only reports it.
+and VBA stomping replaces the source while keeping malicious P-code; the isolated worker cannot
+check that. So app.engine.correlate never lowers a finding on "no-path"; it only reports it.
 
 Nothing is executed. Inputs are bounded by the Office scanner's limits and MAX_SOURCE_BYTES.
 """
 
+import functools
 import io
 import re
 import zipfile
 from collections import deque
 from dataclasses import dataclass, field
 
-from oletools.olevba import AUTOEXEC_KEYWORDS, AUTOEXEC_KEYWORDS_REGEX, VBA_Parser, VBA_Scanner, vba_collapse_long_lines
-
+from app.engine import vba_analysis as va
 from app.scanners import office
 from app.scanners.base import ScanError
 
 LINKED, NO_PATH, UNDETERMINED = "linked", "no-path", "undetermined"
 DEMONSTRATED, POSSIBLE = "demonstrated", "possible"
-MAX_SOURCE_BYTES = 8 * 1024 * 1024  # all modules of a document together
+MAX_SOURCE_BYTES = va.MAX_SOURCE_BYTES  # all modules of a document together
 MAX_PROCEDURES = 20_000
-
-# olevba keywords that do not by themselves show that anything is executed.
-AMBIGUOUS = {
-    "shell": "Shell is also part of the object names WScript.Shell and Shell.Application",
-    "run": "Run also starts macros (Application.Run); only a shell object's Run executes a command",
-    "create": "Create is a common method name; it executes something only on WMI's Win32_Process",
-    "doit": "DoIt is a common procedure name",
-    "shell32": "shell32 is a library with many harmless functions",
-    "wscript.shell": "WScript.Shell also reads special folders and the registry",
-    **dict.fromkeys(["vbnormal", "vbnormalfocus", "vbhide", "vbminimizedfocus", "vbmaximizedfocus",
-                     "vbnormalnofocus", "vbminimizednofocus"], "a window-style constant is an argument, not a call"),
-}
-# Ambiguous keyword -> (context in the same procedure that confirms it, searched with strings intact?).
-CONFIRMED_BY = {
-    "shell": (re.compile(r"(?<![.\w])Shell\b(?!\s*\.)", re.I), False),  # the Shell function, in code
-    "wscript.shell": (re.compile(r"\.\s*(?:Run|Exec)\b", re.I), False),
-    "create": (re.compile(r"Win32_Process", re.I), True),
-}
 
 _START = re.compile(r"^\s*(?:(?:Public|Private|Friend|Static)\s+)*(?:Sub|Function|Property\s+(?:Get|Let|Set))\s+"
                     r"([A-Za-z_]\w*)\s*(?:\((.*)\))?", re.I)
@@ -91,8 +64,6 @@ _NAMED_DISPATCH = re.compile(r"\b(Run|OnTime|OnKey|OnAction|CallByName|MacroRun)
 # Calls whose target cannot be known statically, and self-modifying code.
 _DYNAMIC = re.compile(r"\b(Evaluate|ExecuteExcel4Macro|VBProject|VBComponents|CodeModule|InsertLines|AddFromString"
                       r"|AddFromFile|ReplaceLine|ExecuteGlobal|ExecuteStatement)\b", re.I)
-_ENTRY_NAMES = {k.lower() for keywords in AUTOEXEC_KEYWORDS.values() for k in keywords}
-_ENTRY_PATTERNS = [re.compile(rf"(?i)^{p}$") for patterns in AUTOEXEC_KEYWORDS_REGEX.values() for p in patterns]
 
 
 class VbaChainError(ScanError):
@@ -104,12 +75,13 @@ class Procedure:
     module: str
     name: str
     params: str = ""  # the parameter list of its declaration line
-    text: str = ""  # its code without comments (strings kept), for keyword analysis
+    source: list[tuple[int, str]] = field(default_factory=list)  # (line number, logical line), for analysis
     code: list[tuple[str, list[str]]] = field(default_factory=list)  # (line, strings blanked; its literals)
     demonstrated: list[str] = field(default_factory=list)  # capability descriptions with their keywords
     possible: list[str] = field(default_factory=list)
     edges: list[tuple["Procedure", str, str]] = field(default_factory=list)  # (callee, kind, why)
     dynamic: list[str] = field(default_factory=list)
+    declare: bool = False  # a Declare statement: an external function, never an entry
 
     @property
     def label(self) -> str:
@@ -123,6 +95,7 @@ class EntryResult:
     path: tuple[str, ...] = ()  # entry ... procedure with the capability (linked only)
     capabilities: tuple[str, ...] = ()
     reasons: tuple[str, ...] = ()  # why undetermined
+    trigger: str = ""  # how Office starts it (vba_analysis.entry_trigger)
 
 
 @dataclass
@@ -131,41 +104,14 @@ class VbaChains:
     problems: list[str] = field(default_factory=list)  # project-wide reasons for undetermined
     # Raw extracted modules for bounded INFO evidence; never execute them.
     sources: list[tuple[str, str]] = field(default_factory=list)
+    # Project-wide results the Office scanner reports, each with the procedure it was found in.
+    capabilities: list[tuple[str, va.Capability]] = field(default_factory=list)
+    decoded: list[tuple[str, va.Decoded]] = field(default_factory=list)
 
     @property
     def outcome(self) -> str:
         outcomes = {e.outcome for e in self.entries}
         return LINKED if LINKED in outcomes else UNDETERMINED if UNDETERMINED in outcomes or self.problems else NO_PATH
-
-
-def _strong(code: str) -> dict[str, set[str]]:
-    """olevba's strong suspicious-keyword descriptions in `code`, with the keywords behind each."""
-    found: dict[str, set[str]] = {}
-    for kind, keyword, desc in VBA_Scanner(code).scan():
-        if kind == "Suspicious" and office.STRONG_VBA_BEHAVIOUR.search(desc):
-            found.setdefault(office.clean(desc, 90), set()).add(keyword.lower())
-    return found
-
-
-def strong(code: str) -> list[str]:
-    return sorted(_strong(code))
-
-
-def capabilities(code: str, blanked: str) -> tuple[list[str], list[str]]:
-    """(demonstrated, possible) capabilities, each "description (keywords)". `code`: comment-free
-    source; `blanked`: the same with string contents removed."""
-    def confirmed(keyword: str) -> bool:
-        pattern, in_strings = CONFIRMED_BY.get(keyword, (None, False))
-        return bool(pattern and pattern.search(code if in_strings else blanked))
-
-    demonstrated, possible = [], []
-    for desc, keywords in sorted(_strong(code).items()):
-        specific = {k for k in keywords if k not in AMBIGUOUS or confirmed(k)}
-        if specific:
-            demonstrated.append(f"{desc} ({', '.join(sorted(specific))})")
-        else:
-            possible.append(f"{desc} (only {', '.join(sorted(keywords))}: {AMBIGUOUS[min(keywords)]})")
-    return demonstrated, possible
 
 
 def _clean(line: str) -> tuple[str, list[str], str]:
@@ -219,13 +165,14 @@ def declared(line: str) -> set[str]:
     return names
 
 
-def parse(module: str, source: str, problems: list[str]) -> tuple[list[Procedure], str, set[str]]:
-    """Procedures of one module, its comment-free text outside them, and the names that text declares."""
+def parse(module: str, source: str, problems: list[str]) -> tuple[list[Procedure], list[tuple[int, str]], set[str]]:
+    """Procedures of one module, its logical lines outside them, and the names those lines declare."""
     procedures, outside, module_names, current, in_enum = [], [], set(), None, False
-    for raw in vba_collapse_long_lines(source).splitlines():
-        line, literals, code = _clean(raw)
+    for number, raw in va.logical_lines(source):
+        line, literals, _ = _clean(raw)
         if declared_function := _DECLARE.match(line):
-            procedures.append(Procedure(module, declared_function.group(1), "", code, [(line, literals)]))
+            procedures.append(Procedure(module, declared_function.group(1), "", [(number, raw)], [(line, literals)],
+                                        declare=True))
             continue
         if start := _START.match(line):
             if current:
@@ -233,13 +180,13 @@ def parse(module: str, source: str, problems: list[str]) -> tuple[list[Procedure
                 procedures.append(current)
             current = Procedure(module, start.group(1), start.group(2) or "")
         if current:
-            current.text += code + "\n"
+            current.source.append((number, raw))
             current.code.append((line, literals))
             if _END.match(line):
                 procedures.append(current)
                 current = None
             continue
-        outside.append(code)
+        outside.append((number, raw))
         if _END.match(line):
             problems.append(f"{module}: End without a procedure")
         if _ENUM.match(line):
@@ -253,7 +200,7 @@ def parse(module: str, source: str, problems: list[str]) -> tuple[list[Procedure
     if current:
         problems.append(f"{module}: {current.name} is never ended")
         procedures.append(current)
-    return procedures, "\n".join(outside), module_names
+    return procedures, outside, module_names
 
 
 def _target(literal: str) -> str:
@@ -336,41 +283,75 @@ def search(entry: Procedure, problems: list[str]) -> EntryResult:
     return EntryResult(entry.label, NO_PATH)
 
 
+def _strong(analysis: va.CodeAnalysis) -> list[va.Capability]:
+    return [c for c in analysis.capabilities if c.strong]
+
+
 def analyse(modules: list[tuple[str, str]], problems: list[str] | None = None) -> VbaChains:
     """modules: (module name, VBA source). `problems`: reasons found while extracting them."""
     result = VbaChains(problems=list(problems or []), sources=list(modules))
-    procedures, shadowed, comment_free = [], set(), []
+    parsed, procedures, shadowed = [], [], set()
     for module, source in modules:
         procs, outside, names = parse(module, source, result.problems)
+        parsed.append((module, procs, outside))
         procedures += procs
         shadowed |= names
-        if found := strong(outside):
-            result.problems.append(f"{module}: dangerous keywords outside any procedure ({'; '.join(found)})")
-        whole = outside + "\n" + "\n".join(p.text for p in procs)
-        comment_free.append((module, whole))
-        located = set(strong("\n".join(p.text for p in procs)))
-        if missing := sorted(set(strong(whole)) - located - set(found)):
-            result.problems.append(f"{module}: olevba reports {'; '.join(missing)} but no procedure accounts for it")
     if len(procedures) > MAX_PROCEDURES:
         raise VbaChainError(f"VBA project has more than {MAX_PROCEDURES} procedures")
+    ctx = va.context([(m, va.logical_lines(src)) for m, src in modules],
+                     {p.name.lower() for p in procedures if not p.declare})
 
     by_name: dict[str, list[Procedure]] = {}
     for p in procedures:
-        p.demonstrated, p.possible = capabilities(p.text, "\n".join(line for line, _ in p.code))
+        analysis = va.analyse_code(p.source, ctx, _first_names(p.params))
+        p.demonstrated = [c.text() for c in _strong(analysis) if c.status == va.DEMONSTRATED]
+        p.possible = [c.text() for c in _strong(analysis) if c.status == va.POSSIBLE]
+        result.capabilities += [(p.label, c) for c in analysis.capabilities]
+        result.decoded += [(p.label, d) for d in analysis.decoded]
         by_name.setdefault(p.name.lower(), []).append(p)
+
+    for module, procs, outside in parsed:
+        # Executable code outside a procedure is not valid VBA: never ignore what it could do.
+        outer = va.analyse_code(outside, ctx)
+        result.capabilities += [(f"{module} (outside any procedure)", c) for c in outer.capabilities]
+        result.decoded += [(f"{module} (outside any procedure)", d) for d in outer.decoded]
+        if found := _strong(outer):
+            result.problems.append(f"{module}: dangerous operations outside any procedure "
+                                   f"({'; '.join(c.text() for c in found[:3])})")
+        # Read as one block, the module may show what no single procedure does (an object created in
+        # one procedure and used in another): that is a path this graph cannot attribute.
+        whole = va.analyse_code(sorted(outside + [line for p in procs for line in p.source]), ctx)
+        labels = {p.label for p in procs}
+        located = {(c.kind, c.status) for label, c in result.capabilities if label in labels}
+        if missing := sorted({c.text() for c in _strong(whole) if c.status == va.DEMONSTRATED
+                              and (c.kind, va.DEMONSTRATED) not in located}):
+            result.problems.append(f"{module}: the module's code as a whole shows {'; '.join(missing[:3])}, "
+                                   "which no single procedure does")
+
     module_names = {m.lower(): m for m, _ in modules}
     for p in procedures:
         link(p, by_name, module_names, shadowed)
 
-    entries = [p for p in procedures if p.name.lower() in _ENTRY_NAMES or any(r.match(p.name) for r in _ENTRY_PATTERNS)]
+    entries = [p for p in procedures if not p.declare and va.entry_trigger(p.name)]
     defined = {p.name.lower() for p in entries}
-    for module, code in comment_free:
-        for kind, keyword, _ in VBA_Scanner(code).scan():
-            if kind == "AutoExec" and keyword.lower() not in defined:
-                result.problems.append(f"{module}: automatic-entry keyword {office.clean(keyword, 40)!r} "
-                                       "is not a procedure this analysis found")
-    result.entries = [search(entry, result.problems) for entry in entries]
+    for module, procs, outside in parsed:
+        mentioned = {}  # lower-case name -> as written (identifiers and string literals)
+        for _, text in outside + [line for p in procs for line in p.source]:
+            for t in va.tokenize(text):
+                if t.kind in ("id", "str"):
+                    mentioned.setdefault(str(t.value).lower(), t.text.strip('"[]'))
+        for name in sorted((mentioned.keys() & va.ENTRY_NAMES) - defined):
+            result.problems.append(f"{module}: automatic-entry keyword {office.clean(mentioned[name], 40)!r} "
+                                   "is not a procedure this analysis found")
+    result.entries = [EntryResult(**{**vars(search(entry, result.problems)), "trigger": va.entry_trigger(entry.name)})
+                      for entry in entries]
     return result
+
+
+@functools.lru_cache(maxsize=4)
+def analyse_cached(modules: tuple[tuple[str, str], ...], problems: tuple[str, ...] = ()) -> VbaChains:
+    """analyse() once per project and worker: the Office scanner and this scanner share it."""
+    return analyse(list(modules), list(problems))
 
 
 # ----------------------------------------------------------------------------- documents
@@ -408,21 +389,14 @@ def scan(data: bytes) -> VbaChains | None:
         if not blob.startswith(office.OLE_MAGIC):
             problems.append(f"{office.clean(label, 60)} is not an OLE VBA project")
             continue
-        parser = VBA_Parser(label, data=blob)
-        try:
-            if parser.detect_xlm_macros():
-                problems.append("Excel 4.0 (XLM) macros are present; they are not part of this call graph")
-            if not parser.detect_vba_macros():
-                continue
-            for _, _, name, code in parser.extract_macros():
-                total += len(code or "")
-                if total > MAX_SOURCE_BYTES:
-                    raise VbaChainError(f"VBA source exceeds {MAX_SOURCE_BYTES} bytes")
-                modules.append((office.clean(name or "module", 40), code or ""))
-        except VbaChainError:
-            raise
-        except Exception as e:
-            problems.append(f"{office.clean(label, 60)} could not be extracted ({type(e).__name__})")
-        finally:
-            parser.close()
-    return analyse(modules, problems) if modules or problems else None
+        extracted = va.extract(blob, label)
+        if extracted.error is not None:
+            problems.append(f"{office.clean(label, 60)} could not be extracted ({type(extracted.error).__name__})")
+            continue
+        if extracted.xlm:
+            problems.append("Excel 4.0 (XLM) macros are present; they are not part of this call graph")
+        total += sum(len(code) for _, code in extracted.modules)
+        if extracted.too_large or total > MAX_SOURCE_BYTES:
+            raise VbaChainError(f"VBA source exceeds {MAX_SOURCE_BYTES} bytes")
+        modules += [m for m in extracted.modules if m[0] != va.XLM_MODULE]
+    return analyse_cached(tuple(modules), tuple(problems)) if modules or problems else None
